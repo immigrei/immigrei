@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigrei — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pine:       #1E5E4E;
+    --pine-deep:  #164A3D;
+    --amber:      #E8A33D;
+    --amber-deep: #CC8A22;
+    --cream:      #F4EEE2;
+    --cream-2:    #FBF7EF;
+    --pine-tint:  #E4EFE9;
+    --amber-tint: #FBEDD4;
+    --ink:        #1B2520;
+    --ink-soft:   #55615A;
+    --ink-faint:  #8B958F;
+    --sage:       #5E9E81;
+    --clay:       #C2542F;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Hanken Grotesk', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, .display { font-family: 'Fraunces', serif; }
+
+  /* ── Screens ──────────────────────────────────────────────────────────── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── Progress bar ─────────────────────────────────────────────────────── */
+  .progress-wrap { width: 100%; height: 4px; background: var(--pine-tint); flex-shrink: 0; }
+  .progress-bar  { height: 4px; background: var(--pine); transition: width .5s ease; }
+
+  /* ── Center container ─────────────────────────────────────────────────── */
+  .center { max-width: 560px; margin: 0 auto; width: 100%; padding: 0 24px; }
+
+  /* ── Welcome ──────────────────────────────────────────────────────────── */
+  #screen-welcome .center {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding-top: 64px; padding-bottom: 64px;
+  }
+
+  .welcome-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--pine-tint); display: flex;
+    align-items: center; justify-content: center;
+    font-size: 32px; margin-bottom: 32px;
+  }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .15em; color: var(--ink-faint); margin-bottom: 16px;
+  }
+
+  .welcome-title {
+    font-size: clamp(34px, 6vw, 48px);
+    font-weight: 600; color: var(--ink);
+    line-height: 1.15; margin-bottom: 20px;
+  }
+
+  .welcome-body {
+    font-size: 18px; color: var(--ink-soft);
+    line-height: 1.65; margin-bottom: 12px;
+  }
+
+  .welcome-body strong { color: var(--pine); font-weight: 600; }
+
+  .welcome-note {
+    font-size: 14px; color: var(--ink-faint); margin-bottom: 40px;
+  }
+
+  /* ── Buttons ──────────────────────────────────────────────────────────── */
+  .btn-primary {
+    display: block; width: 100%; max-width: 320px; margin: 0 auto;
+    background: var(--pine); color: var(--cream-2);
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-weight: 700; font-size: 17px;
+    padding: 16px 32px; border-radius: 16px;
+    border: none; cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .btn-primary:hover  { background: var(--pine-deep); }
+  .btn-primary:active { transform: scale(.98); }
+
+  .btn-amber {
+    display: block; width: 100%;
+    background: var(--amber); color: var(--ink);
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-weight: 700; font-size: 17px;
+    padding: 16px 32px; border-radius: 16px;
+    border: none; cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .btn-amber:hover  { background: var(--amber-deep); }
+  .btn-amber:active { transform: scale(.98); }
+
+  .btn-ghost {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 14px; font-weight: 500;
+    color: var(--ink-faint); transition: color .15s;
+    padding: 8px 0;
+  }
+  .btn-ghost:hover { color: var(--ink-soft); }
+
+  /* ── Questions ────────────────────────────────────────────────────────── */
+  #screen-questions .center {
+    flex: 1; display: flex; flex-direction: column;
+    padding-top: 32px; padding-bottom: 24px;
+  }
+
+  .q-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .q-title {
+    font-size: clamp(22px, 4vw, 28px);
+    font-weight: 600; color: var(--ink);
+    line-height: 1.25; margin-bottom: 8px;
+  }
+
+  .q-subtitle {
+    font-size: 14px; color: var(--ink-faint);
+    line-height: 1.6; margin-bottom: 28px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 16px 20px; border-radius: 16px;
+    border: 2px solid var(--pine-tint);
+    background: var(--cream-2); cursor: pointer;
+    transition: all .15s; text-align: left; width: 100%;
+    font-family: 'Hanken Grotesk', sans-serif;
+  }
+  .option:hover { border-color: rgba(30,94,78,.35); background: rgba(228,239,233,.5); }
+  .option.selected { border-color: var(--amber); background: var(--amber-tint); }
+
+  .option-icon  { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .option-text  { flex: 1; }
+  .option-label { font-size: 15px; font-weight: 500; color: var(--ink-soft); display: block; }
+  .option.selected .option-label { color: var(--ink); }
+  .option-sub   { font-size: 12px; color: var(--ink-faint); margin-top: 3px; display: block; }
+  .option-check { font-size: 16px; color: var(--amber); margin-left: auto; flex-shrink: 0; margin-top: 2px; display: none; }
+  .option.selected .option-check { display: block; }
+
+  .q-footer { padding-top: 24px; }
+
+  .btn-disabled {
+    background: var(--pine-tint); color: var(--ink-faint);
+    cursor: not-allowed; width: 100%;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-weight: 700; font-size: 17px;
+    padding: 16px 32px; border-radius: 16px;
+    border: none;
+  }
+
+  /* ── Results ──────────────────────────────────────────────────────────── */
+  #screen-results {
+    background: var(--cream);
+    padding-bottom: 40px;
+  }
+  #screen-results .center {
+    display: flex; flex-direction: column;
+    gap: 20px; padding-top: 40px; padding-bottom: 24px;
+  }
+
+  .results-header { text-align: center; }
+  .results-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--pine-tint);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin: 0 auto 24px;
+  }
+  .results-title {
+    font-size: clamp(26px, 5vw, 34px);
+    font-weight: 600; color: var(--ink);
+    line-height: 1.2; margin-bottom: 10px;
+  }
+  .results-sub { font-size: 15px; color: var(--ink-soft); line-height: 1.6; }
+
+  .alert-box {
+    border-radius: 16px; padding: 16px 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+    font-size: 14px; line-height: 1.6;
+  }
+  .alert-urgent  { background: rgba(194,84,47,.08); border: 1.5px solid var(--clay); color: var(--clay); }
+  .alert-blocked { background: var(--amber-tint); border: 1.5px solid rgba(232,163,61,.5); color: var(--amber-deep); }
+
+  .alert-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  .rec-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .rec-card {
+    background: var(--cream-2); border-radius: 18px;
+    padding: 20px; border: 1.5px solid var(--pine-tint);
+  }
+  .rec-card.urgent  { border: 2px solid var(--clay); }
+  .rec-card.blocked { opacity: .65; border: 1.5px solid rgba(194,84,47,.25); }
+
+  .rec-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 12px; margin-bottom: 10px;
+  }
+
+  .rec-name {
+    font-size: 15px; font-weight: 700;
+    color: var(--pine); line-height: 1.3;
+  }
+  .rec-card.blocked .rec-name {
+    color: var(--ink-faint); text-decoration: line-through;
+  }
+
+  .tag {
+    font-size: 11px; font-weight: 700; padding: 4px 10px;
+    border-radius: 99px; white-space: nowrap; flex-shrink: 0;
+  }
+  .tag-high    { background: var(--amber-tint); color: var(--amber-deep); border: 1px solid rgba(232,163,61,.4); }
+  .tag-medium  { background: var(--pine-tint);  color: var(--pine);       border: 1px solid var(--pine-tint); }
+  .tag-low     { background: var(--cream-2);    color: var(--ink-faint);  border: 1px solid var(--pine-tint); }
+  .tag-blocked { background: rgba(194,84,47,.08); color: var(--clay);     border: 1px solid rgba(194,84,47,.3); }
+
+  .rec-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 10px; }
+
+  .rec-forms {
+    font-size: 12px; color: var(--ink-faint); font-weight: 500;
+    display: flex; gap: 6px; align-items: center;
+  }
+
+  .divider-section {
+    display: flex; align-items: center; gap: 14px; margin: 8px 0 2px;
+  }
+  .divider-line { flex: 1; height: 1px; background: rgba(27,37,32,.1); }
+  .divider-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .12em; color: var(--ink-faint);
+  }
+
+  /* ── Vistos ───────────────────────────────────────────────────────────── */
+  #screen-vistos { background: var(--cream); padding-bottom: 80px; }
+
+  .vistos-header {
+    max-width: 680px; margin: 0 auto;
+    text-align: center; padding: 48px 24px 32px;
+  }
+  .vistos-title {
+    font-size: clamp(30px, 5vw, 44px);
+    font-weight: 600; color: var(--ink); margin-bottom: 14px;
+  }
+  .vistos-sub { font-size: 16px; color: var(--ink-soft); line-height: 1.6; }
+
+  .vistos-grid {
+    max-width: 960px; margin: 0 auto; padding: 0 20px;
+    display: grid; grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  @media(min-width:720px) {
+    .vistos-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .section-divider {
+    max-width: 960px; margin: 28px auto 16px;
+    padding: 0 20px; display: flex; align-items: center; gap: 14px;
+  }
+  .section-divider .divider-line { flex: 1; height: 1px; background: rgba(27,37,32,.12); }
+  .section-divider-inner { text-align: center; }
+  .section-divider-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .14em; color: var(--ink-faint);
+  }
+  .section-divider-sub {
+    font-size: 12px; color: var(--ink-faint); margin-top: 4px;
+  }
+
+  .visto-card {
+    background: var(--cream-2); border-radius: 20px;
+    padding: 24px; border: 2px solid transparent;
+    transition: all .2s; cursor: pointer; display: flex; flex-direction: column; gap: 18px;
+    position: relative;
+  }
+  .visto-card:hover { border-color: rgba(30,94,78,.25); box-shadow: 0 4px 18px rgba(30,94,78,.07); }
+  .visto-card.selected { border-color: var(--pine); box-shadow: 0 6px 24px rgba(30,94,78,.12); transform: scale(1.005); }
+  .visto-card.locked   { opacity: .55; cursor: not-allowed; }
+
+  .visto-badge {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; padding: 4px 12px; border-radius: 99px;
+    display: inline-block;
+  }
+  .badge-pine   { background: var(--pine-tint); color: var(--pine); }
+  .badge-amber  { background: var(--amber-tint); color: var(--amber-deep); }
+  .badge-ink    { background: rgba(27,37,32,.08); color: var(--ink-soft); }
+
+  .visto-code  { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-faint); margin-bottom: 4px; }
+  .visto-name  { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1.2; }
+  .visto-desc  { font-size: 13px; color: var(--ink-soft); line-height: 1.65; margin-top: 6px; }
+
+  .visto-callout {
+    border-radius: 12px; padding: 12px 16px;
+    font-size: 13px; line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .callout-star    { background: var(--pine-tint); color: var(--pine); }
+  .callout-warning { background: var(--amber-tint); color: var(--amber-deep); }
+  .callout-block   { background: rgba(194,84,47,.08); color: var(--clay); }
+
+  .visto-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .stat-box {
+    background: var(--cream); border-radius: 12px; padding: 10px 12px;
+  }
+  .stat-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--ink-faint); margin-bottom: 2px;
+  }
+  .stat-value       { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .stat-value.bad   { color: var(--clay); }
+
+  .visto-cta {
+    width: 100%; background: rgba(232,163,61,.8); color: var(--ink);
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-weight: 700; font-size: 14px;
+    padding: 14px; border-radius: 12px;
+    border: none; cursor: pointer;
+    transition: background .15s, transform .1s;
+    margin-top: auto;
+  }
+  .visto-cta:hover { background: var(--amber); }
+  .visto-card.selected .visto-cta { background: var(--amber); box-shadow: 0 4px 14px rgba(232,163,61,.3); }
+
+  .lock-badge {
+    position: absolute; top: 16px; right: 16px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(27,37,32,.08); border-radius: 99px;
+    padding: 4px 10px; font-size: 11px; font-weight: 700; color: var(--ink-faint);
+  }
+
+  .check-badge {
+    position: absolute; top: 16px; right: 16px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--pine); display: none;
+    align-items: center; justify-content: center;
+    color: var(--cream); font-size: 13px; font-weight: 700;
+  }
+  .visto-card.selected .check-badge { display: flex; }
+
+  .travel-note {
+    max-width: 960px; margin: 28px auto 0; padding: 0 20px;
+  }
+  .travel-box {
+    background: var(--pine); border-radius: 20px;
+    padding: 22px 28px; display: flex; gap: 18px; align-items: flex-start;
+  }
+  .travel-box-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+  .travel-box-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .12em; color: rgba(244,238,226,.7); margin-bottom: 6px;
+  }
+  .travel-box-text { font-size: 14px; color: rgba(244,238,226,.8); line-height: 1.65; }
+
+  .sticky-confirm {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 12px 20px 28px;
+    background: linear-gradient(to top, var(--cream) 70%, transparent);
+    display: none;
+  }
+  .sticky-confirm.visible { display: block; }
+  .sticky-confirm .btn-primary { max-width: 480px; }
+
+  /* ── Transitions ──────────────────────────────────────────────────────── */
+  .fade-out { opacity: 0; transform: translateY(8px); transition: all .18s; }
+  .fade-in  { opacity: 1; transform: translateY(0);   transition: all .18s; }
+
+  /* ── Back link on vistos ──────────────────────────────────────────────── */
+  .back-bar {
+    max-width: 960px; margin: 0 auto;
+    padding: 20px 24px 0;
+  }
+  .back-link {
+    font-size: 14px; font-weight: 500; color: var(--ink-faint);
+    cursor: pointer; background: none; border: none;
+    transition: color .15s;
+  }
+  .back-link:hover { color: var(--ink-soft); }
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SCREEN 1: WELCOME
+════════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="center">
+    <div class="welcome-icon">🌿</div>
+    <p class="eyebrow">Bem-vindo à Immigrei</p>
+    <h1 class="welcome-title">Sua jornada começa com clareza.</h1>
+    <p class="welcome-body">
+      Responda algumas perguntas e vamos identificar
+      <strong>o caminho de imigração mais adequado para você</strong>
+      — sem jargão jurídico, sem enrolação.
+    </p>
+    <p class="welcome-note">Leva menos de 2 minutos.</p>
+    <button class="btn-primary" onclick="startOnboarding()">Começar →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SCREEN 2: QUESTIONS
+════════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-questions" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:5%"></div>
+  </div>
+  <div class="center">
+    <div class="q-topbar">
+      <button class="btn-ghost" onclick="goBack()">← Voltar</button>
+      <span class="eyebrow" id="step-label" style="margin:0">Passo 1</span>
+    </div>
+    <div id="question-body">
+      <h2 class="q-title" id="q-text"></h2>
+      <p class="q-subtitle" id="q-subtitle"></p>
+      <div class="options" id="options-list"></div>
+    </div>
+    <div class="q-footer">
+      <button class="btn-primary" id="btn-next" onclick="goNext()" style="display:none">Próxima →</button>
+      <button class="btn-disabled" id="btn-disabled" disabled>Próxima →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SCREEN 3: RESULTS
+════════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="center">
+    <div class="results-header">
+      <div class="results-icon">🗺️</div>
+      <p class="eyebrow">Seu perfil migratório</p>
+      <h2 class="results-title">Encontramos seu caminho.</h2>
+      <p class="results-sub">Com base no seu perfil, estes são os caminhos mais relevantes para você:</p>
+    </div>
+    <div id="results-alerts"></div>
+    <div class="rec-list" id="rec-list"></div>
+    <button class="btn-amber" onclick="showVistos()">Ver todos os vistos em detalhe →</button>
+    <button class="btn-ghost" style="text-align:center;width:100%" onclick="restart()">↩ Recomeçar do início</button>
+    <p style="font-size:12px;color:var(--ink-faint);text-align:center;line-height:1.6;padding-bottom:8px">
+      As informações acima são educacionais e não constituem aconselhamento jurídico.<br>
+      Para orientação legal específica, consulte um advogado de imigração licenciado.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SCREEN 4: VISTOS
+════════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-vistos" class="screen">
+  <div class="back-bar">
+    <button class="back-link" onclick="showResults()">← Voltar para resultados</button>
+  </div>
+  <div class="vistos-header">
+    <p class="eyebrow">Escolha seu caminho</p>
+    <h1 class="vistos-title">Qual é o seu visto?</h1>
+    <p class="vistos-sub">Selecione o visto que melhor descreve sua situação atual ou o caminho que você quer seguir.</p>
+  </div>
+  <div id="vistos-content"></div>
+  <div class="travel-note">
+    <div class="travel-box">
+      <span class="travel-box-icon">✈️</span>
+      <div>
+        <p class="travel-box-title">Viagem ao Brasil</p>
+        <p class="travel-box-text">
+          Todos esses vistos permitem viagem ao Brasil. O que muda são os documentos necessários
+          para reentrar nos EUA — e isso varia por visto. Ao selecionar seu caminho, você verá o checklist completo.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="sticky-confirm" id="sticky-confirm">
+    <button class="btn-primary" id="sticky-btn" onclick="confirmVisto()">Confirmar visto →</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════════════════════
+
+const QUESTIONS = {
+  q_location: {
+    id: 'q_location', text: 'Onde você está agora?', subtitle: '',
+    options: [
+      { value: 'in_us',   label: 'Estou nos EUA',        icon: '🇺🇸' },
+      { value: 'outside', label: 'Estou fora dos EUA',   icon: '🌍' },
+    ],
+    next: () => 'q_nationality',
+  },
+  q_nationality: {
+    id: 'q_nationality', text: 'Qual é a sua cidadania?',
+    subtitle: 'Isso determina quais vistos estão disponíveis para você.',
+    options: [
+      { value: 'brazilian', label: 'Brasileira',                              icon: '🇧🇷' },
+      { value: 'treaty',    label: 'Europeu ou país com tratado com os EUA',  icon: '🇪🇺', sub: 'Alemanha, França, Portugal, Espanha, Itália, Reino Unido e outros' },
+      { value: 'other',     label: 'Outra cidadania',                         icon: '🌐' },
+    ],
+    next: (a, all) => all.q_location === 'in_us' ? 'q_current_status' : 'q_goal',
+  },
+  q_goal: {
+    id: 'q_goal', text: 'Qual é o seu principal objetivo nos EUA?', subtitle: '',
+    options: [
+      { value: 'visit',    label: 'Visitar ou turismo',          icon: '✈️' },
+      { value: 'study',    label: 'Estudar',                     icon: '🎓' },
+      { value: 'work',     label: 'Trabalhar',                   icon: '💼' },
+      { value: 'business', label: 'Fazer negócios / empreender', icon: '🚀' },
+      { value: 'live',     label: 'Morar permanentemente',       icon: '🏡' },
+      { value: 'family',   label: 'Reunir com família',          icon: '👨‍👩‍👧' },
+    ],
+    next: (a) => {
+      if (a === 'visit')    return 'results';
+      if (a === 'study')    return 'q_study_type';
+      if (a === 'work')     return 'q_work_type';
+      if (a === 'business') return 'q_business_type';
+      return 'q_family_ties';
+    },
+  },
+  q_study_type: {
+    id: 'q_study_type', text: 'Qual tipo de curso você pretende fazer?', subtitle: '',
+    options: [
+      { value: 'university', label: 'Graduação ou pós-graduação em universidade', icon: '🏛️' },
+      { value: 'language',   label: 'Curso de idiomas',                           icon: '🗣️' },
+      { value: 'vocational', label: 'Curso técnico / vocacional',                 icon: '🔧' },
+      { value: 'exchange',   label: 'Intercâmbio, pesquisa ou programa cultural', icon: '🔄' },
+    ],
+    next: () => 'results',
+  },
+  q_work_type: {
+    id: 'q_work_type', text: 'Como será seu vínculo de trabalho?', subtitle: '',
+    options: [
+      { value: 'employer_offer', label: 'Tenho oferta de emprego de empresa americana',              icon: '🤝' },
+      { value: 'intracompany',   label: 'Sou transferido pela minha empresa para os EUA',            icon: '🏢' },
+      { value: 'extraordinary',  label: 'Sou reconhecido na minha área (artista, atleta, cientista)', icon: '⭐' },
+      { value: 'self',           label: 'Sou autônomo / freelancer / sem oferta ainda',              icon: '🧑‍💻' },
+    ],
+    next: (a) => a === 'employer_offer' ? 'q_education' : 'results',
+  },
+  q_education: {
+    id: 'q_education', text: 'Qual é o seu nível de escolaridade?', subtitle: '',
+    options: [
+      { value: 'high_school',      label: 'Ensino médio ou técnico',              icon: '📚' },
+      { value: 'bachelor_ongoing', label: 'Graduação em andamento',               icon: '📝' },
+      { value: 'bachelor',         label: 'Graduação concluída',                  icon: '🎓' },
+      { value: 'postgrad',         label: 'Pós-graduação (mestrado ou doutorado)', icon: '🔬' },
+    ],
+    next: () => 'results',
+  },
+  q_business_type: {
+    id: 'q_business_type', text: 'Qual é o seu tipo de atuação empresarial?', subtitle: '',
+    options: [
+      { value: 'invest_operate',  label: 'Quero investir e operar um negócio nos EUA',     icon: '💰', sub: 'Abertura de empresa, capital em risco' },
+      { value: 'invest_permanent',label: 'Quero investir e obter residência permanente',   icon: '🏠', sub: 'A partir de $800k — caminho para Green Card' },
+      { value: 'trade',           label: 'Tenho empresa que comercializa com os EUA',      icon: '📦', sub: 'Exportação, importação, serviços' },
+      { value: 'meetings',        label: 'Reuniões, negociações ou visitas comerciais',    icon: '🤝', sub: 'Sem trabalhar ou receber salário americano' },
+    ],
+    next: () => 'results',
+  },
+  q_family_ties: {
+    id: 'q_family_ties', text: 'Você tem vínculos com cidadãos americanos ou titulares de Green Card?', subtitle: '',
+    options: [
+      { value: 'spouse_citizen',       label: 'Cônjuge ou noivo/a cidadão americano',   icon: '💍' },
+      { value: 'parent_child_citizen', label: 'Filho/pais cidadãos americanos',          icon: '👨‍👩‍👧' },
+      { value: 'family_gc',            label: 'Familiar próximo com Green Card',         icon: '🟢' },
+      { value: 'none',                 label: 'Não tenho vínculos familiares',           icon: '❌' },
+    ],
+    next: (a) => a === 'none' ? 'q_permanent_path' : 'results',
+  },
+  q_permanent_path: {
+    id: 'q_permanent_path', text: 'Como você pretende buscar residência permanente?', subtitle: '',
+    options: [
+      { value: 'work_gc', label: 'Por meio de emprego / patrocinador',         icon: '💼' },
+      { value: 'merit',   label: 'Por mérito ou habilidade extraordinária',    icon: '⭐' },
+      { value: 'asylum',  label: 'Tenho fundado temor de perseguição (asilo)', icon: '🛡️' },
+      { value: 'lottery', label: 'Loteria de vistos (DV Lottery)',             icon: '🎲' },
+    ],
+    next: () => 'results',
+  },
+  // ── in US ──────────────────────────────────────────────────────────────
+  q_current_status: {
+    id: 'q_current_status', text: 'Qual é o seu status migratório atual nos EUA?', subtitle: '',
+    options: [
+      { value: 'valid_visa',      label: 'Tenho visto válido',                                    icon: '✅' },
+      { value: 'authorized_stay', label: 'Meu visto expirou, mas estou em authorized stay',        icon: '⏳' },
+      { value: 'overstay',        label: 'Fiquei além do prazo autorizado (overstay)',             icon: '⚠️' },
+      { value: 'green_card',      label: 'Tenho Green Card',                                      icon: '🟢' },
+      { value: 'citizen',         label: 'Sou cidadão americano',                                 icon: '🇺🇸' },
+    ],
+    next: (a) => {
+      if (a === 'valid_visa' || a === 'authorized_stay') return 'q_current_visa';
+      if (a === 'overstay')   return 'results';
+      if (a === 'green_card') return 'q_gc_goal';
+      return 'q_citizen_goal';
+    },
+  },
+  q_citizen_goal: {
+    id: 'q_citizen_goal', text: 'O que você deseja fazer?', subtitle: '',
+    options: [
+      { value: 'petition_family', label: 'Peticionar familiar para vir aos EUA',        icon: '👨‍👩‍👧' },
+      { value: 'rights',          label: 'Entender direitos e benefícios da cidadania', icon: '🇺🇸' },
+      { value: 'other',           label: 'Outras questões de cidadania',                icon: '📄' },
+    ],
+    next: (a) => a === 'petition_family' ? 'q_family_ties' : 'results',
+  },
+  q_current_visa: {
+    id: 'q_current_visa', text: 'Qual é o seu visto atual?', subtitle: '',
+    options: [
+      { value: 'b1b2',  label: 'B-1/B-2 — Turismo / Negócios',            icon: '🛂' },
+      { value: 'f1',    label: 'F-1 — Estudante acadêmico',               icon: '🎓' },
+      { value: 'j1',    label: 'J-1 — Intercâmbio',                       icon: '🔄' },
+      { value: 'h1b',   label: 'H-1B — Trabalho especializado',           icon: '🏢' },
+      { value: 'l1',    label: 'L-1 — Transferência intraempresarial',    icon: '🌐' },
+      { value: 'other', label: 'Outro visto',                             icon: '📄' },
+    ],
+    next: () => 'q_change_goal',
+  },
+  q_change_goal: {
+    id: 'q_change_goal', text: 'O que você deseja fazer agora?', subtitle: '',
+    options: [
+      { value: 'extend',        label: 'Estender ou renovar meu visto atual',        icon: '📅' },
+      { value: 'change_status', label: 'Mudar para outro tipo de visto',             icon: '🔄' },
+      { value: 'green_card',    label: 'Solicitar Green Card',                       icon: '🟢' },
+      { value: 'family',        label: 'Trazer ou legalizar minha família',          icon: '👨‍👩‍👧' },
+      { value: 'work_change',   label: 'Mudar de empregador ou área de trabalho',   icon: '💼' },
+    ],
+    next: (a) => {
+      if (a === 'change_status') return 'q_target_visa';
+      if (a === 'green_card')    return 'q_gc_path';
+      if (a === 'family')        return 'q_family_ties';
+      return 'q_process';
+    },
+  },
+  q_target_visa: {
+    id: 'q_target_visa', text: 'Para qual tipo de visto você quer mudar?', subtitle: '',
+    options: [
+      { value: 'f1',    label: 'F-1 — Estudante acadêmico',           icon: '🎓' },
+      { value: 'm1',    label: 'M-1 — Estudante vocacional / técnico', icon: '🔧' },
+      { value: 'j1',    label: 'J-1 — Intercâmbio',                   icon: '🔄' },
+      { value: 'h1b',   label: 'H-1B — Trabalho especializado',        icon: '🏢' },
+      { value: 'o1',    label: 'O-1 — Habilidade extraordinária',      icon: '⭐' },
+      { value: 'other', label: 'Outro / Não tenho certeza',            icon: '🤔' },
+    ],
+    next: () => 'q_process',
+  },
+  q_gc_path: {
+    id: 'q_gc_path', text: 'Qual é o seu caminho para o Green Card?', subtitle: '',
+    options: [
+      { value: 'employer', label: 'Por patrocínio de empregador',          icon: '🏢' },
+      { value: 'family',   label: 'Por vínculo familiar com cidadão / GC', icon: '👨‍👩‍👧' },
+      { value: 'merit',    label: 'Por mérito (EB-1, EB-2 NIW)',           icon: '⭐' },
+      { value: 'unsure',   label: 'Não tenho certeza',                     icon: '🤔' },
+    ],
+    next: (a) => a === 'family' ? 'q_family_ties' : 'q_process',
+  },
+  q_gc_goal: {
+    id: 'q_gc_goal', text: 'O que você deseja fazer?', subtitle: '',
+    options: [
+      { value: 'renew',          label: 'Renovar meu Green Card',                           icon: '🔄' },
+      { value: 'naturalization', label: 'Solicitar naturalização (cidadania)',              icon: '🇺🇸' },
+      { value: 'family',         label: 'Trazer ou peticionar familiar',                   icon: '👨‍👩‍👧' },
+      { value: 'reentry',        label: 'Solicitar permissão de reentrada (Reentry Permit)', icon: '✈️' },
+    ],
+    next: (a) => a === 'family' ? 'q_family_ties' : 'q_process',
+  },
+  q_process: {
+    id: 'q_process',
+    text: 'Você tem algum processo aberto no USCIS atualmente?',
+    subtitle: 'Isso nos ajuda a entender se há prazos ou pendências que afetam seu caminho.',
+    options: [
+      { value: 'yes',    label: 'Sim, tenho um processo em andamento', icon: '📋', sub: 'Você verá onde consultar o status no próximo passo' },
+      { value: 'no',     label: 'Não, nenhum processo aberto',         icon: '❌' },
+      { value: 'unsure', label: 'Não sei / não tenho certeza',         icon: '🤔' },
+    ],
+    next: () => 'results',
+  },
+};
+
+// ── Visa cards data ──────────────────────────────────────────────────────────
+const VISTOS_ESTUDO = [
+  {
+    id: 'f1', code: 'F-1', name: 'Estudante Acadêmico', badge: 'Estudante', badgeClass: 'badge-pine',
+    desc: 'Para quem vai estudar em universidades, colleges ou escolas de idiomas nos EUA. O visto mais comum entre brasileiros.',
+    callout: { type: 'star', text: 'Permite cursos híbridos (presencial + online) — você pode fazer parte da carga horária remotamente.' },
+    stats: [
+      { label: 'Trabalho',       value: 'Permitido (OPT/CPT)', bad: false },
+      { label: 'Duração',        value: 'Curso + 60 dias',     bad: false },
+      { label: 'Sorteio',        value: 'Não',                 bad: false },
+      { label: 'Viagem ao BR',   value: 'Sim, com I-20 válido',bad: false },
+    ],
+    availability: 'all',
+  },
+  {
+    id: 'm1', code: 'M-1', name: 'Estudante Técnico', badge: 'Vocacional', badgeClass: 'badge-pine',
+    desc: 'Para programas técnicos e vocacionais — mecânica, culinária, aviação, estética e afins.',
+    callout: null,
+    stats: [
+      { label: 'Trabalho',     value: 'Muito restrito',      bad: true  },
+      { label: 'Duração',      value: 'Curso + 30 dias',     bad: false },
+      { label: 'Sorteio',      value: 'Não',                 bad: false },
+      { label: 'Viagem ao BR', value: 'Sim, com restrições', bad: false },
+    ],
+    availability: 'all',
+  },
+  {
+    id: 'j1', code: 'J-1', name: 'Intercâmbio Cultural', badge: 'Intercâmbio', badgeClass: 'badge-amber',
+    desc: 'Para programas de intercâmbio, au pair, pesquisa, treinamento ou trabalho temporário com patrocinador autorizado.',
+    callout: { type: 'warning', text: 'Alguns programas têm a regra dos 2 anos — obrigação de retornar ao Brasil antes de pedir outro visto.' },
+    stats: [
+      { label: 'Trabalho',     value: 'Dentro do programa', bad: false },
+      { label: 'Duração',      value: 'Até 5 anos',          bad: false },
+      { label: 'Sorteio',      value: 'Não',                 bad: false },
+      { label: 'Viagem ao BR', value: 'Sim, com atenção',    bad: false },
+    ],
+    availability: 'all',
+  },
+  {
+    id: 'h1b', code: 'H-1B', name: 'Trabalhador Especialista', badge: 'Trabalho', badgeClass: 'badge-ink',
+    desc: 'Para quem tem emprego formal nos EUA em área especializada — tecnologia, engenharia, saúde, finanças. Exige patrocínio de empregador americano.',
+    callout: { type: 'warning', text: 'Sujeito a sorteio anual. Muitos não são selecionados no primeiro ano.' },
+    stats: [
+      { label: 'Trabalho',     value: 'Sim (patrocinador)',      bad: false },
+      { label: 'Duração',      value: '3 anos, até 6',           bad: false },
+      { label: 'Sorteio',      value: 'Sim — 85k vagas/ano',     bad: true  },
+      { label: 'Viagem ao BR', value: 'Sim, com I-797',          bad: false },
+    ],
+    availability: 'all',
+  },
+  {
+    id: 'o1', code: 'O-1', name: 'Habilidade Extraordinária', badge: 'Talento', badgeClass: 'badge-amber',
+    desc: 'Para quem tem reconhecimento extraordinário na sua área — ciência, artes, esportes, negócios, cinema.',
+    callout: { type: 'star', text: 'Sem sorteio. Sem cap. Mas exige evidências robustas de destaque na sua área.' },
+    stats: [
+      { label: 'Trabalho',     value: 'Sim (patrocinador)', bad: false },
+      { label: 'Duração',      value: '3 anos, renovável',  bad: false },
+      { label: 'Sorteio',      value: 'Não',                bad: false },
+      { label: 'Viagem ao BR', value: 'Sim, com I-797',     bad: false },
+    ],
+    availability: 'all',
+  },
+];
+
+const VISTOS_NEGOCIOS = [
+  {
+    id: 'e2', code: 'E-2', name: 'Investidor por Tratado', badge: 'Investimento', badgeClass: 'badge-amber',
+    desc: 'Para quem investe capital substancial em um negócio nos EUA. Exige que o país de origem tenha tratado de comércio com os EUA.',
+    callout: { type: 'block', text: 'Não disponível para cidadãos brasileiros. O Brasil não possui tratado de comércio e navegação com os EUA. Disponível para europeus de países tratados.' },
+    stats: [
+      { label: 'Investimento', value: '~$100k mínimo',    bad: false },
+      { label: 'Trabalho',     value: 'Sim (no negócio)', bad: false },
+      { label: 'Sorteio',      value: 'Não',              bad: false },
+      { label: 'Caminho GC',   value: 'Não direto',       bad: true  },
+    ],
+    availability: 'treaty-only',
+  },
+  {
+    id: 'e1', code: 'E-1', name: 'Comerciante por Tratado', badge: 'Comércio', badgeClass: 'badge-amber',
+    desc: 'Para quem conduz volume substancial de comércio de bens, serviços ou tecnologia entre os EUA e o país de origem. Exige tratado bilateral.',
+    callout: { type: 'block', text: 'Não disponível para cidadãos brasileiros. Mesma restrição do E-2 — exige tratado que o Brasil não possui com os EUA.' },
+    stats: [
+      { label: 'Trabalho',   value: 'Sim',                       bad: false },
+      { label: 'Comércio',   value: '>50% entre os países',      bad: false },
+      { label: 'Sorteio',    value: 'Não',                       bad: false },
+      { label: 'Caminho GC', value: 'Não direto',                bad: true  },
+    ],
+    availability: 'treaty-only',
+  },
+  {
+    id: 'b1', code: 'B-1', name: 'Visitante de Negócios', badge: 'Negócios', badgeClass: 'badge-ink',
+    desc: 'Para reuniões, contratos, negociações e visitas comerciais nos EUA. Não autoriza trabalho remunerado — apenas atividades de negócio.',
+    callout: { type: 'warning', text: 'Brasileiro precisa solicitar visto na embaixada. Europeus de países do Visa Waiver entram via ESTA, sem precisar de visto — até 90 dias.' },
+    stats: [
+      { label: 'Trabalho',   value: 'Não permitido', bad: true  },
+      { label: 'Duração',    value: 'Até 6 meses',   bad: false },
+      { label: 'Sorteio',    value: 'Não',           bad: false },
+      { label: 'Renovação',  value: 'Sim',           bad: false },
+    ],
+    availability: 'all',
+  },
+  {
+    id: 'l1', code: 'L-1', name: 'Transferência Intracompanhia', badge: 'Executivo', badgeClass: 'badge-pine',
+    desc: 'Para executivos, gerentes e especialistas transferidos de uma empresa no exterior para uma filial ou subsidiária nos EUA.',
+    callout: { type: 'star', text: 'Sem sorteio. Caminho natural para o Green Card EB-1C para executivos e gerentes.' },
+    stats: [
+      { label: 'Trabalho',   value: 'Sim (empresa)',  bad: false },
+      { label: 'Duração',    value: '3–7 anos',       bad: false },
+      { label: 'Sorteio',    value: 'Não',            bad: false },
+      { label: 'Caminho GC', value: 'Sim (EB-1C)',    bad: false },
+    ],
+    availability: 'all',
+  },
+  {
+    id: 'eb2niw', code: 'EB-2 NIW', name: 'Green Card por Interesse Nacional', badge: 'Green Card', badgeClass: 'badge-pine',
+    desc: 'Green card para profissionais com grau avançado ou habilidade excepcional cujo trabalho beneficia os EUA. Dispensa patrocinador.',
+    callout: { type: 'warning', text: 'Brasileiro pode pedir, mas a fila é longa. O Brasil entra na categoria "Rest of World" — o tempo de espera varia em anos.' },
+    stats: [
+      { label: 'Patrocínio',    value: 'Não obrigatório', bad: false },
+      { label: 'Resultado',     value: 'Green card',      bad: false },
+      { label: 'Sorteio',       value: 'Não',             bad: false },
+      { label: 'Fila de espera',value: 'Rest of World',   bad: true  },
+    ],
+    availability: 'all',
+  },
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════════════════
+let answers  = {};
+let history  = ['q_location'];
+let selectedVisto = null;
+
+// ════════════════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startOnboarding() {
+  answers = {}; history = ['q_location']; selectedVisto = null;
+  showScreen('questions');
+  renderQuestion();
+}
+
+function restart() {
+  startOnboarding();
+}
+
+function showResults() { showScreen('results'); }
+
+function showVistos() {
+  renderVistos();
+  showScreen('vistos');
+}
+
+function confirmVisto() {
+  if (!selectedVisto) return;
+  alert('✅ Visto ' + selectedVisto.toUpperCase() + ' selecionado!\n\nEm produção, isso salvaria no perfil do usuário e abriria a jornada detalhada.');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// QUESTIONS
+// ════════════════════════════════════════════════════════════════════════════
+function renderQuestion() {
+  const qId = history[history.length - 1];
+  const q   = QUESTIONS[qId];
+  if (!q) return;
+
+  const currentAnswer = answers[qId];
+
+  // Progress
+  const estimated = Math.max(history.length + 2, 5);
+  const pct = Math.min((history.length / estimated) * 100, 90);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('step-label').textContent = 'Passo ' + history.length;
+
+  // Question text
+  document.getElementById('q-text').textContent     = q.text;
+  const subEl = document.getElementById('q-subtitle');
+  subEl.textContent = q.subtitle || '';
+  subEl.style.display = q.subtitle ? 'block' : 'none';
+
+  // Options
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option' + (currentAnswer === opt.value ? ' selected' : '');
+    btn.innerHTML = `
+      <span class="option-icon">${opt.icon}</span>
+      <span class="option-text">
+        <span class="option-label">${opt.label}</span>
+        ${opt.sub ? `<span class="option-sub">${opt.sub}</span>` : ''}
+      </span>
+      <span class="option-check">✓</span>`;
+    btn.onclick = () => selectOption(opt.value);
+    list.appendChild(btn);
+  });
+
+  updateNextBtn(currentAnswer);
+}
+
+function selectOption(value) {
+  const qId = history[history.length - 1];
+  answers[qId] = value;
+
+  document.querySelectorAll('.option').forEach(btn => btn.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  // Re-query in case event.currentTarget is stale
+  document.querySelectorAll('.option').forEach((btn, i) => {
+    const q   = QUESTIONS[qId];
+    if (q.options[i] && q.options[i].value === value) btn.classList.add('selected');
+  });
+
+  updateNextBtn(value);
+}
+
+function updateNextBtn(answer) {
+  const next    = document.getElementById('btn-next');
+  const disabled = document.getElementById('btn-disabled');
+  if (answer) {
+    next.style.display    = 'block';
+    disabled.style.display = 'none';
+  } else {
+    next.style.display    = 'none';
+    disabled.style.display = 'block';
+  }
+}
+
+function goNext() {
+  const qId = history[history.length - 1];
+  const q   = QUESTIONS[qId];
+  const answer = answers[qId];
+  if (!answer || !q) return;
+
+  const nextId = typeof q.next === 'function' ? q.next(answer, answers) : q.next;
+
+  // Fade transition
+  const body = document.getElementById('question-body');
+  body.style.opacity   = '0';
+  body.style.transform = 'translateY(8px)';
+  body.style.transition = 'all .18s';
+
+  setTimeout(() => {
+    if (nextId === 'results') {
+      buildResults();
+      showScreen('results');
+    } else {
+      history.push(nextId);
+      renderQuestion();
+    }
+    body.style.opacity   = '1';
+    body.style.transform = 'translateY(0)';
+  }, 180);
+}
+
+function goBack() {
+  if (history.length <= 1) {
+    showScreen('welcome');
+    return;
+  }
+  const qId = history[history.length - 1];
+  delete answers[qId];
+  history.pop();
+  renderQuestion();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// RECOMMENDATIONS ENGINE
+// ════════════════════════════════════════════════════════════════════════════
+function getRecommendations() {
+  const a            = answers;
+  const nationality  = a.q_nationality;
+  const isBrazilian  = nationality === 'brazilian';
+  const isTreaty     = nationality === 'treaty';
+  const inUs         = a.q_location === 'in_us';
+  const goal         = a.q_goal;
+  const studyType    = a.q_study_type;
+  const workType     = a.q_work_type;
+  const education    = a.q_education;
+  const businessType = a.q_business_type;
+  const familyTies   = a.q_family_ties;
+  const status       = a.q_current_status;
+  const currentVisa  = a.q_current_visa;
+  const changeGoal   = a.q_change_goal;
+  const targetVisa   = a.q_target_visa;
+  const gcGoal       = a.q_gc_goal;
+  const gcPath       = a.q_gc_path;
+  const permPath     = a.q_permanent_path;
+  const citizenGoal  = a.q_citizen_goal;
+  const results      = [];
+
+  const r = (visa, forms, description, priority, extra) =>
+    results.push({ visa, forms, description, priority, ...extra });
+
+  // Overstay
+  if (status === 'overstay') {
+    r('⚠️ Situação irregular — Ação urgente', 'I-539 (se elegível) ou advogado imediatamente',
+      'Overstay pode gerar barra de reentrada de 3 a 10 anos. Não tome nenhuma ação sem orientação jurídica.', 'high', { urgent: true });
+    return results;
+  }
+
+  // Citizen
+  if (status === 'citizen') {
+    if (citizenGoal === 'petition_family' || familyTies === 'spouse_citizen') {
+      r('Petição de familiar — IR-1 / K-1', 'I-130 ou I-129F',
+        'Cidadãos americanos podem peticionar cônjuge, filhos, pais e irmãos. Parentes imediatos não têm fila.', 'high', {});
+    } else {
+      r('Você é cidadão americano 🇺🇸', 'N/A',
+        'Como cidadão, você tem plenos direitos nos EUA. Podemos ajudar com petição de familiares e outras questões.', 'high', {});
+    }
+    return results;
+  }
+
+  // GC holder
+  if (status === 'green_card') {
+    if (gcGoal === 'renew')          r('Renovação do Green Card',          'I-90',   'Renovação a cada 10 anos.', 'high', {});
+    if (gcGoal === 'naturalization') r('Naturalização (Cidadania)',        'N-400',  'Após 3 a 5 anos com Green Card.', 'high', {});
+    if (gcGoal === 'family')         r('Petição de familiar — F-2 / IR',  'I-130',  'Cônjuge e filhos com fila de espera.', 'medium', {});
+    if (gcGoal === 'reentry')        r('Reentry Permit',                   'I-131',  'Permite ausência prolongada (até 2 anos) sem perder o GC.', 'medium', {});
+    return results;
+  }
+
+  // Tourism
+  if (!inUs && isTreaty && goal === 'visit') {
+    r('ESTA (Autorização Eletrônica)', 'esta.cbp.dhs.gov',
+      'Com passaporte VWP, visite os EUA por até 90 dias sem precisar de visto.', 'high', {});
+    return results;
+  }
+  if (!inUs && goal === 'visit') {
+    r('B-1/B-2 (Turismo e Negócios)', 'DS-160 + Entrevista consular',
+      'Para visitas de turismo, negócios, tratamento médico ou visita a familiares.', 'high', {});
+    return results;
+  }
+
+  // Study
+  if (goal === 'study' || studyType || ['f1','m1','j1'].includes(targetVisa)) {
+    const isChangeF1 = inUs && changeGoal === 'change_status' && targetVisa === 'f1';
+    if (isChangeF1) {
+      r('I-539 — Mudança de Status para F-1', 'I-539 (antes do visto expirar)',
+        'Mudança de status para F-1 dentro dos EUA. Urgente se o visto está próximo de expirar.', 'high', { urgent: true });
+    } else if (studyType === 'vocational' || targetVisa === 'm1') {
+      r('M-1 (Estudante Vocacional)', 'DS-160 + I-20 (escola M)',
+        'Para cursos técnicos e vocacionais em instituições credenciadas pelo SEVP.', 'high', {});
+    } else if (studyType === 'exchange' || targetVisa === 'j1') {
+      r('J-1 (Intercâmbio e Pesquisa)', 'DS-160 + DS-2019',
+        'Para intercâmbio, pesquisa, programas culturais e trabalho patrocinados.', 'high', {});
+    } else {
+      r('F-1 (Estudante Acadêmico)', 'DS-160 + I-20',
+        'Para universidades, colleges e escolas de idiomas. Permite cursos híbridos e trabalho via OPT/CPT.', 'high', {});
+      if (studyType === 'language')
+        r('J-1 (alternativa para idiomas)', 'DS-160 + DS-2019',
+          'Alguns programas de idiomas são patrocinados como J-1. Verifique com sua escola.', 'medium', {});
+    }
+  }
+
+  // Work
+  if (goal === 'work' || workType || ['h1b','o1','l1'].includes(targetVisa)) {
+    if (workType === 'intracompany' || targetVisa === 'l1')
+      r('L-1 (Transferência Intraempresarial)', 'I-129 (L)',
+        'Para profissionais transferidos por multinacional. Sem sorteio. Caminho para EB-1C (Green Card executivo).', 'high', {});
+    if (workType === 'extraordinary' || targetVisa === 'o1')
+      r('O-1 (Habilidade Extraordinária)', 'I-129 (O)',
+        'Para artistas, atletas, cientistas com reconhecimento excepcional. Sem sorteio, sem cap.', 'high', {});
+    if (workType === 'employer_offer' && ['bachelor','postgrad'].includes(education))
+      r('H-1B (Trabalho Especializado)', 'I-129 (H) — sorteio anual (85k vagas)',
+        'Para graduados em área de especialidade com oferta de emprego americano.', 'high', {});
+    if (workType === 'employer_offer' && education === 'postgrad')
+      r('EB-2 NIW (Green Card por Interesse Nacional)', 'I-140 + I-485',
+        'Pós-graduados podem solicitar Green Card sem patrocinador se o trabalho beneficia os EUA.', 'medium', {});
+  }
+
+  // Business
+  if (goal === 'business' || businessType) {
+    if (businessType === 'meetings') {
+      r('B-1 (Visitante de Negócios)', 'DS-160 + Entrevista consular',
+        'Para reuniões, contratos e visitas comerciais. Não autoriza trabalho remunerado. É um visto de negócios — não de investimento.', 'high', {});
+      if (isTreaty)
+        r('ESTA (cidadãos VWP)', 'esta.cbp.dhs.gov',
+          'Com passaporte elegível, faça negócios nos EUA por até 90 dias sem visto.', 'medium', {});
+    }
+    if (businessType === 'invest_operate') {
+      if (isTreaty) {
+        r('E-2 (Investidor por Tratado)', 'DS-160 + Aplicação consular',
+          'Para quem investe a partir de ~$100k em negócio próprio nos EUA. Disponível para cidadãos de países com tratado.', 'high', {});
+      } else {
+        r('E-2 (Investidor por Tratado) — Indisponível', 'N/A',
+          'O Brasil não possui tratado com os EUA. O visto E-2 não está disponível para cidadãos brasileiros.', 'high', { blocked: true });
+        r('EB-5 (Green Card por Investimento)', 'I-526E + I-485 ou NVC',
+          'Alternativa ao E-2 para brasileiros: investimento de $800k a $1.05M com caminho direto para o Green Card.', 'high', {});
+        r('L-1 (Transferência Intraempresarial)', 'I-129 (L)',
+          'Se você tem empresa no Brasil, pode abrir uma filial nos EUA e transferir-se como executivo.', 'medium', {});
+      }
+    }
+    if (businessType === 'trade') {
+      if (isTreaty) {
+        r('E-1 (Comércio por Tratado)', 'DS-160 + Documentação comercial',
+          'Para empresários com comércio substancial entre o país de origem e os EUA. Mais de 50% deve ser bilateral.', 'high', {});
+      } else {
+        r('E-1 (Comércio por Tratado) — Indisponível', 'N/A',
+          'O Brasil não possui tratado que permita o E-1. Cidadãos brasileiros não têm acesso a este visto.', 'high', { blocked: true });
+        r('B-1 (Visitante de Negócios)', 'DS-160',
+          'Brasileiros podem usar o B-1 para reuniões e negociações comerciais. Não autoriza trabalho ou recebimento de salário.', 'medium', {});
+        r('L-1 (Transferência Intraempresarial)', 'I-129 (L)',
+          'Se sua empresa tem presença nos EUA, o L-1 permite gerir as operações americanas.', 'medium', {});
+      }
+    }
+    if (businessType === 'invest_permanent') {
+      r('EB-5 (Green Card por Investimento)', 'I-526E + I-485 ou NVC',
+        'Investimento de $800k a $1.05M em projeto que crie 10+ empregos americanos. Caminho direto para residência permanente.', 'high', {});
+    }
+  }
+
+  // Family
+  if (familyTies === 'spouse_citizen')
+    r('K-1 (Noivo/a) ou IR-1/CR-1 (Cônjuge)', 'I-129F (K-1) ou I-130 (IR-1)',
+      'Noivos entram com K-1 e casam nos EUA. Cônjuges já casados usam IR-1 pelo consulado. Parentes imediatos sem fila.', 'high', {});
+  if (familyTies === 'parent_child_citizen')
+    r('IR-1 / IR-2 (Parente Imediato de Cidadão)', 'I-130 + DS-260',
+      'Filhos, pais e cônjuges de cidadãos americanos têm prioridade máxima e não entram em fila.', 'high', {});
+  if (familyTies === 'family_gc')
+    r('F-2 (Familiar de Residente Permanente)', 'I-130',
+      'Cônjuge e filhos de titulares de Green Card com fila de espera.', 'medium', {});
+
+  // Extension in US
+  if (inUs && changeGoal === 'extend')
+    r('Extensão de ' + (currentVisa ? currentVisa.toUpperCase() : 'Visto Atual'),
+      currentVisa === 'f1' || currentVisa === 'j1' ? 'Contato com DSO / Sponsor' : 'I-539 ou I-129',
+      'Para estender sua permanência antes do vencimento. Protocole antes da data de expiração.', 'high', {});
+
+  // GC paths
+  if (goal === 'live' || permPath || gcPath === 'merit') {
+    if (permPath === 'merit' || gcPath === 'merit') {
+      r('EB-1 (Green Card — Habilidade Extraordinária)', 'I-140',
+        'Para profissionais de destaque internacional. Não requer patrocinador.', 'high', {});
+      r('EB-2 NIW (Green Card por Interesse Nacional)', 'I-140 + I-485',
+        'Para pós-graduados cujo trabalho beneficia os EUA. Brasileiros na fila "Rest of World".', 'high', {});
+    }
+    if (permPath === 'asylum')
+      r('Asilo Político', 'I-589 (nos EUA) ou consulado',
+        'Para quem tem fundado temor de perseguição por raça, religião, nacionalidade ou grupo social.', 'high', {});
+    if (permPath === 'lottery')
+      r('DV Lottery (Diversity Visa)', 'dvlottery.state.gov (inscrição anual)',
+        isBrazilian
+          ? 'Atenção: o Brasil foi excluído do DV Lottery em anos recentes por enviar muitos imigrantes. Verifique elegibilidade no ano corrente.'
+          : 'Programa de loteria anual para países com baixa imigração para os EUA.', 'medium', { urgent: isBrazilian });
+  }
+
+  // Process note
+  if (a.q_process === 'yes')
+    r('📋 Processo em andamento', 'egov.uscis.gov/casestatus',
+      'Com um número de recibo do USCIS você pode acompanhar seu caso. O Immigrei vai conectar isso ao seu perfil.', 'medium', {});
+
+  // Dedup + sort
+  const seen = new Set();
+  const order = { high: 0, medium: 1, low: 2 };
+  return results
+    .filter(r => { if (seen.has(r.visa)) return false; seen.add(r.visa); return true; })
+    .sort((a, b) => order[a.priority] - order[b.priority]);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// BUILD RESULTS SCREEN
+// ════════════════════════════════════════════════════════════════════════════
+function buildResults() {
+  const recs     = getRecommendations();
+  const hasUrgent  = recs.some(r => r.urgent && !r.blocked);
+  const hasBlocked = recs.some(r => r.blocked);
+
+  const alertsEl = document.getElementById('results-alerts');
+  alertsEl.innerHTML = '';
+  if (hasUrgent) {
+    alertsEl.innerHTML += `<div class="alert-box alert-urgent"><span class="alert-icon">⚠️</span><div><strong>Atenção:</strong> Identificamos situações que requerem cuidado especial. Recomendamos consulta com advogado de imigração antes de qualquer ação.</div></div>`;
+  }
+  if (hasBlocked) {
+    alertsEl.innerHTML += `<div class="alert-box alert-blocked"><span class="alert-icon">🔒</span><div>Alguns vistos abaixo não estão disponíveis para a sua cidadania. Indicamos as melhores alternativas para o seu perfil.</div></div>`;
+  }
+
+  const tagClass  = { high: 'tag-high', medium: 'tag-medium', low: 'tag-low' };
+  const tagLabel  = { high: 'Alta prioridade', medium: 'Recomendado', low: 'Possível' };
+
+  const listEl = document.getElementById('rec-list');
+  listEl.innerHTML = '';
+  if (recs.length === 0) {
+    listEl.innerHTML = '<div class="rec-card"><p style="color:var(--ink-soft);font-size:14px">Seu perfil requer análise mais detalhada. Recomendamos consulta com advogado de imigração.</p></div>';
+    return;
+  }
+
+  recs.forEach(rec => {
+    const card = document.createElement('div');
+    card.className = 'rec-card' + (rec.urgent && !rec.blocked ? ' urgent' : '') + (rec.blocked ? ' blocked' : '');
+    card.innerHTML = `
+      <div class="rec-top">
+        <div class="rec-name" style="${rec.blocked ? 'text-decoration:line-through;color:var(--ink-faint)' : ''}">${rec.visa}</div>
+        <span class="tag ${rec.blocked ? 'tag-blocked' : tagClass[rec.priority]}">${rec.blocked ? 'Indisponível' : tagLabel[rec.priority]}</span>
+      </div>
+      <p class="rec-desc">${rec.description}</p>
+      ${!rec.blocked ? `<div class="rec-forms">📋 <span>${rec.forms}</span></div>` : ''}
+    `;
+    listEl.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// BUILD VISTOS SCREEN
+// ════════════════════════════════════════════════════════════════════════════
+function renderVistos() {
+  const nationality = answers.q_nationality || null;
+  const isBrazilian = nationality === 'brazilian';
+
+  const content = document.getElementById('vistos-content');
+  content.innerHTML = '';
+
+  function buildSection(title, subtitle, list) {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="section-divider">
+        <div class="divider-line"></div>
+        <div class="section-divider-inner">
+          <div class="section-divider-title">${title}</div>
+          <div class="section-divider-sub">${subtitle}</div>
+        </div>
+        <div class="divider-line"></div>
+      </div>`;
+    content.appendChild(div);
+
+    const grid = document.createElement('div');
+    grid.className = 'vistos-grid';
+
+    list.forEach(v => {
+      const locked = v.availability === 'treaty-only' && isBrazilian;
+      const card   = document.createElement('div');
+      card.className = 'visto-card' + (locked ? ' locked' : '');
+      card.id = 'vcard-' + v.id;
+
+      const calloutHtml = v.callout ? `
+        <div class="visto-callout callout-${v.callout.type}">
+          <span style="flex-shrink:0;margin-top:1px">${v.callout.type === 'block' ? '🚫' : v.callout.type === 'warning' ? '⚠️' : '✦'}</span>
+          <span>${v.callout.text}</span>
+        </div>` : '';
+
+      const statsHtml = v.stats.map(s =>
+        `<div class="stat-box"><div class="stat-label">${s.label}</div><div class="stat-value${s.bad ? ' bad' : ''}">${s.value}</div></div>`
+      ).join('');
+
+      const ctaHtml = locked ? '' : `<button class="visto-cta" onclick="selectVisto('${v.id}', event)">Quero seguir esse caminho →</button>`;
+      const lockHtml = locked ? `<div class="lock-badge">🔒 Indisponível</div>` : `<div class="check-badge" id="check-${v.id}">✓</div>`;
+
+      card.innerHTML = `
+        ${lockHtml}
+        <div><span class="visto-badge ${v.badgeClass}">${v.badge}</span></div>
+        <div>
+          <div class="visto-code">${v.code}</div>
+          <div class="visto-name">${v.name}</div>
+          <div class="visto-desc">${v.desc}</div>
+        </div>
+        ${calloutHtml}
+        <div class="visto-stats">${statsHtml}</div>
+        ${ctaHtml}`;
+
+      if (!locked) card.onclick = () => selectVisto(v.id);
+      grid.appendChild(card);
+    });
+
+    content.appendChild(grid);
+  }
+
+  buildSection('Estudo & Intercâmbio', 'Vistos para quem vem estudar, pesquisar ou participar de programas de intercâmbio', VISTOS_ESTUDO);
+  buildSection('Negócios & Investimento', 'Vistos para empreendedores, executivos e investidores — alguns exigem tratado entre países', VISTOS_NEGOCIOS);
+}
+
+function selectVisto(id, evt) {
+  if (evt) evt.stopPropagation();
+
+  // Deselect previous
+  if (selectedVisto) {
+    const prev = document.getElementById('vcard-' + selectedVisto);
+    if (prev) prev.classList.remove('selected');
+  }
+
+  selectedVisto = id;
+  const card = document.getElementById('vcard-' + id);
+  if (card) card.classList.add('selected');
+
+  // Update sticky bar
+  const all = [...VISTOS_ESTUDO, ...VISTOS_NEGOCIOS];
+  const v   = all.find(x => x.id === id);
+  const btn  = document.getElementById('sticky-btn');
+  if (v) btn.textContent = 'Confirmar ' + v.code + ' — ' + v.name + ' →';
+
+  const sticky = document.getElementById('sticky-confirm');
+  sticky.classList.add('visible');
+}
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>
