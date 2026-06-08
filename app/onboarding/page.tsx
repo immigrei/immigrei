@@ -1,20 +1,1140 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { createServiceClient } from "@/lib/supabase";
-import OnboardingForm from "./OnboardingForm";
+"use client";
 
-export default async function OnboardingPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-  const supabase = createServiceClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("onboarding_completed")
-    .eq("clerk_user_id", userId)
-    .single();
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-  if (profile?.onboarding_completed) redirect("/dashboard");
+type Answers = Record<string, string>;
 
-  return <OnboardingForm />;
+type VisaResult = {
+  visa: string;
+  forms: string;
+  description: string;
+  priority: "high" | "medium" | "low";
+  urgent?: boolean;
+  blocked?: boolean; // nationality restriction
+};
+
+type Option = {
+  value: string;
+  label: string;
+  icon: string;
+  subtitle?: string;
+};
+
+type Question = {
+  id: string;
+  text: string;
+  subtitle?: string;
+  options: Option[];
+  next: string | ((answer: string, allAnswers: Answers) => string);
+};
+
+// ─── Question Tree ────────────────────────────────────────────────────────────
+
+const questionMap: Record<string, Question> = {
+
+  // ── 1. Entry point ───────────────────────────────────────────────────────
+  q_location: {
+    id: "q_location",
+    text: "Onde você está agora?",
+    options: [
+      { value: "in_us", label: "Estou nos EUA", icon: "🇺🇸" },
+      { value: "outside", label: "Estou fora dos EUA", icon: "🌍" },
+    ],
+    next: () => "q_nationality",
+  },
+
+  // ── 2. Nationality (universal — determines E-2/E-1 eligibility) ──────────
+  q_nationality: {
+    id: "q_nationality",
+    text: "Qual é a sua cidadania?",
+    subtitle: "Isso determina quais vistos estão disponíveis para você.",
+    options: [
+      { value: "brazilian", label: "Brasileira", icon: "🇧🇷" },
+      {
+        value: "treaty",
+        label: "Europeu ou país com tratado com os EUA",
+        icon: "🇪🇺",
+        subtitle: "Alemanha, França, Portugal, Espanha, Itália, Reino Unido e outros",
+      },
+      { value: "other", label: "Outra cidadania", icon: "🌐" },
+    ],
+    next: (_, all) => all.q_location === "in_us" ? "q_current_status" : "q_goal",
+  },
+
+  // ── Branch: OUTSIDE the US ───────────────────────────────────────────────
+  q_goal: {
+    id: "q_goal",
+    text: "Qual é o seu principal objetivo nos EUA?",
+    options: [
+      { value: "visit",    label: "Visitar ou turismo",          icon: "✈️" },
+      { value: "study",    label: "Estudar",                     icon: "🎓" },
+      { value: "work",     label: "Trabalhar",                   icon: "💼" },
+      { value: "business", label: "Fazer negócios / empreender", icon: "🚀" },
+      { value: "live",     label: "Morar permanentemente",       icon: "🏡" },
+      { value: "family",   label: "Reunir com família",          icon: "👨‍👩‍👧" },
+    ],
+    next: (a) => {
+      if (a === "visit")    return "results";
+      if (a === "study")    return "q_study_type";
+      if (a === "work")     return "q_work_type";
+      if (a === "business") return "q_business_type";
+      if (a === "live")     return "q_family_ties";
+      return "q_family_ties"; // family
+    },
+  },
+
+  // ── Study sub-branch ──────────────────────────────────────────────────────
+  q_study_type: {
+    id: "q_study_type",
+    text: "Qual tipo de curso você pretende fazer?",
+    options: [
+      { value: "university", label: "Graduação ou pós-graduação em universidade", icon: "🏛️" },
+      { value: "language",   label: "Curso de idiomas",                           icon: "🗣️" },
+      { value: "vocational", label: "Curso técnico / vocacional",                 icon: "🔧" },
+      { value: "exchange",   label: "Intercâmbio, pesquisa ou programa cultural", icon: "🔄" },
+    ],
+    next: () => "results",
+  },
+
+  // ── Work sub-branch ───────────────────────────────────────────────────────
+  q_work_type: {
+    id: "q_work_type",
+    text: "Como será seu vínculo de trabalho?",
+    options: [
+      { value: "employer_offer", label: "Tenho oferta de emprego de empresa americana",             icon: "🤝" },
+      { value: "intracompany",   label: "Sou transferido pela minha empresa para os EUA",           icon: "🏢" },
+      { value: "extraordinary",  label: "Sou reconhecido na minha área (artista, atleta, cientista)", icon: "⭐" },
+      { value: "self",           label: "Sou autônomo / freelancer / sem oferta ainda",             icon: "🧑‍💻" },
+    ],
+    next: (a) => a === "employer_offer" ? "q_education" : "results",
+  },
+
+  q_education: {
+    id: "q_education",
+    text: "Qual é o seu nível de escolaridade?",
+    options: [
+      { value: "high_school",      label: "Ensino médio ou técnico",          icon: "📚" },
+      { value: "bachelor_ongoing", label: "Graduação em andamento",           icon: "📝" },
+      { value: "bachelor",         label: "Graduação concluída",              icon: "🎓" },
+      { value: "postgrad",         label: "Pós-graduação (mestrado ou doutorado)", icon: "🔬" },
+    ],
+    next: () => "results",
+  },
+
+  // ── Business sub-branch ───────────────────────────────────────────────────
+  q_business_type: {
+    id: "q_business_type",
+    text: "Qual é o seu tipo de atuação empresarial?",
+    options: [
+      {
+        value: "invest_operate",
+        label: "Quero investir e operar um negócio nos EUA",
+        icon: "💰",
+        subtitle: "Abertura de empresa, capital em risco",
+      },
+      {
+        value: "invest_permanent",
+        label: "Quero investir e obter residência permanente",
+        icon: "🏠",
+        subtitle: "A partir de $800k — caminho para Green Card",
+      },
+      {
+        value: "trade",
+        label: "Tenho empresa que comercializa com os EUA",
+        icon: "📦",
+        subtitle: "Exportação, importação, serviços",
+      },
+      {
+        value: "meetings",
+        label: "Preciso fazer reuniões, negociações ou visitar clientes",
+        icon: "🤝",
+        subtitle: "Sem trabalhar ou receber salário americano",
+      },
+    ],
+    next: () => "results",
+  },
+
+  // ── Family ties ───────────────────────────────────────────────────────────
+  q_family_ties: {
+    id: "q_family_ties",
+    text: "Você tem vínculos com cidadãos americanos ou titulares de Green Card?",
+    options: [
+      { value: "spouse_citizen",      label: "Cônjuge ou noivo/a cidadão americano",     icon: "💍" },
+      { value: "parent_child_citizen",label: "Filho/pais cidadãos americanos",            icon: "👨‍👩‍👧" },
+      { value: "family_gc",           label: "Familiar próximo com Green Card",           icon: "🟢" },
+      { value: "none",                label: "Não tenho vínculos familiares",             icon: "❌" },
+    ],
+    next: (a) => a === "none" ? "q_permanent_path" : "results",
+  },
+
+  q_permanent_path: {
+    id: "q_permanent_path",
+    text: "Como você pretende buscar residência permanente?",
+    options: [
+      { value: "work_gc",  label: "Por meio de emprego / patrocinador", icon: "💼" },
+      { value: "merit",    label: "Por mérito ou habilidade extraordinária", icon: "⭐" },
+      { value: "asylum",   label: "Tenho fundado temor de perseguição (asilo)", icon: "🛡️" },
+      { value: "lottery",  label: "Loteria de vistos (DV Lottery)", icon: "🎲" },
+    ],
+    next: () => "results",
+  },
+
+  // ── Branch: INSIDE the US ─────────────────────────────────────────────────
+  q_current_status: {
+    id: "q_current_status",
+    text: "Qual é o seu status migratório atual nos EUA?",
+    options: [
+      { value: "valid_visa",      label: "Tenho visto válido",                                   icon: "✅" },
+      { value: "authorized_stay", label: "Meu visto expirou, mas estou em authorized stay",       icon: "⏳" },
+      { value: "overstay",        label: "Fiquei além do prazo autorizado (overstay)",            icon: "⚠️" },
+      { value: "green_card",      label: "Tenho Green Card",                                     icon: "🟢" },
+      { value: "citizen",         label: "Sou cidadão americano",                                icon: "🇺🇸" },
+    ],
+    next: (a) => {
+      if (a === "valid_visa" || a === "authorized_stay") return "q_current_visa";
+      if (a === "overstay")    return "results";
+      if (a === "green_card")  return "q_gc_goal";
+      return "q_citizen_goal"; // citizen
+    },
+  },
+
+  // ── Citizen sub-branch ────────────────────────────────────────────────────
+  q_citizen_goal: {
+    id: "q_citizen_goal",
+    text: "O que você deseja fazer?",
+    options: [
+      { value: "petition_family", label: "Peticionar familiar para vir aos EUA",    icon: "👨‍👩‍👧" },
+      { value: "naturalization",  label: "Entender direitos e benefícios da cidadania", icon: "🇺🇸" },
+      { value: "renounce",        label: "Outras questões de cidadania",             icon: "📄" },
+    ],
+    next: (a) => a === "petition_family" ? "q_family_ties" : "results",
+  },
+
+  // ── Has visa in the US ────────────────────────────────────────────────────
+  q_current_visa: {
+    id: "q_current_visa",
+    text: "Qual é o seu visto atual?",
+    options: [
+      { value: "b1b2", label: "B-1/B-2 — Turismo / Negócios", icon: "🛂" },
+      { value: "f1",   label: "F-1 — Estudante acadêmico",    icon: "🎓" },
+      { value: "j1",   label: "J-1 — Intercâmbio",            icon: "🔄" },
+      { value: "h1b",  label: "H-1B — Trabalho especializado", icon: "🏢" },
+      { value: "l1",   label: "L-1 — Transferência intraempresarial", icon: "🌐" },
+      { value: "other",label: "Outro visto",                  icon: "📄" },
+    ],
+    next: () => "q_change_goal",
+  },
+
+  q_change_goal: {
+    id: "q_change_goal",
+    text: "O que você deseja fazer agora?",
+    options: [
+      { value: "extend",       label: "Estender ou renovar meu visto atual",         icon: "📅" },
+      { value: "change_status",label: "Mudar para outro tipo de visto",              icon: "🔄" },
+      { value: "green_card",   label: "Solicitar Green Card",                       icon: "🟢" },
+      { value: "family",       label: "Trazer ou legalizar minha família",          icon: "👨‍👩‍👧" },
+      { value: "work_change",  label: "Mudar de empregador ou área de trabalho",    icon: "💼" },
+    ],
+    next: (a) => {
+      if (a === "change_status") return "q_target_visa";
+      if (a === "green_card")    return "q_gc_path";
+      if (a === "family")        return "q_family_ties";
+      return "q_process"; // extend, work_change → ask about ongoing process before results
+    },
+  },
+
+  q_target_visa: {
+    id: "q_target_visa",
+    text: "Para qual tipo de visto você quer mudar?",
+    options: [
+      { value: "f1",   label: "F-1 — Estudante acadêmico",           icon: "🎓" },
+      { value: "m1",   label: "M-1 — Estudante vocacional / técnico", icon: "🔧" },
+      { value: "j1",   label: "J-1 — Intercâmbio",                   icon: "🔄" },
+      { value: "h1b",  label: "H-1B — Trabalho especializado",        icon: "🏢" },
+      { value: "o1",   label: "O-1 — Habilidade extraordinária",      icon: "⭐" },
+      { value: "other",label: "Outro / Não tenho certeza",            icon: "🤔" },
+    ],
+    next: () => "q_process",
+  },
+
+  q_gc_path: {
+    id: "q_gc_path",
+    text: "Qual é o seu caminho para o Green Card?",
+    options: [
+      { value: "employer", label: "Por patrocínio de empregador",           icon: "🏢" },
+      { value: "family",   label: "Por vínculo familiar com cidadão / GC", icon: "👨‍👩‍👧" },
+      { value: "merit",    label: "Por mérito (EB-1, EB-2 NIW)",           icon: "⭐" },
+      { value: "unsure",   label: "Não tenho certeza",                     icon: "🤔" },
+    ],
+    next: (a) => a === "family" ? "q_family_ties" : "q_process",
+  },
+
+  // ── Green Card holder ─────────────────────────────────────────────────────
+  q_gc_goal: {
+    id: "q_gc_goal",
+    text: "O que você deseja fazer?",
+    options: [
+      { value: "renew",          label: "Renovar meu Green Card",                          icon: "🔄" },
+      { value: "naturalization", label: "Solicitar naturalização (cidadania)",             icon: "🇺🇸" },
+      { value: "family",         label: "Trazer ou peticionar familiar",                  icon: "👨‍👩‍👧" },
+      { value: "reentry",        label: "Solicitar permissão de reentrada (Reentry Permit)", icon: "✈️" },
+    ],
+    next: (a) => a === "family" ? "q_family_ties" : "q_process",
+  },
+
+  // ── Process check (last question before results for in-US paths) ──────────
+  q_process: {
+    id: "q_process",
+    text: "Você tem algum processo aberto no USCIS atualmente?",
+    subtitle: "Isso nos ajuda a entender se há prazos ou pendências que afetam seu caminho.",
+    options: [
+      {
+        value: "yes",
+        label: "Sim, tenho um processo em andamento",
+        icon: "📋",
+        subtitle: "Você verá onde buscar o número do processo no próximo passo",
+      },
+      { value: "no",    label: "Não, nenhum processo aberto", icon: "❌" },
+      { value: "unsure",label: "Não sei / não tenho certeza", icon: "🤔" },
+    ],
+    next: () => "results",
+  },
+};
+
+// ─── Recommendation Engine ────────────────────────────────────────────────────
+
+function getRecommendations(answers: Answers): VisaResult[] {
+  const results: VisaResult[] = [];
+  const a = answers;
+
+  const nationality    = a.q_nationality;         // "brazilian" | "treaty" | "other"
+  const isBrazilian    = nationality === "brazilian";
+  const isTreaty       = nationality === "treaty";
+  const inUs           = a.q_location === "in_us";
+  const goal           = a.q_goal;
+  const studyType      = a.q_study_type;
+  const workType       = a.q_work_type;
+  const education      = a.q_education;
+  const businessType   = a.q_business_type;
+  const familyTies     = a.q_family_ties;
+  const currentStatus  = a.q_current_status;
+  const currentVisa    = a.q_current_visa;
+  const changeGoal     = a.q_change_goal;
+  const targetVisa     = a.q_target_visa;
+  const gcGoal         = a.q_gc_goal;
+  const gcPath         = a.q_gc_path;
+  const permanentPath  = a.q_permanent_path;
+  const citizenGoal    = a.q_citizen_goal;
+
+  // ── Overstay alert ───────────────────────────────────────────────────────
+  if (currentStatus === "overstay") {
+    results.push({
+      visa: "⚠️ Situação irregular — Ação urgente necessária",
+      forms: "I-539 (se elegível) ou consulta imediata com advogado",
+      description:
+        "Overstay pode gerar barra de reentrada de 3 a 10 anos. Não tome nenhuma ação sem orientação jurídica especializada.",
+      priority: "high",
+      urgent: true,
+    });
+    return results;
+  }
+
+  // ── Citizen ──────────────────────────────────────────────────────────────
+  if (currentStatus === "citizen") {
+    if (citizenGoal === "petition_family" || familyTies === "spouse_citizen") {
+      results.push({
+        visa: "Petição de familiar — IR-1 / K-1",
+        forms: "I-130 (familiar) ou I-129F (noivo/a)",
+        description:
+          "Cidadãos americanos podem peticionar cônjuge, filhos, pais e irmãos. Parentes imediatos não têm fila.",
+        priority: "high",
+      });
+    } else {
+      results.push({
+        visa: "Você é cidadão americano 🇺🇸",
+        forms: "N/A",
+        description:
+          "Como cidadão, você tem plenos direitos nos EUA. Podemos ajudar com petição de familiares, passaporte americano e outras questões.",
+        priority: "high",
+      });
+    }
+    return results;
+  }
+
+  // ── Green Card holder ────────────────────────────────────────────────────
+  if (currentStatus === "green_card") {
+    if (gcGoal === "renew") {
+      results.push({
+        visa: "Renovação do Green Card",
+        forms: "I-90",
+        description: "Renovação do Permanent Resident Card a cada 10 anos.",
+        priority: "high",
+      });
+    }
+    if (gcGoal === "naturalization") {
+      results.push({
+        visa: "Naturalização (Cidadania Americana)",
+        forms: "N-400",
+        description:
+          "Após 3 a 5 anos com Green Card, você pode solicitar a cidadania americana.",
+        priority: "high",
+      });
+    }
+    if (gcGoal === "family" || familyTies !== "none") {
+      results.push({
+        visa: "Petição de familiar — F-2 / IR",
+        forms: "I-130",
+        description:
+          "Titulares de Green Card podem peticionar cônjuge e filhos. Há fila de espera.",
+        priority: "medium",
+      });
+    }
+    if (gcGoal === "reentry") {
+      results.push({
+        visa: "Reentry Permit",
+        forms: "I-131",
+        description:
+          "Permite ausência prolongada dos EUA (até 2 anos) sem perder o Green Card.",
+        priority: "medium",
+      });
+    }
+    return results;
+  }
+
+  // ── ESTA / Turismo (treaty, fora dos EUA, visitar) ───────────────────────
+  if (!inUs && isTreaty && goal === "visit") {
+    results.push({
+      visa: "ESTA (Autorização de Viagem Eletrônica)",
+      forms: "Solicitação online em esta.cbp.dhs.gov",
+      description:
+        "Com passaporte elegível ao Visa Waiver Program, você pode visitar os EUA por até 90 dias sem precisar de visto.",
+      priority: "high",
+    });
+    return results;
+  }
+
+  // ── Turismo para brasileiro ───────────────────────────────────────────────
+  if (!inUs && goal === "visit") {
+    results.push({
+      visa: "B-1/B-2 (Turismo e Negócios)",
+      forms: "DS-160 + Entrevista consular",
+      description:
+        "Para visitas de turismo, negócios, tratamento médico ou visita a familiares nos EUA.",
+      priority: "high",
+    });
+    return results;
+  }
+
+  // ── Estudos ──────────────────────────────────────────────────────────────
+  if (goal === "study" || studyType || targetVisa === "f1" || targetVisa === "m1" || targetVisa === "j1") {
+    const isChangeOfStatus =
+      inUs && changeGoal === "change_status" && targetVisa === "f1";
+
+    if (isChangeOfStatus) {
+      results.push({
+        visa: "I-539 — Mudança de Status para F-1",
+        forms: "I-539 (protocolar antes do visto expirar)",
+        description:
+          "Mudança de status para F-1 dentro dos EUA. Urgente se o visto está próximo de expirar.",
+        priority: "high",
+        urgent: true,
+      });
+    } else if (studyType === "vocational" || targetVisa === "m1") {
+      results.push({
+        visa: "M-1 (Estudante Vocacional / Técnico)",
+        forms: "DS-160 + I-20 (emitido pela escola M)",
+        description:
+          "Para cursos técnicos, vocacionais e profissionalizantes em instituições credenciadas pelo SEVP.",
+        priority: "high",
+      });
+    } else if (studyType === "exchange" || targetVisa === "j1") {
+      results.push({
+        visa: "J-1 (Intercâmbio e Pesquisa)",
+        forms: "DS-160 + DS-2019 (emitido pelo programa patrocinador)",
+        description:
+          "Para intercâmbio acadêmico, pesquisa, programas culturais e trabalho temporário patrocinados.",
+        priority: "high",
+      });
+    } else {
+      results.push({
+        visa: "F-1 (Estudante Acadêmico)",
+        forms: "DS-160 + I-20 (emitido pela universidade ou escola de idiomas)",
+        description:
+          "Para estudantes em universidades, colleges e cursos de idiomas. Permite cursos híbridos (presencial + online) e trabalho via OPT/CPT.",
+        priority: "high",
+      });
+      if (studyType === "language") {
+        results.push({
+          visa: "J-1 (Intercâmbio — alternativa para idiomas)",
+          forms: "DS-160 + DS-2019",
+          description:
+            "Alguns programas de idiomas são patrocinados como J-1. Verifique com sua escola.",
+          priority: "medium",
+        });
+      }
+    }
+  }
+
+  // ── Trabalho ─────────────────────────────────────────────────────────────
+  if (goal === "work" || workType || targetVisa === "h1b" || targetVisa === "o1") {
+    if (workType === "intracompany" || targetVisa === "l1") {
+      results.push({
+        visa: "L-1 (Transferência Intraempresarial)",
+        forms: "I-129 (L)",
+        description:
+          "Para profissionais transferidos por empresa multinacional para filial, subsidiária ou afiliada nos EUA. Sem sorteio. Caminho natural para o EB-1C (Green Card executivo).",
+        priority: "high",
+      });
+    }
+    if (workType === "extraordinary" || targetVisa === "o1") {
+      results.push({
+        visa: "O-1 (Habilidade Extraordinária)",
+        forms: "I-129 (O)",
+        description:
+          "Para artistas, atletas, cientistas ou profissionais com reconhecimento excepcional. Sem sorteio, sem cap.",
+        priority: "high",
+      });
+    }
+    if (
+      workType === "employer_offer" &&
+      (education === "bachelor" || education === "postgrad")
+    ) {
+      results.push({
+        visa: "H-1B (Trabalho Especializado)",
+        forms: "I-129 (H) — sujeito a sorteio anual (85k vagas/ano)",
+        description:
+          "Para profissionais com graduação em área de especialidade e oferta de emprego americano. O sorteio acontece em março com início em outubro.",
+        priority: "high",
+      });
+    }
+    if (workType === "employer_offer" && education === "postgrad") {
+      results.push({
+        visa: "EB-2 NIW (Green Card por Interesse Nacional)",
+        forms: "I-140 + I-485 (ou processo consular)",
+        description:
+          "Pós-graduados podem solicitar Green Card sem patrocinador se o trabalho beneficia os EUA. Brasileiros entram na fila 'Rest of World'.",
+        priority: "medium",
+      });
+    }
+  }
+
+  // ── Negócios / Investimento ───────────────────────────────────────────────
+  if (goal === "business" || businessType) {
+
+    // Reuniões e negociações — B-1 para todos
+    if (businessType === "meetings") {
+      results.push({
+        visa: "B-1 (Visitante de Negócios)",
+        forms: "DS-160 + Entrevista consular",
+        description:
+          "Para reuniões, contratos, negociações, conferências e visitas comerciais. Não autoriza trabalho remunerado nem receber salário americano. Temporário — não é visto de investimento.",
+        priority: "high",
+      });
+      if (isTreaty) {
+        results.push({
+          visa: "ESTA (para cidadãos de países do VWP)",
+          forms: "Solicitação online em esta.cbp.dhs.gov",
+          description:
+            "Com passaporte elegível ao ESTA, você pode fazer negócios nos EUA por até 90 dias sem visto. Mais ágil que o B-1.",
+          priority: "medium",
+        });
+      }
+    }
+
+    // Investir e operar — E-2 (apenas treaty) ou EB-5
+    if (businessType === "invest_operate") {
+      if (isTreaty) {
+        results.push({
+          visa: "E-2 (Investidor por Tratado)",
+          forms: "DS-160 + Aplicação consular",
+          description:
+            "Para quem investe capital substancial (a partir de ~$100k) em negócio próprio nos EUA. Disponível para cidadãos de países com tratado — inclui a maioria dos países europeus.",
+          priority: "high",
+        });
+      } else {
+        // Brazilian or other — E-2 not available
+        results.push({
+          visa: "E-2 (Investidor por Tratado) — Indisponível",
+          forms: "N/A",
+          description:
+            "O Brasil não possui tratado de comércio e navegação com os EUA. O visto E-2 não está disponível para cidadãos brasileiros.",
+          priority: "high",
+          blocked: true,
+        });
+        results.push({
+          visa: "EB-5 (Green Card por Investimento)",
+          forms: "I-526E + I-485 (ou processo consular)",
+          description:
+            "Alternativa ao E-2 para brasileiros: investimento de $800k a $1.05M em projeto aprovado nos EUA, com caminho direto para residência permanente (Green Card).",
+          priority: "high",
+        });
+        results.push({
+          visa: "L-1 (Transferência Intraempresarial)",
+          forms: "I-129 (L)",
+          description:
+            "Se você tem empresa no Brasil, pode abrir uma filial nos EUA e transferir-se como executivo ou especialista. Caminho viável sem o E-2.",
+          priority: "medium",
+        });
+      }
+    }
+
+    // Comércio — E-1 (apenas treaty)
+    if (businessType === "trade") {
+      if (isTreaty) {
+        results.push({
+          visa: "E-1 (Comércio por Tratado)",
+          forms: "DS-160 + Documentação comercial",
+          description:
+            "Para empresários com volume substancial de comércio de bens, serviços ou tecnologia entre o país de origem e os EUA. Mais de 50% do comércio deve ser bilateral.",
+          priority: "high",
+        });
+      } else {
+        results.push({
+          visa: "E-1 (Comércio por Tratado) — Indisponível",
+          forms: "N/A",
+          description:
+            "O Brasil não possui tratado de comércio que permita o E-1. Cidadãos brasileiros não têm acesso a este visto.",
+          priority: "high",
+          blocked: true,
+        });
+        results.push({
+          visa: "B-1 (Visitante de Negócios)",
+          forms: "DS-160 + Entrevista consular",
+          description:
+            "Brasileiros com comércio com os EUA podem usar o B-1 para reuniões, negociações e visitas comerciais. Não autoriza trabalho ou recebimento de salário americano.",
+          priority: "medium",
+        });
+        results.push({
+          visa: "L-1 (Transferência Intraempresarial)",
+          forms: "I-129 (L)",
+          description:
+            "Se sua empresa tem ou pode ter presença nos EUA, o L-1 permite a transferência para gerir as operações americanas.",
+          priority: "medium",
+        });
+      }
+    }
+
+    // Investimento com residência permanente — EB-5 para todos
+    if (businessType === "invest_permanent") {
+      results.push({
+        visa: "EB-5 (Green Card por Investimento)",
+        forms: "I-526E + I-485 (ajuste) ou NVC (consular)",
+        description:
+          "Investimento de $800k (em área de alto desemprego ou projeto regional) a $1.05M em negócio que crie pelo menos 10 empregos americanos. Caminho direto para o Green Card — disponível para brasileiros.",
+        priority: "high",
+      });
+    }
+  }
+
+  // ── Família ──────────────────────────────────────────────────────────────
+  if (familyTies === "spouse_citizen") {
+    results.push({
+      visa: "K-1 (Noivo/a) ou IR-1/CR-1 (Cônjuge Casado)",
+      forms: "I-129F (K-1) ou I-130 + DS-260 (IR-1/CR-1)",
+      description:
+        "Noivos podem entrar com K-1 e casar nos EUA em até 90 dias. Cônjuges já casados usam IR-1 ou CR-1 pelo consulado. Parentes imediatos de cidadão americano não entram em fila.",
+      priority: "high",
+    });
+  }
+  if (familyTies === "parent_child_citizen") {
+    results.push({
+      visa: "IR-1 / IR-2 (Parente Imediato de Cidadão)",
+      forms: "I-130 + DS-260",
+      description:
+        "Filhos, pais e cônjuges de cidadãos americanos têm prioridade máxima e não entram em fila de espera. Processo mais rápido.",
+      priority: "high",
+    });
+  }
+  if (familyTies === "family_gc") {
+    results.push({
+      visa: "F-2 (Familiar de Residente Permanente)",
+      forms: "I-130",
+      description:
+        "Cônjuge e filhos solteiros de titulares de Green Card podem ser peticionados. Há fila de espera que varia por país e categoria.",
+      priority: "medium",
+    });
+  }
+
+  // ── Extensão dentro dos EUA ───────────────────────────────────────────────
+  if (inUs && changeGoal === "extend") {
+    results.push({
+      visa: `Extensão de ${currentVisa?.toUpperCase() ?? "Visto Atual"}`,
+      forms:
+        currentVisa === "f1" || currentVisa === "j1"
+          ? "Contato com DSO / Sponsor da instituição"
+          : "I-539 ou I-129 (conforme visto)",
+      description:
+        "Para estender sua permanência legítima nos EUA antes do vencimento. Protocole antes da data de expiração.",
+      priority: "high",
+    });
+  }
+
+  // ── Green Card paths ──────────────────────────────────────────────────────
+  if (goal === "live" || permanentPath || gcPath === "merit") {
+    if (permanentPath === "merit" || gcPath === "merit") {
+      results.push({
+        visa: "EB-1 (Green Card por Habilidade Extraordinária)",
+        forms: "I-140",
+        description:
+          "Para profissionais de destaque internacional — pesquisadores, executivos multinacionais, artistas de renome. Não requer patrocinador.",
+        priority: "high",
+      });
+      results.push({
+        visa: "EB-2 NIW (Green Card por Interesse Nacional)",
+        forms: "I-140 + I-485 (ou NVC consular)",
+        description:
+          "Para pós-graduados cujo trabalho beneficia os EUA. Dispensa patrocinador. Brasileiros entram na fila 'Rest of World'.",
+        priority: "high",
+      });
+    }
+    if (permanentPath === "asylum") {
+      results.push({
+        visa: "Asilo Político",
+        forms: "I-589 (se nos EUA) ou solicitação consular",
+        description:
+          "Para quem tem fundado temor de perseguição por raça, religião, nacionalidade ou grupo social.",
+        priority: "high",
+      });
+    }
+    if (permanentPath === "lottery") {
+      results.push({
+        visa: "DV Lottery (Diversity Visa Program)",
+        forms: "Inscrição online em dvlottery.state.gov (anual — outubro a novembro)",
+        description: isBrazilian
+          ? "Atenção: o Brasil foi excluído do DV Lottery nos últimos anos por ter enviado muitos imigrantes. Verifique a elegibilidade no ano corrente."
+          : "Programa de loteria anual do governo americano para países com baixa imigração para os EUA.",
+        priority: isBrazilian ? "low" : "medium",
+        urgent: isBrazilian,
+      });
+    }
+  }
+
+  // ── Process in progress note ─────────────────────────────────────────────
+  if (a.q_process === "yes") {
+    results.push({
+      visa: "📋 Processo em andamento detectado",
+      forms: "USCIS Case Status: egov.uscis.gov/casestatus",
+      description:
+        "Com um número de recibo (Receipt Number) do USCIS, você pode acompanhar seu caso em tempo real. O Immigrei vai conectar isso ao seu perfil.",
+      priority: "medium",
+    });
+  }
+
+  // ── Dedup + sort ─────────────────────────────────────────────────────────
+  const seen = new Set<string>();
+  const order = { high: 0, medium: 1, low: 2 };
+  return results
+    .filter((r) => {
+      if (seen.has(r.visa)) return false;
+      seen.add(r.visa);
+      return true;
+    })
+    .sort((a, b) => order[a.priority] - order[b.priority]);
+}
+
+// ─── Build question sequence (for progress bar) ──────────────────────────────
+
+function buildSequence(answers: Answers): string[] {
+  const seq: string[] = ["q_location"];
+  let current = "q_location";
+  while (current !== "results") {
+    const q = questionMap[current];
+    if (!q) break;
+    const answer = answers[current];
+    if (!answer) break;
+    const nextId =
+      typeof q.next === "function" ? q.next(answer, answers) : q.next;
+    if (nextId === "results" || !questionMap[nextId]) break;
+    seq.push(nextId);
+    current = nextId;
+  }
+  return seq;
+}
+
+// ─── UI Component ─────────────────────────────────────────────────────────────
+
+export default function OnboardingPage() {
+  const router = useRouter();
+  const [phase, setPhase] = useState<"welcome" | "questions" | "results">("welcome");
+  const [answers, setAnswers] = useState<Answers>({});
+  const [history, setHistory] = useState<string[]>(["q_location"]);
+  const [animating, setAnimating] = useState(false);
+
+  const currentQuestionId = history[history.length - 1];
+  const currentQuestion   = questionMap[currentQuestionId];
+  const currentAnswer     = answers[currentQuestionId];
+
+  const sequence      = buildSequence(answers);
+  const estimatedTotal = Math.max(sequence.length + 2, history.length + 1);
+  const progress      = (history.length / estimatedTotal) * 100;
+
+  function selectAnswer(value: string) {
+    setAnswers((prev) => ({ ...prev, [currentQuestionId]: value }));
+  }
+
+  function goNext() {
+    if (!currentAnswer || !currentQuestion) return;
+    const nextId =
+      typeof currentQuestion.next === "function"
+        ? currentQuestion.next(currentAnswer, {
+            ...answers,
+            [currentQuestionId]: currentAnswer,
+          })
+        : currentQuestion.next;
+
+    setAnimating(true);
+    setTimeout(() => {
+      if (nextId === "results") {
+        setPhase("results");
+      } else {
+        setHistory((h) => [...h, nextId]);
+      }
+      setAnimating(false);
+    }, 180);
+  }
+
+  function goBack() {
+    if (history.length <= 1) {
+      setPhase("welcome");
+      return;
+    }
+    setAnswers((prev) => {
+      const next = { ...prev };
+      delete next[currentQuestionId];
+      return next;
+    });
+    setHistory((h) => h.slice(0, -1));
+  }
+
+  const recommendations = getRecommendations(answers);
+
+  const priorityLabel: Record<string, string> = {
+    high: "Alta prioridade",
+    medium: "Recomendado",
+    low: "Possível",
+  };
+  const priorityStyle: Record<string, string> = {
+    high:   "bg-amber-tint text-amber-deep border border-amber/40",
+    medium: "bg-pine-tint text-pine border border-pine-tint",
+    low:    "bg-cream-2 text-ink-faint border border-pine-tint",
+  };
+
+  // ── Welcome ───────────────────────────────────────────────────────────────
+  if (phase === "welcome") {
+    return (
+      <main className="min-h-screen bg-cream flex flex-col">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center max-w-lg mx-auto w-full">
+          <div className="w-16 h-16 rounded-full bg-pine-tint flex items-center justify-center mb-8">
+            <span className="text-3xl">🌿</span>
+          </div>
+          <p
+            className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-4"
+            style={{ fontFamily: "var(--font-body)", letterSpacing: "0.15em" }}
+          >
+            Bem-vindo à Immigrei
+          </p>
+          <h1
+            className="text-4xl md:text-5xl font-semibold text-ink mb-6 leading-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Sua jornada começa com clareza.
+          </h1>
+          <p
+            className="text-ink-soft text-lg leading-relaxed mb-4"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Responda algumas perguntas e vamos identificar{" "}
+            <span className="text-pine font-semibold">
+              o caminho de imigração mais adequado para você
+            </span>{" "}
+            — sem jargão jurídico, sem enrolação.
+          </p>
+          <p className="text-ink-faint text-sm mb-10">Leva menos de 2 minutos.</p>
+          <button
+            onClick={() => setPhase("questions")}
+            className="w-full max-w-xs bg-pine text-cream-2 font-semibold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-pine-deep active:scale-95 shadow-sm"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Começar →
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Results ───────────────────────────────────────────────────────────────
+  if (phase === "results") {
+    const hasUrgent  = recommendations.some((r) => r.urgent && !r.blocked);
+    const hasBlocked = recommendations.some((r) => r.blocked);
+
+    return (
+      <main className="min-h-screen bg-cream flex flex-col pb-10">
+        <div className="max-w-lg mx-auto w-full px-6 py-10 flex flex-col gap-6">
+
+          {/* Header */}
+          <div className="text-center pt-4">
+            <div className="w-14 h-14 rounded-full bg-pine-tint flex items-center justify-center mx-auto mb-6">
+              <span className="text-2xl">🗺️</span>
+            </div>
+            <p
+              className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-2"
+              style={{ fontFamily: "var(--font-body)", letterSpacing: "0.15em" }}
+            >
+              Seu perfil migratório
+            </p>
+            <h1
+              className="text-3xl font-semibold text-ink mb-3"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Encontramos seu caminho.
+            </h1>
+            <p className="text-ink-soft" style={{ fontFamily: "var(--font-body)" }}>
+              Com base no seu perfil, estes são os caminhos mais relevantes para você:
+            </p>
+          </div>
+
+          {/* Urgent alert */}
+          {hasUrgent && (
+            <div className="bg-clay/10 border border-clay rounded-2xl p-4 flex gap-3">
+              <span className="text-xl flex-shrink-0">⚠️</span>
+              <p
+                className="text-clay text-sm font-medium leading-relaxed"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                <strong>Atenção:</strong> Identificamos situações que requerem
+                cuidado especial. Recomendamos consulta com advogado de imigração
+                antes de qualquer ação.
+              </p>
+            </div>
+          )}
+
+          {/* Blocked nationality note */}
+          {hasBlocked && (
+            <div className="bg-amber-tint border border-amber/40 rounded-2xl p-4 flex gap-3">
+              <span className="text-xl flex-shrink-0">🔒</span>
+              <p
+                className="text-amber-deep text-sm leading-relaxed"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                Alguns vistos abaixo não estão disponíveis para a sua cidadania.
+                Indicamos as melhores alternativas para o seu perfil.
+              </p>
+            </div>
+          )}
+
+          {/* Results list */}
+          {recommendations.length === 0 ? (
+            <div className="bg-cream-2 rounded-2xl p-6 text-center">
+              <p className="text-ink-soft" style={{ fontFamily: "var(--font-body)" }}>
+                Seu perfil requer análise mais detalhada. Recomendamos consulta
+                com advogado de imigração.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {recommendations.map((rec) => (
+                <div
+                  key={rec.visa}
+                  className={[
+                    "bg-cream-2 rounded-2xl p-5",
+                    rec.blocked
+                      ? "opacity-60 border-2 border-clay/30"
+                      : rec.urgent
+                        ? "border-2 border-clay"
+                        : "border border-pine-tint",
+                  ].join(" ")}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <h3
+                      className={`font-bold text-base leading-tight ${rec.blocked ? "text-ink-faint line-through" : "text-pine"}`}
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      {rec.visa}
+                    </h3>
+                    {!rec.blocked && (
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0 ${priorityStyle[rec.priority]}`}
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        {priorityLabel[rec.priority]}
+                      </span>
+                    )}
+                    {rec.blocked && (
+                      <span className="text-xs font-bold px-2 py-1 rounded-full bg-clay/10 text-clay border border-clay/30 whitespace-nowrap flex-shrink-0">
+                        Indisponível
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className="text-ink-soft text-sm mb-3 leading-relaxed"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {rec.description}
+                  </p>
+                  {!rec.blocked && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-ink-faint">📋</span>
+                      <span
+                        className="text-xs text-ink-faint font-medium"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        {rec.forms}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* CTA */}
+          <button
+            onClick={() => router.push("/vistos")}
+            className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Ver minha jornada em detalhe →
+          </button>
+
+          {/* Restart */}
+          <button
+            onClick={() => {
+              setAnswers({});
+              setHistory(["q_location"]);
+              setPhase("welcome");
+            }}
+            className="text-sm text-ink-faint hover:text-ink-soft text-center transition-colors"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            ↩ Recomeçar
+          </button>
+
+          <p
+            className="text-xs text-ink-faint text-center leading-relaxed pb-4"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            As informações acima são educacionais e não constituem aconselhamento
+            jurídico. Para orientação legal específica, consulte um advogado de
+            imigração licenciado.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Questions ─────────────────────────────────────────────────────────────
+  return (
+    <main className="min-h-screen bg-cream flex flex-col">
+      {/* Progress bar */}
+      <div className="w-full h-1 bg-pine-tint">
+        <div
+          className="h-full bg-pine transition-all duration-500 ease-out"
+          style={{ width: `${Math.min(progress, 95)}%` }}
+        />
+      </div>
+
+      <div className="max-w-lg mx-auto w-full px-6 py-8 flex flex-col flex-1">
+
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={goBack}
+            className="text-ink-faint hover:text-ink transition-colors text-sm font-medium flex items-center gap-1"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            ← Voltar
+          </button>
+          <span
+            className="text-xs text-ink-faint font-medium"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Passo {history.length}
+          </span>
+        </div>
+
+        {/* Question + options */}
+        <div
+          className={`flex-1 flex flex-col transition-all duration-180 ${
+            animating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
+          }`}
+        >
+          <h2
+            className="text-2xl font-semibold text-ink mb-2 leading-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {currentQuestion?.text}
+          </h2>
+
+          {currentQuestion?.subtitle && (
+            <p
+              className="text-sm text-ink-faint mb-6 leading-relaxed"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {currentQuestion.subtitle}
+            </p>
+          )}
+          {!currentQuestion?.subtitle && <div className="mb-6" />}
+
+          <div className="flex flex-col gap-3 flex-1">
+            {currentQuestion?.options.map((opt) => {
+              const selected = currentAnswer === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => selectAnswer(opt.value)}
+                  className={`w-full flex items-start gap-4 px-5 py-4 rounded-2xl border-2 text-left transition-all duration-150 ${
+                    selected
+                      ? "border-amber bg-amber-tint"
+                      : "border-pine-tint bg-cream-2 hover:border-pine/40 hover:bg-pine-tint/50"
+                  }`}
+                >
+                  <span className="text-2xl flex-shrink-0 mt-0.5">{opt.icon}</span>
+                  <div className="flex-1">
+                    <span
+                      className={`font-medium text-base block ${
+                        selected ? "text-ink" : "text-ink-soft"
+                      }`}
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      {opt.label}
+                    </span>
+                    {opt.subtitle && (
+                      <span
+                        className="text-xs text-ink-faint mt-0.5 block"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        {opt.subtitle}
+                      </span>
+                    )}
+                  </div>
+                  {selected && (
+                    <span className="ml-auto text-amber flex-shrink-0 mt-0.5">✓</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Next button */}
+        <div className="pt-8 pb-4">
+          <button
+            onClick={goNext}
+            disabled={!currentAnswer}
+            className={`w-full py-4 px-8 rounded-2xl font-bold text-lg transition-all duration-200 ${
+              currentAnswer
+                ? "bg-pine text-cream-2 hover:bg-pine-deep active:scale-95 shadow-sm"
+                : "bg-pine-tint text-ink-faint cursor-not-allowed"
+            }`}
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Próxima →
+          </button>
+        </div>
+      </div>
+    </main>
+  );
 }
