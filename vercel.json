@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path":     "/api/cron/check-cases",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path":     "/api/cron/visa-bulletin",
+      "schedule": "0 10 10 * *"
+    }
+  ]
+}
