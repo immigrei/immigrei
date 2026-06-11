@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigrei — Setup do César</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pine:       #1E5E4E;
+    --pine-deep:  #164A3D;
+    --amber:      #E8A33D;
+    --amber-deep: #CC8A22;
+    --cream:      #F4EEE2;
+    --cream-2:    #FBF7EF;
+    --pine-tint:  #E4EFE9;
+    --amber-tint: #FBEDD4;
+    --ink:        #1B2520;
+    --ink-soft:   #55615A;
+    --ink-faint:  #8B958F;
+    --sage:       #5E9E81;
+    --clay:       #C2542F;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Hanken Grotesk', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--pine);
+    padding: 48px 24px 44px;
+    text-align: center;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: rgba(244,238,226,.6);
+    letter-spacing: -.3px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .header-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--amber);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 20px;
+  }
+
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(26px, 5vw, 38px);
+    font-weight: 600;
+    color: var(--cream);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .header p {
+    font-size: 16px;
+    color: rgba(244,238,226,.7);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+
+  .meta-chips {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(244,238,226,.12);
+    border: 1px solid rgba(244,238,226,.2);
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: rgba(244,238,226,.85);
+    font-weight: 500;
+  }
+
+  /* ── Progress ── */
+  .progress-bar-section {
+    background: var(--pine-deep);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .progress-label { font-size: 13px; font-weight: 600; color: rgba(244,238,226,.65); }
+
+  .progress-track {
+    flex: 1; max-width: 360px;
+    height: 6px; background: rgba(244,238,226,.15);
+    border-radius: 99px; overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%; background: var(--amber);
+    border-radius: 99px; transition: width .4s ease;
+    width: 0%;
+  }
+
+  .progress-num { font-size: 13px; font-weight: 700; color: var(--amber); min-width: 40px; }
+
+  /* ── Container ── */
+  .container { max-width: 700px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* ── Step ── */
+  .step {
+    background: var(--cream-2);
+    border-radius: 20px;
+    border: 1.5px solid var(--pine-tint);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all .15s;
+  }
+
+  .step.done { opacity: .6; }
+
+  .step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 22px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .step-number {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--pine-tint);
+    color: var(--pine);
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all .15s;
+  }
+
+  .step.done .step-number {
+    background: var(--pine);
+    color: var(--cream);
+  }
+
+  .step-title-wrap { flex: 1; }
+
+  .step-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .step.done .step-title { text-decoration: line-through; color: var(--ink-faint); }
+
+  .step-subtitle { font-size: 13px; color: var(--ink-faint); }
+
+  .step-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .tag {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 99px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+
+  .tag-urgent  { background: rgba(194,84,47,.1);  color: var(--clay); }
+  .tag-medium  { background: var(--amber-tint);   color: var(--amber-deep); }
+  .tag-low     { background: var(--pine-tint);    color: var(--pine); }
+  .tag-blocker { background: rgba(194,84,47,.08); color: var(--clay); border: 1px solid rgba(194,84,47,.2); }
+
+  .step-check {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    border: 2px solid var(--pine-tint);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3px;
+    transition: all .15s;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cream);
+    background: var(--cream);
+  }
+
+  .step.done .step-check { background: var(--pine); border-color: var(--pine); }
+
+  /* ── Step body (instructions) ── */
+  .step-body {
+    padding: 0 22px 22px 70px;
+    display: block;
+  }
+
+  .step.collapsed .step-body { display: none; }
+
+  .instruction {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .instruction:last-child { margin-bottom: 0; }
+
+  .instruction strong { color: var(--ink); font-weight: 600; }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 12px 0;
+    position: relative;
+  }
+
+  .code-block pre {
+    font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+    font-size: 13px;
+    color: #e4efe9;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .code-block .comment { color: #8B958F; }
+  .code-block .key     { color: var(--amber); }
+  .code-block .val     { color: #5E9E81; }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px; right: 12px;
+    background: rgba(244,238,226,.1);
+    border: 1px solid rgba(244,238,226,.15);
+    border-radius: 6px;
+    color: rgba(244,238,226,.6);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: 'Hanken Grotesk', sans-serif;
+    transition: all .15s;
+  }
+
+  .copy-btn:hover { background: rgba(244,238,226,.18); color: rgba(244,238,226,.9); }
+
+  /* ── Inline code ── */
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    background: var(--pine-tint);
+    color: var(--pine);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 600;
+  }
+
+  /* ── Alert box ── */
+  .alert {
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.65;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 12px 0;
+  }
+
+  .alert-warn  { background: var(--amber-tint); color: var(--amber-deep); }
+  .alert-info  { background: var(--pine-tint);  color: var(--pine); }
+  .alert-error { background: rgba(194,84,47,.08); color: var(--clay); }
+
+  /* ── Link ── */
+  a { color: var(--pine); font-weight: 600; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Section divider ── */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0 16px;
+  }
+
+  .section-label-line { flex: 1; height: 1px; background: rgba(27,37,32,.1); }
+
+  .section-label-text {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--ink-faint);
+    padding: 0 4px;
+  }
+
+  /* ── Env block ── */
+  .env-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  .env-table td {
+    padding: 9px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--pine-tint);
+    vertical-align: top;
+  }
+  .env-table tr:last-child td { border-bottom: none; }
+  .env-table .env-key {
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--pine);
+    background: var(--pine-tint);
+    border-radius: 6px;
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+  .env-table .env-val {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    word-break: break-all;
+  }
+  .env-table .env-desc { color: var(--ink-faint); font-size: 12px; }
+
+  /* ── Done banner ── */
+  .done-banner {
+    display: none;
+    background: var(--pine);
+    border-radius: 20px;
+    padding: 28px 32px;
+    text-align: center;
+    margin-top: 32px;
+  }
+
+  .done-banner.visible { display: block; }
+
+  .done-banner h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: 10px;
+  }
+
+  .done-banner p {
+    font-size: 15px;
+    color: rgba(244,238,226,.75);
+    line-height: 1.6;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">Immigrei</span>
+  <div class="header-avatar">🇦🇺</div>
+  <h1>Setup do César</h1>
+  <p>Tudo que você precisa fazer para entrar no projeto, rodar localmente e testar o app.</p>
+  <div class="meta-chips">
+    <span class="chip">🛠 Setup inicial</span>
+    <span class="chip">⏱ ~1 hora</span>
+    <span class="chip">👤 Só você</span>
+  </div>
+</div>
+
+<div class="progress-bar-section">
+  <span class="progress-label">Seu progresso</span>
+  <div class="progress-track">
+    <div class="progress-fill" id="pfill"></div>
+  </div>
+  <span class="progress-num" id="pnum">0 / 0</span>
+</div>
+
+<div class="container">
+
+  <!-- ══ BLOCO 1: VERCEL ══ -->
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <span class="section-label-text">▲ Vercel</span>
+    <div class="section-label-line"></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step collapsed" id="step-1">
+    <div class="step-header" onclick="expandStep('step-1')">
+      <div class="step-number">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Migrar projeto Vercel para sua conta pessoal</div>
+        <div class="step-subtitle">O projeto precisa estar na conta Hobby para suportar 2 membros</div>
+        <div class="step-tags">
+          <span class="tag tag-urgent">🔴 Urgente</span>
+          <span class="tag tag-blocker">⛔ Blocker</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-1')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction">
+        <strong>1.</strong> Acesse <a href="https://vercel.com" target="_blank">vercel.com</a> e faça login na conta da <strong>Immigrei</strong>.
+      </p>
+      <p class="instruction">
+        <strong>2.</strong> Abra o projeto <code>immigrei</code> → <strong>Settings</strong> → role até o final da página → <strong>Transfer Project</strong>.
+      </p>
+      <p class="instruction">
+        <strong>3.</strong> Selecione sua conta pessoal como destino. Confirme a transferência.
+      </p>
+      <div class="alert alert-warn">
+        <span>⚠️</span>
+        <span>Após a transferência, o projeto fica na sua conta pessoal Hobby. A URL <code>immigrei.vercel.app</code> continua a mesma.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step collapsed" id="step-2">
+    <div class="step-header" onclick="expandStep('step-2')">
+      <div class="step-number">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Adicionar Felipe como membro do projeto</div>
+        <div class="step-subtitle">Para que os dois consigam fazer deploy</div>
+        <div class="step-tags">
+          <span class="tag tag-urgent">🔴 Urgente</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-2')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction">
+        <strong>1.</strong> No projeto no Vercel → <strong>Settings</strong> → <strong>Members</strong>.
+      </p>
+      <p class="instruction">
+        <strong>2.</strong> Convidar o email do Felipe com papel de <strong>Editor</strong>.
+      </p>
+      <p class="instruction">
+        GitHub do Felipe: <code>FelipeIwamotoGonzalez</code>
+      </p>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step collapsed" id="step-3">
+    <div class="step-header" onclick="expandStep('step-3')">
+      <div class="step-number">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Adicionar variáveis de ambiente no Vercel</div>
+        <div class="step-subtitle">Settings → Environment Variables → adicionar todas abaixo</div>
+        <div class="step-tags">
+          <span class="tag tag-urgent">🔴 Urgente</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-3')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction">
+        Settings → <strong>Environment Variables</strong> → <strong>Add New</strong> para cada variável abaixo. Marque os 3 ambientes: <code>Production</code> + <code>Preview</code> + <code>Development</code>.
+      </p>
+      <table class="env-table">
+        <tr>
+          <td><span class="env-key">NEXT_PUBLIC_SUPABASE_URL</span></td>
+          <td><span class="env-val">https://vbihlcokhuzyuinzxtvq.supabase.co</span></td>
+        </tr>
+        <tr>
+          <td><span class="env-key">NEXT_PUBLIC_SUPABASE_ANON_KEY</span></td>
+          <td><span class="env-val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiaWhsY29raHV6eXVpbnp4dHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MzE5MTIsImV4cCI6MjA5NjEwNzkxMn0.KfKzmumoRSuoGmEBwKBNAe_hDcUQLcMatZgVRcREOH0</span></td>
+        </tr>
+        <tr>
+          <td><span class="env-key">SUPABASE_SERVICE_ROLE_KEY</span></td>
+          <td><span class="env-val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiaWhsY29raHV6eXVpbnp4dHZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDUzMTkxMiwiZXhwIjoyMDk2MTA3OTEyfQ.WMBsBGrK6VVImrs4675SQSV2_qGp-_S-eyoGmcR-AJ0</span></td>
+        </tr>
+        <tr>
+          <td><span class="env-key">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</span></td>
+          <td><span class="env-val">pk_test_ZW5kbGVzcy1zYXdmbHktMzMuY2xlcmsuYWNjb3VudHMuZGV2JA</span></td>
+        </tr>
+        <tr>
+          <td><span class="env-key">CLERK_SECRET_KEY</span></td>
+          <td><span class="env-val">sk_test_wtGfcEg5Pktn1iCzGC5us1iWBaECurX64OMnxFkBTc</span></td>
+        </tr>
+        <tr>
+          <td><span class="env-key">RESEND_API_KEY</span></td>
+          <td><span class="env-val">re_xhqKGt1U_AB4iwxoAncmRdYekR5VgdapC</span></td>
+        </tr>
+        <tr>
+          <td><span class="env-key">CRON_SECRET</span></td>
+          <td><span class="env-val">8e65f8ed3beedd049e58ceeb4423734322da9ada6f1769e6e9ebe3bef9e17eb5</span></td>
+        </tr>
+        <tr>
+          <td><span class="env-key">NEXT_PUBLIC_APP_URL</span></td>
+          <td><span class="env-val">https://immigrei.vercel.app</span></td>
+        </tr>
+      </table>
+      <div class="alert alert-warn">
+        <span>⚠️</span>
+        <span>Não compartilhe essas chaves em nenhum outro lugar. O <code>.env.local</code> local nunca vai para o GitHub.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BLOCO 2: GITHUB ══ -->
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <span class="section-label-text">⑂ GitHub</span>
+    <div class="section-label-line"></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step collapsed" id="step-4">
+    <div class="step-header" onclick="expandStep('step-4')">
+      <div class="step-number">4</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Aceitar convite de colaborador no GitHub</div>
+        <div class="step-subtitle">Para conseguir fazer push no repositório immigrei/immigrei</div>
+        <div class="step-tags">
+          <span class="tag tag-urgent">🔴 Urgente</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-4')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction">
+        O Felipe vai te mandar um convite. Acesse <a href="https://github.com/notifications" target="_blank">github.com/notifications</a> ou o email do GitHub e aceite o convite para o repositório <code>immigrei/immigrei</code>.
+      </p>
+      <div class="alert alert-info">
+        <span>ℹ️</span>
+        <span>Seu GitHub: <code>cesarAIworld</code>. O Felipe vai usar esse username para enviar o convite.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step collapsed" id="step-5">
+    <div class="step-header" onclick="expandStep('step-5')">
+      <div class="step-number">5</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Clonar o repositório na sua máquina</div>
+        <div class="step-subtitle">Configurar o projeto localmente para desenvolvimento</div>
+        <div class="step-tags">
+          <span class="tag tag-medium">🟡 Importante</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-5')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction"><strong>1.</strong> Clone o repositório:</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre>git clone https://github.com/immigrei/immigrei.git
+cd immigrei
+npm install</pre>
+      </div>
+
+      <p class="instruction"><strong>2.</strong> Crie o arquivo <code>.env.local</code> na raiz do projeto com o conteúdo abaixo:</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><span class="comment"># Supabase</span>
+<span class="key">NEXT_PUBLIC_SUPABASE_URL</span>=<span class="val">https://vbihlcokhuzyuinzxtvq.supabase.co</span>
+<span class="key">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>=<span class="val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiaWhsY29raHV6eXVpbnp4dHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MzE5MTIsImV4cCI6MjA5NjEwNzkxMn0.KfKzmumoRSuoGmEBwKBNAe_hDcUQLcMatZgVRcREOH0</span>
+<span class="key">SUPABASE_SERVICE_ROLE_KEY</span>=<span class="val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiaWhsY29raHV6eXVpbnp4dHZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDUzMTkxMiwiZXhwIjoyMDk2MTA3OTEyfQ.WMBsBGrK6VVImrs4675SQSV2_qGp-_S-eyoGmcR-AJ0</span>
+
+<span class="comment"># Clerk</span>
+<span class="key">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</span>=<span class="val">pk_test_ZW5kbGVzcy1zYXdmbHktMzMuY2xlcmsuYWNjb3VudHMuZGV2JA</span>
+<span class="key">CLERK_SECRET_KEY</span>=<span class="val">sk_test_wtGfcEg5Pktn1iCzGC5us1iWBaECurX64OMnxFkBTc</span>
+
+<span class="comment"># Resend (email)</span>
+<span class="key">RESEND_API_KEY</span>=<span class="val">re_xhqKGt1U_AB4iwxoAncmRdYekR5VgdapC</span>
+
+<span class="comment"># Cron</span>
+<span class="key">CRON_SECRET</span>=<span class="val">8e65f8ed3beedd049e58ceeb4423734322da9ada6f1769e6e9ebe3bef9e17eb5</span>
+
+<span class="comment"># App</span>
+<span class="key">NEXT_PUBLIC_APP_URL</span>=<span class="val">http://localhost:3000</span></pre>
+      </div>
+
+      <div class="alert alert-warn">
+        <span>⚠️</span>
+        <span>O arquivo <code>.env.local</code> está no <code>.gitignore</code> — ele nunca vai para o GitHub. É só para rodar localmente.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step collapsed" id="step-6">
+    <div class="step-header" onclick="expandStep('step-6')">
+      <div class="step-number">6</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Rodar o app localmente</div>
+        <div class="step-subtitle">Confirmar que tudo sobe sem erro na sua máquina</div>
+        <div class="step-tags">
+          <span class="tag tag-medium">🟡 Importante</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-6')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction"><strong>1.</strong> Inicie o servidor de desenvolvimento:</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre>npm run dev</pre>
+      </div>
+
+      <p class="instruction"><strong>2.</strong> Abra no browser: <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+
+      <p class="instruction"><strong>3.</strong> Teste as páginas principais:</p>
+      <table class="env-table">
+        <tr><td><code>localhost:3000</code></td><td class="env-desc">Landing page</td></tr>
+        <tr><td><code>localhost:3000/sign-up</code></td><td class="env-desc">Criar conta (Clerk)</td></tr>
+        <tr><td><code>localhost:3000/onboarding</code></td><td class="env-desc">Fluxo de perguntas completo</td></tr>
+        <tr><td><code>localhost:3000/vistos</code></td><td class="env-desc">Seleção de vistos</td></tr>
+      </table>
+
+      <div class="alert alert-info">
+        <span>ℹ️</span>
+        <span>Se aparecer erro de <code>CLERK</code>, confirme que o <code>.env.local</code> foi salvo corretamente na raiz do projeto (na mesma pasta do <code>package.json</code>).</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BLOCO 3: TESTES ══ -->
+  <div class="section-label">
+    <div class="section-label-line"></div>
+    <span class="section-label-text">✓ Testes</span>
+    <div class="section-label-line"></div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step collapsed" id="step-7">
+    <div class="step-header" onclick="expandStep('step-7')">
+      <div class="step-number">7</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Testar o onboarding — 3 perfis diferentes</div>
+        <div class="step-subtitle">Validar que os resultados fazem sentido para cada perfil</div>
+        <div class="step-tags">
+          <span class="tag tag-medium">🟡 Importante</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-7')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction">Acesse <code>localhost:3000/onboarding</code> e teste os 3 cenários:</p>
+
+      <div class="alert alert-info">
+        <span>🧪</span>
+        <div>
+          <strong>Perfil 1 — Brasileiro fora dos EUA querendo estudar</strong><br>
+          Fora dos EUA → Brasileira → Estudar → Graduação → deve sugerir <strong>F-1</strong>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <span>🧪</span>
+        <div>
+          <strong>Perfil 2 — Europeu querendo investir</strong><br>
+          Fora dos EUA → Europeu → Negócios → Investir e operar → deve sugerir <strong>E-2</strong>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <span>🧪</span>
+        <div>
+          <strong>Perfil 3 — Brasileiro nos EUA com visto H-1B</strong><br>
+          Nos EUA → Brasileira → Visto válido → H-1B → Green Card → Por mérito → deve sugerir <strong>EB-1 / EB-2 NIW</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="step collapsed" id="step-8">
+    <div class="step-header" onclick="expandStep('step-8')">
+      <div class="step-number">8</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Criar conta e testar login no Vercel</div>
+        <div class="step-subtitle">Confirmar que o Clerk funciona em produção na sua localização</div>
+        <div class="step-tags">
+          <span class="tag tag-medium">🟡 Importante</span>
+        </div>
+      </div>
+      <div class="step-check" onclick="toggleStep(event, 'step-8')"></div>
+    </div>
+    <div class="step-body">
+      <p class="instruction">
+        Após o Felipe fazer o push e o Vercel fazer o deploy, acesse:
+        <a href="https://immigrei.vercel.app/sign-up" target="_blank">immigrei.vercel.app/sign-up</a>
+      </p>
+      <p class="instruction">
+        Crie sua conta com Google ou email. Depois acesse o onboarding e os vistos em produção e confirme que está tudo funcionando da Austrália.
+      </p>
+      <div class="alert alert-info">
+        <span>ℹ️</span>
+        <span>Qualquer bug que encontrar — anota o que fez, qual página e qual erro apareceu. Manda para o Felipe com print.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done banner -->
+  <div class="done-banner" id="done-banner">
+    <h2>Setup completo! 🎉</h2>
+    <p>O projeto está configurado na sua máquina e você tem acesso a tudo. Agora é só codar junto com o Felipe.</p>
+  </div>
+
+</div>
+
+<script>
+  function expandStep(id) {
+    const step = document.getElementById(id);
+    step.classList.toggle('collapsed');
+  }
+
+  function toggleStep(e, id) {
+    e.stopPropagation();
+    const step  = document.getElementById(id);
+    const check = step.querySelector('.step-check');
+    step.classList.toggle('done');
+    check.textContent = step.classList.contains('done') ? '✓' : '';
+    if (step.classList.contains('done')) step.classList.add('collapsed');
+    updateProgress();
+    save();
+  }
+
+  function updateProgress() {
+    const total = document.querySelectorAll('.step').length;
+    const done  = document.querySelectorAll('.step.done').length;
+    const pct   = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('pfill').style.width  = pct + '%';
+    document.getElementById('pnum').textContent   = done + ' / ' + total;
+    document.getElementById('done-banner').classList.toggle('visible', done === total);
+  }
+
+  function save() {
+    const states = [...document.querySelectorAll('.step')].map(s => s.classList.contains('done'));
+    localStorage.setItem('immigrei-cesar-setup', JSON.stringify(states));
+  }
+
+  function load() {
+    try {
+      const states = JSON.parse(localStorage.getItem('immigrei-cesar-setup') || '[]');
+      const steps  = document.querySelectorAll('.step');
+      states.forEach((done, i) => {
+        if (done && steps[i]) {
+          steps[i].classList.add('done', 'collapsed');
+          steps[i].querySelector('.step-check').textContent = '✓';
+        }
+      });
+    } catch(e) {}
+    updateProgress();
+  }
+
+  function copyCode(btn) {
+    const pre  = btn.parentElement.querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => btn.textContent = 'Copiar', 2000);
+    });
+  }
+
+  load();
+</script>
+</body>
+</html>
