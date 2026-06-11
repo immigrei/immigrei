@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const supabase = createServiceClient();
+  const supabase = supabaseAdmin;
 
   const { error } = await supabase.from("profiles").upsert(
     {
@@ -42,7 +42,7 @@ export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const supabase = createServiceClient();
+  const supabase = supabaseAdmin;
   const { data, error } = await supabase
     .from("profiles")
     .select("*")

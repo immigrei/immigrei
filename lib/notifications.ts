@@ -5,8 +5,8 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM   = "Immigrei <noreply@immigrei.com>";
+const FROM = "Immigrei <noreply@immigrei.com>";
+function getResend() { return new Resend(process.env.RESEND_API_KEY); }
 
 // ── Case status changed ────────────────────────────────────────────────────
 
@@ -113,7 +113,7 @@ export async function sendCaseStatusUpdate({
 </body>
 </html>`;
 
-  await resend.emails.send({ from: FROM, to, subject, html });
+  await getResend().emails.send({ from: FROM, to, subject, html });
 }
 
 // ── Visa Bulletin updated ──────────────────────────────────────────────────
@@ -172,5 +172,5 @@ export async function sendBulletinUpdate({
 </body>
 </html>`;
 
-  await resend.emails.send({ from: FROM, to, subject, html });
+  await getResend().emails.send({ from: FROM, to, subject, html });
 }

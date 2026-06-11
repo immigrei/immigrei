@@ -1,7 +1,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { createServiceClient } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
   const user = await currentUser();
   const firstName = user?.firstName ?? "você";
 
-  const supabase = createServiceClient();
+  const supabase = supabaseAdmin;
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
         >
           Immigrei
         </span>
-        <UserButton afterSignOutUrl="/" />
+        <UserButton />
       </header>
 
       <div className="max-w-2xl mx-auto px-6 py-10">
