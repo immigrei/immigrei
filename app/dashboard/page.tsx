@@ -3,6 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import CaseTracker from "./CaseTracker";
+import ConsuladosWidget from "./ConsuladosWidget";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
@@ -107,6 +108,9 @@ export default async function DashboardPage() {
 
         {/* Case tracker */}
         <CaseTracker />
+
+        {/* Consulados widget */}
+        <ConsuladosWidget />
 
         {/* Next steps */}
         <NextSteps visaType={profile.visa_type} mainGoal={profile.main_goal} />

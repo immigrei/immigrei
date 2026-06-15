@@ -45,6 +45,33 @@ create table if not exists case_history (
   recorded_at    timestamptz default now()
 );
 
+-- ─── consulate_events ───────────────────────────────────────────────────────
+create table if not exists consulate_events (
+  id           uuid primary key default gen_random_uuid(),
+  consulado    text not null check (consulado in ('miami','nyc')),
+  titulo       text not null,
+  descricao    text,
+  data_inicio  date,
+  data_fim     date,
+  cidade       text,
+  estado       text,
+  servicos     text[] default '{}',
+  url_fonte    text,
+  tipo         text default 'outro' check (tipo in ('itinerante','aviso','horario','outro')),
+  scraped_at   timestamptz default now(),
+  created_at   timestamptz default now()
+);
+
+-- ─── consulate_subscriptions ─────────────────────────────────────────────────
+create table if not exists consulate_subscriptions (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     text not null unique references profiles(clerk_user_id) on delete cascade,
+  consulados  text[] default '{}',
+  active      boolean default true,
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now()
+);
+
 -- ─── RLS policies ───────────────────────────────────────────────────────────
 alter table profiles   enable row level security;
 alter table user_cases enable row level security;
