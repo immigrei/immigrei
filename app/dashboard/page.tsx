@@ -2,6 +2,7 @@ import { UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
+import CaseTracker from "./CaseTracker";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
@@ -104,15 +105,11 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Next steps placeholder */}
-        <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">
-            Próximos passos
-          </p>
-          <p className="text-ink text-sm leading-relaxed">
-            Estamos montando o mapa completo da sua jornada com base nas suas respostas. Em breve você verá seus próximos passos aqui.
-          </p>
-        </div>
+        {/* Case tracker */}
+        <CaseTracker />
+
+        {/* Next steps */}
+        <NextSteps visaType={profile.visa_type} mainGoal={profile.main_goal} />
 
         {/* Edit profile link */}
         <p className="text-center text-xs text-ink-faint">
@@ -133,6 +130,100 @@ function InfoRow({ label, value }: { label: string; value: string }) {
         {label}
       </span>
       <span className="text-ink text-base font-medium">{value}</span>
+    </div>
+  );
+}
+
+const NEXT_STEPS: Record<string, { goal: string; steps: string[] }[]> = {
+  f1: [
+    {
+      goal: "renovar_visto",
+      steps: [
+        "Verifique a data de expiração do seu I-20 com o DSO da sua escola",
+        "Solicite a extensão do I-20 com pelo menos 30 dias de antecedência",
+        "Renove o visto F-1 no consulado antes de viajar ao exterior",
+      ],
+    },
+    {
+      goal: "green_card",
+      steps: [
+        "Explore o Green Card por emprego (EB-2 NIW se tiver mestrado/doutorado)",
+        "Converse com um advogado sobre patrocínio pelo empregador (EB-2 ou EB-3)",
+        "Verifique as datas de corte no Boletim de Vistos para sua categoria",
+      ],
+    },
+  ],
+  h1b: [
+    {
+      goal: "renovar_visto",
+      steps: [
+        "Peça ao seu empregador para iniciar o processo de extensão do H-1B com 6 meses de antecedência",
+        "O I-797 de extensão aprovado permite continuar trabalhando legalmente",
+        "Se precisar viajar, renove o visto H-1B no consulado antes de sair dos EUA",
+      ],
+    },
+    {
+      goal: "green_card",
+      steps: [
+        "Converse com seu empregador sobre patrocínio para Green Card (EB-2 ou EB-3)",
+        "O processo começa com o PERM Labor Certification — pode levar 1 a 2 anos",
+        "Monitore o Boletim de Vistos mensalmente para saber quando seu número estará disponível",
+      ],
+    },
+  ],
+  green_card: [
+    {
+      goal: "cidadania",
+      steps: [
+        "Após 5 anos como residente permanente (3 anos se casado com cidadão americano), você pode pedir cidadania",
+        "Preencha o formulário N-400 e pague a taxa no site do USCIS",
+        "Prepare-se para a entrevista de naturalização — inglês básico e história dos EUA",
+      ],
+    },
+    {
+      goal: "renovar_visto",
+      steps: [
+        "Renove o Green Card 6 meses antes do vencimento com o formulário I-90",
+        "O Green Card de condicional (2 anos) deve ser convertido com o I-751 antes de expirar",
+      ],
+    },
+  ],
+};
+
+function NextSteps({ visaType, mainGoal }: { visaType: string; mainGoal: string }) {
+  const visaSteps = NEXT_STEPS[visaType] ?? [];
+  const match = visaSteps.find((s) => s.goal === mainGoal) ?? visaSteps[0];
+
+  if (!match) {
+    return (
+      <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
+        <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">
+          Próximos passos
+        </p>
+        <p className="text-ink text-sm leading-relaxed">
+          Estamos mapeando os próximos passos para o seu perfil. Em breve aparecerão aqui.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-amber-tint rounded-2xl border border-amber overflow-hidden mb-5">
+      <div className="px-6 py-4 border-b border-amber/30">
+        <p className="text-xs font-bold uppercase tracking-widest text-amber-deep">
+          Próximos passos
+        </p>
+      </div>
+      <ul className="divide-y divide-amber/20">
+        {match.steps.map((step, i) => (
+          <li key={i} className="px-6 py-3 flex gap-3 items-start">
+            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber text-cream-2 text-xs font-bold flex items-center justify-center mt-0.5">
+              {i + 1}
+            </span>
+            <p className="text-ink text-sm leading-relaxed">{step}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

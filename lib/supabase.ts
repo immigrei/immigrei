@@ -11,3 +11,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnon);
 export const supabaseAdmin = createClient(supabaseUrl, supabaseService, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
+
+// Alias used across API routes
+export const createServiceClient = () => supabaseAdmin;
