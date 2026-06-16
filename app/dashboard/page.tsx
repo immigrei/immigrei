@@ -1,9 +1,9 @@
-import { UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import CaseTracker from "./CaseTracker";
 import ConsuladosWidget from "./ConsuladosWidget";
+import AppShell from "@/app/components/AppShell";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
@@ -61,17 +61,7 @@ export default async function DashboardPage() {
   if (!profile?.onboarding_completed) redirect("/onboarding");
 
   return (
-    <main className="min-h-screen bg-cream">
-      <header className="flex items-center justify-between px-6 py-4 bg-cream-2 border-b border-pine-tint">
-        <span
-          className="text-2xl font-semibold text-pine"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Immigrei
-        </span>
-        <UserButton />
-      </header>
-
+    <AppShell>
       <div className="max-w-2xl mx-auto px-6 py-10">
         <h1
           className="text-3xl font-semibold text-ink mb-1"
@@ -123,7 +113,7 @@ export default async function DashboardPage() {
           </a>
         </p>
       </div>
-    </main>
+    </AppShell>
   );
 }
 
