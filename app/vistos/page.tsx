@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Availability = "all" | "treaty-only";
 
@@ -398,6 +399,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
 
 export default function VistosPage() {
   const [selecionado, setSelecionado] = useState<string | null>(null);
+  const router = useRouter();
 
   // Will come from user's onboarding profile.
   // "brazilian" | "treaty" | null
@@ -484,8 +486,11 @@ export default function VistosPage() {
       {selecionado && (
         <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 bg-gradient-to-t from-cream via-cream/95 to-transparent pointer-events-none">
           <div className="max-w-md mx-auto pointer-events-auto">
-            <button className="w-full bg-pine text-cream rounded-2xl py-4 font-semibold text-base shadow-xl shadow-pine/30 transition-all hover:bg-pine-deep active:scale-[0.98]">
-              Confirmar {vistoSelecionado?.codigo} — {vistoSelecionado?.nome} →
+            <button
+              onClick={() => router.push(`/documentos/${selecionado}`)}
+              className="w-full bg-pine text-cream rounded-2xl py-4 font-semibold text-base shadow-xl shadow-pine/30 transition-all hover:bg-pine-deep active:scale-[0.98]"
+            >
+              Seguir este caminho — {vistoSelecionado?.codigo} →
             </button>
           </div>
         </div>
