@@ -5,7 +5,9 @@
 
 import { Resend } from "resend";
 
-const FROM = "Immigrei <noreply@immigrei.com>";
+// Resend sandbox sender until immigrei.com is verified — set EMAIL_FROM
+// in Vercel to "Immigrei <noreply@immigrei.com>" after domain verification.
+const FROM = process.env.EMAIL_FROM ?? "Immigrei <onboarding@resend.dev>";
 function getResend() { return new Resend(process.env.RESEND_API_KEY); }
 
 // ── Case status changed ────────────────────────────────────────────────────

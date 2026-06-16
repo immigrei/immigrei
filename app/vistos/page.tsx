@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Availability = "all" | "treaty-only";
 
@@ -397,15 +398,53 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 export default function VistosPage() {
+  const router = useRouter();
   const [selecionado, setSelecionado] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Will come from user's onboarding profile.
-  // "brazilian" | "treaty" | null
-  const nationality: Nationality = null;
+  // Nationality and goal arrive from the onboarding via query params
+  // (read after mount — this page is statically prerendered).
+  const [nationality, setNationality] = useState<Nationality>(null);
+  const [mainGoal, setMainGoal] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nat = params.get("nationality");
+    if (nat === "brazilian" || nat === "other") setNationality("brazilian");
+    else if (nat === "treaty") setNationality("treaty");
+    setMainGoal(params.get("goal"));
+  }, []);
 
   const vistoSelecionado = [...vistosEstudo, ...vistosNegocios].find(
     (v) => v.id === selecionado
   );
+
+  async function confirmarVisto() {
+    if (!vistoSelecionado || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          visa_type: vistoSelecionado.id,
+          main_goal: mainGoal ?? "outro",
+        }),
+      });
+      if (res.status === 401) {
+        // Not signed in yet — create the account first, then back to the journey
+        router.push("/sign-up");
+        return;
+      }
+      if (!res.ok) throw new Error("save_failed");
+      router.push("/dashboard");
+    } catch {
+      setSaveError("Não conseguimos salvar agora. Tente novamente.");
+      setSaving(false);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-cream px-4 py-12 md:py-16 pb-28">
@@ -484,8 +523,19 @@ export default function VistosPage() {
       {selecionado && (
         <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 bg-gradient-to-t from-cream via-cream/95 to-transparent pointer-events-none">
           <div className="max-w-md mx-auto pointer-events-auto">
-            <button className="w-full bg-pine text-cream rounded-2xl py-4 font-semibold text-base shadow-xl shadow-pine/30 transition-all hover:bg-pine-deep active:scale-[0.98]">
-              Confirmar {vistoSelecionado?.codigo} — {vistoSelecionado?.nome} →
+            {saveError && (
+              <p className="text-center text-sm text-clay mb-2 bg-cream rounded-xl py-1.5">
+                {saveError}
+              </p>
+            )}
+            <button
+              onClick={confirmarVisto}
+              disabled={saving}
+              className="w-full bg-pine text-cream rounded-2xl py-4 font-semibold text-base shadow-xl shadow-pine/30 transition-all hover:bg-pine-deep active:scale-[0.98] disabled:opacity-60"
+            >
+              {saving
+                ? "Salvando sua jornada..."
+                : `Confirmar ${vistoSelecionado?.codigo} — ${vistoSelecionado?.nome} →`}
             </button>
           </div>
         </div>

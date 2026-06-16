@@ -2,13 +2,23 @@ import { UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getJourney } from "@/lib/visa-journeys";
+import JourneyTimeline from "./JourneyTimeline";
+import CaseStatusCard, { UserCase } from "./CaseStatusCard";
+import VisaBulletinWidget from "./VisaBulletinWidget";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
+  m1: "M-1 — Estudante técnico",
+  j1: "J-1 — Intercâmbio",
   h1b: "H-1B — Trabalho especializado",
   o1: "O-1 — Talento extraordinário",
   l1: "L-1 — Transferência intraempresarial",
+  b1: "B-1 — Visitante de negócios",
   b1b2: "B-1/B-2 — Turismo ou negócios",
+  e1: "E-1 — Comércio por tratado",
+  e2: "E-2 — Investidor por tratado",
+  eb2niw: "EB-2 NIW — Green Card por mérito",
   green_card: "Green Card",
   asylee: "Asilo ou refugiado",
   outro: "Outro",
@@ -58,6 +68,22 @@ export default async function DashboardPage() {
 
   if (!profile?.onboarding_completed) redirect("/onboarding");
 
+  const journey = getJourney(profile.visa_type);
+
+  const { data: userCases } = await supabase
+    .from("user_cases")
+    .select("id, receipt_number, label, visa_type, last_status, last_status_date, last_checked_at")
+    .eq("user_id", userId)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+
+  const { data: bulletin } = await supabase
+    .from("visa_bulletin")
+    .select("bulletin_month, bulletin_url, family_dates, employment_dates")
+    .order("bulletin_month", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   return (
     <main className="min-h-screen bg-cream">
       <header className="flex items-center justify-between px-6 py-4 bg-cream-2 border-b border-pine-tint">
@@ -90,35 +116,50 @@ export default async function DashboardPage() {
           </div>
           <div className="divide-y divide-pine-tint">
             <InfoRow
-              label="Tipo de visto"
+              label="Caminho escolhido"
               value={VISA_LABELS[profile.visa_type] ?? profile.visa_type}
             />
-            <InfoRow
-              label="Chegada nos EUA"
-              value={`${formatDate(profile.arrival_date)} — há ${yearsInUS(profile.arrival_date)}`}
-            />
-            <InfoRow
-              label="Objetivo principal"
-              value={GOAL_LABELS[profile.main_goal] ?? profile.main_goal}
-            />
+            {profile.arrival_date && (
+              <InfoRow
+                label="Chegada nos EUA"
+                value={`${formatDate(profile.arrival_date)} — há ${yearsInUS(profile.arrival_date)}`}
+              />
+            )}
+            {profile.main_goal && (
+              <InfoRow
+                label="Objetivo principal"
+                value={GOAL_LABELS[profile.main_goal] ?? profile.main_goal}
+              />
+            )}
           </div>
         </div>
 
-        {/* Next steps placeholder */}
-        <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">
-            Próximos passos
-          </p>
-          <p className="text-ink text-sm leading-relaxed">
-            Estamos montando o mapa completo da sua jornada com base nas suas respostas. Em breve você verá seus próximos passos aqui.
-          </p>
-        </div>
+        {/* USCIS case tracking */}
+        <CaseStatusCard initialCases={(userCases ?? []) as UserCase[]} />
+
+        {/* Journey timeline */}
+        {journey ? (
+          <JourneyTimeline journey={journey} />
+        ) : (
+          <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">
+              Próximos passos
+            </p>
+            <p className="text-ink text-sm leading-relaxed">
+              Estamos montando o mapa completo da sua jornada com base nas suas respostas. Em breve você verá seus próximos passos aqui.
+            </p>
+          </div>
+        )}
+
+        {/* Visa Bulletin */}
+        <VisaBulletinWidget bulletin={bulletin} mainGoal={profile.main_goal} />
+
 
         {/* Edit profile link */}
         <p className="text-center text-xs text-ink-faint">
           Informações erradas?{" "}
-          <a href="/onboarding/edit" className="text-pine underline underline-offset-2">
-            Editar perfil
+          <a href="/onboarding" className="text-pine underline underline-offset-2">
+            Refazer onboarding
           </a>
         </p>
       </div>

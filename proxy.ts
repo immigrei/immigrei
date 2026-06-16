@@ -6,6 +6,10 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/vistos(.*)",
   "/onboarding(.*)",
+  // API routes authenticate themselves (CRON_SECRET or Clerk auth() in the
+  // handler). auth.protect() returns an HTML 404 for unauthenticated API
+  // calls, which blocks Vercel Cron and breaks JSON error responses.
+  "/api(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

@@ -735,6 +735,25 @@ function getRecommendations(answers: Answers): VisaResult[] {
     .sort((a, b) => order[a.priority] - order[b.priority]);
 }
 
+// ─── Derive profile fields from answers ───────────────────────────────────────
+
+// Maps the question-tree answers to the profiles.main_goal values used by
+// the dashboard (GOAL_LABELS).
+function deriveMainGoal(a: Answers): string {
+  if (a.q_change_goal === "extend") return "renovar_visto";
+  if (a.q_change_goal === "green_card" || a.q_gc_path) return "green_card";
+  if (a.q_change_goal === "family" || a.q_goal === "family") return "trazer_familia";
+  if (a.q_change_goal === "change_status" || a.q_change_goal === "work_change") return "regularizar_status";
+  if (a.q_gc_goal === "naturalization" || a.q_citizen_goal) return "cidadania";
+  if (a.q_gc_goal === "renew") return "renovar_visto";
+  if (a.q_gc_goal === "family" || a.q_family_ties && a.q_family_ties !== "none") return "trazer_familia";
+  if (a.q_current_status === "overstay") return "regularizar_status";
+  if (a.q_goal === "live" || a.q_permanent_path) return "green_card";
+  if (a.q_goal === "study" || a.q_goal === "work" || a.q_goal === "business") return "regularizar_status";
+  if (a.q_goal === "visit") return "outro";
+  return "outro";
+}
+
 // ─── Build question sequence (for progress bar) ──────────────────────────────
 
 function buildSequence(answers: Answers): string[] {
@@ -992,7 +1011,12 @@ export default function OnboardingPage() {
 
           {/* CTA */}
           <button
-            onClick={() => router.push("/vistos")}
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (answers.q_nationality) params.set("nationality", answers.q_nationality);
+              params.set("goal", deriveMainGoal(answers));
+              router.push(`/vistos?${params.toString()}`);
+            }}
             className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
             style={{ fontFamily: "var(--font-body)" }}
           >
