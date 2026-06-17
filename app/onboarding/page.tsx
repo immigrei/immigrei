@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -777,10 +778,42 @@ function buildSequence(answers: Answers): string[] {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { isLoaded, isSignedIn } = useUser();
   const [phase, setPhase] = useState<"welcome" | "questions" | "results">("welcome");
   const [answers, setAnswers] = useState<Answers>({});
   const [history, setHistory] = useState<string[]>(["q_location"]);
   const [animating, setAnimating] = useState(false);
+  const [resuming, setResuming] = useState(false);
+
+  // After the sign-up round-trip, finish the save the user started on /vistos
+  // while logged out. The selection was stashed in localStorage; now that the
+  // user is authenticated we can persist it and go straight to the dashboard,
+  // without making them redo the questionnaire.
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    const pending = localStorage.getItem("immigrei_pending_profile");
+    if (!pending) return;
+
+    setResuming(true);
+    (async () => {
+      try {
+        const res = await fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: pending,
+        });
+        if (res.ok) {
+          localStorage.removeItem("immigrei_pending_profile");
+          router.replace("/dashboard");
+          return;
+        }
+      } catch {
+        // fall through to the questionnaire on failure
+      }
+      localStorage.removeItem("immigrei_pending_profile");
+      setResuming(false);
+    })();
+  }, [isLoaded, isSignedIn, router]);
 
   const currentQuestionId = history[history.length - 1];
   const currentQuestion   = questionMap[currentQuestionId];
@@ -840,6 +873,18 @@ export default function OnboardingPage() {
     medium: "bg-pine-tint text-pine border border-pine-tint",
     low:    "bg-cream-2 text-ink-faint border border-pine-tint",
   };
+
+  // ── Resuming save after sign-up ───────────────────────────────────────────
+  if (resuming) {
+    return (
+      <main className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
+        <div className="w-12 h-12 rounded-full border-2 border-pine-tint border-t-pine animate-spin mb-6" />
+        <p className="text-ink-soft" style={{ fontFamily: "var(--font-body)" }}>
+          Finalizando seu cadastro…
+        </p>
+      </main>
+    );
+  }
 
   // ── Welcome ───────────────────────────────────────────────────────────────
   if (phase === "welcome") {

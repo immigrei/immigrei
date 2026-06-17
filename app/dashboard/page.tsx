@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
+import { ensureProfile } from "@/lib/profile";
 import { getJourney } from "@/lib/visa-journeys";
 import JourneyTimeline from "./JourneyTimeline";
 import CaseStatusCard, { UserCase } from "./CaseStatusCard";
@@ -57,6 +58,10 @@ function yearsInUS(dateStr: string): string {
 export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
+
+  // Guarantee the user exists in Supabase even if the Clerk webhook never
+  // fired (e.g. local dev). Idempotent — won't clobber onboarding fields.
+  await ensureProfile(userId);
 
   const user = await currentUser();
   const firstName = user?.firstName ?? "você";

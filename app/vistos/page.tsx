@@ -434,7 +434,13 @@ export default function VistosPage() {
         }),
       });
       if (res.status === 401) {
-        // Not signed in yet — create the account first, then back to the journey
+        // Not signed in yet — stash the selection so it survives the sign-up
+        // round-trip, then create the account. The onboarding page picks this
+        // up after sign-up and finishes the save automatically.
+        localStorage.setItem(
+          "immigrei_pending_profile",
+          JSON.stringify({ visa_type: vistoSelecionado.id, main_goal: mainGoal ?? "outro" })
+        );
         router.push("/sign-up");
         return;
       }

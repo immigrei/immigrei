@@ -39,7 +39,7 @@ export default async function HomePage() {
           com quem pode contar.
         </p>
         <Link
-          href="/sign-up"
+          href="/onboarding"
           className="bg-amber hover:bg-amber-deep text-white font-semibold text-base px-8 py-4 rounded-xl transition-colors"
         >
           Começar agora — é gratuito
