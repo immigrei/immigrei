@@ -42,4 +42,5 @@ next-env.d.ts
 
 # Claude Code local config
 .claude/
+memory/
 next-48h.html
