@@ -1,5 +1,13 @@
 export type Agencia = "USCIS" | "NVC" | "DOS" | "DOL" | "EOIR";
 
+export type KitCaminho = "consulado" | "cos" | "manutencao";
+
+export interface KitMeta {
+  caminho: KitCaminho;
+  preco: string;
+  alertaCritico?: string;
+}
+
 export interface Documento {
   id: string;
   nome: string;
@@ -20,6 +28,7 @@ export interface ChecklistVisto {
   codigo: string;
   nome: string;
   intro: string;
+  kit?: KitMeta;
   grupos: GrupoDocumentos[];
 }
 
@@ -750,6 +759,310 @@ const checklists: Record<string, ChecklistVisto> = {
               "Enviados ao NVC para análise antes de agendar entrevista consular. Tradução juramentada obrigatória.",
             agencia: "NVC",
             obrigatorio: false,
+          },
+        ],
+      },
+    ],
+  },
+
+  "f1-cos": {
+    vistoId: "f1-cos",
+    codigo: "F-1",
+    nome: "Mudança para F-1 (dentro dos EUA)",
+    intro: "Você está nos EUA com outro visto e quer mudar para o F-1 sem sair do país. O processo é feito pelo formulário I-539 direto com o USCIS — sem entrevista consular, mas exige status válido no dia do protocolo.",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 247",
+      alertaCritico: "Seu status atual precisa estar válido no dia do protocolo. Visto expirado ou status violado bloqueia o I-539.",
+    },
+    grupos: [
+      {
+        titulo: "Antes de começar — verificações críticas",
+        descricao: "Erros aqui resultam em negação automática",
+        documentos: [
+          {
+            id: "status-valido",
+            nome: "Confirmar que você ainda está em status válido",
+            descricao: "O I-539 exige que você mantenha status no dia do protocolo. Se seu visto ou status de admissão já venceu, o caminho está fechado. Verifique o I-94 em i94.cbp.dhs.gov.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "escola-proximidade",
+            nome: "Confirmar que a escola fica próxima à sua residência",
+            descricao: "Escola presencial longe da sua casa é motivo de negação — a USCIS considera o programa implausível. Verifique a distância antes de escolher a instituição.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "escola-sevp",
+            nome: "Confirmar que a escola é SEVP-certificada",
+            descricao: "Verifique em studyinthestates.dhs.gov. Escola não certificada não pode emitir o I-20 necessário para o I-539.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Formulário I-539 e documentos da escola",
+        descricao: "Core do processo — preenchidos e enviados por correio ao USCIS",
+        documentos: [
+          {
+            id: "i539",
+            nome: "Formulário I-539 — Application to Extend/Change Nonimmigrant Status",
+            descricao: "Taxa atual: US$370. Enviado por correio (Vermont ou California Service Center conforme seu estado). Não há entrevista — o USCIS analisa o processo internamente.",
+            agencia: "USCIS",
+            formulario: "I-539",
+            obrigatorio: true,
+          },
+          {
+            id: "i20-cos",
+            nome: "I-20 assinado pela escola e pelo aluno",
+            descricao: "Emitido pela escola SEVP. Conferir SEVIS ID, datas do programa e valor total de recursos exigidos.",
+            agencia: "USCIS",
+            formulario: "I-20",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Documentação financeira pessoal — ponto crítico",
+        descricao: "A USCIS exige prova de acesso pessoal aos fundos — não da empresa ou de terceiros",
+        documentos: [
+          {
+            id: "extrato-pessoal",
+            nome: "Extrato bancário pessoal — últimos 6 meses, PDF oficial",
+            descricao: "Deve estar no seu nome. Extrato da empresa não é aceito. Print de tela não é aceito. Precisa mostrar saldo médio suficiente para cobrir o programa.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "carta-sponsor-cos",
+            nome: "Carta de sponsor + comprovante de renda do sponsor",
+            descricao: "Se um familiar vai bancar os estudos: carta assinada explicando o vínculo e os valores, mais extrato ou declaração de renda do sponsor. Template incluso no kit.",
+            agencia: "DOS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Provar atividades consistentes com seu status atual",
+        descricao: "A USCIS verifica se você realmente estava fazendo o que seu visto autoriza",
+        documentos: [
+          {
+            id: "atividades-b2",
+            nome: "Fotos com data e localização ativadas (se veio como B-2)",
+            descricao: "Passeios, estadias, eventos — comprova que a intenção original era turismo, não estudar desde o início.",
+            agencia: "DOS",
+            obrigatorio: false,
+          },
+          {
+            id: "historico-admissoes",
+            nome: "Histórico completo de entradas e saídas dos EUA",
+            descricao: "Extraído do I-94 em i94.cbp.dhs.gov. Declarar todas as admissões no I-539 Part 2. Omitir qualquer entrada resulta em negação imediata.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Envio e acompanhamento",
+        descricao: "Após reunir toda a documentação",
+        documentos: [
+          {
+            id: "money-order",
+            nome: "Money order ou cheque para a taxa de US$370",
+            descricao: "Pago à ordem de 'US Department of Homeland Security'. Cheque pessoal também é aceito. Cartão de crédito não.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "i797-recebimento",
+            nome: "I-797 — Aviso de recebimento (guarde este documento)",
+            descricao: "Enviado pelo USCIS após receber seu I-539. Prova que você protocolou enquanto estava em status. Prazo médio de análise: 4–8 meses.",
+            agencia: "USCIS",
+            formulario: "I-797",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "f1-renovacao": {
+    vistoId: "f1-renovacao",
+    codigo: "F-1",
+    nome: "Renovação, extensão e transferência F-1",
+    intro: "Você já tem o F-1 e precisa estender o programa, transferir de escola ou renovar o carimbo do visto para poder viajar. Cada situação tem um caminho diferente — a maioria não envolve o USCIS.",
+    kit: {
+      caminho: "manutencao",
+      preco: "R$ 147",
+    },
+    grupos: [
+      {
+        titulo: "Extensão do programa (I-20 vai vencer)",
+        descricao: "Feito direto com a escola — sem formulário do USCIS",
+        documentos: [
+          {
+            id: "extensao-i20",
+            nome: "Solicitar extensão do I-20 ao DSO antes do vencimento",
+            descricao: "O DSO (Designated School Official) atualiza seu registro no SEVIS com a nova data de término. Solicite com pelo menos 30 dias de antecedência. Não há taxa federal para essa operação.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "justificativa-extensao",
+            nome: "Justificativa acadêmica ou médica para a extensão",
+            descricao: "A extensão exige motivo comprovado: carga horária reduzida, doença, mudança de programa. O DSO documenta isso no SEVIS.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Transferência para outra escola",
+        descricao: "Transferência SEVIS — sem o USCIS, mas com prazo rígido",
+        documentos: [
+          {
+            id: "transfer-sevis",
+            nome: "Solicitar transferência SEVIS ao DSO da escola atual",
+            descricao: "O DSO libera o SEVIS para a nova escola. Você tem até 15 dias após o encerramento do programa atual para começar na nova instituição.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "i20-nova-escola",
+            nome: "I-20 emitido pela nova escola",
+            descricao: "A nova escola emite o I-20 após receber a transferência SEVIS. Sem esse documento, a matrícula não ativa o status F-1.",
+            agencia: "USCIS",
+            formulario: "I-20",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Renovação do carimbo do visto (para viajar)",
+        descricao: "Feito no consulado — exige sair dos EUA. Verifique sua situação antes de viajar.",
+        documentos: [
+          {
+            id: "verificar-unlawful-presence",
+            nome: "Verificar unlawful presence com seu DSO antes de qualquer viagem",
+            descricao: "O visto expirado não afeta seu status F-1 dentro dos EUA, mas sair do país pode disparar barreiras de reentrada de 3 ou 10 anos se houver unlawful presence acumulada. Confirme com seu DSO antes de comprar passagem.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "ds160-renovacao",
+            nome: "DS-160 — novo formulário para a entrevista consular",
+            descricao: "Preenchido no site do Departamento de Estado. Use os dados do I-20 atual e do programa em andamento.",
+            agencia: "DOS",
+            formulario: "DS-160",
+            obrigatorio: true,
+          },
+          {
+            id: "i20-valido",
+            nome: "I-20 válido e assinado pelo DSO",
+            descricao: "O I-20 para viagem deve ter a assinatura do DSO emitida nos últimos 12 meses.",
+            agencia: "USCIS",
+            formulario: "I-20",
+            obrigatorio: true,
+          },
+          {
+            id: "comprovante-matricula",
+            nome: "Comprovante de matrícula ativa e notas",
+            descricao: "Transcript e carta da escola confirmando que você está regularmente matriculado e em dia com o programa.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "m1-cos": {
+    vistoId: "m1-cos",
+    codigo: "M-1",
+    nome: "Mudança para M-1 (dentro dos EUA)",
+    intro: "Você está nos EUA com outro visto e quer mudar para o M-1 para fazer um curso técnico ou vocacional. O processo usa o mesmo formulário I-539, mas com uma restrição permanente importante: quem entra no M-1 não pode mudar para o F-1 dentro dos EUA depois.",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 247",
+      alertaCritico: "Quem entra no M-1 NÃO pode mudar para F-1 dentro dos EUA. Se houver qualquer chance de querer fazer curso acadêmico no futuro, avalie o F-1 antes de escolher o M-1.",
+    },
+    grupos: [
+      {
+        titulo: "Antes de começar — restrição permanente",
+        descricao: "Leia antes de protocolar",
+        documentos: [
+          {
+            id: "restricao-m1-f1",
+            nome: "Confirmar que o M-1 é a escolha definitiva para seu plano",
+            descricao: "A restrição M-1 → F-1 dentro dos EUA é prevista em lei e não tem exceção. Se no futuro quiser cursar faculdade, inglês certificado ou qualquer programa acadêmico, precisará sair dos EUA e aplicar o F-1 pelo consulado.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "status-valido-m1",
+            nome: "Confirmar que você está em status válido",
+            descricao: "Mesma regra do F-1 COS: o I-539 exige status válido no protocolo. Verifique seu I-94 em i94.cbp.dhs.gov.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Formulário I-539 e documentos da escola técnica",
+        descricao: "Taxa US$370 — enviado por correio ao USCIS",
+        documentos: [
+          {
+            id: "i539-m1",
+            nome: "Formulário I-539",
+            descricao: "Mesmo formulário do F-1 COS. Indique a mudança para M-1 na Part 2. Taxa: US$370 por money order.",
+            agencia: "USCIS",
+            formulario: "I-539",
+            obrigatorio: true,
+          },
+          {
+            id: "i20-m1-cos",
+            nome: "I-20 M-1 emitido pela escola técnica SEVP",
+            descricao: "A versão M-1 do I-20, emitida pela escola vocacional credenciada. Duração máxima: 1 ano (prorrogável). Confirme que a escola fica próxima à sua residência.",
+            agencia: "USCIS",
+            formulario: "I-20",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Documentação financeira",
+        descricao: "Mesmos critérios do F-1 COS — acesso pessoal comprovado",
+        documentos: [
+          {
+            id: "extrato-pessoal-m1",
+            nome: "Extrato bancário pessoal — últimos 6 meses, PDF oficial",
+            descricao: "No seu nome. Deve cobrir mensalidade + moradia + despesas de vida pelo período do curso.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "carta-sponsor-m1",
+            nome: "Carta de sponsor + comprovante de renda (se aplicável)",
+            descricao: "Se um familiar vai financiar o curso. Template incluso no kit.",
+            agencia: "DOS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Envio e acompanhamento",
+        descricao: "Prazo médio de análise: 4–8 meses",
+        documentos: [
+          {
+            id: "i797-m1",
+            nome: "I-797 — Aviso de recebimento",
+            descricao: "Enviado pelo USCIS após receber o I-539. Prova que você protocolou em status. Guarde este documento. Premium Processing disponível: I-907 (US$1.965) para análise em 15 dias úteis.",
+            agencia: "USCIS",
+            formulario: "I-797",
+            obrigatorio: true,
           },
         ],
       },

@@ -11,6 +11,7 @@ create table if not exists profiles (
   visa_type            text,
   arrival_date         date,
   main_goal            text,
+  location             text check (location in ('brasil', 'eua')),
   nationality          text,
   onboarding_completed boolean default false,
   created_at           timestamptz default now(),
