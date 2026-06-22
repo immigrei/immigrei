@@ -233,6 +233,10 @@ const checklists: Record<string, ChecklistVisto> = {
     nome: "Intercâmbio Cultural",
     intro:
       "O J-1 é patrocinado por uma organização autorizada pelo Departamento de Estado. O DS-2019 substitui o I-20 do F-1.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 147",
+    },
     grupos: [
       {
         titulo: "Formulários obrigatórios",
@@ -324,6 +328,11 @@ const checklists: Record<string, ChecklistVisto> = {
     nome: "Trabalhador Especialista",
     intro:
       "O H-1B é iniciado pelo empregador americano, não pelo trabalhador. O processo envolve o Departamento do Trabalho (DOL) e o USCIS antes da entrevista consular.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 197",
+      alertaCritico: "O H-1B exige patrocínio do empregador e está sujeito a sorteio anual (cap de 65.000 vagas + 20.000 para mestrado).",
+    },
     grupos: [
       {
         titulo: "Responsabilidade do empregador",
@@ -426,6 +435,10 @@ const checklists: Record<string, ChecklistVisto> = {
     nome: "Habilidade Extraordinária",
     intro:
       "O O-1 exige evidências robustas de reconhecimento extraordinário. O empregador ou agente americano faz a petição. Sem sorteio, sem cap.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 197",
+    },
     grupos: [
       {
         titulo: "Petição pelo empregador ou agente",
@@ -551,6 +564,10 @@ const checklists: Record<string, ChecklistVisto> = {
     nome: "Transferência Intracompanhia",
     intro:
       "O L-1 exige que a empresa exista nos dois países e que você tenha trabalhado para ela no exterior por pelo menos 1 ano nos últimos 3 anos, em cargo executivo, gerencial ou especialista.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 147",
+    },
     grupos: [
       {
         titulo: "Petição da empresa",
@@ -645,6 +662,10 @@ const checklists: Record<string, ChecklistVisto> = {
     nome: "Green Card por Interesse Nacional",
     intro:
       "O EB-2 NIW dispensa patrocínio de empregador — você mesmo submete a petição ao USCIS. O processo pode ser feito dentro dos EUA (Ajuste de Status) ou pelo consulado (Processamento Consular via NVC).",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 347",
+    },
     grupos: [
       {
         titulo: "Petição ao USCIS",
@@ -1075,6 +1096,10 @@ const checklists: Record<string, ChecklistVisto> = {
     nome: "Visitante de Negócios",
     intro:
       "O B-1 é para visitas de negócios — reuniões, contratos, treinamentos. Não autoriza trabalho remunerado. O processo é direto: DS-160 + entrevista.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 97",
+    },
     grupos: [
       {
         titulo: "Formulários obrigatórios",
@@ -1151,6 +1176,799 @@ const checklists: Record<string, ChecklistVisto> = {
             nome: "Comprovante de vínculo com o Brasil",
             descricao:
               "Contrato de trabalho, escritura de imóvel, família — qualquer documento que comprove que você tem razões para voltar.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+  "h1b-cos": {
+    vistoId: "h1b-cos",
+    codigo: "H-1B",
+    nome: "H-1B Change of Status (dentro dos EUA)",
+    intro:
+      "Você está nos EUA e seu empregador quer mudar seu status para H-1B sem você sair do país. O processo é idêntico ao H-1B consular — mas em vez de entrevista, o USCIS aprova o I-129 com COS e emite o I-797 com nova data de início de status.",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 197",
+      alertaCritico: "Somente o empregador pode protocolar o I-129. Você fornece documentos, o employer e o advogado fazem a petição.",
+    },
+    grupos: [
+      {
+        titulo: "O que o funcionário precisa reunir para o empregador",
+        descricao: "Documentos que você entrega ao RH ou ao advogado do empregador",
+        documentos: [
+          {
+            id: "diploma-h1b-cos",
+            nome: "Diploma e histórico acadêmico",
+            descricao:
+              "Cópia do diploma de bacharel ou equivalente na área de especialidade. Com tradução juramentada se em português.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "curriculo-h1b-cos",
+            nome: "Currículo profissional detalhado",
+            descricao:
+              "Listando experiências anteriores na área especializada. O advogado usa para construir o argumento de especialidade.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "historico-trabalho",
+            nome: "Histórico de empregos anteriores",
+            descricao:
+              "Cartas de emprego, contracheques ou declarações de empregadores anteriores comprovando experiência na especialidade.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "passaporte-h1b-cos",
+            nome: "Cópia do passaporte e do I-94",
+            descricao:
+              "Para que o advogado confirme status atual e histórico de admissões. Extraia o I-94 em i94.cbp.dhs.gov.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "status-atual-cos",
+            nome: "Documentos do status atual (ex: I-20, visto, I-797)",
+            descricao:
+              "Cópias de todos os documentos de status imigratório atual. O advogado precisa confirmar que você está em status válido.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "O que esperar do processo",
+        descricao: "Etapas conduzidas pelo empregador e pelo advogado — você acompanha, não executa",
+        documentos: [
+          {
+            id: "lca-cos",
+            nome: "LCA — Labor Condition Application (DOL)",
+            descricao:
+              "O empregador submete ao Departamento do Trabalho. Aprovação em ~7 dias úteis. Define salário mínimo e local de trabalho.",
+            agencia: "DOL",
+            obrigatorio: true,
+          },
+          {
+            id: "i129-cos",
+            nome: "Formulário I-129 com COS — submetido pelo empregador",
+            descricao:
+              "O empregador envia ao USCIS com a LCA aprovada e seu pacote de documentos. Se aprovado com COS, o USCIS emite o I-797 autorizando o novo status.",
+            agencia: "USCIS",
+            formulario: "I-129",
+            obrigatorio: true,
+          },
+          {
+            id: "i797-cos",
+            nome: "I-797 — Aprovação com Change of Status",
+            descricao:
+              "Confirma que seu status mudou para H-1B dentro dos EUA. Guarde este documento — substitui o carimbo de visto para fins de status interno.",
+            agencia: "USCIS",
+            formulario: "I-797",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Documentos de suporte à petição",
+        descricao: "Fortalecem o caso — especialmente úteis se a petição for contestada",
+        documentos: [
+          {
+            id: "cartas-rec-h1b",
+            nome: "Cartas de recomendação profissional",
+            descricao:
+              "De gestores ou colegas sêniores descrevendo suas funções especializadas. Ajudam a demonstrar que o cargo é de especialidade.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "portfolio-h1b",
+            nome: "Portfólio ou amostras de trabalho",
+            descricao:
+              "Projetos, relatórios, código ou qualquer material que ilustre a natureza especializada do trabalho.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "comprovante-salario-atual",
+            nome: "Comprovantes de salário atual",
+            descricao:
+              "Contracheques dos últimos 3 meses ou declaração do empregador atual confirmando remuneração.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+    ],
+  },
+
+  "o1-cos": {
+    vistoId: "o1-cos",
+    codigo: "O-1",
+    nome: "O-1 Change of Status (dentro dos EUA)",
+    intro:
+      "Você está nos EUA e quer mudar seu status para O-1 sem sair do país. O empregador ou agente americano submete o I-129 com COS ao USCIS. Autônomos e freelancers precisam de um agente americano — sem agente, não há petição.",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 197",
+      alertaCritico: "Você precisa de um empregador ou agente americano para protocolar o I-129. Autônomos precisam de um agente.",
+    },
+    grupos: [
+      {
+        titulo: "Evidências de habilidade extraordinária (foco em COS)",
+        descricao: "Apresente pelo menos 3 das categorias — mesmas do O-1 consular, mas narrativa adaptada para COS",
+        documentos: [
+          {
+            id: "premios-cos",
+            nome: "Prêmios e reconhecimentos de destaque",
+            descricao:
+              "Troféus, certificados, prêmios de competições ou associações reconhecidas na área.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "midia-cos",
+            nome: "Cobertura de mídia",
+            descricao:
+              "Artigos em jornais, revistas, sites ou programas de TV que destacam seu trabalho ou realizações.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "salario-alto-cos",
+            nome: "Comprovante de remuneração alta",
+            descricao:
+              "Contratos ou declarações de renda mostrando remuneração superior à média da área.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "contribuicoes-cos",
+            nome: "Contribuições originais de destaque",
+            descricao:
+              "Publicações, patentes, projetos ou inovações com impacto reconhecido.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "membros-cos",
+            nome: "Membros em associações de excelência",
+            descricao:
+              "Participação em organizações que exigem conquistas extraordinárias para ingresso.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Documentos pessoais para o empregador/agente",
+        descricao: "Entregues ao seu empregador ou agente americano para montar a petição",
+        documentos: [
+          {
+            id: "passaporte-o1-cos",
+            nome: "Cópia do passaporte e do I-94",
+            descricao:
+              "Confirma identidade e status imigratório atual. Extraia o I-94 em i94.cbp.dhs.gov.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "docs-status-o1",
+            nome: "Documentos do status atual (visto, I-797, I-20, etc.)",
+            descricao:
+              "Cópias de todos os documentos de status imigratório. O USCIS precisa confirmar que você está em status válido.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "contrato-oferta-o1",
+            nome: "Contrato ou carta de oferta do empregador/agente",
+            descricao:
+              "Descrevendo os serviços, projetos ou eventos para os quais você foi contratado nos EUA.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Advisory Opinion da associação da área",
+        descricao: "Exigido pelo USCIS para a maioria das categorias O-1",
+        documentos: [
+          {
+            id: "advisory-opinion",
+            nome: "Carta da associação profissional ou sindicato da área",
+            descricao:
+              "Confirmando que seu trabalho é reconhecido como extraordinário no setor. O agente ou advogado normalmente coordena essa solicitação.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Contrato ou carta de oferta",
+        descricao: "Documentação formal da relação de trabalho nos EUA",
+        documentos: [
+          {
+            id: "contrato-formal-o1",
+            nome: "Contrato assinado entre você e o empregador/agente",
+            descricao:
+              "Especificando escopo, prazo e remuneração. Pode ser um contrato de prestação de serviços se você for freelancer com agente.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "i797-o1-cos",
+            nome: "I-797 — Aprovação com Change of Status",
+            descricao:
+              "Emitido após aprovação do I-129 com COS. Confirma a mudança de status para O-1 dentro dos EUA.",
+            agencia: "USCIS",
+            formulario: "I-797",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "l1-cos": {
+    vistoId: "l1-cos",
+    codigo: "L-1",
+    nome: "L-1 Change of Status (dentro dos EUA)",
+    intro:
+      "Você está nos EUA com outro status e sua empresa quer regularizar sua situação como L-1 sem que você saia do país. A empresa nos EUA e no exterior precisam ter relação corporativa comprovada, e você precisa ter trabalhado na empresa no exterior por pelo menos 1 ano nos últimos 3 anos.",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 147",
+      alertaCritico: "A empresa nos EUA e no exterior precisam ter relação corporativa comprovada (subsidiária, afiliada ou empresa-mãe).",
+    },
+    grupos: [
+      {
+        titulo: "Documentos do funcionário para a empresa",
+        descricao: "Você entrega esses documentos ao RH ou advogado da empresa para montar a petição",
+        documentos: [
+          {
+            id: "passaporte-l1-cos",
+            nome: "Cópia do passaporte e do I-94",
+            descricao:
+              "Confirma identidade e status atual. Extraia o I-94 em i94.cbp.dhs.gov.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "docs-status-l1",
+            nome: "Documentos do status imigratório atual",
+            descricao:
+              "Cópias do visto atual, I-797 ou I-20, conforme aplicável. O advogado confirma que você está em status válido.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "carta-funcoes-l1",
+            nome: "Carta da empresa descrevendo cargo e funções",
+            descricao:
+              "Detalhando o cargo no exterior (gerencial, executivo ou especialista), as responsabilidades e a proposta de função nos EUA.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Comprovação de 1 ano de trabalho no exterior",
+        descricao: "Exigência central do L-1 — sem ela o pedido não avança",
+        documentos: [
+          {
+            id: "contracheques-exterior",
+            nome: "Contracheques ou comprovantes de salário no exterior",
+            descricao:
+              "Dos últimos 3 anos, mostrando pelo menos 12 meses contínuos de trabalho na empresa estrangeira.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "contrato-exterior",
+            nome: "Contrato de trabalho ou carta da empresa estrangeira",
+            descricao:
+              "Confirmando datas de início e término, cargo e tipo de relação empregatícia.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "registros-empresa-ext",
+            nome: "Registros corporativos da empresa no exterior",
+            descricao:
+              "Documentos que comprovem a existência legal da empresa estrangeira e sua relação com a entidade americana.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Descrição do cargo gerencial, executivo ou especialista",
+        descricao: "O cargo nos EUA deve se encaixar em uma dessas três categorias — o advogado documenta isso no I-129",
+        documentos: [
+          {
+            id: "descricao-cargo-eua",
+            nome: "Descrição detalhada do cargo nos EUA",
+            descricao:
+              "Responsabilidades, subordinados (se gerencial), decisões estratégicas (se executivo) ou conhecimento especializado (se especialista). Documento crítico para aprovação.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "i129-l1-cos",
+            nome: "Formulário I-129 com classificação L e COS",
+            descricao:
+              "Submetido pelo empregador americano ao USCIS com toda a documentação. Se aprovado com COS, você recebe o I-797 com novo status.",
+            agencia: "USCIS",
+            formulario: "I-129",
+            obrigatorio: true,
+          },
+          {
+            id: "i797-l1-cos",
+            nome: "I-797 — Aprovação com Change of Status",
+            descricao:
+              "Confirma a mudança de status para L-1 dentro dos EUA. Guarde este documento.",
+            agencia: "USCIS",
+            formulario: "I-797",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "j1-extensao": {
+    vistoId: "j1-extensao",
+    codigo: "J-1",
+    nome: "Extensão do J-1 via patrocinador",
+    intro:
+      "Extensão do programa J-1 — feita pelo patrocinador no SEVIS, sem necessidade de novo formulário do USCIS ou do Departamento de Estado.",
+    kit: {
+      caminho: "manutencao",
+      preco: "R$ 97",
+    },
+    grupos: [
+      {
+        titulo: "Solicitar extensão ao patrocinador antes do vencimento do DS-2019",
+        descricao: "O patrocinador atualiza o SEVIS — você não envia nada ao USCIS ou ao consulado",
+        documentos: [
+          {
+            id: "solicitar-extensao-j1",
+            nome: "Solicitação formal de extensão ao patrocinador",
+            descricao:
+              "Entre em contato com o patrocinador (Responsible Officer) antes do vencimento do DS-2019. Cada programa tem prazo mínimo de aviso — geralmente 30 a 60 dias antes.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "justificativa-extensao-j1",
+            nome: "Justificativa para a extensão",
+            descricao:
+              "Carta ou formulário do patrocinador exigindo motivo válido: conclusão do programa, aprovação acadêmica ou continuidade de projeto. O patrocinador define os critérios.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Verificar a regra dos 2 anos antes de qualquer mudança de status",
+        descricao: "Importante antes de planejar qualquer próximo passo imigratório",
+        documentos: [
+          {
+            id: "regra-2-anos-check",
+            nome: "Verificar se seu programa está sujeito à regra dos 2 anos",
+            descricao:
+              "Alguns programas J-1 exigem retorno ao país de origem por 2 anos antes de mudar para outro status ou obter green card. Confirme com seu patrocinador (Responsible Officer) ou consulte o DS-2019 — o campo 'Exchange Visitor Subject to Two-Year Rule' indica se a restrição se aplica.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "waiver-j1",
+            nome: "Waiver da regra dos 2 anos (se aplicável)",
+            descricao:
+              "Se você estiver sujeito à regra e quiser mudar de status sem sair dos EUA, precisará de um waiver. Os caminhos incluem: interesse do governo americano, hardship excepcional ao cônjuge/filho americano, ou objeção do país de origem.",
+            agencia: "DOS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "DS-2019 atualizado",
+        descricao: "Documento central da extensão — emitido pelo patrocinador",
+        documentos: [
+          {
+            id: "ds2019-atualizado",
+            nome: "DS-2019 com nova data de término",
+            descricao:
+              "Emitido pelo patrocinador após aprovação da extensão no SEVIS. Guarde o DS-2019 original e o novo — ambos podem ser solicitados futuramente.",
+            agencia: "DOS",
+            formulario: "DS-2019",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "eb2niw-brasil": {
+    vistoId: "eb2niw-brasil",
+    codigo: "EB-2 NIW",
+    nome: "EB-2 NIW — Processamento Consular (fora dos EUA)",
+    intro:
+      "Para quem está fora dos EUA: após a aprovação do I-140 pelo USCIS, o processo segue pelo NVC (National Visa Center) até a entrevista consular no Brasil.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 297",
+    },
+    grupos: [
+      {
+        titulo: "I-140 aprovado — base de tudo",
+        descricao: "Sem o I-140 aprovado, o processo consular não começa",
+        documentos: [
+          {
+            id: "i140-aprovado",
+            nome: "I-140 aprovado pelo USCIS",
+            descricao:
+              "A petição de imigrante deve estar aprovada antes de qualquer passo consular. Se ainda não submeteu o I-140, esse é o primeiro passo.",
+            agencia: "USCIS",
+            formulario: "I-140",
+            obrigatorio: true,
+          },
+          {
+            id: "boletim-vistos",
+            nome: "Verificar disponibilidade de número de visto no Visa Bulletin",
+            descricao:
+              "O Visa Bulletin do Departamento de Estado (publicado mensalmente) indica se um número de visto está disponível para a sua categoria e país de nascimento. Para brasileiros no EB-2, verifique a coluna 'All Chargeability Areas Except Those Listed'.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Registro no NVC e DS-260",
+        descricao: "Após o USCIS transferir o caso ao NVC, você receberá um número de caso",
+        documentos: [
+          {
+            id: "nvc-registro",
+            nome: "Criar conta e registrar caso no portal do NVC (CEAC)",
+            descricao:
+              "O NVC envia um aviso por e-mail com o número de caso. Acesse ceac.state.gov para criar o perfil e pagar as taxas de agendamento.",
+            agencia: "NVC",
+            obrigatorio: true,
+          },
+          {
+            id: "ds260",
+            nome: "DS-260 — Formulário de Pedido de Visto de Imigrante",
+            descricao:
+              "Preenchido online no portal CEAC. Formulário longo — dedique pelo menos 2 horas. Após enviar, não pode ser editado sem entrar em contato com o NVC.",
+            agencia: "NVC",
+            formulario: "DS-260",
+            obrigatorio: true,
+          },
+          {
+            id: "taxa-affidavit",
+            nome: "Pagamento das taxas do NVC",
+            descricao:
+              "Taxa de processamento do formulário IV (US$325) e taxa do Affidavit of Support (US$120), pagas no portal CEAC.",
+            agencia: "NVC",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Documentos civis com tradução juramentada",
+        descricao: "Enviados ao NVC antes de agendar a entrevista consular",
+        documentos: [
+          {
+            id: "cert-nascimento-br",
+            nome: "Certidão de nascimento (original + tradução juramentada)",
+            descricao:
+              "Original em português + tradução juramentada para o inglês. O NVC aceita cópias certificadas — não precisa ser o documento original.",
+            agencia: "NVC",
+            obrigatorio: true,
+          },
+          {
+            id: "cert-casamento-br",
+            nome: "Certidão de casamento (se aplicável)",
+            descricao:
+              "Original + tradução juramentada. Se divorciado, inclua também a certidão de divórcio.",
+            agencia: "NVC",
+            obrigatorio: false,
+          },
+          {
+            id: "antecedentes-br",
+            nome: "Certidão de antecedentes criminais",
+            descricao:
+              "Emitida pela Polícia Federal do Brasil e pelos estados onde você residiu por mais de 6 meses após os 16 anos. Cada certidão precisa de tradução juramentada.",
+            agencia: "NVC",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Exame médico",
+        descricao: "Realizado por médico autorizado pelo Departamento de Estado no Brasil",
+        documentos: [
+          {
+            id: "medico-autorizado",
+            nome: "Agendar exame com médico civil autorizado (Panel Physician)",
+            descricao:
+              "No Brasil, os médicos autorizados estão no Rio de Janeiro e em São Paulo. Liste os médicos em travel.state.gov. O exame inclui: raio-X, exame de sangue, histórico vacinal e avaliação geral.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "ds5540",
+            nome: "DS-5540 — Health History and Physical Examination",
+            descricao:
+              "Preenchido pelo médico durante o exame. Fica em envelope lacrado e é entregue por você na entrevista consular. Não abra o envelope.",
+            agencia: "DOS",
+            formulario: "DS-5540",
+            obrigatorio: true,
+          },
+          {
+            id: "cartao-vacinas",
+            nome: "Cartão de vacinas",
+            descricao:
+              "Leve o cartão completo para o médico verificar. Vacinas faltantes são aplicadas no mesmo dia — isso pode aumentar o custo do exame.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Entrevista no consulado americano no Brasil",
+        descricao: "Etapa final — conduzida no consulado após o NVC aprovar toda a documentação",
+        documentos: [
+          {
+            id: "agendamento-consular",
+            nome: "Agendamento da entrevista consular via portal do NVC",
+            descricao:
+              "O NVC notifica quando você pode agendar. Consulados com visto de imigrante no Brasil: São Paulo e Rio de Janeiro.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "passaporte-entrevista",
+            nome: "Passaporte válido",
+            descricao:
+              "Válido por pelo menos 6 meses além da data prevista de entrada nos EUA.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "foto-consular",
+            nome: "Foto no padrão americano",
+            descricao: "5x5 cm, fundo branco, tirada nos últimos 6 meses.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "ds260-confirmacao",
+            nome: "Página de confirmação do DS-260",
+            descricao:
+              "Impressa após o envio do formulário no portal CEAC. O oficial consular verifica no sistema.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  e2: {
+    vistoId: "e2",
+    codigo: "E-2",
+    nome: "Visto de Investidor",
+    intro:
+      "O E-2 é um visto de investidor para nacionais de países com tratado de amizade e comércio com os EUA. Exige investimento substancial em um negócio americano e participação ativa na gestão.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 347",
+      alertaCritico: "O E-2 NÃO está disponível para brasileiros. Disponível para nacionais de países com tratado com os EUA: Portugal, Alemanha, França, Itália, Espanha, Japão, Coreia do Sul, entre outros.",
+    },
+    grupos: [
+      {
+        titulo: "Elegibilidade e requisitos básicos",
+        descricao: "Confirme antes de iniciar qualquer documentação",
+        documentos: [
+          {
+            id: "nacionalidade-tratado",
+            nome: "Confirmar nacionalidade de país com tratado E-2",
+            descricao:
+              "Você precisa ser nacional de um país que tenha tratado de investimento com os EUA. A lista está em travel.state.gov. Brasileiros não são elegíveis.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "investimento-substancial",
+            nome: "Confirmar valor do investimento (geralmente US$100k+)",
+            descricao:
+              "O USCIS e o consulado não fixam um valor mínimo, mas o investimento deve ser 'substancial' em relação ao custo total do negócio. Para negócios de baixo custo, valores menores podem ser aceitos se representarem proporção alta do total.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "propriedade-empresa",
+            nome: "Confirmar propriedade de pelo menos 50% da empresa",
+            descricao:
+              "Você precisa ser o principal investidor e ter controle efetivo da empresa. Sócios minoritários não se qualificam como titular E-2.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "papel-ativo",
+            nome: "Confirmar papel ativo na gestão da empresa",
+            descricao:
+              "O E-2 não é para investidores passivos. Você precisa dirigir e desenvolver o negócio ativamente.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Documentos do investimento",
+        descricao: "Comprovam que o dinheiro foi comprometido e investido no negócio americano",
+        documentos: [
+          {
+            id: "contrato-compra-empresa",
+            nome: "Contrato de compra/venda da empresa ou investimento",
+            descricao:
+              "Se comprou uma empresa existente: contrato de compra e venda assinado. Se criou uma nova: contrato social, registros corporativos e comprovante de capitalização.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "extratos-transferencia",
+            nome: "Extratos bancários mostrando transferência dos fundos",
+            descricao:
+              "Comprovando que o dinheiro saiu da sua conta pessoal e entrou na empresa americana. O rastro financeiro precisa ser completo e claro.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "origem-fundos",
+            nome: "Prova de origem lícita dos fundos",
+            descricao:
+              "Declarações de imposto de renda, escrituras, contratos de venda de imóvel ou empresa, herança documentada — qualquer fonte que explique de onde veio o dinheiro investido.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "avaliacao-empresa",
+            nome: "Avaliação de mercado da empresa (se comprou negócio existente)",
+            descricao:
+              "Feita por avaliador independente. Ajuda a demonstrar que o investimento é substancial em relação ao valor total do negócio.",
+            agencia: "DOS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Documentos da empresa",
+        descricao: "Comprovam que a empresa é real, ativa e com potencial de crescimento",
+        documentos: [
+          {
+            id: "plano-negocios",
+            nome: "Plano de negócios detalhado (projeção de 5 anos)",
+            descricao:
+              "Incluindo projeções financeiras, estratégia de crescimento, número de empregos gerados para americanos e análise de mercado. Um dos documentos mais importantes da petição.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "registros-corporativos",
+            nome: "Registros corporativos da empresa americana",
+            descricao:
+              "Articles of Incorporation, Operating Agreement (LLC) ou Bylaws (Corp), e evidência de registro no estado.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "alvara",
+            nome: "Alvará de funcionamento (business license)",
+            descricao:
+              "Emitido pelo município ou condado onde a empresa opera. Comprova que a empresa está legalmente autorizada a funcionar.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "projecoes-financeiras",
+            nome: "Projeções financeiras e extratos da empresa",
+            descricao:
+              "Se a empresa já opera: extratos bancários da empresa e declarações de imposto (Form 1120 ou 1065). Se é nova: projeções elaboradas por contador.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "DS-160 e entrevista consular",
+        descricao: "Etapa final do processo — agendada no consulado americano do seu país",
+        documentos: [
+          {
+            id: "ds160-e2",
+            nome: "DS-160 — Formulário de visto não-imigrante",
+            descricao:
+              "Preenchido no site do Departamento de Estado. Selecione a categoria E-2 no campo de tipo de visto.",
+            agencia: "DOS",
+            formulario: "DS-160",
+            obrigatorio: true,
+          },
+          {
+            id: "passaporte-e2",
+            nome: "Passaporte válido",
+            descricao: "Válido por pelo menos 6 meses além do período de validade do visto.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "foto-e2",
+            nome: "Foto no padrão americano",
+            descricao: "5x5 cm, fundo branco, tirada nos últimos 6 meses.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "taxa-mrv",
+            nome: "Comprovante de pagamento da taxa MRV",
+            descricao:
+              "Taxa de solicitação de visto não-imigrante paga no site do consulado. Guarde o comprovante para agendar a entrevista.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Renovação do E-2",
+        descricao: "O E-2 pode ser renovado indefinidamente — desde que o investimento e a empresa estejam ativos",
+        documentos: [
+          {
+            id: "comprovante-operacao",
+            nome: "Comprovante de que a empresa continua em operação",
+            descricao:
+              "Extratos bancários recentes, declarações de imposto, contratos ativos, folha de pagamento de funcionários — qualquer evidência de que a empresa está funcionando.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "ds160-renovacao-e2",
+            nome: "Novo DS-160 para renovação",
+            descricao:
+              "A renovação do E-2 é feita pelo consulado — não pelo USCIS. Você precisa agendar nova entrevista consular.",
+            agencia: "DOS",
+            formulario: "DS-160",
+            obrigatorio: true,
+          },
+          {
+            id: "plano-negocios-atualizado",
+            nome: "Plano de negócios atualizado",
+            descricao:
+              "Com resultados reais vs. projeções anteriores e planos para os próximos anos. Mostra que o negócio está crescendo e cumprindo o propósito original do E-2.",
             agencia: "DOS",
             obrigatorio: true,
           },

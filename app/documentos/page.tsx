@@ -5,69 +5,121 @@ import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 
 interface Profile {
-  visa_type:    string | null;
-  location:     "brasil" | "eua" | null;
-  main_goal:    string | null;
+  visa_type: string | null;
+  location:  "brasil" | "eua" | null;
+  main_goal: string | null;
 }
 
 interface Kit {
-  id:          string;
-  codigo:      string;
-  titulo:      string;
-  descricao:   string;
-  preco:       string;
-  caminho:     "consulado" | "cos" | "manutencao";
-  parachQuem: string;
-  alerta?:     string;
+  id:         string;
+  codigo:     string;
+  titulo:     string;
+  descricao:  string;
+  preco:      string;
+  caminho:    "consulado" | "cos" | "manutencao";
+  alerta?:    string;
+  restrito?:  boolean; // ex: E-2 não disponível para brasileiros
 }
 
 const KITS: Kit[] = [
+  // ── F-1 ──────────────────────────────────────────────────────────────
   {
-    id:         "f1",
-    codigo:     "F-1",
-    titulo:     "Visto F-1 via consulado",
-    descricao:  "DS-160 + entrevista consular + visto no passaporte. Para quem está no Brasil.",
-    preco:      "R$ 197",
-    caminho:    "consulado",
-    parachQuem: "brasil",
+    id: "f1", codigo: "F-1", caminho: "consulado", preco: "R$ 197",
+    titulo:   "Visto F-1 via consulado",
+    descricao:"DS-160 + entrevista consular. Para quem está no Brasil e quer estudar nos EUA.",
   },
   {
-    id:         "f1-cos",
-    codigo:     "F-1",
-    titulo:     "Mudança para F-1 dentro dos EUA",
-    descricao:  "Formulário I-539 direto com o USCIS. Sem entrevista consular. Para quem já está nos EUA com outro visto.",
-    preco:      "R$ 247",
-    caminho:    "cos",
-    parachQuem: "eua",
-    alerta:     "Seu status atual precisa estar válido no protocolo.",
+    id: "f1-cos", codigo: "F-1", caminho: "cos", preco: "R$ 247",
+    titulo:   "Mudança para F-1 dentro dos EUA",
+    descricao:"Formulário I-539 direto com o USCIS. Para quem já está nos EUA com outro visto.",
+    alerta:   "Seu status atual precisa estar válido no protocolo.",
   },
   {
-    id:         "f1-renovacao",
-    codigo:     "F-1",
-    titulo:     "Renovação, extensão e transferência F-1",
-    descricao:  "Estender o I-20, transferir de escola ou renovar o carimbo para viajar. Já tem F-1.",
-    preco:      "R$ 147",
-    caminho:    "manutencao",
-    parachQuem: "eua",
+    id: "f1-renovacao", codigo: "F-1", caminho: "manutencao", preco: "R$ 147",
+    titulo:   "Renovação, extensão e transferência F-1",
+    descricao:"Estender o I-20, transferir de escola ou renovar o carimbo para viajar. Já tem F-1.",
+  },
+  // ── M-1 ──────────────────────────────────────────────────────────────
+  {
+    id: "m1", codigo: "M-1", caminho: "consulado", preco: "R$ 197",
+    titulo:   "Visto M-1 via consulado",
+    descricao:"Curso técnico ou vocacional. DS-160 + entrevista consular. Para quem está no Brasil.",
   },
   {
-    id:         "m1",
-    codigo:     "M-1",
-    titulo:     "Visto M-1 via consulado",
-    descricao:  "Curso técnico ou vocacional. DS-160 + entrevista consular. Para quem está no Brasil.",
-    preco:      "R$ 197",
-    caminho:    "consulado",
-    parachQuem: "brasil",
+    id: "m1-cos", codigo: "M-1", caminho: "cos", preco: "R$ 247",
+    titulo:   "Mudança para M-1 dentro dos EUA",
+    descricao:"Formulário I-539. Atenção: M-1 dentro dos EUA não pode mudar para F-1 depois.",
+    alerta:   "Restrição permanente: M-1 não vira F-1 dentro dos EUA.",
+  },
+  // ── J-1 ──────────────────────────────────────────────────────────────
+  {
+    id: "j1", codigo: "J-1", caminho: "consulado", preco: "R$ 147",
+    titulo:   "Visto J-1 via consulado",
+    descricao:"Intercâmbio cultural patrocinado. DS-160 + DS-2019 do patrocinador autorizado.",
   },
   {
-    id:         "m1-cos",
-    codigo:     "M-1",
-    titulo:     "Mudança para M-1 dentro dos EUA",
-    descricao:  "Formulário I-539. Para quem está nos EUA e quer fazer curso técnico. Atenção: M-1 não vira F-1 dentro dos EUA.",
-    preco:      "R$ 247",
-    caminho:    "cos",
-    parachQuem: "eua",
-    alerta:     "M-1 dentro dos EUA não pode mudar para F-1 depois.",
+    id: "j1-extensao", codigo: "J-1", caminho: "manutencao", preco: "R$ 97",
+    titulo:   "Extensão do J-1 via patrocinador",
+    descricao:"Extensão feita pelo patrocinador no SEVIS, sem formulário USCIS. Inclui guia da regra dos 2 anos.",
+  },
+  // ── H-1B ─────────────────────────────────────────────────────────────
+  {
+    id: "h1b", codigo: "H-1B", caminho: "consulado", preco: "R$ 197",
+    titulo:   "H-1B — Guia para o funcionário",
+    descricao:"O empregador faz a petição. Este kit te orienta sobre o que reunir e entregar ao RH/advogado.",
+    alerta:   "Sujeito a sorteio anual. Cap de 65.000 vagas + 20.000 para mestrado.",
+  },
+  {
+    id: "h1b-cos", codigo: "H-1B", caminho: "cos", preco: "R$ 197",
+    titulo:   "H-1B Change of Status — dentro dos EUA",
+    descricao:"Para quem já está nos EUA e o empregador vai pedir o H-1B com COS. Guia do que o funcionário precisa providenciar.",
+  },
+  // ── O-1 ──────────────────────────────────────────────────────────────
+  {
+    id: "o1", codigo: "O-1", caminho: "consulado", preco: "R$ 197",
+    titulo:   "O-1 — Habilidade extraordinária via consulado",
+    descricao:"Sem sorteio, sem cap. Exige empregador ou agente americano e evidências robustas de reconhecimento.",
+  },
+  {
+    id: "o1-cos", codigo: "O-1", caminho: "cos", preco: "R$ 197",
+    titulo:   "O-1 Change of Status — dentro dos EUA",
+    descricao:"Para quem já está nos EUA. O empregador ou agente protocola o I-129 com pedido de COS.",
+  },
+  // ── L-1 ──────────────────────────────────────────────────────────────
+  {
+    id: "l1", codigo: "L-1", caminho: "consulado", preco: "R$ 147",
+    titulo:   "L-1 — Transferência intracompanhia via consulado",
+    descricao:"Para executivos, gerentes e especialistas transferidos. A empresa nos dois países precisa ter vínculo corporativo.",
+  },
+  {
+    id: "l1-cos", codigo: "L-1", caminho: "cos", preco: "R$ 147",
+    titulo:   "L-1 Change of Status — dentro dos EUA",
+    descricao:"Já está nos EUA com outro visto e vai ser transferido pela empresa. Guia de documentos para o RH.",
+  },
+  // ── EB-2 NIW ─────────────────────────────────────────────────────────
+  {
+    id: "eb2niw", codigo: "EB-2 NIW", caminho: "cos", preco: "R$ 347",
+    titulo:   "EB-2 NIW — Ajuste de Status (dentro dos EUA)",
+    descricao:"Green card por interesse nacional. Auto-petição via I-140 + I-485. Para quem já está nos EUA.",
+  },
+  {
+    id: "eb2niw-brasil", codigo: "EB-2 NIW", caminho: "consulado", preco: "R$ 297",
+    titulo:   "EB-2 NIW — Processamento consular (fora dos EUA)",
+    descricao:"Após aprovação do I-140, processo segue pelo NVC e entrevista no consulado americano no Brasil.",
+  },
+  // ── E-2 ──────────────────────────────────────────────────────────────
+  {
+    id: "e2", codigo: "E-2", caminho: "consulado", preco: "R$ 347",
+    titulo:   "E-2 — Visto de Investidor (países com tratado)",
+    descricao:"Para nacionais de países com tratado com os EUA: Portugal, Alemanha, França, Itália, Espanha, Japão, Coreia do Sul e outros.",
+    alerta:   "NÃO disponível para brasileiros. Verifique se seu país tem tratado E-2 com os EUA.",
+    restrito: true,
+  },
+  // ── B-1/B-2 ──────────────────────────────────────────────────────────
+  {
+    id: "b1", codigo: "B-1/B-2", caminho: "consulado", preco: "R$ 97",
+    titulo:   "B-1/B-2 — Turismo e negócios via consulado",
+    descricao:"DS-160 + entrevista consular. Inclui orientações sobre prova de vínculo com o Brasil e documentação financeira.",
   },
 ];
 
@@ -75,21 +127,42 @@ function inferirKitRecomendado(profile: Profile | null): string | null {
   if (!profile) return null;
   const { visa_type, location, main_goal } = profile;
 
-  if (visa_type === "f1" && main_goal === "renovar_visto") return "f1-renovacao";
-  if (visa_type === "f1" && location === "brasil") return "f1";
-  if (visa_type === "f1" && location === "eua") return "f1-cos";
-  if (visa_type === "m1" && location === "brasil") return "m1";
-  if (visa_type === "m1" && location === "eua") return "m1-cos";
-  if (location === "brasil") return "f1";
+  if (visa_type === "f1") {
+    if (main_goal === "renovar_visto") return "f1-renovacao";
+    if (location === "brasil")         return "f1";
+    if (location === "eua")            return "f1-cos";
+  }
+  if (visa_type === "m1") {
+    if (location === "brasil") return "m1";
+    if (location === "eua")    return "m1-cos";
+  }
+  if (visa_type === "h1b") {
+    if (location === "eua")    return "h1b-cos";
+    return "h1b";
+  }
+  if (visa_type === "o1") {
+    if (location === "eua")    return "o1-cos";
+    return "o1";
+  }
+  if (visa_type === "l1") {
+    if (location === "eua")    return "l1-cos";
+    return "l1";
+  }
+  if (visa_type === "green_card") {
+    if (location === "eua")    return "eb2niw";
+    return "eb2niw-brasil";
+  }
+  if (visa_type === "b1b2")    return "b1";
+  if (location === "brasil")   return "f1";
   if (location === "eua" && main_goal === "renovar_visto") return "f1-renovacao";
-  if (location === "eua") return "f1-cos";
+  if (location === "eua")      return "f1-cos";
   return null;
 }
 
 const caminhoLabel: Record<Kit["caminho"], string> = {
   consulado:  "Consulado",
   cos:        "Change of Status",
-  manutencao: "Manutenção F-1",
+  manutencao: "Manutenção",
 };
 
 const caminhoColor: Record<Kit["caminho"], string> = {
@@ -98,8 +171,20 @@ const caminhoColor: Record<Kit["caminho"], string> = {
   manutencao: "bg-cream text-ink-soft border border-pine-tint",
 };
 
+const GRUPOS_LABEL: Record<string, string> = {
+  "F-1": "Estudante acadêmico",
+  "M-1": "Curso técnico",
+  "J-1": "Intercâmbio",
+  "H-1B": "Trabalho especializado",
+  "O-1": "Talento extraordinário",
+  "L-1": "Transferência intracompanhia",
+  "EB-2 NIW": "Green Card",
+  "E-2": "Investidor",
+  "B-1/B-2": "Turismo e negócios",
+};
+
 export default function DocumentosPage() {
-  const router = useRouter();
+  const router  = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -112,7 +197,13 @@ export default function DocumentosPage() {
 
   const recomendadoId = inferirKitRecomendado(profile);
   const recomendado   = KITS.find((k) => k.id === recomendadoId);
-  const demais        = KITS.filter((k) => k.id !== recomendadoId);
+
+  // Agrupar os demais kits por código de visto
+  const grupos = Object.entries(GRUPOS_LABEL).map(([codigo, label]) => ({
+    codigo,
+    label,
+    kits: KITS.filter((k) => k.codigo === codigo && k.id !== recomendadoId),
+  })).filter((g) => g.kits.length > 0);
 
   return (
     <AppShell>
@@ -126,14 +217,14 @@ export default function DocumentosPage() {
             Documente e protocole
           </h1>
           <p className="text-ink-soft text-sm leading-relaxed">
-            Guias passo a passo em português para você protocolar o seu visto com confiança.
+            Guias passo a passo em português para você protocolar com confiança — sem depender de traduções automáticas.
           </p>
         </div>
 
         {loading && (
           <div className="flex items-center gap-2 text-ink-faint text-sm mb-6">
             <span className="w-4 h-4 rounded-full border-2 border-pine-tint border-t-pine animate-spin inline-block" />
-            Carregando seu perfil...
+            Identificando seu kit...
           </div>
         )}
 
@@ -146,23 +237,22 @@ export default function DocumentosPage() {
           </div>
         )}
 
-        {!loading && (
-          <div>
+        {!loading && grupos.map((grupo) => (
+          <div key={grupo.codigo} className="mb-7">
             <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-3" style={{ letterSpacing: "0.1em" }}>
-              {recomendado ? "Outros kits disponíveis" : "Kits disponíveis"}
+              {grupo.codigo} · {grupo.label}
             </p>
             <div className="flex flex-col gap-3">
-              {(recomendado ? demais : KITS).map((kit) => (
+              {grupo.kits.map((kit) => (
                 <KitCard key={kit.id} kit={kit} onClick={() => router.push(`/documentos/${kit.id}`)} />
               ))}
             </div>
           </div>
-        )}
+        ))}
 
-        <p className="text-xs text-ink-faint mt-10 leading-relaxed">
-          Os kits são compras únicas, separadas da mensalidade. Cada kit inclui guia passo a passo,
-          checklist interativo, modelos de carta e orientações específicas sobre o que a USCIS avalia.
-          Não substituem aconselhamento jurídico.
+        <p className="text-xs text-ink-faint mt-6 leading-relaxed border-t border-pine-tint pt-5">
+          Kits são compras únicas, independentes da mensalidade. Cada kit inclui guia passo a passo,
+          checklist interativo e modelos de carta. Não substituem aconselhamento jurídico.
         </p>
       </div>
     </AppShell>
@@ -174,10 +264,11 @@ function KitCard({ kit, destaque, onClick }: { kit: Kit; destaque?: boolean; onC
     <button
       onClick={onClick}
       className={[
-        "w-full text-left rounded-2xl border p-4 transition-all duration-150 hover:shadow-sm",
+        "w-full text-left rounded-2xl border p-4 transition-all duration-150",
         destaque
           ? "border-pine bg-pine-tint"
-          : "border-pine-tint bg-cream-2 hover:border-pine/30",
+          : "border-pine-tint bg-cream-2 hover:border-pine/30 hover:shadow-sm",
+        kit.restrito ? "opacity-75" : "",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
