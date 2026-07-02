@@ -20,6 +20,17 @@ export type CaseStatusResult = {
 
 const USCIS_STATUS_URL = "https://egov.uscis.gov/casestatus/mycasestatus.do";
 
+// Shared status classifiers — used by the parser, the cron and the dashboard
+export function isDeniedStatus(status: string): boolean {
+  const s = status.toLowerCase();
+  return s.includes("denied") || s.includes("rejected") || s.includes("terminated");
+}
+
+export function isApprovedStatus(status: string): boolean {
+  const s = status.toLowerCase();
+  return s.includes("approved") || s.includes("accepted");
+}
+
 // Normalize receipt number: remove spaces/dashes, uppercase
 export function normalizeReceiptNumber(raw: string): string {
   return raw.replace(/[\s\-]/g, "").toUpperCase().trim();
@@ -104,9 +115,8 @@ function parseCaseStatusHtml(
   const dateMatch = description.match(/(?:On\s+)?([A-Z][a-z]+ \d{1,2},\s*\d{4})/);
   const statusDate = dateMatch ? dateMatch[1] : "";
 
-  const statusLower = status.toLowerCase();
-  const isApproved  = statusLower.includes("approved") || statusLower.includes("accepted");
-  const isDenied    = statusLower.includes("denied") || statusLower.includes("rejected") || statusLower.includes("terminated");
+  const isApproved  = isApprovedStatus(status);
+  const isDenied    = isDeniedStatus(status);
   const isPending   = !isApproved && !isDenied;
 
   return { receiptNumber, status, statusDate, description, isApproved, isPending, isDenied, fetchedAt };

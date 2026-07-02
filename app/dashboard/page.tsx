@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
 import { getJourney } from "@/lib/visa-journeys";
+import { isDeniedStatus } from "@/lib/uscis";
 import JourneyTimeline from "./JourneyTimeline";
 import CaseStatusCard, { UserCase } from "./CaseStatusCard";
+import StrategicOptionsCard from "./StrategicOptionsCard";
 import VisaBulletinWidget from "./VisaBulletinWidget";
 import CaseTracker from "./CaseTracker";
 import ConsuladosWidget from "./ConsuladosWidget";
@@ -133,6 +135,18 @@ export default async function DashboardPage() {
 
         {/* USCIS case tracking */}
         <CaseStatusCard initialCases={(userCases ?? []) as UserCase[]} />
+
+        {/* Strategic options for denied cases */}
+        {(userCases ?? [])
+          .filter((c) => c.last_status && isDeniedStatus(c.last_status))
+          .map((c) => (
+            <StrategicOptionsCard
+              key={c.id}
+              receiptNumber={c.receipt_number}
+              label={c.label}
+              statusDate={c.last_status_date}
+            />
+          ))}
 
         {/* Journey timeline */}
         {journey ? (
