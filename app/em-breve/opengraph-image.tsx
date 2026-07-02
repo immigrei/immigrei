@@ -5,8 +5,14 @@ export const alt = "Immigrei — Sua jornada migratória nos EUA, com clareza.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Brand colors hardcoded: CSS variables don't exist in the OG renderer.
-export default function OgImage() {
+// Brand poster, not a site thumbnail. Everything important sits in the
+// central square so WhatsApp's square crop still reads as the brand.
+// Colors hardcoded: CSS variables don't exist in the OG renderer.
+export default async function OgImage() {
+  const fraunces = await fetch(
+    new URL("./Fraunces-SemiBold.ttf", import.meta.url),
+  ).then((res) => res.arrayBuffer());
+
   return new ImageResponse(
     (
       <div
@@ -17,61 +23,65 @@ export default function OgImage() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          background: "#F4EEE2",
-          padding: 80,
+          background: "#1E5E4E",
+          fontFamily: "Fraunces",
         }}
       >
-        <div
-          style={{
-            fontSize: 40,
-            fontWeight: 700,
-            color: "#1E5E4E",
-            marginBottom: 32,
-          }}
+        {/* Sprout symbol — growth, new roots */}
+        <svg
+          width="120"
+          height="120"
+          viewBox="0 0 24 24"
+          fill="none"
+          style={{ marginBottom: 28 }}
         >
+          <circle cx="12" cy="12" r="12" fill="#E4EFE9" fillOpacity="0.16" />
+          <path
+            d="M12 19v-6"
+            stroke="#FBF7EF"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M12 13c0-3 1.8-4.8 4.8-4.8 0 3-1.8 4.8-4.8 4.8Z"
+            fill="#E8A33D"
+          />
+          <path
+            d="M12 13c0-3-1.8-4.8-4.8-4.8 0 3 1.8 4.8 4.8 4.8Z"
+            fill="#FBF7EF"
+          />
+        </svg>
+
+        <div style={{ fontSize: 96, color: "#FBF7EF", letterSpacing: -2 }}>
           Immigrei
         </div>
+
         <div
           style={{
-            fontSize: 72,
-            fontWeight: 600,
-            color: "#1B2520",
-            textAlign: "center",
-            lineHeight: 1.15,
-            marginBottom: 32,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            fontSize: 30,
+            color: "#E4EFE9",
+            marginTop: 20,
           }}
         >
-          <span>Sua jornada migratória</span>
-          <span style={{ display: "flex" }}>
-            nos EUA,&nbsp;<span style={{ color: "#1E5E4E" }}>com clareza.</span>
-          </span>
+          Sua jornada migratória nos EUA, com clareza.
         </div>
+
         <div
           style={{
-            fontSize: 28,
-            color: "#55615A",
-            marginBottom: 48,
+            fontSize: 22,
+            color: "#E8A33D",
+            marginTop: 44,
+            textTransform: "uppercase",
+            letterSpacing: 4,
           }}
         >
-          Construído por imigrantes, para imigrantes. Em português.
-        </div>
-        <div
-          style={{
-            fontSize: 26,
-            fontWeight: 700,
-            color: "#FBF7EF",
-            background: "#E8A33D",
-            padding: "18px 44px",
-            borderRadius: 16,
-          }}
-        >
-          Entrar na lista de espera →
+          Em breve — entre na lista
         </div>
       </div>
     ),
-    size,
+    {
+      ...size,
+      fonts: [{ name: "Fraunces", data: fraunces, weight: 600 as const }],
+    },
   );
 }
