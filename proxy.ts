@@ -8,6 +8,7 @@ const GATED_HOSTS = new Set(["immigrei.com", "www.immigrei.com"]);
 const isPublicRoute = createRouteMatcher([
   "/",
   "/em-breve",
+  "/planos",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/vistos(.*)",
