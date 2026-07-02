@@ -403,9 +403,13 @@ export default function VistosPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Nationality and goal arrive from the onboarding via query params
-  // (read after mount — this page is statically prerendered).
+  // Nationality, location and goal arrive from the onboarding via query
+  // params (read after mount — this page is statically prerendered).
   const [nationality, setNationality] = useState<Nationality>(null);
+  // Raw onboarding answer ("brazilian" | "treaty" | "other") — persisted to
+  // the profile, unlike `nationality` which is collapsed for card filtering.
+  const [rawNationality, setRawNationality] = useState<string | null>(null);
+  const [location, setLocation] = useState<"brasil" | "eua" | null>(null);
   const [mainGoal, setMainGoal] = useState<string | null>(null);
 
   useEffect(() => {
@@ -413,6 +417,11 @@ export default function VistosPage() {
     const nat = params.get("nationality");
     if (nat === "brazilian" || nat === "other") setNationality("brazilian");
     else if (nat === "treaty") setNationality("treaty");
+    if (nat === "brazilian" || nat === "treaty" || nat === "other") {
+      setRawNationality(nat);
+    }
+    const loc = params.get("location");
+    if (loc === "brasil" || loc === "eua") setLocation(loc);
     setMainGoal(params.get("goal"));
   }, []);
 
@@ -424,23 +433,23 @@ export default function VistosPage() {
     if (!vistoSelecionado || saving) return;
     setSaving(true);
     setSaveError(null);
+    const payload = {
+      visa_type: vistoSelecionado.id,
+      main_goal: mainGoal ?? "outro",
+      ...(location ? { location } : {}),
+      ...(rawNationality ? { nationality: rawNationality } : {}),
+    };
     try {
       const res = await fetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visa_type: vistoSelecionado.id,
-          main_goal: mainGoal ?? "outro",
-        }),
+        body: JSON.stringify(payload),
       });
       if (res.status === 401) {
         // Not signed in yet — stash the selection so it survives the sign-up
         // round-trip, then create the account. The onboarding page picks this
         // up after sign-up and finishes the save automatically.
-        localStorage.setItem(
-          "immigrei_pending_profile",
-          JSON.stringify({ visa_type: vistoSelecionado.id, main_goal: mainGoal ?? "outro" })
-        );
+        localStorage.setItem("immigrei_pending_profile", JSON.stringify(payload));
         router.push("/sign-up");
         return;
       }

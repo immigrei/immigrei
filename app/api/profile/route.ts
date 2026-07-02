@@ -11,9 +11,9 @@ export async function POST(req: NextRequest) {
 
   const user = await currentUser();
   const body = await req.json().catch(() => ({}));
-  const { visa_type, arrival_date, main_goal, location } = body;
+  const { visa_type, arrival_date, main_goal, location, nationality } = body;
 
-  if (!visa_type && !arrival_date && !main_goal && !location) {
+  if (!visa_type && !arrival_date && !main_goal && !location && !nationality) {
     return NextResponse.json({ error: "No fields to save" }, { status: 400 });
   }
 
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
   if (arrival_date) row.arrival_date = arrival_date;
   if (main_goal) row.main_goal = main_goal;
   if (location) row.location = location;
+  if (nationality) row.nationality = nationality;
 
   const { error } = await supabaseAdmin
     .from("profiles")

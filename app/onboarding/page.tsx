@@ -520,6 +520,45 @@ function getRecommendations(answers: Answers): VisaResult[] {
         priority: "medium",
       });
     }
+    if (
+      workType === "employer_offer" &&
+      (education === "high_school" || education === "bachelor_ongoing")
+    ) {
+      results.push({
+        visa: "F-1 (Estudante Acadêmico) — caminho recomendado",
+        forms: "DS-160 + I-20 (emitido pela universidade ou escola de idiomas)",
+        description:
+          "O H-1B exige graduação completa na área da vaga. Enquanto isso, o F-1 permite estudar nos EUA e trabalhar via OPT/CPT — o caminho mais comum até o visto de trabalho.",
+        priority: "high",
+      });
+    }
+    if (workType === "self") {
+      results.push({
+        visa: "O-1 (Habilidade Extraordinária)",
+        forms: "I-129 (O) — via agente ou empregador americano",
+        description:
+          "Sem oferta de emprego, o O-1 é uma porta real para quem tem portfólio e reconhecimento na área — inclusive autônomos, com petição via agente.",
+        priority: "high",
+      });
+      results.push({
+        visa: "EB-2 NIW (Green Card por Interesse Nacional)",
+        forms: "I-140 + I-485 (ou processo consular)",
+        description:
+          "Auto-petição: não exige patrocinador nem oferta de emprego. Para quem tem formação sólida e trabalho que beneficia os EUA.",
+        priority: "medium",
+      });
+    }
+    // COS para H-1B dentro dos EUA — este ramo não pergunta escolaridade,
+    // então o requisito de graduação vai explícito na descrição.
+    if (inUs && targetVisa === "h1b") {
+      results.push({
+        visa: "H-1B via Mudança de Status",
+        forms: "I-129 (H) com pedido de COS — protocolado pelo empregador",
+        description:
+          "Para mudar para H-1B sem sair dos EUA, você precisa de empregador patrocinador e graduação completa na área. O sorteio anual (março) também se aplica.",
+        priority: "high",
+      });
+    }
   }
 
   // ── Negócios / Investimento ───────────────────────────────────────────────
@@ -661,8 +700,14 @@ function getRecommendations(answers: Answers): VisaResult[] {
 
   // ── Extensão dentro dos EUA ───────────────────────────────────────────────
   if (inUs && changeGoal === "extend") {
+    const visaLabels: Record<string, string> = {
+      b1b2: "B-1/B-2", f1: "F-1", j1: "J-1", h1b: "H-1B", l1: "L-1",
+    };
     results.push({
-      visa: `Extensão de ${currentVisa?.toUpperCase() ?? "Visto Atual"}`,
+      visa:
+        currentVisa && visaLabels[currentVisa]
+          ? `Extensão de ${visaLabels[currentVisa]}`
+          : "Extensão do visto atual",
       forms:
         currentVisa === "f1" || currentVisa === "j1"
           ? "Contato com DSO / Sponsor da instituição"
@@ -673,8 +718,79 @@ function getRecommendations(answers: Answers): VisaResult[] {
     });
   }
 
+  // ── Mudança de empregador dentro dos EUA ──────────────────────────────────
+  if (inUs && changeGoal === "work_change") {
+    if (currentVisa === "h1b") {
+      results.push({
+        visa: "Transferência de H-1B (novo empregador)",
+        forms: "I-129 (H) — o novo empregador protocola",
+        description:
+          "O H-1B é portátil: o novo empregador protocola a petição e você pode começar assim que o USCIS receber o caso, sem novo sorteio.",
+        priority: "high",
+      });
+    } else {
+      results.push({
+        visa: "H-1B (Trabalho Especializado)",
+        forms: "I-129 (H) — protocolado pelo novo empregador",
+        description:
+          "Para trabalhar para um novo empregador americano, o caminho mais comum é o H-1B com patrocínio da nova empresa — sujeito ao sorteio anual.",
+        priority: "high",
+      });
+      results.push({
+        visa: "O-1 (Habilidade Extraordinária)",
+        forms: "I-129 (O)",
+        description:
+          "Se você tem reconhecimento sólido na sua área, o O-1 dispensa sorteio e aceita petição via agente ou empregador.",
+        priority: "medium",
+      });
+    }
+  }
+
+  // ── Mudança de status sem destino definido ────────────────────────────────
+  if (inUs && changeGoal === "change_status" && targetVisa === "other") {
+    results.push({
+      visa: "Vamos encontrar seu caminho juntos",
+      forms: "Explore os vistos disponíveis na próxima tela",
+      description:
+        "Seu caso pede um olhar mais próximo. Na próxima tela você compara os vistos disponíveis — e, se quiser, conectamos você a um profissional verificado.",
+      priority: "medium",
+    });
+  }
+
   // ── Green Card paths ──────────────────────────────────────────────────────
-  if (goal === "live" || permanentPath || gcPath === "merit") {
+  if (goal === "live" || permanentPath || gcPath) {
+    if (gcPath === "employer" || permanentPath === "work_gc") {
+      results.push({
+        visa: "Green Card por Patrocínio (EB-2 / EB-3)",
+        forms: "PERM + I-140 + I-485 (ou processo consular)",
+        description:
+          "O empregador conduz a certificação trabalhista (PERM) e a petição. É o caminho mais comum para o Green Card por emprego.",
+        priority: "high",
+      });
+      results.push({
+        visa: "EB-2 NIW (Green Card por Interesse Nacional)",
+        forms: "I-140 + I-485 (ou NVC consular)",
+        description:
+          "Alternativa sem depender do empregador: auto-petição para quem tem formação sólida e trabalho que beneficia os EUA.",
+        priority: "medium",
+      });
+    }
+    if (gcPath === "unsure") {
+      results.push({
+        visa: "EB-2 NIW (Green Card por Interesse Nacional)",
+        forms: "I-140 + I-485 (ou NVC consular)",
+        description:
+          "Auto-petição sem patrocinador — costuma ser o primeiro caminho a avaliar para quem tem pós-graduação ou experiência sólida.",
+        priority: "high",
+      });
+      results.push({
+        visa: "Green Card por Patrocínio (EB-2 / EB-3)",
+        forms: "PERM + I-140 + I-485",
+        description:
+          "Se o seu empregador topar patrocinar, a empresa conduz o processo de certificação e petição.",
+        priority: "medium",
+      });
+    }
     if (permanentPath === "merit" || gcPath === "merit") {
       results.push({
         visa: "EB-1 (Green Card por Habilidade Extraordinária)",
@@ -1059,6 +1175,8 @@ export default function OnboardingPage() {
             onClick={() => {
               const params = new URLSearchParams();
               if (answers.q_nationality) params.set("nationality", answers.q_nationality);
+              if (answers.q_location)
+                params.set("location", answers.q_location === "in_us" ? "eua" : "brasil");
               params.set("goal", deriveMainGoal(answers));
               router.push(`/vistos?${params.toString()}`);
             }}
