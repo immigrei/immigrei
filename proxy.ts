@@ -8,6 +8,7 @@ const GATED_HOSTS = new Set(["immigrei.com", "www.immigrei.com"]);
 const isPublicRoute = createRouteMatcher([
   "/",
   "/em-breve(.*)",
+  "/nossa-historia(.*)",
   "/planos",
   "/sign-in(.*)",
   "/sign-up(.*)",
@@ -23,9 +24,13 @@ export default clerkMiddleware(async (auth, req) => {
   const host = req.headers.get("host")?.toLowerCase().split(":")[0] ?? "";
   if (GATED_HOSTS.has(host)) {
     const { pathname } = req.nextUrl;
-    // Waitlist API and landing assets (e.g. opengraph-image) must work on
-    // the gated host; everything else → landing.
-    if (!pathname.startsWith("/em-breve") && pathname !== "/api/waitlist") {
+    // Waitlist API, landing assets (e.g. opengraph-image) and the story
+    // page must work on the gated host; everything else → landing.
+    if (
+      !pathname.startsWith("/em-breve") &&
+      !pathname.startsWith("/nossa-historia") &&
+      pathname !== "/api/waitlist"
+    ) {
       const url = req.nextUrl.clone();
       url.pathname = "/em-breve";
       return NextResponse.rewrite(url);
