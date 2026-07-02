@@ -163,7 +163,7 @@ export default function EmBrevePage() {
             Quem está construindo
           </p>
           <p className="text-ink-soft text-base leading-relaxed mb-4">
-            A Immigrei nasceu de dois brasileiros — <strong className="text-ink">César</strong>,
+            A Immigrei nasceu de dois brasileiros — <strong className="text-ink">Cesar</strong>,
             que imigrou para a Austrália, e <strong className="text-ink">Felipe</strong>,
             para os EUA — que viveram na pele a falta de um mapa. Construímos a
             ferramenta que procuramos e não encontramos.

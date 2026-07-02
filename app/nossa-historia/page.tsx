@@ -65,7 +65,7 @@ export default function NossaHistoriaPage() {
 
         <div className="space-y-6 text-ink-soft text-lg leading-relaxed">
           <p>
-            O <strong className="text-ink">César</strong> foi para a Austrália.
+            O <strong className="text-ink">Cesar</strong> foi para a Austrália.
             O <strong className="text-ink">Felipe</strong>, para os Estados
             Unidos. Dois caminhos diferentes, a mesma experiência: a
             desorientação de chegar num lugar novo e descobrir que ninguém tem
