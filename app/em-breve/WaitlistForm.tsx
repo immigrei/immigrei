@@ -23,9 +23,25 @@ export default function WaitlistForm() {
   }
 
   if (status === "done") {
+    const shareText = encodeURIComponent(
+      "Achei um app que vai mostrar a jornada de imigração nos EUA inteira em português — feito por brasileiros. Entra na lista de espera: https://immigrei.com",
+    );
     return (
-      <div className="bg-pine-tint text-pine font-semibold text-base px-6 py-4 rounded-xl max-w-md w-full text-center">
-        Você está na lista! Avisaremos você em primeira mão. 💚
+      <div className="flex flex-col items-center gap-4 max-w-md w-full">
+        <div className="bg-pine-tint text-pine font-semibold text-base px-6 py-4 rounded-xl w-full text-center">
+          Você está na lista! Avisaremos você em primeira mão. 💚
+        </div>
+        <p className="text-ink-soft text-sm text-center">
+          Conhece alguém navegando o processo de imigração?
+        </p>
+        <a
+          href={`https://wa.me/?text=${shareText}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-sage hover:bg-pine text-white font-semibold text-base px-6 py-3.5 rounded-xl transition-colors w-full text-center"
+        >
+          Compartilhar no WhatsApp
+        </a>
       </div>
     );
   }

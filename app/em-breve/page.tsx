@@ -2,9 +2,26 @@ import type { Metadata } from "next";
 import WaitlistForm from "./WaitlistForm";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://immigrei.com"),
   title: "Immigrei — Sua jornada migratória nos EUA, com clareza.",
   description:
     "O companheiro completo da sua jornada de imigração nos EUA. Em português, construído por imigrantes, para imigrantes. Em breve.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Immigrei — Sua jornada migratória nos EUA, com clareza.",
+    description:
+      "Não só onde seu caso está — mas para onde você vai. Em português, feito por quem já viveu isso. Entre na lista de espera.",
+    url: "https://immigrei.com",
+    siteName: "Immigrei",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Immigrei — Sua jornada migratória nos EUA, com clareza.",
+    description:
+      "Não só onde seu caso está — mas para onde você vai. Em português, feito por quem já viveu isso.",
+  },
 };
 
 const pillars = [
