@@ -25,6 +25,41 @@ export const metadata: Metadata = {
   },
 };
 
+const faq = [
+  {
+    q: "A Immigrei é um escritório de advocacia?",
+    a: "Não — e isso é proposital. A Immigrei organiza a informação da sua jornada: onde seu caso está, o que vem a seguir e o que é preciso em cada etapa, tudo em português. Não damos aconselhamento jurídico. Quando o seu caso pedir um profissional, conectamos você a advogados e consultores verificados — na hora certa, nos seus termos.",
+  },
+  {
+    q: "Meus dados estão seguros? Vocês compartilham com alguém?",
+    a: "Seus dados são criptografados e nunca são vendidos ou compartilhados com terceiros — nem com o governo. Sabemos que confiança é tudo em um momento como o atual. Sem sigilo não existe Immigrei; esse é o nosso compromisso número um.",
+  },
+  {
+    q: "Quanto vai custar?",
+    a: "A Immigrei terá um plano gratuito — você poderá começar a organizar a sua jornada sem pagar nada. Os detalhes dos planos completos serão anunciados no lançamento, e quem estiver na lista de espera fica sabendo primeiro (com condições especiais).",
+  },
+  {
+    q: "Quando lança?",
+    a: "Estamos construindo agora, com atualizações toda semana. Quem está na lista de espera recebe acesso antecipado antes da abertura ao público — entre na lista e acompanhe de perto.",
+  },
+  {
+    q: "Serve para o meu tipo de visto?",
+    a: "Começamos pelos caminhos mais comuns de brasileiros nos EUA: turista (B1/B2), estudante (F-1/M-1), mudança de status e acompanhamento de casos no USCIS. A partir daí, expandimos para mais categorias — conte na lista de espera qual é o seu momento.",
+  },
+  {
+    q: "Já uso um app de tracking. Qual a diferença?",
+    a: "Os apps que existem mostram um status — em inglês — e param aí. A Immigrei mostra a jornada completa: onde você está, para onde vai, o que precisa em cada etapa e quem pode ajudar. Em português, feito por quem já viveu isso.",
+  },
+  {
+    q: "Meu status está vencendo (ou vencido). A Immigrei é para mim?",
+    a: "Sim — e sem julgamento. Acreditamos que informação clara é ainda mais importante para quem está em um momento delicado. A Immigrei ajuda você a entender sua situação e as opções que existem, com sigilo total, e a encontrar ajuda profissional de confiança quando você decidir.",
+  },
+  {
+    q: "Ainda estou no Brasil. Posso usar?",
+    a: "Pode — e planejar antes de partir é o melhor momento. A Immigrei vai mostrar os caminhos possíveis e o que preparar desde já.",
+  },
+];
+
 const pillars = [
   {
     title: "Caminho completo",
@@ -41,8 +76,22 @@ const pillars = [
 ];
 
 export default function EmBrevePage() {
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   return (
     <main className="min-h-screen bg-cream flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <header className="flex items-center justify-center px-6 py-6">
         <span
           className="text-2xl font-semibold text-pine"
@@ -125,6 +174,34 @@ export default function EmBrevePage() {
           >
             Leia a nossa história →
           </Link>
+        </div>
+
+        {/* FAQ */}
+        <div className="max-w-2xl w-full mt-20 text-left">
+          <h2
+            className="text-2xl md:text-3xl font-semibold text-ink mb-6 text-center"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Perguntas frequentes
+          </h2>
+          <div className="space-y-3">
+            {faq.map((item) => (
+              <details
+                key={item.q}
+                className="group bg-cream-2 border border-pine-tint rounded-xl px-5 py-4"
+              >
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-ink font-semibold text-base">
+                  {item.q}
+                  <span className="text-pine transition-transform group-open:rotate-45 text-xl leading-none">
+                    +
+                  </span>
+                </summary>
+                <p className="text-ink-soft text-sm leading-relaxed mt-3">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
         </div>
 
         {/* Final CTA */}
