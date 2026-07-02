@@ -8,6 +8,9 @@ import { Resend } from "resend";
 // Resend sandbox sender until immigrei.com is verified — set EMAIL_FROM
 // in Vercel to "Immigrei <noreply@immigrei.com>" after domain verification.
 const FROM = process.env.EMAIL_FROM ?? "Immigrei <onboarding@resend.dev>";
+// Canonical app URL for email links — set NEXT_PUBLIC_APP_URL in Vercel to
+// https://immigrei.com once the domain is live.
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://immigrei.vercel.app";
 function getResend() { return new Resend(process.env.RESEND_API_KEY); }
 
 // ── Case status changed ────────────────────────────────────────────────────
@@ -99,7 +102,7 @@ export async function sendCaseStatusUpdate({
       </div>` : ""}
 
       <!-- CTA -->
-      <a href="https://immigrei.vercel.app/dashboard"
+      <a href="${APP_URL}/dashboard"
          style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
         Ver minha jornada →
       </a>
@@ -162,7 +165,7 @@ export async function sendBulletinUpdate({
          style="display:block;background:#E8A33D;color:#1B2520;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;margin-bottom:12px;">
         Ver boletim oficial →
       </a>
-      <a href="https://immigrei.vercel.app/dashboard"
+      <a href="${APP_URL}/dashboard"
          style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
         Ver minha jornada →
       </a>
@@ -254,7 +257,7 @@ export async function sendConsuladoAlert({
         Olá${userName ? ", " + userName : ""}! Encontramos ${events.length === 1 ? "um novo atendimento" : `${events.length} novos atendimentos`} nos consulados brasileiros que você acompanha.
       </p>
       ${eventsHtml}
-      <a href="https://immigrei.vercel.app/consulados"
+      <a href="${APP_URL}/consulados"
          style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;margin-top:8px;">
         Ver todos os atendimentos →
       </a>
@@ -263,7 +266,7 @@ export async function sendConsuladoAlert({
       <p style="margin:0">Dados extraídos dos sites oficiais dos Consulados-Gerais do Brasil.</p>
       <p style="margin:6px 0 0">
         Para cancelar os alertas, acesse suas
-        <a href="https://immigrei.vercel.app/dashboard" style="color:#8B958F;">preferências no Immigrei</a>.
+        <a href="${APP_URL}/dashboard" style="color:#8B958F;">preferências no Immigrei</a>.
       </p>
     </div>
   </div>
