@@ -276,6 +276,64 @@ export async function sendConsuladoAlert({
   await getResend().emails.send({ from: FROM, to, subject, html });
 }
 
+// ── Waitlist welcome ───────────────────────────────────────────────────────
+
+export async function sendWaitlistWelcome(to: string) {
+  const shareText = encodeURIComponent(
+    "Achei um app que vai mostrar a jornada de imigração nos EUA inteira em português — feito por brasileiros. Entra na lista de espera: https://immigrei.com",
+  );
+  const subject = "Você está na lista 💚 — Immigrei";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <span style="font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;">Immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8B958F;margin:0 0 12px;">
+        Bem-vindo(a) à lista
+      </p>
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 16px;line-height:1.25;">
+        Você está dentro. 💚
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 16px;line-height:1.65;">
+        A Immigrei nasceu de dois brasileiros — o Cesar, que imigrou para a
+        Austrália, e o Felipe, para os EUA — cansados de navegar a imigração
+        sem mapa. Estamos construindo o companheiro que procuramos e não
+        encontramos: sua jornada completa, em português, sem juridiquês.
+      </p>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;line-height:1.65;">
+        Você será avisado(a) em primeira mão quando abrirmos — com acesso
+        antecipado.
+      </p>
+
+      <p style="font-size:15px;color:#1B2520;font-weight:600;margin:0 0 12px;">
+        Conhece alguém navegando esse processo?
+      </p>
+      <a href="https://wa.me/?text=${shareText}"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
+        Compartilhar no WhatsApp
+      </a>
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
+      <p style="margin:6px 0 0"><a href="https://immigrei.com/nossa-historia" style="color:#8B958F;">Leia a nossa história</a></p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
 function formatDatePT(iso: string): string {
   const [y, m, d] = iso.split("-");
   const months = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
