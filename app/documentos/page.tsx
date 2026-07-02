@@ -148,11 +148,17 @@ function inferirKitRecomendado(profile: Profile | null): string | null {
     if (location === "eua")    return "l1-cos";
     return "l1";
   }
-  if (visa_type === "green_card") {
+  if (visa_type === "j1") {
+    if (location === "eua" && main_goal === "renovar_visto") return "j1-extensao";
+    return "j1";
+  }
+  if (visa_type === "eb2niw" || visa_type === "green_card") {
     if (location === "eua")    return "eb2niw";
     return "eb2niw-brasil";
   }
-  if (visa_type === "b1b2")    return "b1";
+  if (visa_type === "b1" || visa_type === "b1b2") return "b1";
+  if (visa_type === "e2")      return "e2";
+  if (visa_type === "e1")      return null; // sem kit E-1 ainda — mostra o catálogo completo
   if (location === "brasil")   return "f1";
   if (location === "eua" && main_goal === "renovar_visto") return "f1-renovacao";
   if (location === "eua")      return "f1-cos";
