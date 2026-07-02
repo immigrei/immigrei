@@ -303,14 +303,23 @@ export async function sendWaitlistWelcome(to: string) {
         Você está dentro. 💚
       </h1>
       <p style="font-size:15px;color:#55615A;margin:0 0 16px;line-height:1.65;">
-        A Immigrei nasceu de dois brasileiros — o Cesar, que imigrou para a
-        Austrália, e o Felipe, para os EUA — cansados de navegar a imigração
-        sem mapa. Estamos construindo o companheiro que procuramos e não
-        encontramos: sua jornada completa, em português, sem juridiquês.
+        Você sabe como é: o USCIS diz &ldquo;caso recebido&rdquo; e some. O
+        Google se contradiz. E cada semana de incerteza custa sono — às vezes,
+        dinheiro.
       </p>
+      <p style="font-size:15px;color:#1B2520;font-weight:600;margin:0 0 10px;">
+        A Immigrei está sendo construída para acabar com isso. Você vai poder:
+      </p>
+      <table role="presentation" style="margin:0 0 16px;border-collapse:collapse;">
+        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">✅&nbsp; <strong style="color:#1B2520;">Ver onde seu caso está</strong> — status real do USCIS, explicado em português</td></tr>
+        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">🧭&nbsp; <strong style="color:#1B2520;">Saber o próximo passo</strong> — documentos, prazos e opções de cada etapa</td></tr>
+        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">🔔&nbsp; <strong style="color:#1B2520;">Receber alertas automáticos</strong> — mudanças no caso, visa bulletin, consulados itinerantes</td></tr>
+        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">🤝&nbsp; <strong style="color:#1B2520;">Falar com profissionais verificados</strong> — quando você decidir que precisa</td></tr>
+      </table>
       <p style="font-size:15px;color:#55615A;margin:0 0 24px;line-height:1.65;">
-        Você será avisado(a) em primeira mão quando abrirmos — com acesso
-        antecipado.
+        Quem constrói somos nós: Cesar (imigrou para a Austrália) e Felipe
+        (para os EUA). Vivemos essa incerteza na pele — por isso você será
+        avisado(a) em primeira mão, com acesso antecipado, quando abrirmos.
       </p>
 
       <p style="font-size:15px;color:#1B2520;font-weight:600;margin:0 0 12px;">
