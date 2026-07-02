@@ -284,6 +284,9 @@ export async function sendWaitlistWelcome(to: string) {
   );
   const subject = "Você está na lista 💚 — Immigrei";
 
+  const item = (emoji: string, title: string, text: string) =>
+    `<p style="font-size:15px;color:#55615A;line-height:1.7;margin:0 0 6px;">${emoji}&nbsp; <strong style="color:#1B2520;">${title}</strong> — ${text}</p>`;
+
   const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -296,38 +299,38 @@ export async function sendWaitlistWelcome(to: string) {
     </div>
 
     <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
-      <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8B958F;margin:0 0 12px;">
-        Bem-vindo(a) à lista
-      </p>
       <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 16px;line-height:1.25;">
         Você está dentro. 💚
       </h1>
       <p style="font-size:15px;color:#55615A;margin:0 0 16px;line-height:1.65;">
-        Você sabe como é: o USCIS diz &ldquo;caso recebido&rdquo; e some. O
-        Google se contradiz. E cada semana de incerteza custa sono — às vezes,
-        dinheiro.
+        O USCIS está com <strong style="color:#1B2520;">mais de 11 milhões de casos parados</strong>
+        — o maior acúmulo em uma década. Se o seu é um deles, você conhece a
+        rotina: o site diz &ldquo;caso recebido&rdquo; e some. O Google se
+        contradiz. E entender o básico custa US$ 300 numa ligação de 15 minutos
+        com advogado — que muitas vezes termina com mais dúvidas do que começou.
       </p>
-      <p style="font-size:15px;color:#1B2520;font-weight:600;margin:0 0 10px;">
-        A Immigrei está sendo construída para acabar com isso. Você vai poder:
+      <p style="font-size:15px;color:#1B2520;font-weight:600;margin:0 0 12px;">
+        A Immigrei está sendo construída para acabar com isso. No app, você vai ter:
       </p>
-      <table role="presentation" style="margin:0 0 16px;border-collapse:collapse;">
-        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">✅&nbsp; <strong style="color:#1B2520;">Ver onde seu caso está</strong> — status real do USCIS, explicado em português</td></tr>
-        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">🧭&nbsp; <strong style="color:#1B2520;">Saber o próximo passo</strong> — documentos, prazos e opções de cada etapa</td></tr>
-        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">🔔&nbsp; <strong style="color:#1B2520;">Receber alertas automáticos</strong> — mudanças no caso, visa bulletin, consulados itinerantes</td></tr>
-        <tr><td style="font-size:15px;color:#55615A;line-height:1.7;padding:2px 0;">🤝&nbsp; <strong style="color:#1B2520;">Falar com profissionais verificados</strong> — quando você decidir que precisa</td></tr>
-      </table>
+      ${item("🔔", "Seu caso monitorado dia e noite", "a gente fica de olho no USCIS e te avisa na hora que algo mudar. Chega de abrir o site toda manhã para ver a mesma tela.")}
+      ${item("🧭", "Os caminhos possíveis a partir de onde você está", "com os requisitos claros de cada um. Mesmo que ainda não dê para avançar hoje, você sai sabendo exatamente o que construir para chegar lá.")}
+      ${item("📋", "Kits passo a passo do seu visto", "documentos, prazos, taxas e cada formulário explicado em português. Inclusive os detalhes que ninguém conta e que causam negação.")}
+      ${item("🗂️", "Seus documentos em um lugar só", "passaporte, recibos, formulários: guardados, organizados e à mão quando pedirem")}
+      ${item("📅", "Radar de datas e eventos", "o visa bulletin do mês explicado e os consulados itinerantes perto de você")}
+      <p style="font-size:15px;color:#55615A;line-height:1.7;margin:0 0 16px;">🤝&nbsp; <strong style="color:#1B2520;">E quando o caso pedir julgamento humano</strong> — aquelas decisões com subjetividade que só um especialista pode avaliar — conectamos você a profissionais verificados, sem sair do app. A Immigrei segue organizando tudo; o especialista entra na hora certa.</p>
       <p style="font-size:15px;color:#55615A;margin:0 0 24px;line-height:1.65;">
         Quem constrói somos nós: Cesar (imigrou para a Austrália) e Felipe
-        (para os EUA). Vivemos essa incerteza na pele — por isso você será
-        avisado(a) em primeira mão, com acesso antecipado, quando abrirmos.
+        (para os EUA). Vivemos essa incerteza na pele — por isso quem está na
+        lista entra primeiro, com acesso antecipado.
       </p>
 
-      <p style="font-size:15px;color:#1B2520;font-weight:600;margin:0 0 12px;">
-        Conhece alguém navegando esse processo?
-      </p>
+      <a href="https://immigrei.com/nossa-historia"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;margin-bottom:10px;">
+        Conhecer a nossa história →
+      </a>
       <a href="https://wa.me/?text=${shareText}"
-         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
-        Compartilhar no WhatsApp
+         style="display:block;background:transparent;color:#1E5E4E;border:2px solid #1E5E4E;text-align:center;padding:14px;border-radius:14px;text-decoration:none;font-size:15px;font-weight:700;">
+        Indicar para alguém no WhatsApp
       </a>
     </div>
 
