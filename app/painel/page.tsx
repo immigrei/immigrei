@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
+import OptionsList from "@/app/components/OptionsList";
+import { getAlternativePaths } from "@/lib/strategies";
 
 interface Profile {
   full_name:    string | null;
@@ -373,6 +375,20 @@ export default function PainelPage() {
             </div>
           </div>
         )}
+
+        {/* Outros caminhos possíveis */}
+        <div className="mb-7">
+          <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-1" style={{ letterSpacing: "0.1em" }}>
+            Outros caminhos possíveis
+          </p>
+          <p className="text-xs text-ink-soft leading-relaxed mb-2">
+            Sua jornada atual não é a única porta. Estas rotas existem em paralelo — algumas podem
+            ser mais rápidas ou mais seguras dependendo da sua vida hoje.
+          </p>
+          <div className="bg-cream-2 rounded-2xl border border-pine-tint overflow-hidden">
+            <OptionsList options={getAlternativePaths({ location: profile.location })} />
+          </div>
+        </div>
 
         {/* CTA — kit */}
         <div className="bg-pine rounded-2xl px-5 py-5 flex items-center justify-between gap-4">

@@ -23,6 +23,12 @@ export type StrategyPath = {
   description: string;
 };
 
+export type StrategyKit = {
+  label: string;
+  kitId?: string; // links to /documentos/{kitId} when available
+  status: "disponivel" | "em_breve";
+};
+
 export type StrategyOption = {
   id: string;
   icon: string;
@@ -34,6 +40,8 @@ export type StrategyOption = {
   does?: string[]; // "o que isso faz"
   doesNot?: string[]; // "o que isso NÃO faz"
   deadline?: StrategyDeadline;
+  kits?: StrategyKit[];
+  link?: { href: string; label: string };
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -113,6 +121,10 @@ export function getDeniedCaseStrategies(statusDate?: string | null): StrategyOpt
         "O I-130 sozinho não congela a presença irregular nem dá permissão de trabalho — só o I-485 pendente faz isso",
         "Sair dos EUA antes do Green Card pode ativar barreiras de reentrada de 3 ou 10 anos",
       ],
+      kits: [
+        { label: "Kit I-130 — cônjuge de cidadão (com I-485)", status: "em_breve" },
+        { label: "Kit I-130 — cônjuge de residente (F2A)", status: "em_breve" },
+      ],
     },
     {
       id: "talk_to_lawyer",
@@ -122,6 +134,98 @@ export function getDeniedCaseStrategies(statusDate?: string | null): StrategyOpt
       title: "Converse com um profissional antes de agir",
       description:
         "Cada caso tem detalhes que mudam a estratégia — como você entrou nos EUA, quem é seu cônjuge, quanto tempo se passou. Entendemos o mapa; um advogado de imigração conhece o seu terreno. Leve estas opções para a conversa e ganhe tempo (e dinheiro) na consulta.",
+      link: { href: "/profissionais", label: "Ver profissionais verificados →" },
+    },
+  ];
+}
+
+/**
+ * Proactive paths — shown to users with VALID status too, not only after a
+ * denial. The goal: most immigrants only know the path they're on. Showing
+ * the parallel doors (marriage-based, employer-based, self-petition, lottery)
+ * is the "clareza" the product promises — and each door maps to a kit.
+ */
+export function getAlternativePaths(profile?: {
+  location?: "brasil" | "eua" | null;
+}): StrategyOption[] {
+  const inUs = profile?.location !== "brasil";
+
+  return [
+    {
+      id: "path_marriage",
+      icon: "💍",
+      badge: "FAMÍLIA",
+      tone: "amber",
+      title: "Green Card por casamento — com cidadão OU residente",
+      description:
+        "Muita gente acredita que só casamento com cidadão americano leva ao Green Card. Não é verdade — cônjuge de residente (Green Card holder) também peticiona. O que muda é a estratégia, e ela depende do seu status:",
+      paths: [
+        {
+          title: "Cônjuge de cidadão americano",
+          description:
+            "Parente imediato: I-130 e I-485 protocolados juntos, sem fila. Se sua última entrada nos EUA foi legal, até um período fora de status é perdoado no ajuste.",
+        },
+        {
+          title: "Cônjuge de residente — você COM status válido",
+          description:
+            "Categoria F2A. Quando ela está 'Current' no Boletim de Vistos (acompanhe no seu painel), dá para protocolar I-130 + I-485 juntos, sem esperar — mas você precisa manter o status válido até o protocolo do I-485.",
+        },
+        {
+          title: "Cônjuge de residente — você SEM status",
+          description:
+            "Fora de status, o ajuste em F2A é bloqueado. As saídas: protocolar o I-130 agora (protege e guarda seu lugar) e aguardar a naturalização do cônjuge — a petição converte automaticamente para parente imediato, destravando o I-485.",
+        },
+      ],
+      doesNot: [
+        "Casamento precisa ser genuíno — o USCIS investiga; fraude bane o Green Card para sempre",
+      ],
+      kits: [
+        { label: "Kit I-130 — cônjuge de cidadão (com I-485)", status: "em_breve" },
+        { label: "Kit I-130 — cônjuge de residente (F2A, com ou sem status)", status: "em_breve" },
+      ],
+    },
+    {
+      id: "path_employer",
+      icon: "🏢",
+      badge: "TRABALHO",
+      tone: "pine",
+      title: "Green Card por patrocínio de empregador (EB-2 / EB-3)",
+      description:
+        "Se um empregador americano topa patrocinar, o caminho é o PERM (certificação de trabalho) seguido do I-140 e, com o Boletim de Vistos favorável, o I-485. Funciona a partir de qualquer status de trabalho válido (H-1B, L-1, O-1…) — e diferente do H-1B, não tem sorteio.",
+      does: [
+        "Você pode conversar com o empregador a qualquer momento — o processo é dele, mas a iniciativa costuma ser sua",
+        "H-1B com PERM em andamento pode estender o status além dos 6 anos",
+      ],
+      doesNot: ["O processo completo costuma levar de 2 a 4 anos — comece antes de precisar"],
+      kits: [{ label: "Kit Green Card por empregador (PERM/EB-2/EB-3)", status: "em_breve" }],
+    },
+    {
+      id: "path_niw",
+      icon: "⭐",
+      badge: "MÉRITO",
+      tone: "pine",
+      title: "EB-2 NIW — Green Card sem empregador e sem sorteio",
+      description:
+        "Se você tem mestrado/doutorado ou experiência sólida e seu trabalho beneficia os EUA, pode peticionar o próprio Green Card (I-140 NIW) — sem depender de patrocínio. É o caminho favorito de pesquisadores, engenheiros, profissionais de saúde e empreendedores brasileiros.",
+      kits: [
+        {
+          label: "Kit EB-2 NIW",
+          kitId: inUs ? "eb2niw" : "eb2niw-brasil",
+          status: "disponivel",
+        },
+      ],
+    },
+    {
+      id: "path_dv_lottery",
+      icon: "🎲",
+      badge: "LOTERIA",
+      tone: "amber",
+      title: "DV Lottery — a porta gratuita que quase ninguém tenta",
+      description:
+        "Brasileiros são elegíveis à loteria anual de Green Cards. A inscrição é gratuita e abre normalmente em outubro, no site oficial dvprogram.state.gov. As chances individuais são baixas — mas o custo é zero, e todo ano brasileiros ganham. Inscreva-se sempre.",
+      doesNot: [
+        "Sites que cobram pela inscrição são intermediários (ou golpe) — a inscrição oficial é gratuita",
+      ],
     },
   ];
 }
