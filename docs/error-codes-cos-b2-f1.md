@@ -48,9 +48,9 @@ Referência de troubleshooting para testes e produção. Companion de
 | ruleCode | O que valida | Fato de entrada | Fonte oficial | uiMessageKey quando falha |
 |----------|--------------|-----------------|---------------|---------------------------|
 | `I94_EXPIRED` | I-94 vigente na data da validação | `i94_admit_until` | 8 CFR § 248.1(b) | `block.i94_expired` (vencido) / `block.i94_missing` (sem dado) |
-| `DOS_90_DAY_WINDOW` | ≥90 dias desde a última entrada; senão, disclosure | `last_entry_date` | 9 FAM 302.9-4(B)(3)(g) | `disclosure.dos_90_day` / `block.last_entry_date_missing` (sem dado) |
+| `DOS_90_DAY_WINDOW` | ≥90 dias desde a última entrada; senão, disclosure | `last_entry_date` | 9 FAM 302.9-4(B)(3)(g)(2) | `disclosure.dos_90_day` / `block.last_entry_date_missing` (sem dado) |
 | `I20_MISSING` | SEVIS ID presente e no formato `N` + 10 dígitos | `sevis_id` | 8 CFR § 214.2(f)(1)(i)(A) | `block.i20_missing` |
-| `SEVIS_FEE_UNPAID` | Taxa SEVIS I-901 paga | `i901_fee_paid` | 8 CFR § 214.13(a)(4) | `block.sevis_fee_unpaid` |
+| `SEVIS_FEE_UNPAID` | Taxa SEVIS I-901 paga | `i901_fee_paid` | 8 CFR § 214.13(a)(3) | `block.sevis_fee_unpaid` |
 | `B2_STUDY_STARTED` | Não iniciou estudos antes da aprovação | `enrolled_before_approval` | 8 CFR § 214.2(b)(7) | `block.b2_study_started` |
 | `UNAUTHORIZED_WORK` | Não trabalhou sem autorização | `worked_without_authorization` | 8 CFR § 214.1(e); INA § 248(a)(1) | `block.unauthorized_work` |
 

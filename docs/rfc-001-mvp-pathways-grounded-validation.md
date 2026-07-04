@@ -255,3 +255,33 @@ export const MESSAGES_PT = {
    com o tempo) e dispara e-mail via Resend usando as mesmas strings.
 5. Qualquer `hard_block` ou pedido de ajuda → CTA único: advogado parceiro.
    O app nunca responde "o que eu faço agora?" com estratégia.
+
+---
+
+## ADENDO A (2026-07-04) — Auditoria de grounding contra as fontes oficiais
+
+Após a implementação, todos os textos verbatim foram conferidos contra a API
+oficial do eCFR e o fam.state.gov. Resultado: 2 textos exatos, 4 correções
+aplicadas via `supabase/migrations/011_grounding_corrections.sql` (o código
+em `lib/rules/` foi atualizado em conjunto — os trechos de exemplo neste RFC
+refletem a versão pré-auditoria e NÃO devem ser copiados):
+
+1. **8 CFR 248.1(b)** — o texto vigente inclui a exceção discricionária de
+   late filing (4 condições) que o seed original truncava, além de "whose
+   status expired" e a referência a § 214.15(f).
+2. **8 CFR 214.2(f)(1)(i)(A)** — redação atual: "Form I-20 or successor
+   form ... school certified by the Student and Exchange Visitor Program
+   (SEVP)" (a redação "SEVIS Form I-20 ... approved by the Service" é
+   obsoleta).
+3. **Taxa SEVIS para COS é 8 CFR 214.13(a)(3)** — não (a)(4), que trata de
+   mudança de categoria J-1. O texto correto também diz "fee to DHS before
+   the alien is granted the change".
+4. **Regra dos 90 dias: 9 FAM 302.9-4(B)(3)(g)(2)** — revisão CT:VISA-2002
+   (05-31-2024): "individual" em vez de "alien", janela contada de "visa
+   application or admission", e garantia de oportunidade de refutação da
+   presunção. Tradução livre atualizada em `lib/rules/officialTextPt.ts`.
+
+Nota adicional da auditoria: **8 CFR 248.1(c)** (visto no texto integral)
+reforça que, especificamente para B-1/B-2, o início de estudos antes da
+aprovação é vedado — candidato a citação secundária da regra
+`B2_STUDY_STARTED` numa iteração futura, com validação do advogado parceiro.

@@ -18,7 +18,7 @@ export const MESSAGES_PT = {
   'disclosure.dos_90_day':
     'Antes de continuar, precisamos que você leia uma regra oficial do ' +
     'Departamento de Estado. Você entrou nos EUA há {days} dias. O manual ' +
-    '9 FAM 302.9-4(B)(3)(g) diz, em tradução livre: "{official_text_pt}" ' +
+    '9 FAM 302.9-4(B)(3)(g)(2) diz, em tradução livre: "{official_text_pt}" ' +
     '[texto original em inglês →]. O Immigrei não avalia como essa regra se ' +
     'aplica ao seu caso — isso é uma análise jurídica individual. Você pode ' +
     'prosseguir com o preenchimento por sua própria decisão, ou conversar ' +
@@ -37,7 +37,7 @@ export const MESSAGES_PT = {
 
   'block.sevis_fee_unpaid':
     'Não conseguimos preparar este pedido. A regra federal 8 CFR § ' +
-    '214.13(a)(4) exige o pagamento da taxa SEVIS I-901 antes da mudança de ' +
+    '214.13(a)(3) exige o pagamento da taxa SEVIS I-901 antes da mudança de ' +
     'status para F-1. Ainda não encontramos esse comprovante no seu caso — ' +
     'o pagamento é feito diretamente em fmjfee.com, e você pode voltar aqui ' +
     'assim que tiver o recibo. Seu progresso fica salvo. Se preferir, um ' +

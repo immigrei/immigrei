@@ -44,24 +44,49 @@ export type RuleOutcome =
 // (migration 010). A UI exibe este texto — nunca uma paráfrase aplicada ao
 // caso do usuário (blindagem UPL).
 export const OFFICIAL_TEXT = {
+  // Verificado verbatim contra a API oficial do eCFR em 2026-07-04
+  // (migration 011 espelha estas correções no banco).
   CFR_248_1_B:
     'Except in the case of an alien applying to obtain V nonimmigrant ' +
-    'status, a change of status may not be approved for an alien who ' +
-    'failed to maintain the previously accorded status or where such ' +
-    'status expired before the application or petition was filed.',
+    'status in the United States under § 214.15(f) of this chapter, a ' +
+    'change of status may not be approved for an alien who failed to ' +
+    'maintain the previously accorded status or whose status expired ' +
+    'before the application or petition was filed, except that failure ' +
+    'to file before the period of previously authorized status expired ' +
+    'may be excused in the discretion of USCIS, and without separate ' +
+    'application, where it is demonstrated at the time of filing that: ' +
+    '(1) The failure to file a timely application was due to ' +
+    'extraordinary circumstances beyond the control of the applicant or ' +
+    'petitioner, and USCIS finds the delay commensurate with the ' +
+    'circumstances; (2) The alien has not otherwise violated his or her ' +
+    'nonimmigrant status; (3) The alien remains a bona fide nonimmigrant; ' +
+    'and (4) The alien is not the subject of removal proceedings under ' +
+    '8 CFR part 240.',
+  // Rev. CT:VISA-2002 (05-31-2024) — fam.state.gov, 9 FAM 302.9-4(B)(3)(g)(2)(a).
   FAM_302_9_4_B_3_G:
-    "If an alien violates or engages in conduct inconsistent with his or " +
-    "her nonimmigrant status within 90 days of entry, you may presume " +
-    "that the applicant's representations about engaging in only " +
-    "status-compliant activity were willful misrepresentations of his or " +
-    "her intention in seeking a visa or entry.",
+    'If an individual engages in conduct inconsistent with their ' +
+    'nonimmigrant status within 90 days of visa application or admission ' +
+    'to the United States, as described in subparagraph (2)(b) below, ' +
+    "you may presume that the applicant made a willful misrepresentation " +
+    "(i.e., you may presume that the applicant's representations about " +
+    'engaging in only status-compliant activity were willful ' +
+    'misrepresentations of their true intentions in seeking a visa or ' +
+    'admission to the United States). You must provide the applicant ' +
+    'with the opportunity to rebut the presumption of misrepresentation ' +
+    'by verbally presenting the applicant with your factual findings as ' +
+    'to why you believe they are ineligible 6C1.',
   CFR_214_2_F_1_I_A:
-    'A nonimmigrant student must present a SEVIS Form I-20 issued in his ' +
-    'or her own name by a school approved by the Service for attendance ' +
-    'by foreign students.',
-  CFR_214_13_A_4:
-    'An alien seeking a change of status to F-1, F-3, M-1, or M-3 must ' +
-    'pay the SEVIS fee to SEVP, unless exempt.',
+    'A nonimmigrant student may be admitted into the United States in ' +
+    'nonimmigrant status under section 101(a)(15)(F) of the Act, if: ' +
+    "(A) The student presents a Form I-20 or successor form issued in " +
+    "the student's name by a school certified by the Student and " +
+    'Exchange Visitor Program (SEVP) for attendance by F-1 foreign ' +
+    'students.',
+  CFR_214_13_A_3:
+    'A nonimmigrant alien in the United States seeking a change of ' +
+    'status to F-1, F-3, J-1, M-1, or M-3 must pay the fee to DHS before ' +
+    'the alien is granted the change of nonimmigrant status, except as ' +
+    'provided in paragraph (e)(4) of this section.',
   CFR_214_2_B_7:
     'An alien who is admitted as, or changes status to, a B-1 or B-2 ' +
     'nonimmigrant on or after April 12, 2002, or who files a request to ' +
@@ -119,7 +144,7 @@ export function rule90Days(entryDate: Date | null, today: Date): RuleOutcome {
     return {
       status: 'hard_block',
       ruleCode: 'DOS_90_DAY_WINDOW',
-      citation: '9 FAM 302.9-4(B)(3)(g)',
+      citation: '9 FAM 302.9-4(B)(3)(g)(2)',
       officialText: OFFICIAL_TEXT.FAM_302_9_4_B_3_G,
       sourceUrl: 'https://fam.state.gov/FAM/09FAM/09FAM030209.html',
       uiMessageKey: 'block.last_entry_date_missing',
@@ -133,7 +158,7 @@ export function rule90Days(entryDate: Date | null, today: Date): RuleOutcome {
   return {
     status: 'disclosure_ack_required',
     ruleCode: 'DOS_90_DAY_WINDOW',
-    citation: '9 FAM 302.9-4(B)(3)(g)',
+    citation: '9 FAM 302.9-4(B)(3)(g)(2)',
     officialText: OFFICIAL_TEXT.FAM_302_9_4_B_3_G,
     sourceUrl: 'https://fam.state.gov/FAM/09FAM/09FAM030209.html',
     uiMessageKey: 'disclosure.dos_90_day',
@@ -160,14 +185,15 @@ export function ruleI20Present(sevisId: string | null): RuleOutcome {
 }
 
 // Taxa SEVIS I-901 paga.
-// Fonte: 8 CFR § 214.13(a)(4).
+// Fonte: 8 CFR § 214.13(a)(3) — (a)(4) trata de mudança de categoria J-1;
+// citação corrigida na auditoria de grounding de 2026-07-04 (migration 011).
 export function ruleI901FeePaid(feePaid: boolean): RuleOutcome {
   if (feePaid) return { status: 'pass', ruleCode: 'SEVIS_FEE_UNPAID' };
   return {
     status: 'hard_block',
     ruleCode: 'SEVIS_FEE_UNPAID',
-    citation: '8 CFR § 214.13(a)(4)',
-    officialText: OFFICIAL_TEXT.CFR_214_13_A_4,
+    citation: '8 CFR § 214.13(a)(3)',
+    officialText: OFFICIAL_TEXT.CFR_214_13_A_3,
     sourceUrl: 'https://www.ecfr.gov/current/title-8/section-214.13',
     uiMessageKey: 'block.sevis_fee_unpaid',
     referral: 'partner_attorney',
@@ -220,7 +246,7 @@ export const RULE_CITATIONS: Record<string, string> = {
   I94_EXPIRED: '8 CFR § 248.1(b)',
   DOS_90_DAY_WINDOW: '9 FAM 302.9-4(B)(3)(g)',
   I20_MISSING: '8 CFR § 214.2(f)(1)(i)(A)',
-  SEVIS_FEE_UNPAID: '8 CFR § 214.13(a)(4)',
+  SEVIS_FEE_UNPAID: '8 CFR § 214.13(a)(3)',
   B2_STUDY_STARTED: '8 CFR § 214.2(b)(7)',
   UNAUTHORIZED_WORK: '8 CFR § 214.1(e); INA § 248(a)(1)',
 };

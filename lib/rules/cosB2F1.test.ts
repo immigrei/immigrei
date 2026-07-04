@@ -67,7 +67,7 @@ describe('rule90Days', () => {
     expect(result.status).toBe('disclosure_ack_required');
     if (result.status === 'disclosure_ack_required') {
       expect(result.ruleCode).toBe('DOS_90_DAY_WINDOW');
-      expect(result.citation).toBe('9 FAM 302.9-4(B)(3)(g)');
+      expect(result.citation).toBe('9 FAM 302.9-4(B)(3)(g)(2)');
       expect(result.referral).toBe('partner_attorney_optional');
     }
   });
@@ -92,7 +92,7 @@ describe('rule90Days', () => {
     expect(result.status).toBe('hard_block');
     if (result.status === 'hard_block') {
       expect(result.ruleCode).toBe('DOS_90_DAY_WINDOW');
-      expect(result.citation).toBe('9 FAM 302.9-4(B)(3)(g)');
+      expect(result.citation).toBe('9 FAM 302.9-4(B)(3)(g)(2)');
       expect(result.uiMessageKey).toBe('block.last_entry_date_missing');
       expect(result.referral).toBe('partner_attorney');
     }
@@ -144,7 +144,7 @@ describe('ruleI901FeePaid', () => {
     expect(result.status).toBe('hard_block');
     if (result.status === 'hard_block') {
       expect(result.ruleCode).toBe('SEVIS_FEE_UNPAID');
-      expect(result.citation).toBe('8 CFR § 214.13(a)(4)');
+      expect(result.citation).toBe('8 CFR § 214.13(a)(3)');
       expect(result.referral).toBe('partner_attorney');
     }
   });
