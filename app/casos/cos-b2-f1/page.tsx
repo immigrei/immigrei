@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import { interpolateMessage } from "@/lib/rules/interpolateMessage";
@@ -61,6 +61,59 @@ const CASE_STATUS_LABELS: Record<CaseStatus, string> = {
   compiled: "Compilado",
 };
 
+const AUTOSAVE_DEBOUNCE_MS = 800;
+
+// Link oficial por campo do formulário — a definição de uma linha vem de
+// MESSAGES_PT['helper.*'] (vigiada pelo guard UPL); o rótulo do link aqui é
+// só navegação, igual ao padrão já usado em "Ver a norma oficial →".
+const FIELD_HELP: Record<
+  keyof Pick<FormState, "i94_number" | "last_entry_date" | "i94_admit_until" | "sevis_id" | "i901_fee_paid">,
+  { messageKey: keyof typeof MESSAGES_PT; url: string; linkLabel: string }
+> = {
+  i94_number: {
+    messageKey: "helper.i94_number",
+    url: "https://i94.cbp.dhs.gov/",
+    linkLabel: "Abrir i94.cbp.dhs.gov →",
+  },
+  last_entry_date: {
+    messageKey: "helper.last_entry_date",
+    url: "https://i94.cbp.dhs.gov/",
+    linkLabel: "Abrir i94.cbp.dhs.gov →",
+  },
+  i94_admit_until: {
+    messageKey: "helper.i94_admit_until",
+    url: "https://i94.cbp.dhs.gov/",
+    linkLabel: "Abrir i94.cbp.dhs.gov →",
+  },
+  sevis_id: {
+    messageKey: "helper.sevis_id",
+    url: "https://studyinthestates.dhs.gov/school-search",
+    linkLabel: "Buscar escolas certificadas (SEVP) →",
+  },
+  i901_fee_paid: {
+    messageKey: "helper.i901_fee_paid",
+    url: "https://www.fmjfee.com/",
+    linkLabel: "Abrir fmjfee.com →",
+  },
+};
+
+function FieldHelp({ field }: { field: keyof typeof FIELD_HELP }) {
+  const { messageKey, url, linkLabel } = FIELD_HELP[field];
+  return (
+    <p className="text-ink-faint text-xs mt-1.5 leading-relaxed">
+      {MESSAGES_PT[messageKey]}{" "}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-pine underline underline-offset-2 whitespace-nowrap"
+      >
+        {linkLabel}
+      </a>
+    </p>
+  );
+}
+
 function formatDateBr(isoDate: string): string {
   const [year, month, day] = isoDate.split("-");
   return `${day}/${month}/${year}`;
@@ -108,9 +161,8 @@ export default function CosB2F1Page() {
   const [acknowledgedAt, setAcknowledgedAt] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [savedOnce, setSavedOnce] = useState(false);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveErrorMsg, setSaveErrorMsg] = useState<string | null>(null);
 
   const [validating, setValidating] = useState(false);
   const [validateError, setValidateError] = useState<string | null>(null);
@@ -118,8 +170,22 @@ export default function CosB2F1Page() {
 
   const [acknowledging, setAcknowledging] = useState(false);
 
+  // formRef sempre reflete o form mais recente — persist() lê daqui em vez
+  // de depender do valor capturado no closure do momento em que o debounce
+  // foi agendado.
+  const formRef = useRef(form);
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inFlightSaveRef = useRef<Promise<string | null> | null>(null);
+
   useEffect(() => {
     load();
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -164,54 +230,77 @@ export default function CosB2F1Page() {
     }
   }
 
-  function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
+  // Salva os fatos atuais (formRef.current) e devolve o id do caso, ou null
+  // em falha. Chamadas concorrentes (debounce disparando bem na hora do
+  // clique em "Validar meu caso") reaproveitam a mesma requisição em voo.
+  async function persist(): Promise<string | null> {
+    if (inFlightSaveRef.current) return inFlightSaveRef.current;
 
-  async function save() {
-    setSaving(true);
-    setSaveError(null);
+    const run = (async (): Promise<string | null> => {
+      setSaveState("saving");
+      setSaveErrorMsg(null);
+      try {
+        const f = formRef.current;
+        const res = await fetch("/api/cases/cos-b2-f1", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            i94_number: f.i94_number || null,
+            last_entry_date: f.last_entry_date || null,
+            i94_admit_until: f.i94_admit_until || null,
+            sevis_id: f.sevis_id || null,
+            i901_fee_paid: f.i901_fee_paid,
+            enrolled_before_approval: f.enrolled_before_approval,
+            worked_without_authorization: f.worked_without_authorization,
+          }),
+        });
+
+        if (res.status === 401) {
+          router.push("/sign-in");
+          return null;
+        }
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          setSaveState("error");
+          setSaveErrorMsg(data.error ?? "Falha ao salvar o caso.");
+          return null;
+        }
+
+        setCaseId(data.case.id);
+        setCaseStatus(data.case.status);
+        setSaveState("saved");
+        return data.case.id as string;
+      } catch {
+        setSaveState("error");
+        setSaveErrorMsg("Falha ao salvar o caso.");
+        return null;
+      }
+    })();
+
+    inFlightSaveRef.current = run;
     try {
-      const res = await fetch("/api/cases/cos-b2-f1", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          i94_number: form.i94_number || null,
-          last_entry_date: form.last_entry_date || null,
-          i94_admit_until: form.i94_admit_until || null,
-          sevis_id: form.sevis_id || null,
-          i901_fee_paid: form.i901_fee_paid,
-          enrolled_before_approval: form.enrolled_before_approval,
-          worked_without_authorization: form.worked_without_authorization,
-        }),
-      });
-
-      if (res.status === 401) {
-        router.push("/sign-in");
-        return;
-      }
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setSaveError(data.error ?? "Falha ao salvar o caso.");
-        return;
-      }
-
-      setCaseId(data.case.id);
-      setCaseStatus(data.case.status);
-      setSavedOnce(true);
+      return await run;
     } finally {
-      setSaving(false);
+      inFlightSaveRef.current = null;
     }
   }
 
-  async function validateCase() {
-    if (!caseId) return;
+  function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null;
+      persist();
+    }, AUTOSAVE_DEBOUNCE_MS);
+  }
+
+  async function validateCase(id: string) {
     setValidating(true);
     setValidateError(null);
     try {
-      const res = await fetch(`/api/cases/cos-b2-f1/${caseId}/validate`, { method: "POST" });
+      const res = await fetch(`/api/cases/cos-b2-f1/${id}/validate`, { method: "POST" });
 
       if (res.status === 401) {
         router.push("/sign-in");
@@ -232,6 +321,22 @@ export default function CosB2F1Page() {
     } finally {
       setValidating(false);
     }
+  }
+
+  async function handleValidateClick() {
+    setValidateError(null);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    const id = await persist();
+    if (!id) {
+      setValidateError(
+        "Não foi possível salvar seu progresso antes de validar. Tente novamente.",
+      );
+      return;
+    }
+    await validateCase(id);
   }
 
   async function acknowledge90Day() {
@@ -341,6 +446,7 @@ export default function CosB2F1Page() {
               placeholder="Ex.: 12345678901"
               className="w-full rounded-xl border border-pine-tint bg-cream-2 px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-pine"
             />
+            <FieldHelp field="i94_number" />
           </div>
 
           <div className="mb-4">
@@ -353,6 +459,7 @@ export default function CosB2F1Page() {
               onChange={(e) => updateField("last_entry_date", e.target.value)}
               className="w-full rounded-xl border border-pine-tint bg-cream-2 px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-pine"
             />
+            <FieldHelp field="last_entry_date" />
           </div>
 
           <div className="mb-4">
@@ -365,6 +472,7 @@ export default function CosB2F1Page() {
               onChange={(e) => updateField("i94_admit_until", e.target.value)}
               className="w-full rounded-xl border border-pine-tint bg-cream-2 px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-pine"
             />
+            <FieldHelp field="i94_admit_until" />
           </div>
 
           <div className="mb-4">
@@ -379,9 +487,10 @@ export default function CosB2F1Page() {
               placeholder="Ex.: N0012345678"
               className="w-full rounded-xl border border-pine-tint bg-cream-2 px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-pine"
             />
+            <FieldHelp field="sevis_id" />
           </div>
 
-          <label className="flex items-start gap-3 cursor-pointer mb-3">
+          <label className="flex items-start gap-3 cursor-pointer mb-1">
             <input
               type="checkbox"
               checked={form.i901_fee_paid}
@@ -390,6 +499,9 @@ export default function CosB2F1Page() {
             />
             <span className="text-ink text-sm">Já paguei a taxa SEVIS I-901</span>
           </label>
+          <div className="pl-7 mb-3">
+            <FieldHelp field="i901_fee_paid" />
+          </div>
 
           <label className="flex items-start gap-3 cursor-pointer mb-3">
             <input
@@ -415,32 +527,25 @@ export default function CosB2F1Page() {
             </span>
           </label>
 
-          <button
-            onClick={save}
-            disabled={saving}
-            className="w-full bg-pine text-cream-2 rounded-xl py-3 text-sm font-bold hover:bg-pine-deep transition-colors disabled:opacity-50"
-          >
-            {saving ? "Salvando..." : "Salvar progresso"}
-          </button>
-          {saveError && <p className="text-clay text-xs mt-2">{saveError}</p>}
-          {savedOnce && !saveError && !saving && (
-            <p className="text-sage text-xs mt-2">✓ Progresso salvo.</p>
-          )}
+          <div className="flex justify-end h-4 mt-2">
+            {saveState === "saving" && <p className="text-ink-faint text-xs">Salvando...</p>}
+            {saveState === "saved" && (
+              <p className="text-sage text-xs font-semibold">Salvo ✓</p>
+            )}
+            {saveState === "error" && (
+              <p className="text-clay text-xs">{saveErrorMsg}</p>
+            )}
+          </div>
         </div>
 
-        {/* Validar */}
+        {/* Validar — sempre salva os fatos pendentes antes de validar */}
         <button
-          onClick={validateCase}
-          disabled={!caseId || validating}
+          onClick={handleValidateClick}
+          disabled={saveState === "saving" || validating}
           className="w-full bg-amber text-ink rounded-xl py-3.5 text-sm font-bold hover:bg-amber-deep transition-colors disabled:opacity-50 mb-2"
         >
-          {validating ? "Validando..." : "Validar meu caso"}
+          {saveState === "saving" ? "Salvando..." : validating ? "Validando..." : "Validar meu caso"}
         </button>
-        {!caseId && (
-          <p className="text-ink-faint text-xs text-center mb-6">
-            Salve seu progresso antes de validar.
-          </p>
-        )}
         {validateError && (
           <p className="text-clay text-xs text-center mb-6">{validateError}</p>
         )}

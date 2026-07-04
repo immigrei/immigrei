@@ -77,6 +77,30 @@ export const MESSAGES_PT = {
     'consultar a data no seu I-94 em i94.cbp.dhs.gov e informá-la para ' +
     'continuar. Seu progresso fica salvo. Se preferir, um advogado ' +
     'parceiro pode orientar seus próximos passos.',
+
+  // Helper text educativo sob os campos do formulário (app/casos/cos-b2-f1).
+  // Definições factuais de uma linha — zero verbo de conselho — vigiadas
+  // pelo mesmo guard UPL (messages.upl-guard.test.ts) que as mensagens de
+  // bloqueio/disclosure.
+  'helper.i94_number':
+    'Registro eletrônico de entrada e saída criado pelo CBP quando você ' +
+    'entra nos EUA. Consulte o seu em i94.cbp.dhs.gov.',
+
+  'helper.last_entry_date':
+    'Data que consta no seu I-94 — o mesmo registro eletrônico de entrada ' +
+    'e saída emitido pelo CBP.',
+
+  'helper.i94_admit_until':
+    'Data-limite da sua permanência autorizada, definida pelo CBP — campo ' +
+    '"Admit Until" do I-94.',
+
+  'helper.sevis_id':
+    'Número no topo do seu Form I-20, emitido pela escola. Formato N ' +
+    'seguido de 10 dígitos.',
+
+  'helper.i901_fee_paid':
+    'Taxa SEVIS paga diretamente ao SEVP em fmjfee.com, exigida para a ' +
+    'mudança de status para F-1.',
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_PT;
