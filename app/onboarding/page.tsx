@@ -866,7 +866,7 @@ function deriveMainGoal(a: Answers): string {
   if (a.q_gc_goal === "family" || a.q_family_ties && a.q_family_ties !== "none") return "trazer_familia";
   if (a.q_current_status === "overstay") return "regularizar_status";
   if (a.q_goal === "live" || a.q_permanent_path) return "green_card";
-  if (a.q_goal === "study" || a.q_goal === "work" || a.q_goal === "business") return "regularizar_status";
+  if (a.q_goal === "study" || a.q_goal === "work" || a.q_goal === "business") return "outro";
   if (a.q_goal === "visit") return "outro";
   return "outro";
 }
