@@ -6,6 +6,8 @@ import {
   ruleI901FeePaid,
   ruleNoEarlyEnrollment,
   ruleNoUnauthorizedWork,
+  runCosB2F1Rules,
+  type CosB2F1CaseFacts,
 } from './cosB2F1';
 
 const DAY = 86_400_000;
@@ -43,6 +45,18 @@ describe('ruleI94Valid', () => {
     const result = ruleI94Valid(i94ExpiresOn, today);
     expect(result).toEqual({ status: 'pass', ruleCode: 'I94_EXPIRED' });
   });
+
+  it('bloqueia (dado ausente) quando i94ExpiresOn é null, sem lançar exceção', () => {
+    const today = new Date('2026-07-04T00:00:00Z');
+    const result = ruleI94Valid(null, today);
+    expect(result.status).toBe('hard_block');
+    if (result.status === 'hard_block') {
+      expect(result.ruleCode).toBe('I94_EXPIRED');
+      expect(result.citation).toBe('8 CFR § 248.1(b)');
+      expect(result.uiMessageKey).toBe('block.i94_missing');
+      expect(result.referral).toBe('partner_attorney');
+    }
+  });
 });
 
 describe('rule90Days', () => {
@@ -70,6 +84,18 @@ describe('rule90Days', () => {
     const entryDate = new Date(today.getTime() - 200 * DAY);
     const result = rule90Days(entryDate, today);
     expect(result.status).toBe('pass');
+  });
+
+  it('bloqueia (dado ausente) quando entryDate é null, sem lançar exceção', () => {
+    const today = new Date('2026-07-04T00:00:00Z');
+    const result = rule90Days(null, today);
+    expect(result.status).toBe('hard_block');
+    if (result.status === 'hard_block') {
+      expect(result.ruleCode).toBe('DOS_90_DAY_WINDOW');
+      expect(result.citation).toBe('9 FAM 302.9-4(B)(3)(g)');
+      expect(result.uiMessageKey).toBe('block.last_entry_date_missing');
+      expect(result.referral).toBe('partner_attorney');
+    }
   });
 });
 
@@ -140,6 +166,13 @@ describe('ruleNoEarlyEnrollment', () => {
       expect(result.citation).toBe('8 CFR § 214.2(b)(7)');
     }
   });
+
+  it('aprova quando o fato ainda não foi declarado (null => tratado como false)', () => {
+    expect(ruleNoEarlyEnrollment(null)).toEqual({
+      status: 'pass',
+      ruleCode: 'B2_STUDY_STARTED',
+    });
+  });
 });
 
 describe('ruleNoUnauthorizedWork', () => {
@@ -157,5 +190,44 @@ describe('ruleNoUnauthorizedWork', () => {
       expect(result.ruleCode).toBe('UNAUTHORIZED_WORK');
       expect(result.citation).toBe('8 CFR § 214.1(e); INA § 248(a)(1)');
     }
+  });
+
+  it('aprova quando o fato ainda não foi declarado (null => tratado como false)', () => {
+    expect(ruleNoUnauthorizedWork(null)).toEqual({
+      status: 'pass',
+      ruleCode: 'UNAUTHORIZED_WORK',
+    });
+  });
+});
+
+describe('runCosB2F1Rules', () => {
+  const today = new Date('2026-07-04T00:00:00Z');
+
+  const completeFacts: CosB2F1CaseFacts = {
+    i94AdmitUntil: new Date('2026-08-01T00:00:00Z'),
+    lastEntryDate: new Date('2026-01-01T00:00:00Z'),
+    sevisId: 'N0012345678',
+    i901FeePaid: true,
+    enrolledBeforeApproval: false,
+    workedWithoutAuthorization: false,
+  };
+
+  it('retorna 6 outcomes, todos pass, para um caso completo e conforme', () => {
+    const outcomes = runCosB2F1Rules(completeFacts, today);
+    expect(outcomes).toHaveLength(6);
+    expect(outcomes.every((o) => o.status === 'pass')).toBe(true);
+  });
+
+  it('bloqueia por dado ausente quando i94AdmitUntil e lastEntryDate são null, sem lançar exceção', () => {
+    const facts: CosB2F1CaseFacts = {
+      ...completeFacts,
+      i94AdmitUntil: null,
+      lastEntryDate: null,
+    };
+    const outcomes = runCosB2F1Rules(facts, today);
+    expect(outcomes).toHaveLength(6);
+    const [i94Outcome, days90Outcome] = outcomes;
+    expect(i94Outcome).toMatchObject({ status: 'hard_block', ruleCode: 'I94_EXPIRED' });
+    expect(days90Outcome).toMatchObject({ status: 'hard_block', ruleCode: 'DOS_90_DAY_WINDOW' });
   });
 });

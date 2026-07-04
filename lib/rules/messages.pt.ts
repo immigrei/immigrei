@@ -60,6 +60,23 @@ export const MESSAGES_PT = {
     'notícia é difícil. Casos fora dos parâmetros do nosso compilador ' +
     'precisam de análise individual — podemos te conectar agora com um ' +
     'advogado parceiro. Ver a norma oficial →',
+
+  'block.i94_missing':
+    'Não conseguimos preparar este pedido. A regra federal 8 CFR § ' +
+    '248.1(b) exige que a mudança de status seja protocolada enquanto o ' +
+    'seu período autorizado de permanência (I-94) está vigente, e ainda ' +
+    'não encontramos a data "Admit Until" do seu I-94 no seu caso. Você ' +
+    'pode consultar o documento mais recente em i94.cbp.dhs.gov e informar ' +
+    'essa data para continuar. Seu progresso fica salvo. Se preferir, um ' +
+    'advogado parceiro pode orientar seus próximos passos.',
+
+  'block.last_entry_date_missing':
+    'Não conseguimos preparar este pedido. A regra 9 FAM 302.9-4(B)(3)(g) ' +
+    'do Departamento de Estado depende da data da sua última entrada nos ' +
+    'EUA, e ainda não encontramos essa informação no seu caso. Você pode ' +
+    'consultar a data no seu I-94 em i94.cbp.dhs.gov e informá-la para ' +
+    'continuar. Seu progresso fica salvo. Se preferir, um advogado ' +
+    'parceiro pode orientar seus próximos passos.',
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_PT;

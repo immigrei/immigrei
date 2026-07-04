@@ -78,7 +78,20 @@ export const OFFICIAL_TEXT = {
 // EDGE CASE 1 — I-94 vencido (ex.: venceu ontem)
 // Fonte: 8 CFR § 248.1(b) (timely filing / manutenção de status);
 //        CBP, "Arrival/Departure Record" (o I-94 define o Authorized Period of Stay).
-export function ruleI94Valid(i94ExpiresOn: Date, today: Date): RuleOutcome {
+// i94ExpiresOn null = dado obrigatório ausente (fato ainda não coletado do
+// usuário) — trava o fluxo como hard_block, nunca lança exceção.
+export function ruleI94Valid(i94ExpiresOn: Date | null, today: Date): RuleOutcome {
+  if (i94ExpiresOn === null) {
+    return {
+      status: 'hard_block',
+      ruleCode: 'I94_EXPIRED',
+      citation: '8 CFR § 248.1(b)',
+      officialText: OFFICIAL_TEXT.CFR_248_1_B,
+      sourceUrl: 'https://www.ecfr.gov/current/title-8/section-248.1',
+      uiMessageKey: 'block.i94_missing',
+      referral: 'partner_attorney',
+    };
+  }
   if (toUtcDateOnly(i94ExpiresOn).getTime() >= toUtcDateOnly(today).getTime()) {
     return { status: 'pass', ruleCode: 'I94_EXPIRED' };
   }
@@ -98,7 +111,21 @@ export function ruleI94Valid(i94ExpiresOn: Date, today: Date): RuleOutcome {
 // conduta inconsistente nos primeiros 90 dias). NÃO é proibição de protocolo:
 // não existe regra que impeça o filing. Por isso NÃO é hard_block — é
 // disclosure com ciência obrigatória.
-export function rule90Days(entryDate: Date, today: Date): RuleOutcome {
+// entryDate null = dado obrigatório ausente — trava o fluxo como hard_block
+// (diferente da disclosure de "ainda não completou 90 dias": aqui não há
+// dado nenhum para calcular a janela).
+export function rule90Days(entryDate: Date | null, today: Date): RuleOutcome {
+  if (entryDate === null) {
+    return {
+      status: 'hard_block',
+      ruleCode: 'DOS_90_DAY_WINDOW',
+      citation: '9 FAM 302.9-4(B)(3)(g)',
+      officialText: OFFICIAL_TEXT.FAM_302_9_4_B_3_G,
+      sourceUrl: 'https://fam.state.gov/FAM/09FAM/09FAM030209.html',
+      uiMessageKey: 'block.last_entry_date_missing',
+      referral: 'partner_attorney',
+    };
+  }
   const days = Math.floor(
     (toUtcDateOnly(today).getTime() - toUtcDateOnly(entryDate).getTime()) / DAY
   );
@@ -149,7 +176,9 @@ export function ruleI901FeePaid(feePaid: boolean): RuleOutcome {
 
 // Matrícula antecipada: início de curso em B1/B2 antes da aprovação viola o
 // status. Fonte: 8 CFR § 214.2(b)(7).
-export function ruleNoEarlyEnrollment(enrolledBeforeApproval: boolean): RuleOutcome {
+// null (fato ainda não declarado) => tratado como false, espelhando
+// coalesce(c.enrolled_before_approval, false) em validate_cos_b2_f1().
+export function ruleNoEarlyEnrollment(enrolledBeforeApproval: boolean | null): RuleOutcome {
   if (!enrolledBeforeApproval) {
     return { status: 'pass', ruleCode: 'B2_STUDY_STARTED' };
   }
@@ -166,7 +195,9 @@ export function ruleNoEarlyEnrollment(enrolledBeforeApproval: boolean): RuleOutc
 
 // Trabalho não autorizado em B1/B2 impede mudança de status.
 // Fonte: 8 CFR § 214.1(e); INA § 248(a)(1).
-export function ruleNoUnauthorizedWork(workedWithoutAuthorization: boolean): RuleOutcome {
+// null (fato ainda não declarado) => tratado como false, espelhando
+// coalesce(c.worked_without_authorization, false) em validate_cos_b2_f1().
+export function ruleNoUnauthorizedWork(workedWithoutAuthorization: boolean | null): RuleOutcome {
   if (!workedWithoutAuthorization) {
     return { status: 'pass', ruleCode: 'UNAUTHORIZED_WORK' };
   }
@@ -179,4 +210,47 @@ export function ruleNoUnauthorizedWork(workedWithoutAuthorization: boolean): Rul
     uiMessageKey: 'block.unauthorized_work',
     referral: 'partner_attorney',
   };
+}
+
+// Citações verbatim por rule_code, para as linhas 'pass' persistidas em
+// case_rule_results (citation é NOT NULL na migration mesmo quando outcome é
+// 'pass' — a variante 'pass' de RuleOutcome não carrega citation por design
+// do contrato do RFC-001 §3.1, então o valor é resolvido aqui).
+export const RULE_CITATIONS: Record<string, string> = {
+  I94_EXPIRED: '8 CFR § 248.1(b)',
+  DOS_90_DAY_WINDOW: '9 FAM 302.9-4(B)(3)(g)',
+  I20_MISSING: '8 CFR § 214.2(f)(1)(i)(A)',
+  SEVIS_FEE_UNPAID: '8 CFR § 214.13(a)(4)',
+  B2_STUDY_STARTED: '8 CFR § 214.2(b)(7)',
+  UNAUTHORIZED_WORK: '8 CFR § 214.1(e); INA § 248(a)(1)',
+};
+
+export function citationFor(outcome: RuleOutcome): string {
+  return outcome.status === 'pass' ? RULE_CITATIONS[outcome.ruleCode] : outcome.citation;
+}
+
+// Fatos do caso, já tipados (Date/boolean), independentes de como o chamador
+// os obteve (Supabase, service role, etc.) — a orquestração abaixo continua
+// sem I/O.
+export interface CosB2F1CaseFacts {
+  i94AdmitUntil: Date | null;
+  lastEntryDate: Date | null;
+  sevisId: string | null;
+  i901FeePaid: boolean;
+  enrolledBeforeApproval: boolean | null;
+  workedWithoutAuthorization: boolean | null;
+}
+
+// Roda as 6 regras espelhando, na mesma ordem, validate_cos_b2_f1() da
+// migration 010 — reutilizável tanto no submit quanto num futuro cron de
+// reavaliação (RFC-001 §3.4).
+export function runCosB2F1Rules(facts: CosB2F1CaseFacts, today: Date): RuleOutcome[] {
+  return [
+    ruleI94Valid(facts.i94AdmitUntil, today),
+    rule90Days(facts.lastEntryDate, today),
+    ruleI20Present(facts.sevisId),
+    ruleI901FeePaid(facts.i901FeePaid),
+    ruleNoEarlyEnrollment(facts.enrolledBeforeApproval),
+    ruleNoUnauthorizedWork(facts.workedWithoutAuthorization),
+  ];
 }
