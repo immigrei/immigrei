@@ -150,10 +150,21 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 
 ```
 /app              → Next.js App Router pages
+/lib              → Shared logic (visa journeys, strategies, cron helpers)
+/content/leis     → Curated legal knowledge base (see rule below)
 /public           → Static assets
 CLAUDE.md         → This file
 .env.local        → API keys (local only, never commit)
 ```
+
+### Legal research rule
+For any immigration-law question (visas, forms, denials, concepts), search
+`/content/leis` FIRST — it is the closed, curated knowledge base. Only go to
+the web if the topic is missing there, and then only use the official sources
+listed in `content/leis/fontes.md`, proposing the result as a new file.
+Current Visa Bulletin priority dates live in the Supabase `visa_bulletin`
+table (updated monthly by `/api/cron/visa-bulletin` on the 10th) — never
+hardcode dates.
 
 ---
 
