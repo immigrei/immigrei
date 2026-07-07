@@ -6,7 +6,6 @@ import { getJourney } from "@/lib/visa-journeys";
 import { isDeniedStatus } from "@/lib/uscis";
 import JourneyTimeline from "./JourneyTimeline";
 import CaseStatusCard, { UserCase } from "./CaseStatusCard";
-import CosB2F1Card from "./CosB2F1Card";
 import StrategicOptionsCard from "./StrategicOptionsCard";
 import VisaBulletinWidget from "./VisaBulletinWidget";
 import CaseTracker from "./CaseTracker";
@@ -136,9 +135,6 @@ export default async function DashboardPage() {
 
         {/* USCIS case tracking */}
         <CaseStatusCard initialCases={(userCases ?? []) as UserCase[]} />
-
-        {/* B1/B2 -> F-1 change of status pathway */}
-        <CosB2F1Card />
 
         {/* Strategic options for denied cases */}
         {(userCases ?? [])

@@ -9,6 +9,8 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/em-breve(.*)",
   "/nossa-historia(.*)",
+  "/termos",
+  "/privacidade",
   "/sitemap.xml",
   "/robots.txt",
   "/planos",
@@ -34,6 +36,8 @@ export default clerkMiddleware(async (auth, req) => {
     if (
       !pathname.startsWith("/em-breve") &&
       !pathname.startsWith("/nossa-historia") &&
+      pathname !== "/termos" &&
+      pathname !== "/privacidade" &&
       pathname !== "/api/waitlist" &&
       pathname !== "/sitemap.xml" &&
       pathname !== "/robots.txt"

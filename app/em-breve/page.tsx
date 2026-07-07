@@ -219,6 +219,11 @@ export default function EmBrevePage() {
       <footer className="text-center px-6 py-8 text-ink-faint text-xs leading-relaxed">
         <p>Imigrando com clareza. Em breve.</p>
         <p className="mt-1">© {new Date().getFullYear()} Immigrei. Não somos um escritório de advocacia.</p>
+        <p className="mt-1">
+          <Link href="/termos" className="underline underline-offset-2">Termos de Uso</Link>
+          {" · "}
+          <Link href="/privacidade" className="underline underline-offset-2">Privacidade</Link>
+        </p>
       </footer>
     </main>
   );
