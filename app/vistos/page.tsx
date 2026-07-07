@@ -488,7 +488,7 @@ export default function VistosPage() {
         title="Estudo & Intercâmbio"
         subtitle="Vistos para quem vem estudar, pesquisar ou participar de programas de intercâmbio"
       />
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
         {vistosEstudo.map((v) => (
           <VistoCard
             key={v.id}
@@ -505,7 +505,7 @@ export default function VistosPage() {
         title="Negócios & Investimento"
         subtitle="Vistos para empreendedores, executivos e investidores — alguns exigem tratado entre países"
       />
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
         {vistosNegocios.map((v) => (
           <VistoCard
             key={v.id}
