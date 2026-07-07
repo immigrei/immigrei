@@ -14,6 +14,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { ensureProfile } from "@/lib/profile";
 
 const UPSERTABLE_FIELDS = [
   "i94_number",
@@ -73,11 +74,35 @@ export async function POST(req: NextRequest) {
     .limit(1)
     .maybeSingle();
 
+  // user_id tem FK para profiles(clerk_user_id); quem chega por deep link
+  // sem passar pelo dashboard ainda não tem perfil — garante antes do insert.
+  if (!existing) {
+    await ensureProfile(userId);
+  }
+
   const query = existing
     ? supabaseAdmin.from("cos_b2_f1_cases").update(fields).eq("id", existing.id)
     : supabaseAdmin.from("cos_b2_f1_cases").insert({ user_id: userId, ...fields });
 
-  const { data, error } = await query.select().single();
+  let { data, error } = await query.select().single();
+
+  // 23505 = corrida de dois inserts simultâneos (duas abas). O índice único
+  // de user_id (migration 012) garante uma linha; o perdedor vira update.
+  if (error?.code === "23505" && !existing) {
+    const { data: winner } = await supabaseAdmin
+      .from("cos_b2_f1_cases")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (winner) {
+      ({ data, error } = await supabaseAdmin
+        .from("cos_b2_f1_cases")
+        .update(fields)
+        .eq("id", winner.id)
+        .select()
+        .single());
+    }
+  }
 
   if (error) {
     // 23514 = check_violation (ex.: SEVIS ID ou I-94 number em formato

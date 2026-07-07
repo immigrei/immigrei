@@ -18,7 +18,7 @@ function display(state: CardState): {
   switch (state) {
     case "none":
       return {
-        description: "Veja se você pode mudar de status para estudante.",
+        description: "Verificação técnica do caminho B1/B2 → F-1.",
         right: { kind: "cta", label: "Começar →" },
       };
     case "draft":
@@ -34,10 +34,13 @@ function display(state: CardState): {
       };
     case "blocked":
       return {
-        description: "Revise as pendências.",
+        // Neutro de propósito: um hard_block pode ser dado faltante
+        // (recuperável) ou violação substantiva (não é "pendência" a
+        // revisar) — o detalhe com o tom certo vive em MESSAGES_PT.
+        description: "Há itens que exigem sua atenção. Veja os detalhes.",
         right: {
           kind: "badge",
-          label: "Requer atenção",
+          label: "Atenção",
           badgeClass: "bg-amber-tint text-amber-deep",
         },
       };

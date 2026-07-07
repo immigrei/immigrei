@@ -24,20 +24,27 @@ const disclosure = (ruleCode: string): RuleOutcome => ({
   referral: 'partner_attorney_optional',
 });
 
+const ACK = '2026-07-07T00:00:00Z';
+
 describe('deriveCaseStatus', () => {
   it('retorna validated quando todas as regras passam', () => {
     const outcomes = [pass('A'), pass('B'), pass('C')];
-    expect(deriveCaseStatus(outcomes)).toBe('validated');
+    expect(deriveCaseStatus(outcomes, null)).toBe('validated');
   });
 
-  it('retorna validated quando há disclosure mas nenhum hard_block', () => {
+  it('retorna draft quando há disclosure sem ciência registrada', () => {
     const outcomes = [pass('A'), disclosure('B'), pass('C')];
-    expect(deriveCaseStatus(outcomes)).toBe('validated');
+    expect(deriveCaseStatus(outcomes, null)).toBe('draft');
   });
 
-  it('retorna blocked quando há ao menos um hard_block', () => {
+  it('retorna validated quando a disclosure já tem ciência registrada', () => {
+    const outcomes = [pass('A'), disclosure('B'), pass('C')];
+    expect(deriveCaseStatus(outcomes, ACK)).toBe('validated');
+  });
+
+  it('retorna blocked quando há ao menos um hard_block (mesmo com ciência)', () => {
     const outcomes = [pass('A'), hardBlock('B'), disclosure('C')];
-    expect(deriveCaseStatus(outcomes)).toBe('blocked');
+    expect(deriveCaseStatus(outcomes, ACK)).toBe('blocked');
   });
 
   it('retorna blocked mesmo com um único hard_block entre 6 outcomes', () => {
@@ -49,10 +56,10 @@ describe('deriveCaseStatus', () => {
       hardBlock('B2_STUDY_STARTED'),
       pass('UNAUTHORIZED_WORK'),
     ];
-    expect(deriveCaseStatus(outcomes)).toBe('blocked');
+    expect(deriveCaseStatus(outcomes, null)).toBe('blocked');
   });
 
   it('retorna validated para uma lista vazia (nenhum hard_block presente)', () => {
-    expect(deriveCaseStatus([])).toBe('validated');
+    expect(deriveCaseStatus([], null)).toBe('validated');
   });
 });

@@ -10,6 +10,16 @@
 // link para fam.state.gov — esta tradução é só apoio de leitura, nunca
 // substitui a norma original. Texto-fonte verificado contra fam.state.gov
 // em 2026-07-04 (auditoria de grounding, migration 011).
+// Gate de publicação: enquanto false, a UI NÃO exibe a tradução livre —
+// mostra um aviso neutro e aponta para o texto oficial em inglês.
+// Vire true somente após aprovação por escrito do advogado parceiro.
+export const OFFICIAL_TEXT_PT_APPROVED = false;
+
+// Exibido no lugar da tradução enquanto OFFICIAL_TEXT_PT_APPROVED = false.
+export const OFFICIAL_TEXT_PT_PENDING_NOTICE =
+  'tradução em português em revisão pelo advogado parceiro — leia o texto ' +
+  'oficial em inglês no link ao lado';
+
 export const OFFICIAL_TEXT_PT = {
   // Voz corrigida (revisão adversarial 2026-07-04): no original, "you may
   // presume" dirige-se ao OFICIAL CONSULAR — é faculdade discricionária do

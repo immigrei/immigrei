@@ -244,7 +244,7 @@ export function ruleNoUnauthorizedWork(workedWithoutAuthorization: boolean | nul
 // do contrato do RFC-001 §3.1, então o valor é resolvido aqui).
 export const RULE_CITATIONS: Record<string, string> = {
   I94_EXPIRED: '8 CFR § 248.1(b)',
-  DOS_90_DAY_WINDOW: '9 FAM 302.9-4(B)(3)(g)',
+  DOS_90_DAY_WINDOW: '9 FAM 302.9-4(B)(3)(g)(2)',
   I20_MISSING: '8 CFR § 214.2(f)(1)(i)(A)',
   SEVIS_FEE_UNPAID: '8 CFR § 214.13(a)(3)',
   B2_STUDY_STARTED: '8 CFR § 214.2(b)(7)',

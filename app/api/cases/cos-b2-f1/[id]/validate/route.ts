@@ -23,6 +23,19 @@ function toDateOrNull(value: string | null): Date | null {
   return value ? new Date(value) : null;
 }
 
+const DAY_MS = 86_400_000;
+
+function resolveToday(clientToday: unknown): Date {
+  const serverToday = new Date();
+  if (typeof clientToday !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(clientToday)) {
+    return serverToday;
+  }
+  const parsed = new Date(clientToday);
+  if (Number.isNaN(parsed.getTime())) return serverToday;
+  if (Math.abs(parsed.getTime() - serverToday.getTime()) > 2 * DAY_MS) return serverToday;
+  return parsed;
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -56,7 +69,12 @@ export async function POST(
     workedWithoutAuthorization: kase.worked_without_authorization,
   };
 
-  const today = new Date();
+  // "Hoje" na data LOCAL do usuário quando o cliente informa (YYYY-MM-DD);
+  // new Date() no servidor é UTC e vira o dia seguinte à noite nas Américas,
+  // expirando I-94/janela de 90 dias um dia antes do real. Aceitamos no
+  // máximo 1 dia de desvio do relógio do servidor (faixa de fusos reais).
+  const body = await req.json().catch(() => ({}));
+  const today = resolveToday(body?.clientToday);
   const outcomes = runCosB2F1Rules(facts, today);
 
   const resultRows = outcomes.map((outcome) => ({
@@ -78,7 +96,7 @@ export async function POST(
     );
   }
 
-  const caseStatus = deriveCaseStatus(outcomes);
+  const caseStatus = deriveCaseStatus(outcomes, kase.dos_90_day_acknowledged_at);
 
   const { error: updateError } = await supabaseAdmin
     .from("cos_b2_f1_cases")

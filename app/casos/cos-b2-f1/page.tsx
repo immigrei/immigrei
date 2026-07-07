@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import { interpolateMessage } from "@/lib/rules/interpolateMessage";
 import { MESSAGES_PT } from "@/lib/rules/messages.pt";
-import { OFFICIAL_TEXT_PT } from "@/lib/rules/officialTextPt";
+import {
+  OFFICIAL_TEXT_PT,
+  OFFICIAL_TEXT_PT_APPROVED,
+  OFFICIAL_TEXT_PT_PENDING_NOTICE,
+} from "@/lib/rules/officialTextPt";
 import type { RuleOutcome } from "@/lib/rules/cosB2F1";
 
 type CaseStatus = "draft" | "validated" | "blocked" | "compiled";
@@ -144,7 +148,9 @@ function valuesForOutcome(outcome: RuleOutcome, form: FormState): Record<string,
   ) {
     return {
       days: String(daysSinceEntry(form.last_entry_date)),
-      official_text_pt: OFFICIAL_TEXT_PT.FAM_302_9_4_B_3_G,
+      official_text_pt: OFFICIAL_TEXT_PT_APPROVED
+        ? OFFICIAL_TEXT_PT.FAM_302_9_4_B_3_G
+        : OFFICIAL_TEXT_PT_PENDING_NOTICE,
     };
   }
   return {};
@@ -231,10 +237,14 @@ export default function CosB2F1Page() {
   }
 
   // Salva os fatos atuais (formRef.current) e devolve o id do caso, ou null
-  // em falha. Chamadas concorrentes (debounce disparando bem na hora do
-  // clique em "Validar meu caso") reaproveitam a mesma requisição em voo.
+  // em falha. Se já existe um save em voo, ESPERA e grava de novo com o
+  // snapshot mais recente — devolver a promise antiga descartaria edições
+  // feitas nesse meio-tempo (ex.: digitar o SEVIS ID e clicar "Validar"
+  // antes de o autosave anterior terminar).
   async function persist(): Promise<string | null> {
-    if (inFlightSaveRef.current) return inFlightSaveRef.current;
+    while (inFlightSaveRef.current) {
+      await inFlightSaveRef.current;
+    }
 
     const run = (async (): Promise<string | null> => {
       setSaveState("saving");
@@ -354,6 +364,9 @@ export default function CosB2F1Page() {
       if (res.ok) {
         const data = await res.json();
         setAcknowledgedAt(data.acknowledgedAt);
+        // A ciência destrava o status (draft -> validated): revalida no
+        // servidor para o status persistido refletir o gate fechado.
+        if (caseId) await validateCase(caseId);
         return;
       }
       if (res.status === 409) {
