@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import OptionsList from "@/app/components/OptionsList";
-import { getAlternativePaths } from "@/lib/strategies";
+import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
 
 interface Profile {
   full_name:    string | null;
@@ -386,7 +386,12 @@ export default function PainelPage() {
             ser mais rápidas ou mais seguras dependendo da sua vida hoje.
           </p>
           <div className="bg-cream-2 rounded-2xl border border-pine-tint overflow-hidden">
-            <OptionsList options={getAlternativePaths({ location: profile.location })} />
+            <OptionsList
+              options={[
+                ...getVisaSpecificPaths(profile.visa_type),
+                ...getAlternativePaths({ location: profile.location }),
+              ]}
+            />
           </div>
         </div>
 

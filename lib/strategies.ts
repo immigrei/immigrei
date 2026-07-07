@@ -12,6 +12,14 @@
 
 export type StrategyTone = "clay" | "amber" | "pine";
 
+/**
+ * Whether a path is legally open for this user.
+ * "bloqueado" cards stay VISIBLE with the reason — a closed door explained
+ * builds more trust than a hidden one (same pattern as E-2 for Brazilians
+ * in onboarding). Every blocked card points to the door that IS open.
+ */
+export type PathAvailability = "disponivel" | "condicional" | "bloqueado";
+
 export type StrategyDeadline = {
   label: string;
   dueDate: Date;
@@ -42,6 +50,10 @@ export type StrategyOption = {
   deadline?: StrategyDeadline;
   kits?: StrategyKit[];
   link?: { href: string; label: string };
+  availability?: PathAvailability; // omitted = "disponivel"
+  blockedReason?: string; // plain-PT why the law closes this door (cite the rule)
+  manualSlug?: string; // /caminhos/{slug} — the free manual shown before the kit
+  alternative?: { label: string; manualSlug: string }; // the door that opens when this one closes
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -137,6 +149,63 @@ export function getDeniedCaseStrategies(statusDate?: string | null): StrategyOpt
       link: { href: "/profissionais", label: "Ver profissionais verificados →" },
     },
   ];
+}
+
+/**
+ * Visa-specific paths — doors that only make sense (or are only CLOSED) for
+ * the visa the user holds. Rendered ABOVE the generic alternative paths.
+ * Source of truth for the legal facts: content/leis (vistos/{visa}.md and
+ * negativas/{visa}-negado.md). Every entry demonstrates one of the three
+ * availability states so the pattern replicates cleanly to other visas.
+ */
+export function getVisaSpecificPaths(visaType?: string | null): StrategyOption[] {
+  if (visaType === "m1") {
+    return [
+      {
+        id: "m1_cos_f1_blocked",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Mudar de M-1 para F-1 dentro dos EUA",
+        description:
+          "É a pergunta mais comum de quem está de M-1 — e a resposta é dura, mas é melhor você saber agora: a lei proíbe expressamente a mudança de status de estudante vocacional (M-1) para acadêmico (F-1) dentro dos EUA, sem exceção.",
+        blockedReason:
+          "Vedação prevista em regulamento federal (8 CFR §248.1). Nenhum advogado, formulário ou taxa muda isso — pedidos assim são negados, e você perde tempo e dinheiro.",
+        alternative: {
+          label: "F-1 pelo consulado no Brasil",
+          manualSlug: "m1-para-f1-consulado",
+        },
+      },
+      {
+        id: "m1_f1_consulado",
+        icon: "🎓",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "F-1 pelo consulado — a porta que continua aberta",
+        description:
+          "Quer migrar do curso técnico para faculdade, inglês acadêmico ou qualquer programa acadêmico? O caminho existe: sair dos EUA, aplicar o F-1 no consulado no Brasil e voltar como estudante acadêmico. Feito no momento certo — antes do relógio da presença irregular virar barreira — é uma troca segura e comum.",
+        manualSlug: "m1-para-f1-consulado",
+        kits: [{ label: "Kit F-1 pelo consulado", kitId: "f1", status: "disponivel" }],
+      },
+      {
+        id: "m1_h_conditional",
+        icon: "💼",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "M-1 → visto de trabalho H: depende de onde veio sua qualificação",
+        description:
+          "Aqui a lei tem uma pegadinha: se foi o SEU CURSO no M-1 que te qualificou para a vaga (ex.: escola de aviação → vaga de piloto), a mudança para o H é vedada. Se a qualificação veio de antes — diploma ou experiência do Brasil — a porta existe. É exatamente o tipo de detalhe para confirmar com um profissional antes de investir.",
+        doesNot: [
+          "Não funciona quando o treinamento vocacional do M-1 é a base da qualificação para o H (8 CFR §248.1)",
+        ],
+      },
+    ];
+  }
+
+  return [];
 }
 
 /**

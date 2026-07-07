@@ -57,6 +57,7 @@ export default function OptionsList({ options }: { options: StrategyOption[] }) 
       {options.map((opt, i) => {
         const tone = TONE_STYLES[opt.tone];
         const isLast = i === options.length - 1;
+        const blocked = opt.availability === "bloqueado";
 
         return (
           <li key={opt.id} className="relative flex gap-4">
@@ -68,7 +69,9 @@ export default function OptionsList({ options }: { options: StrategyOption[] }) 
             )}
 
             <span
-              className={`relative z-10 mt-0.5 flex h-7 w-7 min-w-7 items-center justify-center rounded-full text-sm ${tone.dot}`}
+              className={`relative z-10 mt-0.5 flex h-7 w-7 min-w-7 items-center justify-center rounded-full text-sm ${
+                blocked ? "bg-cream border border-clay/40" : tone.dot
+              }`}
             >
               {opt.icon}
             </span>
@@ -84,6 +87,24 @@ export default function OptionsList({ options }: { options: StrategyOption[] }) 
               </div>
 
               <p className="text-xs text-ink-soft leading-relaxed mt-1.5">{opt.description}</p>
+
+              {/* Blocked path: show the WHY (with legal basis) and the door that IS open */}
+              {blocked && opt.blockedReason && (
+                <div className="mt-3 rounded-xl border border-clay/30 bg-clay/5 px-4 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-clay mb-1">
+                    Por que esta porta está fechada
+                  </p>
+                  <p className="text-xs text-ink-soft leading-relaxed">{opt.blockedReason}</p>
+                  {opt.alternative && (
+                    <a
+                      href={`/caminhos/${opt.alternative.manualSlug}`}
+                      className="mt-2 inline-block text-xs font-bold text-pine underline underline-offset-2"
+                    >
+                      Mas existe outra porta: {opt.alternative.label} →
+                    </a>
+                  )}
+                </div>
+              )}
 
               {opt.deadline && <DeadlineChip deadline={opt.deadline} />}
 
@@ -123,6 +144,16 @@ export default function OptionsList({ options }: { options: StrategyOption[] }) 
                     </li>
                   ))}
                 </ul>
+              )}
+
+              {/* Manual first, kit second: read everything free, then decide */}
+              {!blocked && opt.manualSlug && (
+                <a
+                  href={`/caminhos/${opt.manualSlug}`}
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-pine bg-cream px-3 py-1.5 text-xs font-bold text-pine hover:bg-pine-tint transition-colors"
+                >
+                  Quero seguir este caminho →
+                </a>
               )}
 
               {opt.kits && (

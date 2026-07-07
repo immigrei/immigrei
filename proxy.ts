@@ -16,6 +16,9 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/vistos(.*)",
   "/onboarding(.*)",
+  // Path manuals are the free educational layer (and an SEO entrance) —
+  // they must be readable before sign-up.
+  "/caminhos(.*)",
   // API routes authenticate themselves (CRON_SECRET or Clerk auth() in the
   // handler). auth.protect() returns an HTML 404 for unauthenticated API
   // calls, which blocks Vercel Cron and breaks JSON error responses.
