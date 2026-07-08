@@ -209,12 +209,6 @@ const questionMap: Record<string, Question> = {
         subtitle: "Extensão ou mudança de status protocolada, aguardando resposta",
       },
       {
-        value: "overstay",
-        label: "Passei do prazo do meu I-94 (overstay)",
-        icon: "⚠️",
-        subtitle: "Sem julgamento — informação clara é para quem mais precisa dela",
-      },
-      {
         value: "unsure",
         label: "Não sei / nunca conferi meu I-94",
         icon: "🔎",
@@ -222,9 +216,17 @@ const questionMap: Record<string, Question> = {
       },
       { value: "green_card", label: "Tenho Green Card",      icon: "🟢" },
       { value: "citizen",    label: "Sou cidadão americano", icon: "🇺🇸" },
+      {
+        value: "overstay",
+        label: "Passei do prazo do meu I-94 (overstay)",
+        icon: "⚠️",
+        subtitle:
+          "Existem regras específicas para essa situação — mostramos o que consta em fontes oficiais e onde buscar ajuda",
+      },
     ],
     next: (a) => {
-      if (a === "in_status" || a === "pending_uscis" || a === "unsure") return "q_current_visa";
+      if (a === "in_status" || a === "pending_uscis") return "q_current_visa";
+      if (a === "unsure")      return "results"; // conferir o I-94 vem antes de qualquer rota
       if (a === "overstay")    return "results";
       if (a === "green_card")  return "q_gc_goal";
       return "q_citizen_goal"; // citizen
@@ -246,16 +248,32 @@ const questionMap: Record<string, Question> = {
   // ── Has visa in the US ────────────────────────────────────────────────────
   q_current_visa: {
     id: "q_current_visa",
-    text: "Qual é o seu visto atual?",
+    text: "Em qual categoria você está hoje?",
+    subtitle:
+      "A do seu I-94 ou da última aprovação do USCIS — pode ser diferente do visto carimbado no passaporte.",
     options: [
       { value: "b1b2", label: "B-1/B-2 — Turismo / Negócios", icon: "🛂" },
       { value: "f1",   label: "F-1 — Estudante acadêmico",    icon: "🎓" },
       { value: "j1",   label: "J-1 — Intercâmbio",            icon: "🔄" },
       { value: "h1b",  label: "H-1B — Trabalho especializado", icon: "🏢" },
       { value: "l1",   label: "L-1 — Transferência intraempresarial", icon: "🌐" },
-      { value: "other",label: "Outro visto",                  icon: "📄" },
+      {
+        value: "dependent",
+        label: "Dependente — F-2, H-4, L-2 ou J-2",
+        icon: "👪",
+      },
+      {
+        value: "esta_vwp",
+        label: "Entrei sem visto (ESTA / Visa Waiver)",
+        icon: "🛬",
+        subtitle: "Passaporte europeu ou de país do VWP",
+      },
+      { value: "other",label: "Outra categoria",              icon: "📄" },
     ],
-    next: () => "q_change_goal",
+    // ESTA/VWP não permite extensão nem mudança de status por dentro
+    // (8 CFR §248) — direto aos resultados com a regra, sem oferecer
+    // jornadas impossíveis.
+    next: (a) => (a === "esta_vwp" ? "results" : "q_change_goal"),
   },
 
   q_change_goal: {
@@ -368,19 +386,73 @@ function getRecommendations(answers: Answers): VisaResult[] {
       visa: "🔎 Primeiro passo: confira seu I-94 (grátis, 2 min)",
       forms: "i94.cbp.dhs.gov → \"Get Most Recent I-94\"",
       description:
-        "A data que define sua permanência é a do I-94 — o registro oficial de entrada —, não a do visto no passaporte. Consulte com passaporte em mãos no site oficial do CBP; os caminhos abaixo dependem dessa data.",
+        "A data que define sua permanência é a do I-94 — o registro oficial de entrada —, não a do visto no passaporte. Consulte com passaporte em mãos no site oficial do CBP. Depois, refaça este mapa (leva 2 minutos): todos os caminhos dependem dessa data.",
       priority: "high",
       urgent: true,
+    });
+    return results;
+  }
+
+  // ── ESTA / Visa Waiver dentro dos EUA — regra dura, sem COS/extensão ─────
+  if (currentVisa === "esta_vwp") {
+    results.push({
+      visa: "⚠️ Entrada por ESTA/VWP: sem extensão ou mudança de status",
+      forms: "8 CFR §248 — regra federal",
+      description:
+        "Quem entra pelo Visa Waiver aceita não estender a estadia (máx. 90 dias) nem mudar de status por dentro dos EUA. O caminho padrão é sair e aplicar o visto no consulado. Exceção estreita: ajuste por parente imediato de cidadão americano — análise jurídica individual.",
+      priority: "high",
+      urgent: true,
+    });
+    results.push({
+      visa: "Planeje o próximo passo do lado de fora",
+      forms: "DS-160 no consulado (F-1, trabalho etc.)",
+      description:
+        "Se o objetivo é estudar ou trabalhar, o processo consular a partir do seu país costuma ser o caminho — o Immigrei mostra as etapas de cada visto para você preparar tudo antes de sair.",
+      priority: "medium",
+    });
+    return results;
+  }
+
+  // ── Pedido pendente no USCIS → acompanhamento automático ─────────────────
+  if (currentStatus === "pending_uscis") {
+    results.push({
+      visa: "📡 Acompanhe seu pedido automaticamente",
+      forms: "Número de recibo do USCIS (ex.: IOE0123456789)",
+      description:
+        "Crie sua conta e conecte o número de recibo: o Immigrei consulta o USCIS por você e avisa por e-mail a cada mudança no caso. Os caminhos abaixo consideram o pedido em andamento.",
+      priority: "high",
     });
   }
 
   // ── Overstay alert ───────────────────────────────────────────────────────
   if (currentStatus === "overstay") {
     results.push({
-      visa: "⚠️ Situação irregular — Ação urgente necessária",
-      forms: "I-539 (se elegível) ou consulta imediata com advogado",
+      visa: "⚠️ Antes de qualquer decisão: entenda as barras de 3/10 anos",
+      forms: "INA §212(a)(9)(B) — unlawful presence",
       description:
-        "Overstay pode gerar barra de reentrada de 3 a 10 anos. Não tome nenhuma ação sem orientação jurídica especializada.",
+        "Mais de 180 dias além do prazo geram barra de reentrada de 3 anos; mais de 365 dias, de 10 anos. As barras só disparam NA SAÍDA dos EUA — por isso, decisões de viagem são críticas e nenhuma deve ser tomada sem análise individual.",
+      priority: "high",
+      urgent: true,
+    });
+    results.push({
+      visa: "Ajuste de status por parente imediato (se aplicável)",
+      forms: "I-130 + I-485",
+      description:
+        "Quem entrou nos EUA com inspeção e é cônjuge, pai/mãe ou filho(a) de cidadão americano pode, em muitos casos, ajustar o status por dentro — sem sair e sem acionar as barras (INA §245(a)). A elegibilidade é uma análise jurídica individual.",
+      priority: "high",
+    });
+    results.push({
+      visa: "Perdão por dificuldade extrema (waiver)",
+      forms: "I-601 / I-601A",
+      description:
+        "Existe perdão para a barra de reentrada quando a ausência causaria dificuldade extrema a cônjuge ou pai/mãe cidadão ou residente. É um dos processos mais técnicos que existem — sempre com advogado.",
+      priority: "medium",
+    });
+    results.push({
+      visa: "🤝 Análise individual com profissional verificado",
+      forms: "Consulta com advogado de imigração licenciado",
+      description:
+        "Overstay tem saídas — mas quais valem para você depende de fatos do seu caso (data de entrada, forma de entrada, vínculos familiares). O Immigrei conecta você a profissionais verificados; até lá, evite viagens e novos protocolos por conta própria.",
       priority: "high",
       urgent: true,
     });
@@ -391,10 +463,10 @@ function getRecommendations(answers: Answers): VisaResult[] {
   if (currentStatus === "citizen") {
     if (citizenGoal === "petition_family" || familyTies === "spouse_citizen") {
       results.push({
-        visa: "Petição de familiar — IR-1 / K-1",
-        forms: "I-130 (familiar) ou I-129F (noivo/a)",
+        visa: "Petição de familiar — parentes imediatos e categorias com fila",
+        forms: "I-130 (familiar) ou I-129F (noivo/a — K-1)",
         description:
-          "Cidadãos americanos podem peticionar cônjuge, filhos, pais e irmãos. Parentes imediatos não têm fila.",
+          "Parentes imediatos (cônjuge, pais, filhos solteiros menores de 21) não têm fila. Filhos 21+ ou casados (F1/F3) e irmãos (F4) entram em filas que variam de anos a décadas — confira no visa bulletin. Noivo(a) no exterior: K-1 via I-129F.",
         priority: "high",
       });
     } else {
@@ -413,9 +485,10 @@ function getRecommendations(answers: Answers): VisaResult[] {
   if (currentStatus === "green_card") {
     if (gcGoal === "renew") {
       results.push({
-        visa: "Renovação do Green Card",
+        visa: "Renovação do Green Card (10 anos)",
         forms: "I-90",
-        description: "Renovação do Permanent Resident Card a cada 10 anos.",
+        description:
+          "Para o cartão de 10 anos vencido ou a vencer em até 6 meses. Atenção: se o seu Green Card é o CONDICIONAL de 2 anos (por casamento), o caminho é outro — I-751 (remoção de condições), protocolado nos 90 dias antes do vencimento, nunca o I-90.",
         priority: "high",
       });
     }
@@ -424,16 +497,16 @@ function getRecommendations(answers: Answers): VisaResult[] {
         visa: "Naturalização (Cidadania Americana)",
         forms: "N-400",
         description:
-          "Após 3 a 5 anos com Green Card, você pode solicitar a cidadania americana.",
+          "Regra geral: 5 anos como residente permanente — ou 3 anos se casado(a) e vivendo com cidadão americano. Também contam residência contínua, presença física e inglês/cívica. Dá para protocolar até 90 dias antes de completar o prazo.",
         priority: "high",
       });
     }
     if (gcGoal === "family" || familyTies !== "none") {
       results.push({
-        visa: "Petição de familiar — F-2 / IR",
+        visa: "Petição de familiar — F2A / F2B",
         forms: "I-130",
         description:
-          "Titulares de Green Card podem peticionar cônjuge e filhos. Há fila de espera.",
+          "Residentes permanentes peticionam cônjuge e filhos solteiros: menores de 21 na categoria F2A (fila frequentemente curta ou zerada — confira no visa bulletin, que o Immigrei acompanha) e 21+ na F2B (fila mais longa).",
         priority: "medium",
       });
     }
@@ -442,7 +515,7 @@ function getRecommendations(answers: Answers): VisaResult[] {
         visa: "Reentry Permit",
         forms: "I-131",
         description:
-          "Permite ausência prolongada dos EUA (até 2 anos) sem perder o Green Card.",
+          "Protege o Green Card em ausências de até 2 anos. Regra de ouro: o I-131 precisa ser protocolado ANTES de sair dos EUA (e a biometria é feita aqui) — não dá para pedir de fora.",
         priority: "medium",
       });
     }
@@ -746,6 +819,7 @@ function getRecommendations(answers: Answers): VisaResult[] {
   if (inUs && changeGoal === "extend") {
     const visaLabels: Record<string, string> = {
       b1b2: "B-1/B-2", f1: "F-1", j1: "J-1", h1b: "H-1B", l1: "L-1",
+      dependent: "dependente (F-2/H-4/L-2/J-2)",
     };
     results.push({
       visa:
@@ -1220,6 +1294,12 @@ export default function OnboardingPage() {
           {/* CTA */}
           <button
             onClick={() => {
+              // Overstay: as jornadas de visto padrão não se aplicam — o
+              // próximo passo real é ajuda profissional.
+              if (answers.q_current_status === "overstay") {
+                router.push("/profissionais");
+                return;
+              }
               const params = new URLSearchParams();
               if (answers.q_nationality) params.set("nationality", answers.q_nationality);
               if (answers.q_location)
@@ -1230,7 +1310,9 @@ export default function OnboardingPage() {
             className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Ver minha jornada em detalhe →
+            {answers.q_current_status === "overstay"
+              ? "Encontrar ajuda profissional →"
+              : "Ver minha jornada em detalhe →"}
           </button>
 
           {/* Restart */}
