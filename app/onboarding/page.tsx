@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 
@@ -15,6 +16,7 @@ type VisaResult = {
   priority: "high" | "medium" | "low";
   urgent?: boolean;
   blocked?: boolean; // nationality restriction
+  href?: string;     // deep link to the product surface (kit, manual, case engine)
 };
 
 type Option = {
@@ -257,6 +259,8 @@ const questionMap: Record<string, Question> = {
       { value: "j1",   label: "J-1 — Intercâmbio",            icon: "🔄" },
       { value: "h1b",  label: "H-1B — Trabalho especializado", icon: "🏢" },
       { value: "l1",   label: "L-1 — Transferência intraempresarial", icon: "🌐" },
+      { value: "m1",   label: "M-1 — Estudante vocacional / técnico",  icon: "🔧" },
+      { value: "o1",   label: "O-1 — Habilidade extraordinária",       icon: "⭐" },
       {
         value: "dependent",
         label: "Dependente — F-2, H-4, L-2 ou J-2",
@@ -354,7 +358,26 @@ const questionMap: Record<string, Question> = {
 
 // ─── Recommendation Engine ────────────────────────────────────────────────────
 
+// Kits existentes em /documentos/[vistoId] — anexados por prefixo do nome.
+const KIT_BY_PREFIX: Array<[RegExp, string]> = [
+  [/^F-1/, "f1"], [/^M-1/, "m1"], [/^J-1/, "j1"], [/^H-1B/, "h1b"],
+  [/^O-1/, "o1"], [/^L-1/, "l1"], [/^EB-2/, "eb2niw"], [/^B-1/, "b1"],
+  [/^E-2 /, "e2"], [/^E-2$/, "e2"],
+];
+
+export function attachKitLinks(results: VisaResult[]): VisaResult[] {
+  return results.map((r) => {
+    if (r.href || r.blocked) return r;
+    const hit = KIT_BY_PREFIX.find(([re]) => re.test(r.visa));
+    return hit ? { ...r, href: `/documentos/${hit[1]}` } : r;
+  });
+}
+
 function getRecommendations(answers: Answers): VisaResult[] {
+  return attachKitLinks(computeRecommendations(answers));
+}
+
+export function computeRecommendations(answers: Answers): VisaResult[] {
   const results: VisaResult[] = [];
   const a = answers;
 
@@ -551,14 +574,38 @@ function getRecommendations(answers: Answers): VisaResult[] {
     const isChangeOfStatus =
       inUs && changeGoal === "change_status" && targetVisa === "f1";
 
-    if (isChangeOfStatus) {
+    if (isChangeOfStatus && currentVisa === "m1") {
+      // 8 CFR 214.2(m): M-1 -> F-1 por dentro é vedado sem exceção — a rota
+      // real é consular. Nunca oferecer I-539 aqui.
       results.push({
-        visa: "I-539 — Mudança de Status para F-1",
-        forms: "I-539 (protocolar antes do visto expirar)",
+        visa: "M-1 → F-1 só pelo consulado (guia passo a passo)",
+        forms: "Saída programada + DS-160 + novo I-20 F-1",
         description:
-          "Mudança de status para F-1 dentro dos EUA. Urgente se o visto está próximo de expirar.",
+          "A lei veda a mudança M-1 → F-1 dentro dos EUA, sem exceção. O caminho existente é aplicar o F-1 pelo consulado — temos o manual completo dessa rota, com ordem certa das etapas.",
         priority: "high",
         urgent: true,
+        href: "/caminhos/m1-para-f1-consulado",
+      });
+    } else if (isChangeOfStatus && currentVisa === "j1") {
+      results.push({
+        visa: "J-1 → F-1 (guia passo a passo)",
+        forms: "Verificar regra dos 2 anos + I-539 ou rota consular",
+        description:
+          "Antes de tudo: confira no seu DS-2019 se a regra dos 2 anos (212(e)) se aplica — ela muda o caminho inteiro. Nosso manual cobre as duas rotas a partir daí.",
+        priority: "high",
+        href: "/caminhos/j1-para-f1",
+      });
+    } else if (isChangeOfStatus) {
+      results.push({
+        visa: "I-539 — Mudança de Status para F-1",
+        forms: "I-539 (protocolar antes do prazo do I-94 vencer)",
+        description:
+          currentVisa === "b1b2"
+            ? "Mudança de status para F-1 dentro dos EUA. Nosso validador confere os requisitos técnicos do seu caso (I-94, I-20, taxa SEVIS) antes de você gastar com o protocolo."
+            : "Mudança de status para F-1 dentro dos EUA. Urgente se o prazo do I-94 está próximo de vencer.",
+        priority: "high",
+        urgent: true,
+        href: currentVisa === "b1b2" ? "/casos/cos-b2-f1" : "/documentos/f1",
       });
     } else if (studyType === "vocational" || targetVisa === "m1") {
       results.push({
@@ -594,6 +641,38 @@ function getRecommendations(answers: Answers): VisaResult[] {
         });
       }
     }
+  }
+
+  // ── Pares de caminho com manual próprio (dentro dos EUA) ─────────────────
+  if (inUs && currentVisa === "f1" && (targetVisa === "h1b" || changeGoal === "work_change")) {
+    results.push({
+      visa: "F-1 → H-1B (guia passo a passo)",
+      forms: "OPT/CPT + I-129 (H) pelo empregador + sorteio",
+      description:
+        "A escada clássica pós-estudos: janelas de datas do OPT, cap-gap e o sorteio de março explicados em ordem, com o que preparar em cada etapa.",
+      priority: "high",
+      href: "/caminhos/f1-para-h1b",
+    });
+  }
+  if (inUs && currentVisa === "h1b" && changeGoal === "work_change") {
+    results.push({
+      visa: "Transferência de H-1B (guia passo a passo)",
+      forms: "I-129 (H) pelo novo empregador — sem novo sorteio",
+      description:
+        "Mudar de empregador mantendo o H-1B: quando você pode começar no novo emprego, portabilidade e os riscos de gap.",
+      priority: "high",
+      href: "/caminhos/h1b-transferencia",
+    });
+  }
+  if (inUs && currentVisa === "o1" && changeGoal === "green_card") {
+    results.push({
+      visa: "O-1 → Green Card por autopetição (guia passo a passo)",
+      forms: "I-140 (EB-2 NIW ou EB-1A) + I-485",
+      description:
+        "Quem sustenta um O-1 costuma ter o perfil das categorias de autopetição — sem depender de empregador. O manual mostra a ponte.",
+      priority: "high",
+      href: "/caminhos/o1-autopeticao-greencard",
+    });
   }
 
   // ── Trabalho ─────────────────────────────────────────────────────────────
@@ -1285,6 +1364,15 @@ export default function OnboardingPage() {
                         {rec.forms}
                       </span>
                     </div>
+                  )}
+                  {!rec.blocked && rec.href && (
+                    <Link
+                      href={rec.href}
+                      className="inline-block mt-3 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      Abrir o guia completo →
+                    </Link>
                   )}
                 </div>
               ))}
