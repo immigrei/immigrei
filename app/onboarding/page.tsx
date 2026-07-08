@@ -40,18 +40,21 @@ const questionMap: Record<string, Question> = {
   q_location: {
     id: "q_location",
     text: "Onde você está agora?",
+    subtitle:
+      "O caminho muda completamente: de dentro dos EUA, o processo é mudança de status (USCIS); de fora, é pelo consulado.",
     options: [
       { value: "in_us", label: "Estou nos EUA", icon: "🇺🇸" },
       { value: "outside", label: "Estou fora dos EUA", icon: "🌍" },
     ],
-    next: () => "q_nationality",
+    next: (a) => (a === "in_us" ? "q_current_status" : "q_goal"),
   },
 
-  // ── 2. Nationality (universal — determines E-2/E-1 eligibility) ──────────
+  // ── Nationality (asked only in visit/business branches — E-1/E-2, ESTA) ──
   q_nationality: {
     id: "q_nationality",
     text: "Qual é a sua cidadania?",
-    subtitle: "Isso determina quais vistos estão disponíveis para você.",
+    subtitle:
+      "Perguntamos aqui porque este caminho muda com a cidadania: países com tratado têm acesso a isenção de visto e aos vistos E-1/E-2.",
     options: [
       { value: "brazilian", label: "Brasileira", icon: "🇧🇷" },
       {
@@ -62,7 +65,7 @@ const questionMap: Record<string, Question> = {
       },
       { value: "other", label: "Outra cidadania", icon: "🌐" },
     ],
-    next: (_, all) => all.q_location === "in_us" ? "q_current_status" : "q_goal",
+    next: () => "results",
   },
 
   // ── Branch: OUTSIDE the US ───────────────────────────────────────────────
@@ -78,7 +81,7 @@ const questionMap: Record<string, Question> = {
       { value: "family",   label: "Reunir com família",          icon: "👨‍👩‍👧" },
     ],
     next: (a) => {
-      if (a === "visit")    return "results";
+      if (a === "visit")    return "q_nationality";
       if (a === "study")    return "q_study_type";
       if (a === "work")     return "q_work_type";
       if (a === "business") return "q_business_type";
@@ -155,7 +158,7 @@ const questionMap: Record<string, Question> = {
         subtitle: "Sem trabalhar ou receber salário americano",
       },
     ],
-    next: () => "results",
+    next: () => "q_nationality",
   },
 
   // ── Family ties ───────────────────────────────────────────────────────────
@@ -184,18 +187,44 @@ const questionMap: Record<string, Question> = {
   },
 
   // ── Branch: INSIDE the US ─────────────────────────────────────────────────
+  // Ancorada no I-94, não no visto: visto válido + I-94 vencido = irregular
+  // (content/leis/conceitos/status-vs-visto.md). "Não sei" existe porque a
+  // maioria nunca conferiu o próprio I-94.
   q_current_status: {
     id: "q_current_status",
-    text: "Qual é o seu status migratório atual nos EUA?",
+    text: "Como está o prazo da sua permanência (I-94)?",
+    subtitle:
+      "O prazo que vale é o do I-94 — o registro de entrada —, não a validade do visto no passaporte. Sua resposta é confidencial e serve só para mostrar seus caminhos.",
     options: [
-      { value: "valid_visa",      label: "Tenho visto válido",                                   icon: "✅" },
-      { value: "authorized_stay", label: "Meu visto expirou, mas estou em authorized stay",       icon: "⏳" },
-      { value: "overstay",        label: "Fiquei além do prazo autorizado (overstay)",            icon: "⚠️" },
-      { value: "green_card",      label: "Tenho Green Card",                                     icon: "🟢" },
-      { value: "citizen",         label: "Sou cidadão americano",                                icon: "🇺🇸" },
+      {
+        value: "in_status",
+        label: "Estou dentro do prazo do meu I-94",
+        icon: "✅",
+        subtitle: "Para estudantes F-1, o I-94 costuma dizer \"D/S\"",
+      },
+      {
+        value: "pending_uscis",
+        label: "Tenho pedido pendente no USCIS",
+        icon: "⏳",
+        subtitle: "Extensão ou mudança de status protocolada, aguardando resposta",
+      },
+      {
+        value: "overstay",
+        label: "Passei do prazo do meu I-94 (overstay)",
+        icon: "⚠️",
+        subtitle: "Sem julgamento — informação clara é para quem mais precisa dela",
+      },
+      {
+        value: "unsure",
+        label: "Não sei / nunca conferi meu I-94",
+        icon: "🔎",
+        subtitle: "É grátis e leva 2 minutos — vamos te mostrar onde",
+      },
+      { value: "green_card", label: "Tenho Green Card",      icon: "🟢" },
+      { value: "citizen",    label: "Sou cidadão americano", icon: "🇺🇸" },
     ],
     next: (a) => {
-      if (a === "valid_visa" || a === "authorized_stay") return "q_current_visa";
+      if (a === "in_status" || a === "pending_uscis" || a === "unsure") return "q_current_visa";
       if (a === "overstay")    return "results";
       if (a === "green_card")  return "q_gc_goal";
       return "q_citizen_goal"; // citizen
@@ -312,7 +341,10 @@ function getRecommendations(answers: Answers): VisaResult[] {
   const a = answers;
 
   const nationality    = a.q_nationality;         // "brazilian" | "treaty" | "other"
-  const isBrazilian    = nationality === "brazilian";
+  // Cidadania agora só é perguntada nos ramos onde decide algo (turismo/
+  // negócios de fora). Quando não coletada, assume o público-alvo (BR) —
+  // direção conservadora: mostra os avisos brasileiros, nunca os esconde.
+  const isBrazilian    = nationality !== "treaty" && nationality !== "other";
   const isTreaty       = nationality === "treaty";
   const inUs           = a.q_location === "in_us";
   const goal           = a.q_goal;
@@ -329,6 +361,18 @@ function getRecommendations(answers: Answers): VisaResult[] {
   const gcPath         = a.q_gc_path;
   const permanentPath  = a.q_permanent_path;
   const citizenGoal    = a.q_citizen_goal;
+
+  // ── "Não sei meu I-94" — primeiro passo factual, antes de qualquer rota ──
+  if (currentStatus === "unsure") {
+    results.push({
+      visa: "🔎 Primeiro passo: confira seu I-94 (grátis, 2 min)",
+      forms: "i94.cbp.dhs.gov → \"Get Most Recent I-94\"",
+      description:
+        "A data que define sua permanência é a do I-94 — o registro oficial de entrada —, não a do visto no passaporte. Consulte com passaporte em mãos no site oficial do CBP; os caminhos abaixo dependem dessa data.",
+      priority: "high",
+      urgent: true,
+    });
+  }
 
   // ── Overstay alert ───────────────────────────────────────────────────────
   if (currentStatus === "overstay") {
@@ -866,7 +910,10 @@ function deriveMainGoal(a: Answers): string {
   if (a.q_gc_goal === "family" || a.q_family_ties && a.q_family_ties !== "none") return "trazer_familia";
   if (a.q_current_status === "overstay") return "regularizar_status";
   if (a.q_goal === "live" || a.q_permanent_path) return "green_card";
-  if (a.q_goal === "study" || a.q_goal === "work" || a.q_goal === "business") return "regularizar_status";
+  // In-US study/work/business = mudança de status (guidance no dashboard);
+  // primeiro pedido a partir do exterior continua "outro".
+  if (a.q_goal === "study" || a.q_goal === "work" || a.q_goal === "business")
+    return a.q_location === "in_us" ? "regularizar_status" : "outro";
   if (a.q_goal === "visit") return "outro";
   return "outro";
 }
