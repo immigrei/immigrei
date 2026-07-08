@@ -462,6 +462,9 @@ export default function VistosPage() {
   const [rawNationality, setRawNationality] = useState<string | null>(null);
   const [location, setLocation] = useState<"brasil" | "eua" | null>(null);
   const [mainGoal, setMainGoal] = useState<string | null>(null);
+  // Cards recomendados pelo onboarding (param `focus`) — sobem para uma
+  // seção própria; os demais continuam visíveis como rotas paralelas.
+  const [focusIds, setFocusIds] = useState<string[]>([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -474,11 +477,21 @@ export default function VistosPage() {
     const loc = params.get("location");
     if (loc === "brasil" || loc === "eua") setLocation(loc);
     setMainGoal(params.get("goal"));
+    const focus = params.get("focus");
+    if (focus) {
+      const valid = new Set([...vistosEstudo, ...vistosNegocios].map((v) => v.id));
+      setFocusIds(focus.split(",").filter((id) => valid.has(id)));
+    }
   }, []);
 
-  const vistoSelecionado = [...vistosEstudo, ...vistosNegocios].find(
-    (v) => v.id === selecionado
-  );
+  const todosVistos = [...vistosEstudo, ...vistosNegocios];
+  const vistoSelecionado = todosVistos.find((v) => v.id === selecionado);
+
+  const recomendados = focusIds
+    .map((id) => todosVistos.find((v) => v.id === id))
+    .filter((v): v is Visto => Boolean(v));
+  const estudoRestantes = vistosEstudo.filter((v) => !focusIds.includes(v.id));
+  const negociosRestantes = vistosNegocios.filter((v) => !focusIds.includes(v.id));
 
   async function confirmarVisto() {
     if (!vistoSelecionado || saving) return;
@@ -534,39 +547,68 @@ export default function VistosPage() {
         </p>
       </section>
 
-      {/* Section 1 — Estudo & Intercâmbio */}
-      <SectionHeader
-        title="Estudo & Intercâmbio"
-        subtitle="Vistos para quem vem estudar, pesquisar ou participar de programas de intercâmbio"
-      />
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
-        {vistosEstudo.map((v) => (
-          <VistoCard
-            key={v.id}
-            visto={v}
-            nationality={nationality}
-            selecionado={selecionado === v.id}
-            onSelect={() => setSelecionado(v.id)}
+      {/* Section 0 — Recomendados pelo onboarding (quando há focus) */}
+      {recomendados.length > 0 && (
+        <>
+          <SectionHeader
+            title="Recomendados para você"
+            subtitle="Com base nas suas respostas, estes são os caminhos mais prováveis — os demais seguem abertos para comparar"
           />
-        ))}
-      </div>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+            {recomendados.map((v) => (
+              <VistoCard
+                key={v.id}
+                visto={v}
+                nationality={nationality}
+                selecionado={selecionado === v.id}
+                onSelect={() => setSelecionado(v.id)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Section 1 — Estudo & Intercâmbio */}
+      {estudoRestantes.length > 0 && (
+        <>
+          <SectionHeader
+            title={recomendados.length > 0 ? "Outros caminhos — Estudo & Intercâmbio" : "Estudo & Intercâmbio"}
+            subtitle="Vistos para quem vem estudar, pesquisar ou participar de programas de intercâmbio"
+          />
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+            {estudoRestantes.map((v) => (
+              <VistoCard
+                key={v.id}
+                visto={v}
+                nationality={nationality}
+                selecionado={selecionado === v.id}
+                onSelect={() => setSelecionado(v.id)}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Section 2 — Negócios & Investimento */}
-      <SectionHeader
-        title="Negócios & Investimento"
-        subtitle="Vistos para empreendedores, executivos e investidores — alguns exigem tratado entre países"
-      />
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
-        {vistosNegocios.map((v) => (
-          <VistoCard
-            key={v.id}
-            visto={v}
-            nationality={nationality}
-            selecionado={selecionado === v.id}
-            onSelect={() => setSelecionado(v.id)}
+      {negociosRestantes.length > 0 && (
+        <>
+          <SectionHeader
+            title={recomendados.length > 0 ? "Outros caminhos — Negócios & Investimento" : "Negócios & Investimento"}
+            subtitle="Vistos para empreendedores, executivos e investidores — alguns exigem tratado entre países"
           />
-        ))}
-      </div>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+            {negociosRestantes.map((v) => (
+              <VistoCard
+                key={v.id}
+                visto={v}
+                nationality={nationality}
+                selecionado={selecionado === v.id}
+                onSelect={() => setSelecionado(v.id)}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Travel note */}
       <div className="max-w-5xl mx-auto mt-8">

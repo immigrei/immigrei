@@ -6,7 +6,12 @@
  * este teste quebra o merge.
  */
 import { describe, expect, it } from "vitest";
-import { attachKitLinks, computeRecommendations, deriveMainGoal } from "./page";
+import {
+  attachKitLinks,
+  computeRecommendations,
+  deriveFocusIds,
+  deriveMainGoal,
+} from "./page";
 
 type Answers = Record<string, string>;
 
@@ -124,5 +129,57 @@ describe("objetivo derivado para quem já tem residência ou cidadania", () => {
         q_citizen_goal: "naturalization",
       })
     ).toBe("entender_direitos");
+  });
+});
+
+// O param `focus` leva os cards recomendados para o topo de /vistos.
+// Cada persona deve destacar os caminhos certos — e nunca um visto
+// bloqueado pela cidadania.
+describe("focus da vitrine derivado por persona", () => {
+  const focus = (a: Answers) => deriveFocusIds(a, recs(a));
+
+  it("estudante universitário fora → foca F-1", () => {
+    expect(focus({ q_location: "outside", q_goal: "study", q_study_type: "university" }))
+      .toEqual(expect.arrayContaining(["f1"]));
+  });
+
+  it("H-1B estendendo → foca H-1B", () => {
+    expect(focus({
+      q_location: "in_us", q_current_status: "in_status",
+      q_current_visa: "h1b", q_change_goal: "extend",
+    })).toContain("h1b");
+  });
+
+  it("B1/B2 mudando para F-1 → foca F-1", () => {
+    expect(focus({
+      q_location: "in_us", q_current_status: "in_status",
+      q_current_visa: "b1b2", q_change_goal: "change_status", q_target_visa: "f1",
+    })).toContain("f1");
+  });
+
+  it("investidor de tratado → foca E-2", () => {
+    expect(focus({
+      q_location: "outside", q_goal: "business",
+      q_business_type: "invest_operate", q_nationality: "treaty",
+    })).toContain("e2");
+  });
+
+  it("investidor brasileiro → E-2 bloqueado fora do foco, L-1 dentro", () => {
+    const f = focus({
+      q_location: "outside", q_goal: "business",
+      q_business_type: "invest_operate", q_nationality: "brazilian",
+    });
+    expect(f).toContain("l1");
+    expect(f).not.toContain("e2");
+  });
+
+  it("autônomo sem oferta → foca O-1 e EB-2 NIW", () => {
+    expect(focus({ q_location: "outside", q_goal: "work", q_work_type: "self" }))
+      .toEqual(expect.arrayContaining(["o1", "eb2niw"]));
+  });
+
+  it("turista brasileiro → foca B-1/B-2", () => {
+    expect(focus({ q_location: "outside", q_goal: "visit", q_nationality: "brazilian" }))
+      .toContain("b1");
   });
 });

@@ -377,6 +377,44 @@ function getRecommendations(answers: Answers): VisaResult[] {
   return attachKitLinks(computeRecommendations(answers));
 }
 
+// ─── Focus derivation for /vistos ─────────────────────────────────────────────
+
+// Ids dos cards do catálogo em /vistos. A vitrine destaca estes caminhos
+// ("Recomendados para você") e rebaixa os demais — nunca os esconde: todo
+// perfil mantém as rotas paralelas visíveis.
+const CATALOG_IDS = new Set([
+  "f1", "m1", "j1", "h1b", "o1", "l1", "b1", "e2", "e1", "eb2niw",
+]);
+
+export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
+  const ids = new Set<string>();
+  const add = (id?: string | null) => {
+    if (id && CATALOG_IDS.has(id)) ids.add(id);
+  };
+
+  // 1. Kits já anexados às recomendações apontam direto para o catálogo.
+  for (const r of results) {
+    if (r.blocked || !r.href) continue;
+    const m = r.href.match(/^\/documentos\/(\w+)$/);
+    if (m) add(m[1]);
+  }
+
+  // 2. Âncoras vindas das respostas — cobrem extensões e manuais de caminho,
+  //    cujos títulos não carregam kit próprio.
+  const visaToCard: Record<string, string> = {
+    b1b2: "b1", f1: "f1", j1: "j1", h1b: "h1b", l1: "l1", m1: "m1", o1: "o1",
+  };
+  if (a.q_change_goal === "extend" || a.q_change_goal === "work_change")
+    add(visaToCard[a.q_current_visa]);
+  if (a.q_target_visa) add(visaToCard[a.q_target_visa]);
+  if (a.q_study_type === "university" || a.q_study_type === "language") add("f1");
+  if (a.q_study_type === "vocational") add("m1");
+  if (a.q_study_type === "exchange") add("j1");
+  if (a.q_goal === "visit") add("b1");
+
+  return [...ids];
+}
+
 export function computeRecommendations(answers: Answers): VisaResult[] {
   const results: VisaResult[] = [];
   const a = answers;
@@ -1467,6 +1505,8 @@ export default function OnboardingPage() {
                 if (answers.q_location)
                   params.set("location", answers.q_location === "in_us" ? "eua" : "brasil");
                 params.set("goal", deriveMainGoal(answers));
+                const focus = deriveFocusIds(answers, recommendations);
+                if (focus.length > 0) params.set("focus", focus.join(","));
                 router.push(`/vistos?${params.toString()}`);
               }}
               className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
