@@ -275,9 +275,34 @@ const questionMap: Record<string, Question> = {
       { value: "other",label: "Outra categoria",              icon: "📄" },
     ],
     // ESTA/VWP não permite extensão nem mudança de status por dentro
-    // (8 CFR §248) — direto aos resultados com a regra, sem oferecer
-    // jornadas impossíveis.
-    next: (a) => (a === "esta_vwp" ? "results" : "q_change_goal"),
+    // (8 CFR §248) — mas o objetivo define qual rota consular planejar,
+    // e a exceção de parente imediato precisa ser detectada.
+    next: (a) => (a === "esta_vwp" ? "q_esta_goal" : "q_change_goal"),
+  },
+
+  // ── ESTA/VWP dentro dos EUA — o objetivo define a rota consular ──────────
+  q_esta_goal: {
+    id: "q_esta_goal",
+    text: "O que você deseja fazer agora?",
+    subtitle:
+      "Pelo ESTA não dá para estender a estadia nem mudar de status por dentro — mas dá para planejar a próxima entrada do jeito certo.",
+    options: [
+      { value: "study",  label: "Estudar nos EUA",             icon: "🎓" },
+      { value: "work",   label: "Trabalhar nos EUA",           icon: "💼" },
+      { value: "invest", label: "Investir ou empreender",      icon: "💰" },
+      {
+        value: "family_citizen",
+        label: "Sou cônjuge ou parente imediato de cidadão americano",
+        icon: "💍",
+        subtitle: "Cônjuge, pai/mãe ou filho(a) solteiro(a) menor de 21 de cidadão",
+      },
+      {
+        value: "plan_return",
+        label: "Só visitando — quero planejar visitas futuras",
+        icon: "✈️",
+      },
+    ],
+    next: () => "results",
   },
 
   q_change_goal: {
@@ -411,6 +436,12 @@ export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
   if (a.q_study_type === "vocational") add("m1");
   if (a.q_study_type === "exchange") add("j1");
   if (a.q_goal === "visit") add("b1");
+  // ESTA por dentro: as saídas são consulares — E-1 não tem kit, entra aqui.
+  if (a.q_esta_goal === "invest") {
+    add("e2");
+    add("e1");
+  }
+  if (a.q_business_type === "trade" && a.q_nationality === "treaty") add("e1");
 
   return [...ids];
 }
@@ -455,7 +486,12 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
   }
 
   // ── ESTA / Visa Waiver dentro dos EUA — regra dura, sem COS/extensão ─────
+  // A regra fecha a porta de dentro; o objetivo (q_esta_goal) define qual
+  // rota consular abrir. Quem entra de ESTA tem passaporte de país do VWP —
+  // na maioria dos casos, também tratado E-1/E-2.
   if (currentVisa === "esta_vwp") {
+    const estaGoal = a.q_esta_goal;
+
     results.push({
       visa: "⚠️ Entrada por ESTA/VWP: sem extensão ou mudança de status",
       forms: "8 CFR §248 — regra federal",
@@ -464,13 +500,86 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       priority: "high",
       urgent: true,
     });
-    results.push({
-      visa: "Planeje o próximo passo do lado de fora",
-      forms: "DS-160 no consulado (F-1, trabalho etc.)",
-      description:
-        "Se o objetivo é estudar ou trabalhar, o processo consular a partir do seu país costuma ser o caminho — o Immigrei mostra as etapas de cada visto para você preparar tudo antes de sair.",
-      priority: "medium",
-    });
+
+    if (estaGoal === "family_citizen") {
+      results.push({
+        visa: "Ajuste de status por parente imediato — a exceção do VWP",
+        forms: "I-130 + I-485",
+        description:
+          "Cônjuges, pais e filhos solteiros menores de 21 de cidadão americano podem, em muitos casos, ajustar o status por dentro mesmo tendo entrado de ESTA (INA §245(a)). Atenção à regra dos 90 dias: a intenção na entrada pesa na análise — nenhum protocolo sem orientação individual.",
+        priority: "high",
+        urgent: true,
+      });
+      results.push({
+        visa: "🤝 Análise individual com profissional verificado",
+        forms: "Consulta com advogado de imigração licenciado",
+        description:
+          "Essa exceção é real, mas cheia de detalhes de timing e prova de intenção. O Immigrei conecta você a profissionais verificados antes de qualquer decisão — evite protocolos por conta própria.",
+        priority: "high",
+      });
+    }
+
+    if (estaGoal === "study") {
+      results.push({
+        visa: "F-1 (Estudante Acadêmico) — pelo consulado",
+        forms: "Saída programada + DS-160 + I-20",
+        description:
+          "O caminho real para estudar: garanta o I-20 da escola, saia dos EUA dentro dos 90 dias e aplique o F-1 no consulado do seu país. Estudar em carga integral com ESTA não é permitido — e compromete vistos futuros.",
+        priority: "high",
+      });
+    }
+
+    if (estaGoal === "work") {
+      results.push({
+        visa: "O-1 (Habilidade Extraordinária)",
+        forms: "I-129 (O) + aplicação consular",
+        description:
+          "Para quem tem reconhecimento sólido na sua área: sem sorteio e sem cota. A petição é feita por empregador ou agente nos EUA e o visto sai no consulado.",
+        priority: "high",
+      });
+      results.push({
+        visa: "H-1B (Trabalho Especializado)",
+        forms: "I-129 (H) pelo empregador + sorteio anual",
+        description:
+          "Com graduação e oferta de emprego americana, o empregador registra você no sorteio de março. Aprovado, o visto é emitido no consulado — sem depender de status dentro dos EUA.",
+        priority: "medium",
+      });
+      results.push({
+        visa: "L-1 (Transferência Intraempresarial)",
+        forms: "I-129 (L)",
+        description:
+          "Se você trabalha há 1 ano numa empresa com operação (ou planos de operação) nos EUA, a transferência dispensa sorteio — caminho forte para executivos e especialistas.",
+        priority: "medium",
+      });
+    }
+
+    if (estaGoal === "invest") {
+      results.push({
+        visa: "E-2 (Investidor por Tratado)",
+        forms: "DS-160 + aplicação consular",
+        description:
+          "A grande porta para cidadãos de países com tratado — a maioria dos países do VWP tem. Investimento substancial (a partir de ~$100k) em negócio real, com renovações ilimitadas. Confira seu país na lista oficial de tratados.",
+        priority: "high",
+      });
+      results.push({
+        visa: "E-1 (Comércio por Tratado)",
+        forms: "DS-160 + documentação comercial",
+        description:
+          "Se a sua empresa já comercializa com os EUA (mais de 50% do volume bilateral), o E-1 sustenta idas e vindas de longo prazo — também condicionado ao tratado do seu país.",
+        priority: "medium",
+      });
+    }
+
+    if (!estaGoal || estaGoal === "plan_return") {
+      results.push({
+        visa: "Use o ESTA do jeito certo",
+        forms: "esta.cbp.dhs.gov + I-94 a cada entrada",
+        description:
+          "Até 90 dias por entrada, sem extensão. Entradas muito frequentes levantam a suspeita de 'morar de ESTA' — e podem custar a autorização. Se os planos crescerem, o caminho é um visto de verdade, planejado do lado de fora.",
+        priority: "medium",
+      });
+    }
+
     return results;
   }
 
@@ -1095,6 +1204,8 @@ export function deriveMainGoal(a: Answers): string {
   // Cidadão americano: não está buscando a cidadania — já a tem.
   if (a.q_citizen_goal === "petition_family") return "trazer_familia";
   if (a.q_citizen_goal) return "entender_direitos";
+  // ESTA + parente imediato de cidadão: o objetivo é ajustar o próprio status.
+  if (a.q_esta_goal === "family_citizen") return "regularizar_status";
   if (a.q_change_goal === "extend") return "renovar_visto";
   if (a.q_change_goal === "green_card" || a.q_gc_path) return "green_card";
   if (a.q_change_goal === "family" || a.q_goal === "family") return "trazer_familia";
@@ -1494,14 +1605,22 @@ export default function OnboardingPage() {
           ) : (
             <button
               onClick={() => {
-                // Overstay: as jornadas de visto padrão não se aplicam — o
-                // próximo passo real é ajuda profissional.
-                if (answers.q_current_status === "overstay") {
+                // Overstay e ajuste por parente imediato (exceção do VWP):
+                // as jornadas de visto padrão não se aplicam — o próximo
+                // passo real é ajuda profissional.
+                if (
+                  answers.q_current_status === "overstay" ||
+                  answers.q_esta_goal === "family_citizen"
+                ) {
                   router.push("/profissionais");
                   return;
                 }
                 const params = new URLSearchParams();
                 if (answers.q_nationality) params.set("nationality", answers.q_nationality);
+                // Entrou de ESTA = passaporte de país do VWP: destrava
+                // E-1/E-2 na vitrine sem perguntar a cidadania de novo.
+                else if (answers.q_current_visa === "esta_vwp")
+                  params.set("nationality", "treaty");
                 if (answers.q_location)
                   params.set("location", answers.q_location === "in_us" ? "eua" : "brasil");
                 params.set("goal", deriveMainGoal(answers));
@@ -1512,7 +1631,8 @@ export default function OnboardingPage() {
               className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              {answers.q_current_status === "overstay"
+              {answers.q_current_status === "overstay" ||
+              answers.q_esta_goal === "family_citizen"
                 ? "Encontrar ajuda profissional →"
                 : "Ver minha jornada em detalhe →"}
             </button>

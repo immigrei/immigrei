@@ -183,3 +183,51 @@ describe("focus da vitrine derivado por persona", () => {
       .toContain("b1");
   });
 });
+
+// ESTA/VWP dentro dos EUA: a regra dura aparece sempre; a saída certa
+// depende do objetivo — e a exceção de parente imediato nunca vira
+// jornada de visto comum.
+describe("saídas para quem entrou de ESTA/VWP", () => {
+  const esta = (goal?: string): Answers => ({
+    q_location: "in_us", q_current_status: "in_status",
+    q_current_visa: "esta_vwp", ...(goal ? { q_esta_goal: goal } : {}),
+  });
+
+  it("regra dura (sem COS/extensão) aparece em todo objetivo", () => {
+    for (const goal of ["study", "work", "invest", "family_citizen", "plan_return"]) {
+      expect(recs(esta(goal))[0].visa).toContain("ESTA/VWP");
+    }
+  });
+
+  it("estudar → rota consular F-1 com kit, foco f1", () => {
+    expect(hrefs(esta("study"))).toContain("/documentos/f1");
+    expect(deriveFocusIds(esta("study"), recs(esta("study")))).toContain("f1");
+  });
+
+  it("trabalhar → O-1, H-1B e L-1 consulares com kits", () => {
+    const h = hrefs(esta("work"));
+    expect(h).toEqual(expect.arrayContaining([
+      "/documentos/o1", "/documentos/h1b", "/documentos/l1",
+    ]));
+  });
+
+  it("investir → E-2 (kit) e E-1, com foco em ambos — sem bloqueio", () => {
+    const r = recs(esta("invest"));
+    expect(hrefs(esta("invest"))).toContain("/documentos/e2");
+    expect(r.some((x) => x.blocked)).toBe(false);
+    expect(deriveFocusIds(esta("invest"), r)).toEqual(
+      expect.arrayContaining(["e2", "e1"])
+    );
+  });
+
+  it("parente imediato de cidadão → exceção I-130+I-485, sem kit de visto", () => {
+    const r = recs(esta("family_citizen"));
+    expect(r.some((x) => x.forms.includes("I-130") && x.forms.includes("I-485"))).toBe(true);
+    for (const x of r) expect(x.href ?? "").not.toMatch(/^\/documentos/);
+  });
+
+  it("só visitando → orientação de uso do ESTA, sem jornada de visto", () => {
+    const r = recs(esta("plan_return"));
+    expect(r.some((x) => x.visa.includes("ESTA do jeito certo"))).toBe(true);
+  });
+});
