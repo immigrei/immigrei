@@ -205,6 +205,193 @@ export function getVisaSpecificPaths(visaType?: string | null): StrategyOption[]
     ];
   }
 
+  if (visaType === "f1") {
+    return [
+      {
+        id: "f1_trabalho_nao_autorizado",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Trabalhar por conta própria de F-1 (freelance, aplicativo, cash)",
+        description:
+          "É a pergunta mais comum de quem está de F-1 apertado: 'posso fazer um extra?' A resposta honesta: não. Qualquer trabalho fora do campus sem autorização — freelance, aplicativo, dinheiro vivo, até a sua própria LLC operando — é violação grave de status.",
+        blockedReason:
+          "O regulamento só permite trabalho on-campus (20h/semana), CPT, OPT ou hardship autorizado (8 CFR §214.2(f)(9)). Trabalho não autorizado encerra o status, bloqueia o reinstatement e fecha portas que você vai querer abertas depois.",
+        alternative: {
+          label: "Os caminhos de trabalho legais: OPT, CPT e H-1B",
+          manualSlug: "f1-para-h1b",
+        },
+      },
+      {
+        id: "f1_h1b",
+        icon: "💼",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "F-1 → H-1B: a ponte do estudo para o trabalho",
+        description:
+          "O caminho mais percorrido depois da formatura: OPT (12 meses, +24 se STEM) enquanto o empregador registra você na loteria do H-1B. Selecionado, o cap-gap segura seu status até o H-1B começar. E existe o atalho que pouca gente conhece: universidades e organizações de pesquisa são isentas da loteria o ano inteiro.",
+        manualSlug: "f1-para-h1b",
+        kits: [{ label: "Kit H-1B — mudança de status", kitId: "h1b-cos", status: "disponivel" }],
+      },
+      {
+        id: "f1_reinstatement",
+        icon: "🔄",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Caiu fora de status? O reinstatement tem janela e condições",
+        description:
+          "Perdeu o status por circunstância fora do seu controle — erro do DSO, doença, confusão com carga horária? O pedido de restauração (I-539) existe, mas tem regras duras: protocolar em até 5 meses da violação, e trabalho não autorizado mata o pedido. Passou dos 5 meses, a rota realista é sair e voltar com novo visto F-1 pelo consulado.",
+        doesNot: [
+          "Não funciona depois de 5 meses da violação, salvo circunstâncias excepcionais (8 CFR §214.2(f)(16))",
+          "Não funciona se houve trabalho não autorizado",
+        ],
+      },
+    ];
+  }
+
+  if (visaType === "j1") {
+    return [
+      {
+        id: "j1_cos_212e_blocked",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Mudar de status dentro dos EUA com a regra dos 2 anos ativa",
+        description:
+          "Se o seu DS-2019 marca que você está sujeito à regra dos 2 anos (INA §212(e)) — por financiamento do governo ou treinamento médico —, a lei fecha três portas até você cumprir os 2 anos no Brasil ou conseguir o waiver: vistos H, L e K, o Green Card, e a mudança de status dentro dos EUA.",
+        blockedReason:
+          "Vedação prevista em lei federal (INA §212(e) e §248(a)). Mas atenção ao que ela NÃO fecha: obter F-1, O-1 ou visto de turista pelo consulado continua possível mesmo sujeito à regra.",
+        alternative: {
+          label: "J-1 → F-1: pelo waiver ou pelo consulado",
+          manualSlug: "j1-para-f1",
+        },
+      },
+      {
+        id: "j1_f1",
+        icon: "🎓",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "J-1 → F-1: continuar estudando nos EUA",
+        description:
+          "Terminou o intercâmbio e quer ficar estudando — faculdade, mestrado, inglês acadêmico? O F-1 é a continuação natural. Sem a regra dos 2 anos, dá para mudar de status dentro dos EUA (I-539). Sujeito à regra, o caminho existe do mesmo jeito: waiver primeiro, ou aplicar o F-1 no consulado — que a regra dos 2 anos não bloqueia.",
+        manualSlug: "j1-para-f1",
+        kits: [{ label: "Kit F-1 — mudança de status (I-539)", kitId: "f1-cos", status: "disponivel" }],
+      },
+      {
+        id: "j1_waiver",
+        icon: "🔓",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Waiver da regra dos 2 anos: depende de quem pagou seu programa",
+        description:
+          "A chave que destrava as portas do §212(e) é o waiver por no-objection: o governo brasileiro declara que não se opõe à sua permanência. Para a maioria dos brasileiros, funciona. As exceções: programas financiados pelo governo AMERICANO raramente conseguem, e médicos em treinamento ECFMG não têm acesso a essa via.",
+        doesNot: [
+          "Não está disponível para médicos em treinamento de pós-graduação (ECFMG)",
+          "Não costuma prosperar quando o programa foi financiado pelo governo dos EUA",
+        ],
+      },
+    ];
+  }
+
+  if (visaType === "h1b") {
+    return [
+      {
+        id: "h1b_trabalho_pos_negativa",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Continuar trabalhando depois da negativa da extensão",
+        description:
+          "É o erro mais comum — e o mais caro. Quem espera a extensão do H-1B pode trabalhar enquanto ela pende (regra dos 240 dias). Negada, a autorização morre no mesmo dia. Continuar 'só até resolver' é trabalho não autorizado, e é exatamente isso que contamina as outras portas.",
+        blockedReason:
+          "A autorização da regra dos 240 dias (8 CFR §274a.12(b)(20)) termina na negativa. Trabalho não autorizado pesa contra nova petição, mudança de status e até o ajuste por casamento em algumas categorias.",
+        alternative: {
+          label: "Trocar de empregador do jeito certo (portabilidade)",
+          manualSlug: "h1b-transferencia",
+        },
+      },
+      {
+        id: "h1b_portabilidade",
+        icon: "💼",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "Trocar de empregador sem esperar aprovação (portabilidade)",
+        description:
+          "O H-1B não te prende ao empregador: com status válido, você pode começar no novo emprego assim que a nova petição é protocolada — sem esperar a aprovação (INA §214(n)). E quem já foi contado na loteria não passa por ela de novo. Perdeu o emprego? Você tem até 60 dias de grace period para o novo empregador protocolar.",
+        manualSlug: "h1b-transferencia",
+        kits: [{ label: "Kit H-1B — mudança de status", kitId: "h1b-cos", status: "disponivel" }],
+      },
+      {
+        id: "h1b_alem_6_anos",
+        icon: "⏳",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Passar do limite de 6 anos: depende do seu Green Card andando",
+        description:
+          "O H-1B tem teto de 6 anos — mas a lei abre exceção para quem já está no caminho do Green Card: PERM ou I-140 pendente há mais de 1 ano garante extensões anuais, e I-140 aprovado com fila no Boletim de Vistos garante extensões de 3 anos (acompanhe a fila no seu painel). O H-1B é visto de dupla intenção: buscar o Green Card não viola nada.",
+        doesNot: [
+          "Não funciona sem processo de Green Card em andamento — sem PERM/I-140, o teto de 6 anos vale (AC21 §§104(c) e 106)",
+        ],
+      },
+    ];
+  }
+
+  if (visaType === "o1") {
+    return [
+      {
+        id: "o1_autopeticao_blocked",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Aplicar o O-1 sozinho, sem empregador ou agente",
+        description:
+          "O desejo mais comum de artistas, criadores e autônomos: 'quero peticionar meu próprio O-1'. A lei não permite — a petição precisa vir de um empregador ou agente AMERICANO. Mas a porta da auto-petição existe: ela fica no Green Card, não no visto.",
+        blockedReason:
+          "O regulamento exige peticionário americano — empregador ou agente (8 CFR §214.2(o)(2)(i)). Auto-petição de verdade existe no EB-1A e no EB-2 NIW, onde você mesmo protocola o I-140.",
+        alternative: {
+          label: "Auto-petição de Green Card: EB-1A e EB-2 NIW",
+          manualSlug: "o1-autopeticao-greencard",
+        },
+      },
+      {
+        id: "o1_greencard",
+        icon: "🏆",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "Do O-1 ao Green Card: EB-1A e EB-2 NIW, sem empregador",
+        description:
+          "O O-1 combina com a busca do Green Card: ter um I-140 pendente ou aprovado não prejudica seu status nem suas renovações (8 CFR §214.2(o)(13)). E as duas rotas naturais são auto-petição — EB-1A para quem está no topo da área, EB-2 NIW para quem tem trabalho de importância nacional. Nenhuma exige empregador ou PERM.",
+        manualSlug: "o1-autopeticao-greencard",
+        kits: [{ label: "Kit EB-2 NIW — auto-petição", kitId: "eb2niw", status: "disponivel" }],
+      },
+      {
+        id: "o1_nova_peticao",
+        icon: "🔄",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "O-1 negado? A negativa diz exatamente o que faltou",
+        description:
+          "Negativa de O-1 quase nunca é 'você não serve' — é 'faltou evidência nos critérios X e Y'. Não existe loteria nem limite de tentativas: uma nova petição atacando exatamente os pontos fracos apontados é a rota padrão. O texto da negativa é o seu mapa; leve-o à conversa com o profissional.",
+        doesNot: [
+          "Não dispensa o peticionário americano — a nova petição também precisa de empregador ou agente",
+          "Não restaura autorização de trabalho perdida enquanto a nova petição pende",
+        ],
+      },
+    ];
+  }
+
   return [];
 }
 
