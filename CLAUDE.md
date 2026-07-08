@@ -204,7 +204,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 - **Language:** Code, variables, comments, commit messages → English
 - **UI copy:** Portuguese (PT-BR) first for all user-facing text
-- **Commits:** Short imperative English (`add login page`, `fix auth redirect`)
+- **Commits:** Conventional Commits — `type: short imperative summary` in English. Types: `feat`, `fix`, `chore`, `docs`, `refactor`. Ex: `feat: add path manuals with blocked-route states`, `fix: correct M-1 to F-1 status change block`
 - **Components:** Mobile-first always
 - **Brand colors:** Use CSS variables — never hardcode hex values
 - **Fonts:** Load Fraunces and Hanken Grotesk from Google Fonts
