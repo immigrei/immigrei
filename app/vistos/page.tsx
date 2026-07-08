@@ -12,6 +12,8 @@ interface Visto {
   badge: string;
   badgeColor: "pine" | "amber" | "ink" | "clay";
   descricao: string;
+  chave: string;   // o requisito-porteiro que destrava o caminho (fonte oficial)
+  degrau: string;  // o plano de crescimento p/ quem ainda não está pronto
   destaque: { tipo: "star" | "warning" | "block"; texto: string } | null;
   stats: { label: string; valor: string; ok: boolean }[];
   availability: Availability;
@@ -27,76 +29,96 @@ const vistosEstudo: Visto[] = [
     badge: "Estudante",
     badgeColor: "pine",
     descricao:
-      "Para quem vai estudar em universidades, colleges ou escolas de idiomas nos EUA. O visto mais comum entre brasileiros.",
+      "Para estudar em universidades, colleges ou escolas de idiomas. O visto mais comum entre brasileiros — e a porta de entrada da escada estudo → trabalho.",
+    chave:
+      "Um I-20 emitido por escola certificada SEVP + prova de fundos para o 1º ano + taxa SEVIS (I-901) paga.",
+    degrau:
+      "Ainda sem escola ou fundos? Comece por aí: o I-20 vem da escola, e extratos organizados (em seu nome) decidem a entrevista.",
     destaque: {
       tipo: "star",
       texto:
-        "Permite cursos híbridos (presencial + online) — você pode fazer parte da carga horária remotamente.",
+        "Depois de formado, o OPT dá até 12 meses de trabalho (36 em STEM) — é o trampolim clássico para o H-1B.",
     },
     stats: [
-      { label: "Trabalho", valor: "Permitido (OPT/CPT)", ok: true },
-      { label: "Duração", valor: "Curso + 60 dias", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Viagem ao Brasil", valor: "Sim, com I-20 válido", ok: true },
+      { label: "Trabalho", valor: "Limitado (on-campus, OPT/CPT)", ok: true },
+      { label: "Duração", valor: "Enquanto durar o curso (D/S)", ok: true },
+      { label: "Rumo ao Green Card", valor: "Indireto — via OPT → H-1B", ok: true },
+      { label: "Família", valor: "F-2 (cônjuge não trabalha)", ok: false },
     ],
     availability: "all",
   },
   {
     id: "m1",
     codigo: "M-1",
-    nome: "Estudante Técnico",
-    badge: "Vocacional",
+    nome: "Estudante Técnico / Vocacional",
+    badge: "Estudante",
     badgeColor: "pine",
     descricao:
-      "Para programas técnicos e vocacionais — mecânica, culinária, aviação, estética e afins.",
-    destaque: null,
+      "Para cursos profissionalizantes: aviação, culinária, mecânica, estética e afins, em escolas credenciadas pelo SEVP.",
+    chave:
+      "Um I-20 (versão M) de escola vocacional certificada + fundos para o curso INTEIRO comprovados de partida.",
+    degrau:
+      "Escolha um curso perto de onde vai morar — distância implausível entre casa e escola é motivo clássico de negação.",
+    destaque: {
+      tipo: "warning",
+      texto:
+        "A lei veda mudar de M-1 para F-1 por dentro dos EUA, sem exceção. Se um dia você quiser universidade, o caminho é pelo consulado — planeje a categoria certa antes.",
+    },
     stats: [
-      { label: "Trabalho", valor: "Muito restrito", ok: false },
-      { label: "Duração", valor: "Curso + 30 dias", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Viagem ao Brasil", valor: "Sim, com restrições", ok: true },
+      { label: "Trabalho", valor: "Não (estágio só após o curso)", ok: false },
+      { label: "Duração", valor: "Duração do curso (máx. 1 ano, prorrogável)", ok: true },
+      { label: "Rumo ao Green Card", valor: "Não é caminho", ok: false },
+      { label: "Família", valor: "M-2 (cônjuge não trabalha)", ok: false },
     ],
     availability: "all",
   },
   {
     id: "j1",
     codigo: "J-1",
-    nome: "Intercâmbio Cultural",
+    nome: "Intercâmbio e Pesquisa",
     badge: "Intercâmbio",
-    badgeColor: "amber",
+    badgeColor: "pine",
     descricao:
-      "Para programas de intercâmbio, au pair, pesquisa, treinamento ou trabalho temporário com patrocinador autorizado.",
+      "Para programas patrocinados: au pair, pesquisa, professor visitante, summer work, treinamento profissional e mais 10 categorias.",
+    chave:
+      "Um DS-2019 emitido por um sponsor designado pelo Depto. de Estado — não é a escola que emite, é o programa patrocinador.",
+    degrau:
+      "O sponsor conduz quase tudo: o primeiro passo é ser aceito num programa (au pair, intern, pesquisa) — a partir daí o caminho anda sozinho.",
     destaque: {
       tipo: "warning",
       texto:
-        "Alguns programas têm a regra dos 2 anos — obrigação de retornar ao Brasil antes de pedir outro visto.",
+        "Regra dos 2 anos (212(e)): algumas categorias exigem voltar ao Brasil por 2 anos antes de mudar de status ou pedir green card. Confira no seu DS-2019 antes de aceitar.",
     },
     stats: [
-      { label: "Trabalho", valor: "Dentro do programa", ok: true },
-      { label: "Duração", valor: "Até 5 anos", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Viagem ao Brasil", valor: "Sim, com atenção", ok: true },
+      { label: "Trabalho", valor: "Sim, dentro do programa", ok: true },
+      { label: "Duração", valor: "Varia por categoria (meses a 5 anos)", ok: true },
+      { label: "Rumo ao Green Card", valor: "Travado se a regra 212(e) se aplicar", ok: false },
+      { label: "Família", valor: "J-2 (cônjuge PODE pedir permissão de trabalho)", ok: true },
     ],
     availability: "all",
   },
   {
     id: "h1b",
     codigo: "H-1B",
-    nome: "Trabalhador Especialista",
+    nome: "Trabalho Especializado",
     badge: "Trabalho",
-    badgeColor: "ink",
+    badgeColor: "amber",
     descricao:
-      "Para quem tem emprego formal nos EUA em área especializada — tecnologia, engenharia, saúde, finanças. Exige patrocínio de empregador americano.",
+      "O visto de trabalho mais conhecido: para funções que exigem graduação, com patrocínio de um empregador americano.",
+    chave:
+      "Graduação na área da vaga + um empregador disposto a patrocinar — a petição (I-129) é dele, não sua.",
+    degrau:
+      "Sem graduação? Cada 3 anos de experiência contam como 1 ano de estudo. Sem empregador? A rota comum é F-1 → OPT → conquistar a vaga por dentro.",
     destaque: {
       tipo: "warning",
       texto:
-        "Sujeito a sorteio anual. Muitos não são selecionados no primeiro ano.",
+        "Tem sorteio: registro em março pelo empregador, com ~1 chance em 3 por ano. Quem planeja a escada F-1/OPT ganha múltiplas tentativas.",
     },
     stats: [
-      { label: "Trabalho", valor: "Sim (patrocinador)", ok: true },
-      { label: "Duração", valor: "3 anos, até 6", ok: true },
-      { label: "Sorteio", valor: "Sim — 85k vagas/ano", ok: false },
-      { label: "Viagem ao Brasil", valor: "Sim, com I-797", ok: true },
+      { label: "Trabalho", valor: "Sim (no patrocinador)", ok: true },
+      { label: "Duração", valor: "3 + 3 anos (máx. 6)", ok: true },
+      { label: "Rumo ao Green Card", valor: "Sim — dual intent, patrocínio comum", ok: true },
+      { label: "Família", valor: "H-4 (cônjuge trabalha em certos casos)", ok: true },
     ],
     availability: "all",
   },
@@ -104,26 +126,27 @@ const vistosEstudo: Visto[] = [
     id: "o1",
     codigo: "O-1",
     nome: "Habilidade Extraordinária",
-    badge: "Talento",
+    badge: "Trabalho",
     badgeColor: "amber",
     descricao:
-      "Para quem tem reconhecimento extraordinário na sua área — ciência, artes, esportes, negócios, cinema.",
+      "Para quem se destaca comprovadamente na sua área: tech, ciência, artes, esportes, negócios. Cada vez mais usado por brasileiros.",
+    chave:
+      "Provas de reconhecimento em pelo menos 3 de 8 critérios oficiais (prêmios, imprensa, papel de liderança, alta remuneração...) + um empregador ou agente nos EUA.",
+    degrau:
+      "O dossiê se constrói em 12–24 meses: prêmios, publicações, cartas de especialistas, projetos de destaque. Dá para planejar — e vale começar hoje.",
     destaque: {
       tipo: "star",
-      texto:
-        "Sem sorteio. Sem cap. Mas exige evidências robustas de destaque na sua área.",
+      texto: "Sem sorteio e sem cota — e renovações ilimitadas enquanto o trabalho continuar.",
     },
     stats: [
-      { label: "Trabalho", valor: "Sim (patrocinador)", ok: true },
-      { label: "Duração", valor: "3 anos, renovável", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Viagem ao Brasil", valor: "Sim, com I-797", ok: true },
+      { label: "Trabalho", valor: "Sim (com o peticionário)", ok: true },
+      { label: "Duração", valor: "3 anos + renovações sem limite", ok: true },
+      { label: "Rumo ao Green Card", valor: "Sim — perfil casa com EB-1A/NIW", ok: true },
+      { label: "Família", valor: "O-3 (cônjuge não trabalha)", ok: false },
     ],
     availability: "all",
   },
 ];
-
-// ─── Business & Investment ─────────────────────────────────────────────────
 
 const vistosNegocios: Visto[] = [
   {
@@ -131,82 +154,95 @@ const vistosNegocios: Visto[] = [
     codigo: "E-2",
     nome: "Investidor por Tratado",
     badge: "Investimento",
-    badgeColor: "amber",
+    badgeColor: "ink",
     descricao:
-      "Para quem investe capital substancial em um negócio nos EUA. Exige que o país de origem tenha tratado de comércio com os EUA.",
+      "Para quem investe capital próprio e em risco num negócio real nos EUA — restaurantes, franquias, empresas de serviço.",
+    chave:
+      "Cidadania de país com tratado com os EUA + investimento substancial já comprometido num negócio operante.",
+    degrau:
+      "Brasileiro não tem tratado — mas a porta costuma ser a segunda cidadania (italiana, portuguesa, espanhola por descendência). Sem ela, os caminhos análogos são L-1 e EB-5.",
     destaque: {
       tipo: "block",
-      texto:
-        "Não disponível para cidadãos brasileiros. O Brasil não possui tratado de comércio e navegação com os EUA. Disponível para europeus de países tratados (Alemanha, França, Portugal, Espanha e outros).",
+      texto: "O Brasil não tem tratado E-2 — disponível apenas com cidadania de país-membro.",
     },
     stats: [
-      { label: "Investimento", valor: "~$100k mínimo", ok: true },
-      { label: "Trabalho", valor: "Sim (no negócio)", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Caminho para GC", valor: "Não direto", ok: false },
+      { label: "Trabalho", valor: "Sim (no próprio negócio)", ok: true },
+      { label: "Duração", valor: "Renovável sem limite (2–5 anos por vez)", ok: true },
+      { label: "Rumo ao Green Card", valor: "Não direto", ok: false },
+      { label: "Família", valor: "Cônjuge PODE trabalhar", ok: true },
     ],
     availability: "treaty-only",
   },
   {
     id: "e1",
     codigo: "E-1",
-    nome: "Comerciante por Tratado",
-    badge: "Comércio",
-    badgeColor: "amber",
+    nome: "Comércio por Tratado",
+    badge: "Negócios",
+    badgeColor: "ink",
     descricao:
-      "Para quem conduz volume substancial de comércio de bens, serviços ou tecnologia entre os EUA e o país de origem. Também exige tratado.",
+      "Para quem já tem empresa com comércio constante e substancial com os EUA — exportação, importação, serviços.",
+    chave:
+      "Cidadania de país com tratado + mais de 50% do volume de comércio da empresa entre os EUA e o país do tratado.",
+    degrau:
+      "O degrau é o histórico: contratos e faturamento recorrentes com os EUA constroem o caso. Brasileiros precisam da segunda cidadania (como no E-2).",
     destaque: {
       tipo: "block",
-      texto:
-        "Não disponível para cidadãos brasileiros. Mesma restrição do E-2 — exige tratado que o Brasil não possui.",
+      texto: "O Brasil não tem tratado E-1 — disponível apenas com cidadania de país-membro.",
     },
     stats: [
-      { label: "Trabalho", valor: "Sim", ok: true },
-      { label: "Comércio", valor: ">50% entre os países", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Caminho para GC", valor: "Não direto", ok: false },
+      { label: "Trabalho", valor: "Sim (na empresa do tratado)", ok: true },
+      { label: "Duração", valor: "Renovável sem limite (2–5 anos por vez)", ok: true },
+      { label: "Rumo ao Green Card", valor: "Não direto", ok: false },
+      { label: "Família", valor: "Cônjuge PODE trabalhar", ok: true },
     ],
     availability: "treaty-only",
   },
   {
     id: "b1",
-    codigo: "B-1",
-    nome: "Visitante de Negócios",
-    badge: "Negócios",
-    badgeColor: "ink",
+    codigo: "B-1/B-2",
+    nome: "Turismo e Negócios",
+    badge: "Visita",
+    badgeColor: "clay",
     descricao:
-      "Para reuniões, contratos, conferências e negociações nos EUA. Não autoriza trabalho remunerado — apenas atividades de negócio.",
+      "Para visitas: turismo, reuniões de negócios, feiras, tratamento médico, visita a família. É visita — não é vida nos EUA.",
+    chave:
+      "Convencer o consulado dos seus vínculos com o Brasil: emprego, estudo, família e bens que provem a intenção de voltar.",
+    degrau:
+      "A entrevista é o jogo inteiro. Organize os vínculos ANTES de agendar — e nunca use o B para trabalhar ou estudar em carga integral: isso fecha portas futuras.",
     destaque: {
       tipo: "warning",
       texto:
-        "Brasileiro precisa solicitar visto na embaixada. Europeus de países do Visa Waiver entram via ESTA, sem precisar de visto — até 90 dias.",
+        "O prazo de permanência é o do I-94 (definido na entrada), não a validade do visto. Muita gente confunde — e a confusão custa caro.",
     },
     stats: [
-      { label: "Trabalho", valor: "Não permitido", ok: false },
-      { label: "Duração", valor: "Até 6 meses", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Renovação", valor: "Sim", ok: true },
+      { label: "Trabalho", valor: "Não", ok: false },
+      { label: "Duração", valor: "Até 6 meses por entrada (I-94 manda)", ok: true },
+      { label: "Rumo ao Green Card", valor: "Não é caminho", ok: false },
+      { label: "Família", valor: "Cada pessoa solicita o seu", ok: true },
     ],
     availability: "all",
   },
   {
     id: "l1",
     codigo: "L-1",
-    nome: "Transferência Intracompanhia",
-    badge: "Executivo",
-    badgeColor: "pine",
+    nome: "Transferência Intraempresarial",
+    badge: "Trabalho",
+    badgeColor: "amber",
     descricao:
-      "Para executivos, gerentes e especialistas transferidos de uma empresa no exterior para uma filial ou subsidiária nos EUA. A empresa precisa existir nos dois países.",
+      "Para quem é transferido por uma empresa com operação no Brasil e nos EUA — ou para o dono que vai abrir a filial americana da própria empresa.",
+    chave:
+      "1 ano trabalhando na empresa fora dos EUA (nos últimos 3) + relação corporativa real entre as empresas (matriz, filial, afiliada).",
+    degrau:
+      "Dois degraus possíveis: entrar numa multinacional com presença nos EUA e completar 12 meses — ou estruturar a expansão da sua própria empresa (L-1 de novo escritório).",
     destaque: {
       tipo: "star",
-      texto:
-        "Sem sorteio. Caminho natural para o green card EB-1C para executivos e gerentes.",
+      texto: "Sem sorteio e sem cota — e o L-1A é a ponte natural para o EB-1C (green card de executivo).",
     },
     stats: [
-      { label: "Trabalho", valor: "Sim (empresa)", ok: true },
-      { label: "Duração", valor: "3–7 anos", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Caminho para GC", valor: "Sim (EB-1C)", ok: true },
+      { label: "Trabalho", valor: "Sim (na própria empresa)", ok: true },
+      { label: "Duração", valor: "L-1A até 7 anos / L-1B até 5", ok: true },
+      { label: "Rumo ao Green Card", valor: "Sim — dual intent, via EB-1C", ok: true },
+      { label: "Família", valor: "L-2 (cônjuge PODE trabalhar)", ok: true },
     ],
     availability: "all",
   },
@@ -217,17 +253,20 @@ const vistosNegocios: Visto[] = [
     badge: "Green Card",
     badgeColor: "pine",
     descricao:
-      "Green card para profissionais com grau avançado ou habilidade excepcional cujo trabalho beneficia os EUA. Dispensa patrocínio de empregador.",
+      "Residência permanente direta, sem empregador: para profissionais cujo trabalho tem mérito e importância nacional para os EUA.",
+    chave:
+      "Grau avançado (mestrado+, ou graduação + 5 anos de experiência) + um projeto/atuação com impacto que interesse aos EUA — bem documentado.",
+    degrau:
+      "O caso se constrói: publicações, cartas de recomendação, plano do que você fará nos EUA. Quem começa a montar o dossiê 1 ano antes chega muito mais forte.",
     destaque: {
-      tipo: "warning",
-      texto:
-        "Brasileiro pode pedir, mas a fila é longa. O Brasil entra na categoria 'Rest of World' — o tempo de espera varia em anos dependendo do momento.",
+      tipo: "star",
+      texto: "Autopetição: você mesmo protocola — sem sorteio, sem oferta de emprego, sem patrocinador.",
     },
     stats: [
-      { label: "Patrocínio", valor: "Não obrigatório", ok: true },
-      { label: "Resultado", valor: "Green card", ok: true },
-      { label: "Sorteio", valor: "Não", ok: true },
-      { label: "Fila de espera", valor: "Sim — Rest of World", ok: false },
+      { label: "Trabalho", valor: "Livre (é residência)", ok: true },
+      { label: "Duração", valor: "Permanente (é o green card)", ok: true },
+      { label: "Rumo ao Green Card", valor: "É o próprio green card", ok: true },
+      { label: "Família", valor: "Cônjuge e filhos <21 incluídos", ok: true },
     ],
     availability: "all",
   },
@@ -325,6 +364,18 @@ function VistoCard({
       </div>
 
       {/* Callout */}
+      {/* O que destrava */}
+      <div className="bg-pine-tint/60 rounded-xl px-4 py-3">
+        <p className="text-pine text-xs font-bold uppercase tracking-wider mb-1">🔑 O que destrava este caminho</p>
+        <p className="text-ink text-sm leading-relaxed">{visto.chave}</p>
+      </div>
+
+      {/* Degrau para quem não está pronto */}
+      <div className="bg-cream rounded-xl px-4 py-3">
+        <p className="text-ink-faint text-xs font-bold uppercase tracking-wider mb-1">🌱 Ainda não está pronto?</p>
+        <p className="text-ink-soft text-sm leading-relaxed">{visto.degrau}</p>
+      </div>
+
       {visto.destaque && (
         <div
           className={[

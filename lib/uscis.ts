@@ -20,6 +20,134 @@ export type CaseStatusResult = {
 
 const USCIS_STATUS_URL = "https://egov.uscis.gov/casestatus/mycasestatus.do";
 
+// ── Official Torch API (developer.uscis.gov) ────────────────────────────────
+// Preferred path. Sandbox: https://api-int.uscis.gov (test receipts only);
+// production: https://api.uscis.gov (granted after the USCIS demo).
+// Legacy egov scraping now returns 403 (Akamai bot protection) and only
+// remains as a fallback while credentials are not configured.
+const USCIS_API_BASE =
+  process.env.USCIS_API_BASE ?? "https://api-int.uscis.gov";
+const USCIS_CLIENT_ID = process.env.USCIS_CLIENT_ID;
+const USCIS_CLIENT_SECRET = process.env.USCIS_CLIENT_SECRET;
+
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
+async function getUscisApiToken(): Promise<string> {
+  if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
+    return cachedToken.token;
+  }
+  const res = await fetch(`${USCIS_API_BASE}/oauth/accesstoken`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: USCIS_CLIENT_ID!,
+      client_secret: USCIS_CLIENT_SECRET!,
+    }).toString(),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) throw new Error(`USCIS oauth returned HTTP ${res.status}`);
+  const data = await res.json();
+  const expiresIn = Number(data.expires_in ?? 1800);
+  cachedToken = {
+    token: data.access_token,
+    expiresAt: Date.now() + expiresIn * 1000,
+  };
+  return cachedToken.token;
+}
+
+// Every documented Torch response code gets an explicit, user-honest
+// treatment (production-demo requirement: handle ALL documented codes).
+export function describeApiFailure(
+  httpStatus: number,
+  normalized: string,
+  fetchedAt: string,
+): CaseStatusResult {
+  const base = {
+    receiptNumber: normalized,
+    statusDate: "",
+    isApproved: false, isPending: false, isDenied: false,
+    fetchedAt,
+  };
+  switch (httpStatus) {
+    case 400:
+      return { ...base, status: "Número de recibo inválido",
+        description: "O USCIS não reconheceu o formato desse número. Confira os 13 caracteres (3 letras + 10 dígitos) no topo da sua notificação I-797.",
+        error: "bad_request" };
+    case 401:
+    case 403:
+      return { ...base, status: "Verificação temporariamente indisponível",
+        description: "Nossa credencial junto ao USCIS precisa ser renovada. Já fomos avisados — tente novamente em alguns minutos.",
+        error: `auth_${httpStatus}` };
+    case 404:
+      return { ...base, status: "Caso não encontrado",
+        description: "O USCIS não encontrou um caso com esse número de recibo. Confira os 13 caracteres no topo da sua notificação I-797.",
+        error: "not_found" };
+    case 429:
+      return { ...base, status: "Muitas consultas agora",
+        description: "Atingimos o limite de consultas do USCIS neste momento. Sua verificação será refeita automaticamente — não é preciso fazer nada.",
+        error: "rate_limited" };
+    default:
+      return { ...base, status: "USCIS temporariamente indisponível",
+        description: "O sistema do USCIS não respondeu (isso inclui o horário de manutenção deles). Verificamos seus casos toda semana automaticamente — tente de novo mais tarde.",
+        error: `http_${httpStatus}` };
+  }
+}
+
+// Pure payload mapper — tolerant to the documented Torch field variants.
+export function mapCaseStatusPayload(
+  normalized: string,
+  data: Record<string, unknown>,
+  fetchedAt: string,
+): CaseStatusResult {
+  const cs = (data.case_status ?? data.caseStatus ?? data) as Record<string, unknown>;
+  const status = String(
+    cs.current_case_status_text_en ?? cs.actionCodeText ?? cs.status ?? "",
+  );
+  const description = String(
+    cs.current_case_status_desc_en ?? cs.actionCodeDesc ?? cs.description ?? "",
+  );
+  const statusDate = String(cs.modifiedDate ?? cs.actionCodeDate ?? "");
+  const isApproved = isApprovedStatus(status);
+  const isDenied = isDeniedStatus(status);
+  return {
+    receiptNumber: normalized,
+    status: status || "Status não encontrado",
+    statusDate,
+    description: cleanHtml(description),
+    isApproved,
+    isPending: !isApproved && !isDenied,
+    isDenied,
+    fetchedAt,
+  };
+}
+
+async function fetchCaseStatusViaApi(
+  normalized: string,
+  fetchedAt: string,
+): Promise<CaseStatusResult> {
+  let token = await getUscisApiToken();
+  let res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(10_000),
+  });
+
+  // 401 once: the cached token may have just expired — refresh and retry.
+  if (res.status === 401 && cachedToken) {
+    cachedToken = null;
+    token = await getUscisApiToken();
+    res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+  }
+
+  if (!res.ok) return describeApiFailure(res.status, normalized, fetchedAt);
+
+  const data = await res.json();
+  return mapCaseStatusPayload(normalized, data, fetchedAt);
+}
+
 // Shared status classifiers — used by the parser, the cron and the dashboard
 export function isDeniedStatus(status: string): boolean {
   const s = status.toLowerCase();
@@ -57,6 +185,10 @@ export async function fetchCaseStatus(receiptNumber: string): Promise<CaseStatus
   }
 
   try {
+    if (USCIS_CLIENT_ID && USCIS_CLIENT_SECRET) {
+      return await fetchCaseStatusViaApi(normalized, fetchedAt);
+    }
+
     const body = new URLSearchParams({
       appReceiptNum: normalized,
       caseStatusSearchBtn: "CHECK STATUS",
