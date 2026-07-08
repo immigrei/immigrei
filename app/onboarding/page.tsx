@@ -248,16 +248,32 @@ const questionMap: Record<string, Question> = {
   // ── Has visa in the US ────────────────────────────────────────────────────
   q_current_visa: {
     id: "q_current_visa",
-    text: "Qual é o seu visto atual?",
+    text: "Em qual categoria você está hoje?",
+    subtitle:
+      "A do seu I-94 ou da última aprovação do USCIS — pode ser diferente do visto carimbado no passaporte.",
     options: [
       { value: "b1b2", label: "B-1/B-2 — Turismo / Negócios", icon: "🛂" },
       { value: "f1",   label: "F-1 — Estudante acadêmico",    icon: "🎓" },
       { value: "j1",   label: "J-1 — Intercâmbio",            icon: "🔄" },
       { value: "h1b",  label: "H-1B — Trabalho especializado", icon: "🏢" },
       { value: "l1",   label: "L-1 — Transferência intraempresarial", icon: "🌐" },
-      { value: "other",label: "Outro visto",                  icon: "📄" },
+      {
+        value: "dependent",
+        label: "Dependente — F-2, H-4, L-2 ou J-2",
+        icon: "👪",
+      },
+      {
+        value: "esta_vwp",
+        label: "Entrei sem visto (ESTA / Visa Waiver)",
+        icon: "🛬",
+        subtitle: "Passaporte europeu ou de país do VWP",
+      },
+      { value: "other",label: "Outra categoria",              icon: "📄" },
     ],
-    next: () => "q_change_goal",
+    // ESTA/VWP não permite extensão nem mudança de status por dentro
+    // (8 CFR §248) — direto aos resultados com a regra, sem oferecer
+    // jornadas impossíveis.
+    next: (a) => (a === "esta_vwp" ? "results" : "q_change_goal"),
   },
 
   q_change_goal: {
@@ -373,6 +389,26 @@ function getRecommendations(answers: Answers): VisaResult[] {
         "A data que define sua permanência é a do I-94 — o registro oficial de entrada —, não a do visto no passaporte. Consulte com passaporte em mãos no site oficial do CBP. Depois, refaça este mapa (leva 2 minutos): todos os caminhos dependem dessa data.",
       priority: "high",
       urgent: true,
+    });
+    return results;
+  }
+
+  // ── ESTA / Visa Waiver dentro dos EUA — regra dura, sem COS/extensão ─────
+  if (currentVisa === "esta_vwp") {
+    results.push({
+      visa: "⚠️ Entrada por ESTA/VWP: sem extensão ou mudança de status",
+      forms: "8 CFR §248 — regra federal",
+      description:
+        "Quem entra pelo Visa Waiver aceita não estender a estadia (máx. 90 dias) nem mudar de status por dentro dos EUA. O caminho padrão é sair e aplicar o visto no consulado. Exceção estreita: ajuste por parente imediato de cidadão americano — análise jurídica individual.",
+      priority: "high",
+      urgent: true,
+    });
+    results.push({
+      visa: "Planeje o próximo passo do lado de fora",
+      forms: "DS-160 no consulado (F-1, trabalho etc.)",
+      description:
+        "Se o objetivo é estudar ou trabalhar, o processo consular a partir do seu país costuma ser o caminho — o Immigrei mostra as etapas de cada visto para você preparar tudo antes de sair.",
+      priority: "medium",
     });
     return results;
   }
@@ -783,6 +819,7 @@ function getRecommendations(answers: Answers): VisaResult[] {
   if (inUs && changeGoal === "extend") {
     const visaLabels: Record<string, string> = {
       b1b2: "B-1/B-2", f1: "F-1", j1: "J-1", h1b: "H-1B", l1: "L-1",
+      dependent: "dependente (F-2/H-4/L-2/J-2)",
     };
     results.push({
       visa:
