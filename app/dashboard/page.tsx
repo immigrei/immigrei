@@ -25,6 +25,7 @@ const VISA_LABELS: Record<string, string> = {
   e2: "E-2 — Investidor por tratado",
   eb2niw: "EB-2 NIW — Green Card por mérito",
   green_card: "Green Card",
+  citizen: "Cidadão americano",
   asylee: "Asilo ou refugiado",
   outro: "Outro",
 };

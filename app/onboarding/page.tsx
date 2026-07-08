@@ -1053,12 +1053,15 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
 
 // Maps the question-tree answers to the profiles.main_goal values used by
 // the dashboard (GOAL_LABELS).
-function deriveMainGoal(a: Answers): string {
+export function deriveMainGoal(a: Answers): string {
+  // Cidadão americano: não está buscando a cidadania — já a tem.
+  if (a.q_citizen_goal === "petition_family") return "trazer_familia";
+  if (a.q_citizen_goal) return "entender_direitos";
   if (a.q_change_goal === "extend") return "renovar_visto";
   if (a.q_change_goal === "green_card" || a.q_gc_path) return "green_card";
   if (a.q_change_goal === "family" || a.q_goal === "family") return "trazer_familia";
   if (a.q_change_goal === "change_status" || a.q_change_goal === "work_change") return "regularizar_status";
-  if (a.q_gc_goal === "naturalization" || a.q_citizen_goal) return "cidadania";
+  if (a.q_gc_goal === "naturalization") return "cidadania";
   if (a.q_gc_goal === "renew") return "renovar_visto";
   if (a.q_gc_goal === "family" || a.q_family_ties && a.q_family_ties !== "none") return "trazer_familia";
   if (a.q_current_status === "overstay") return "regularizar_status";
@@ -1100,6 +1103,8 @@ export default function OnboardingPage() {
   const [history, setHistory] = useState<string[]>(["q_location"]);
   const [animating, setAnimating] = useState(false);
   const [resuming, setResuming] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // After the sign-up round-trip, finish the save the user started on /vistos
   // while logged out. The selection was stashed in localStorage; now that the
@@ -1175,6 +1180,37 @@ export default function OnboardingPage() {
       return next;
     });
     setHistory((h) => h.slice(0, -1));
+  }
+
+  // Residentes permanentes e cidadãos não escolhem visto na vitrine — a
+  // jornada deles já está definida. Salvamos o perfil direto e vamos ao
+  // painel; sem login, o mesmo stash de /vistos sobrevive ao sign-up.
+  async function saveProfileAndGoToDashboard(visaType: "green_card" | "citizen") {
+    if (savingProfile) return;
+    setSavingProfile(true);
+    setSaveError(null);
+    const payload = {
+      visa_type: visaType,
+      main_goal: deriveMainGoal(answers),
+      location: "eua",
+    };
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.status === 401) {
+        localStorage.setItem("immigrei_pending_profile", JSON.stringify(payload));
+        router.push("/sign-up");
+        return;
+      }
+      if (!res.ok) throw new Error("save_failed");
+      router.push("/dashboard");
+    } catch {
+      setSaveError("Não conseguimos salvar agora. Tente novamente.");
+      setSavingProfile(false);
+    }
   }
 
   const recommendations = getRecommendations(answers);
@@ -1379,29 +1415,68 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* CTA */}
-          <button
-            onClick={() => {
-              // Overstay: as jornadas de visto padrão não se aplicam — o
-              // próximo passo real é ajuda profissional.
-              if (answers.q_current_status === "overstay") {
-                router.push("/profissionais");
-                return;
+          {/* CTA — o destino muda conforme o caso: a vitrine de vistos só
+              faz sentido para quem ainda vai escolher um caminho de visto. */}
+          {saveError && (
+            <p
+              className="text-center text-sm text-clay bg-cream-2 rounded-xl py-2"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {saveError}
+            </p>
+          )}
+          {answers.q_current_status === "unsure" ? (
+            // Sem o I-94 conferido, nenhuma rota é confiável — o próximo
+            // passo é o site oficial do CBP, não a vitrine de vistos.
+            <a
+              href="https://i94.cbp.dhs.gov/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full block text-center bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Conferir meu I-94 no site oficial →
+            </a>
+          ) : answers.q_current_status === "green_card" ||
+            answers.q_current_status === "citizen" ? (
+            // Green Card / cidadão: a jornada já está definida (I-90, N-400,
+            // petições) — vai direto ao painel, sem escolher visto.
+            <button
+              onClick={() =>
+                saveProfileAndGoToDashboard(
+                  answers.q_current_status === "citizen" ? "citizen" : "green_card"
+                )
               }
-              const params = new URLSearchParams();
-              if (answers.q_nationality) params.set("nationality", answers.q_nationality);
-              if (answers.q_location)
-                params.set("location", answers.q_location === "in_us" ? "eua" : "brasil");
-              params.set("goal", deriveMainGoal(answers));
-              router.push(`/vistos?${params.toString()}`);
-            }}
-            className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            {answers.q_current_status === "overstay"
-              ? "Encontrar ajuda profissional →"
-              : "Ver minha jornada em detalhe →"}
-          </button>
+              disabled={savingProfile}
+              className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {savingProfile ? "Salvando sua jornada..." : "Ir para o meu painel →"}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                // Overstay: as jornadas de visto padrão não se aplicam — o
+                // próximo passo real é ajuda profissional.
+                if (answers.q_current_status === "overstay") {
+                  router.push("/profissionais");
+                  return;
+                }
+                const params = new URLSearchParams();
+                if (answers.q_nationality) params.set("nationality", answers.q_nationality);
+                if (answers.q_location)
+                  params.set("location", answers.q_location === "in_us" ? "eua" : "brasil");
+                params.set("goal", deriveMainGoal(answers));
+                router.push(`/vistos?${params.toString()}`);
+              }}
+              className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {answers.q_current_status === "overstay"
+                ? "Encontrar ajuda profissional →"
+                : "Ver minha jornada em detalhe →"}
+            </button>
+          )}
 
           {/* Restart */}
           <button

@@ -275,6 +275,38 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
     ],
   },
 
+  citizen: {
+    visaType: "citizen",
+    name: "Cidadão americano",
+    currentStepId: "cidadania_ativa",
+    steps: [
+      {
+        id: "cidadania_ativa",
+        title: "Cidadania americana ativa 🇺🇸",
+        description: "Você tem plenos direitos nos EUA — a sua jornada agora é abrir caminhos para quem você ama.",
+      },
+      {
+        id: "passaporte",
+        title: "Passaporte americano",
+        description: "Se ainda não tem, o passaporte é a prova de cidadania mais prática para viagens e petições.",
+        docs: ["Formulário DS-11 (primeira via)"],
+      },
+      {
+        id: "peticao_familiar",
+        title: "Petição de familiares (I-130 / I-129F)",
+        description: "Cônjuge, pais e filhos menores solteiros não entram em fila. Noivo(a) no exterior: K-1 via I-129F.",
+        docs: ["Formulário I-130", "Formulário I-129F (noivo/a)"],
+        uscisUrl: "https://www.uscis.gov/i-130",
+        avgDays: 400,
+      },
+      {
+        id: "chegada_familia",
+        title: "Chegada e Green Card da família",
+        description: "Após a aprovação, o familiar ajusta status nos EUA (I-485) ou finaliza pelo consulado (NVC/DS-260).",
+      },
+    ],
+  },
+
   asylee: {
     visaType: "asylee",
     name: "Asilo ou refúgio",
