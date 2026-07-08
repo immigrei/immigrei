@@ -1,7 +1,7 @@
 ---
 fonte: https://www.uscis.gov/i-539 / https://studyinthestates.dhs.gov/students / https://www.uscis.gov/forms/all-forms/questions-and-answers-appeals-and-motions
 secao_lei: 8 CFR §214.2(m), 8 CFR §248.1, 8 CFR §103.5, INA §212(a)(9)(B)
-verificado_em: pendente
+verificado_em: 2026-07-07
 ---
 
 # Saídas após negativa no M-1
