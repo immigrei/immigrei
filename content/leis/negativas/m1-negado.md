@@ -27,7 +27,7 @@ particularidades do M-1.
 
 | Rota | Quando faz sentido | Riscos/observações |
 |------|--------------------|--------------------|
-| **Motion to Reopen/Reconsider (I-290B)** | Erro claro do USCIS ou fato novo | Prazo de 30 dias; não restaura status enquanto pendente |
+| **Motion to Reopen/Reconsider (I-290B)** | Erro claro do USCIS ou fato novo | Prazo de 33 dias (30 + 3 por correio); não restaura status enquanto pendente |
 | **Sair dos EUA e reaplicar do Brasil** | Menos de 180 dias de unlawful presence | Checar quando o relógio começou (I-94 vencido vs. negativa) — muda quanto resta antes da barra de 3 anos |
 | **F-1 via consulado** | Quer migrar para curso acadêmico | Única via possível — mudança de status M-1 → F-1 é proibida dentro dos EUA |
 | **Petição familiar (I-130)** | Cônjuge/pai cidadão ou residente | Cidadão (IR): ajuste possível mesmo com overstay. Residente (F2A): depende do Visa Bulletin — ligar à tabela `visa_bulletin` |
