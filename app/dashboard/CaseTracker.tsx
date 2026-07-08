@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { traduzirStatus } from "@/lib/uscis-status-pt";
 
 type Case = {
   id: string;
@@ -176,6 +177,7 @@ export default function CaseTracker() {
             const statusDate = r?.statusDate ?? c.last_status_date;
             const description = r?.description;
             const isLoading = checking === c.receipt_number;
+            const traduzido = status ? traduzirStatus(status) : null;
 
             return (
               <div key={c.id} className="px-6 py-4">
@@ -190,16 +192,26 @@ export default function CaseTracker() {
                     {c.label && (
                       <p className="text-ink-faint text-xs mb-1">{c.receipt_number}</p>
                     )}
-                    {status && (
+                    {traduzido && (
                       <p className={`text-sm font-semibold mb-1 ${statusColor(c, r)}`}>
-                        {status}
+                        {traduzido.titulo}
+                      </p>
+                    )}
+                    {traduzido && traduzido.titulo !== traduzido.original && (
+                      <p className="text-ink-faint text-[11px] mb-1">
+                        USCIS: {traduzido.original}
                       </p>
                     )}
                     {statusDate && (
                       <p className="text-ink-faint text-xs">{statusDate}</p>
                     )}
+                    {traduzido && (
+                      <p className="text-ink-soft text-xs mt-2 leading-relaxed">
+                        {traduzido.explicacao}
+                      </p>
+                    )}
                     {description && (
-                      <p className="text-ink-soft text-xs mt-2 leading-relaxed line-clamp-3">
+                      <p className="text-ink-faint text-xs mt-2 leading-relaxed line-clamp-3">
                         {description}
                       </p>
                     )}

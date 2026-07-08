@@ -15,6 +15,10 @@ import { fetchCaseStatus } from "@/lib/uscis";
 import { sendCaseStatusUpdate } from "@/lib/notifications";
 import { clerkClient } from "@clerk/nextjs/server";
 
+// Allow long runs — with 1.5s per case the default timeout would cut the
+// job after a handful of cases (300s = Vercel Hobby ceiling, ~180 cases)
+export const maxDuration = 300;
+
 // Delay between each USCIS request to avoid rate-limiting
 const DELAY_MS = 1_500;
 

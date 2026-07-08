@@ -4,6 +4,7 @@
  */
 
 import { Resend } from "resend";
+import { traduzirStatus } from "./uscis-status-pt";
 
 // Resend sandbox sender until immigrei.com is verified — set EMAIL_FROM
 // in Vercel to "Immigrei <noreply@immigrei.com>" after domain verification.
@@ -42,7 +43,9 @@ export async function sendCaseStatusUpdate({
 }) {
   const caseName = label ?? visaType ?? receiptNumber;
   const emoji    = isApproved ? "✅" : isDenied ? "❌" : "📋";
-  const subject  = `${emoji} Atualização no seu caso ${caseName} — Immigrei`;
+  const antigo   = traduzirStatus(oldStatus);
+  const novo     = traduzirStatus(newStatus);
+  const subject  = `${emoji} ${novo.titulo} — caso ${caseName} | Immigrei`;
 
   const statusColor = isApproved ? "#1E5E4E" : isDenied ? "#C2542F" : "#E8A33D";
   const statusBg    = isApproved ? "#E4EFE9" : isDenied ? "rgba(194,84,47,.08)" : "#FBEDD4";
@@ -85,19 +88,28 @@ export async function sendCaseStatusUpdate({
       <div style="margin-bottom:20px;">
         <div style="font-size:12px;color:#8B958F;margin-bottom:6px;">Status anterior</div>
         <div style="font-size:14px;color:#8B958F;text-decoration:line-through;padding:10px 14px;background:#F4EEE2;border-radius:8px;">
-          ${oldStatus}
+          ${antigo.titulo}
         </div>
       </div>
       <div style="margin-bottom:24px;">
         <div style="font-size:12px;color:#8B958F;margin-bottom:6px;">Novo status ${statusDate ? "— " + statusDate : ""}</div>
         <div style="font-size:15px;font-weight:700;color:${statusColor};padding:12px 16px;background:${statusBg};border-radius:10px;border:1px solid ${statusColor}33;">
-          ${newStatus}
+          ${novo.titulo}
+        </div>
+        <div style="font-size:12px;color:#8B958F;margin-top:6px;">
+          Status oficial (USCIS): ${newStatus}
         </div>
       </div>
 
-      <!-- Description -->
+      <!-- O que isso significa -->
+      <div style="font-size:14px;color:#1B2520;line-height:1.65;padding:14px 16px;background:#E4EFE9;border-radius:10px;margin-bottom:${description ? "12px" : "24px"};">
+        <strong>O que isso significa:</strong> ${novo.explicacao}
+      </div>
+
+      <!-- Description (original USCIS text) -->
       ${description ? `
-      <div style="font-size:14px;color:#55615A;line-height:1.65;padding:14px 16px;background:#F4EEE2;border-radius:10px;margin-bottom:24px;">
+      <div style="font-size:13px;color:#55615A;line-height:1.65;padding:14px 16px;background:#F4EEE2;border-radius:10px;margin-bottom:24px;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#8B958F;">Texto original do USCIS</span><br>
         ${description}
       </div>` : ""}
 

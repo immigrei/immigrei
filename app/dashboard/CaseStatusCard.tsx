@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { traduzirStatus } from "@/lib/uscis-status-pt";
 
 /**
  * "Meu Caso" — add a USCIS receipt number and track its status.
@@ -130,7 +131,7 @@ export default function CaseStatusCard({ initialCases }: { initialCases: UserCas
                   </p>
                   <p className="text-xs text-ink-soft truncate">
                     {c.label ? `${c.receipt_number} · ` : ""}
-                    {c.last_status ?? "Ainda não verificado"}
+                    {c.last_status ? traduzirStatus(c.last_status).titulo : "Ainda não verificado"}
                     {c.last_status_date ? ` — ${c.last_status_date}` : ""}
                   </p>
                 </div>
@@ -194,12 +195,18 @@ export default function CaseStatusCard({ initialCases }: { initialCases: UserCas
               </span>
               <span className="text-xs text-ink-faint font-mono">{result.receiptNumber}</span>
             </div>
-            <p className="text-sm font-semibold text-ink">{result.status}</p>
+            <p className="text-sm font-semibold text-ink">{traduzirStatus(result.status).titulo}</p>
+            {traduzirStatus(result.status).titulo !== result.status && (
+              <p className="text-[11px] text-ink-faint mt-0.5">USCIS: {result.status}</p>
+            )}
             {result.statusDate && (
               <p className="text-xs text-ink-soft mt-0.5">Última atualização: {result.statusDate}</p>
             )}
+            <p className="text-xs text-ink leading-relaxed mt-2">
+              {traduzirStatus(result.status).explicacao}
+            </p>
             {result.description && (
-              <p className="text-xs text-ink-soft leading-relaxed mt-2">{result.description}</p>
+              <p className="text-[11px] text-ink-faint leading-relaxed mt-2">{result.description}</p>
             )}
           </div>
         )}
