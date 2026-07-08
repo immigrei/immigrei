@@ -187,18 +187,44 @@ const questionMap: Record<string, Question> = {
   },
 
   // ── Branch: INSIDE the US ─────────────────────────────────────────────────
+  // Ancorada no I-94, não no visto: visto válido + I-94 vencido = irregular
+  // (content/leis/conceitos/status-vs-visto.md). "Não sei" existe porque a
+  // maioria nunca conferiu o próprio I-94.
   q_current_status: {
     id: "q_current_status",
-    text: "Qual é o seu status migratório atual nos EUA?",
+    text: "Como está o prazo da sua permanência (I-94)?",
+    subtitle:
+      "O prazo que vale é o do I-94 — o registro de entrada —, não a validade do visto no passaporte. Sua resposta é confidencial e serve só para mostrar seus caminhos.",
     options: [
-      { value: "valid_visa",      label: "Tenho visto válido",                                   icon: "✅" },
-      { value: "authorized_stay", label: "Meu visto expirou, mas estou em authorized stay",       icon: "⏳" },
-      { value: "overstay",        label: "Fiquei além do prazo autorizado (overstay)",            icon: "⚠️" },
-      { value: "green_card",      label: "Tenho Green Card",                                     icon: "🟢" },
-      { value: "citizen",         label: "Sou cidadão americano",                                icon: "🇺🇸" },
+      {
+        value: "in_status",
+        label: "Estou dentro do prazo do meu I-94",
+        icon: "✅",
+        subtitle: "Para estudantes F-1, o I-94 costuma dizer \"D/S\"",
+      },
+      {
+        value: "pending_uscis",
+        label: "Tenho pedido pendente no USCIS",
+        icon: "⏳",
+        subtitle: "Extensão ou mudança de status protocolada, aguardando resposta",
+      },
+      {
+        value: "overstay",
+        label: "Passei do prazo do meu I-94 (overstay)",
+        icon: "⚠️",
+        subtitle: "Sem julgamento — informação clara é para quem mais precisa dela",
+      },
+      {
+        value: "unsure",
+        label: "Não sei / nunca conferi meu I-94",
+        icon: "🔎",
+        subtitle: "É grátis e leva 2 minutos — vamos te mostrar onde",
+      },
+      { value: "green_card", label: "Tenho Green Card",      icon: "🟢" },
+      { value: "citizen",    label: "Sou cidadão americano", icon: "🇺🇸" },
     ],
     next: (a) => {
-      if (a === "valid_visa" || a === "authorized_stay") return "q_current_visa";
+      if (a === "in_status" || a === "pending_uscis" || a === "unsure") return "q_current_visa";
       if (a === "overstay")    return "results";
       if (a === "green_card")  return "q_gc_goal";
       return "q_citizen_goal"; // citizen
@@ -335,6 +361,18 @@ function getRecommendations(answers: Answers): VisaResult[] {
   const gcPath         = a.q_gc_path;
   const permanentPath  = a.q_permanent_path;
   const citizenGoal    = a.q_citizen_goal;
+
+  // ── "Não sei meu I-94" — primeiro passo factual, antes de qualquer rota ──
+  if (currentStatus === "unsure") {
+    results.push({
+      visa: "🔎 Primeiro passo: confira seu I-94 (grátis, 2 min)",
+      forms: "i94.cbp.dhs.gov → \"Get Most Recent I-94\"",
+      description:
+        "A data que define sua permanência é a do I-94 — o registro oficial de entrada —, não a do visto no passaporte. Consulte com passaporte em mãos no site oficial do CBP; os caminhos abaixo dependem dessa data.",
+      priority: "high",
+      urgent: true,
+    });
+  }
 
   // ── Overstay alert ───────────────────────────────────────────────────────
   if (currentStatus === "overstay") {
