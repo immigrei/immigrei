@@ -7,10 +7,11 @@
 import { describe, expect, it } from "vitest";
 import { getJourney, VISA_JOURNEYS } from "./visa-journeys";
 import { MANUAIS } from "./manuais";
+import { vistosEstudo, vistosNegocios } from "./vistosCatalog";
 import checklists from "../app/documentos/[vistoId]/data";
 
-// Ids selecionáveis no catálogo /vistos (app/vistos/page.tsx).
-const CATALOG_IDS = ["f1", "m1", "j1", "h1b", "o1", "e2", "e1", "b1", "l1", "eb2niw"];
+// Ids selecionáveis no catálogo /vistos — direto da fonte.
+const CATALOG_IDS = [...vistosEstudo, ...vistosNegocios].map((v) => v.id);
 
 // Motores de caso existentes em /casos.
 const CASE_ENGINES = new Set(["/casos/cos-b2-f1"]);
