@@ -67,7 +67,7 @@ const vistosEstudo: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Não (estágio só após o curso)", ok: false },
       { label: "Duração", valor: "Duração do curso (máx. 1 ano, prorrogável)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Não é caminho", ok: false },
+      { label: "Rumo ao Green Card", valor: "Indireto — trocando p/ F-1 (consulado) ou família", ok: true },
       { label: "Família", valor: "M-2 (cônjuge não trabalha)", ok: false },
     ],
     availability: "all",
@@ -92,7 +92,7 @@ const vistosEstudo: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim, dentro do programa", ok: true },
       { label: "Duração", valor: "Varia por categoria (meses a 5 anos)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Travado se a regra 212(e) se aplicar", ok: false },
+      { label: "Rumo ao Green Card", valor: "Possível — livre do 212(e), ou após 2 anos/waiver", ok: true },
       { label: "Família", valor: "J-2 (cônjuge PODE pedir permissão de trabalho)", ok: true },
     ],
     availability: "all",
@@ -168,7 +168,7 @@ const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim (no próprio negócio)", ok: true },
       { label: "Duração", valor: "Renovável sem limite (2–5 anos por vez)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Não direto", ok: false },
+      { label: "Rumo ao Green Card", valor: "Indireto — ponte para EB-5, EB-1C ou NIW", ok: true },
       { label: "Família", valor: "Cônjuge PODE trabalhar", ok: true },
     ],
     availability: "treaty-only",
@@ -192,7 +192,7 @@ const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim (na empresa do tratado)", ok: true },
       { label: "Duração", valor: "Renovável sem limite (2–5 anos por vez)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Não direto", ok: false },
+      { label: "Rumo ao Green Card", valor: "Indireto — via EB-1C (executivo) ou patrocínio", ok: true },
       { label: "Família", valor: "Cônjuge PODE trabalhar", ok: true },
     ],
     availability: "treaty-only",
@@ -217,7 +217,7 @@ const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Não", ok: false },
       { label: "Duração", valor: "Até 6 meses por entrada (I-94 manda)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Não é caminho", ok: false },
+      { label: "Rumo ao Green Card", valor: "Indireto — mudando de categoria (ex.: B → F-1) ou família", ok: true },
       { label: "Família", valor: "Cada pessoa solicita o seu", ok: true },
     ],
     availability: "all",
