@@ -10,9 +10,10 @@ describe("describeApiFailure — every documented Torch response code", () => {
     [401, "auth_401"],
     [403, "auth_403"],
     [404, "not_found"],
+    [422, "unprocessable"],
     [429, "rate_limited"],
     [500, "http_500"],
-    [503, "http_503"],
+    [503, "service_unavailable"],
   ])("HTTP %i vira resultado com error=%s e nunca lança", (code, error) => {
     const r = describeApiFailure(code, RECEIPT, NOW);
     expect(r.error).toBe(error);

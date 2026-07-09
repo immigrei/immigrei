@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
 import { getJourney } from "@/lib/visa-journeys";
-import { isDeniedStatus } from "@/lib/uscis";
+import { isDeniedStatus, isUscisSandbox } from "@/lib/uscis";
 import JourneyTimeline from "./JourneyTimeline";
 import CaseStatusCard, { UserCase } from "./CaseStatusCard";
 import StrategicOptionsCard from "./StrategicOptionsCard";
@@ -135,7 +135,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* USCIS case tracking */}
-        <CaseStatusCard initialCases={(userCases ?? []) as UserCase[]} />
+        <CaseStatusCard
+          initialCases={(userCases ?? []) as UserCase[]}
+          sandboxMode={isUscisSandbox()}
+        />
 
         {/* Strategic options for denied cases */}
         {(userCases ?? [])
@@ -149,9 +152,16 @@ export default async function DashboardPage() {
             />
           ))}
 
-        {/* Journey timeline */}
+        {/* Journey timeline.
+            profile.visa_type vem de uma escolha aspiracional ("Quero seguir
+            esse caminho" no /vistos e nas recomendações do onboarding), então
+            a jornada começa do primeiro passo — nenhuma etapa foi concluída.
+            Quando o perfil distinguir status atual de caminho desejado, volte
+            a usar journey.currentStepId para posicionar quem já tem o status. */}
         {journey ? (
-          <JourneyTimeline journey={journey} />
+          <JourneyTimeline
+            journey={{ ...journey, currentStepId: journey.steps[0].id }}
+          />
         ) : (
           <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
             <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">

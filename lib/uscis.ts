@@ -30,6 +30,14 @@ const USCIS_API_BASE =
 const USCIS_CLIENT_ID = process.env.USCIS_CLIENT_ID;
 const USCIS_CLIENT_SECRET = process.env.USCIS_CLIENT_SECRET;
 
+// True while we run against the Torch sandbox (api-int). The sandbox only
+// answers the official staging receipt numbers — every real receipt is a 404
+// — and only operates M-F 7AM-8PM EST. Production (api.uscis.gov) flips this
+// off via USCIS_API_BASE.
+export function isUscisSandbox(): boolean {
+  return USCIS_API_BASE.includes("api-int");
+}
+
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
 async function getUscisApiToken(): Promise<string> {
@@ -81,12 +89,24 @@ export function describeApiFailure(
         error: `auth_${httpStatus}` };
     case 404:
       return { ...base, status: "Caso não encontrado",
-        description: "O USCIS não encontrou um caso com esse número de recibo. Confira os 13 caracteres no topo da sua notificação I-797.",
+        description: isUscisSandbox()
+          ? "Estamos no ambiente de testes do USCIS: por enquanto só números de recibo de teste funcionam. Números reais passarão a funcionar quando o USCIS liberar nosso acesso de produção."
+          : "O USCIS não encontrou um caso com esse número de recibo. Confira os 13 caracteres no topo da sua notificação I-797.",
         error: "not_found" };
+    case 422:
+      return { ...base, status: "Número de recibo inválido",
+        description: "O USCIS não reconheceu o formato desse número. Confira os 13 caracteres (3 letras + 10 dígitos) no topo da sua notificação I-797.",
+        error: "unprocessable" };
     case 429:
       return { ...base, status: "Muitas consultas agora",
         description: "Atingimos o limite de consultas do USCIS neste momento. Sua verificação será refeita automaticamente — não é preciso fazer nada.",
         error: "rate_limited" };
+    case 503:
+      return { ...base, status: "USCIS temporariamente indisponível",
+        description: isUscisSandbox()
+          ? "O ambiente de testes do USCIS só funciona de segunda a sexta, das 7h às 20h (horário de Nova York). Tente novamente dentro desse horário."
+          : "O sistema do USCIS está em manutenção. Verificamos seus casos toda semana automaticamente — tente de novo mais tarde.",
+        error: "service_unavailable" };
     default:
       return { ...base, status: "USCIS temporariamente indisponível",
         description: "O sistema do USCIS não respondeu (isso inclui o horário de manutenção deles). Verificamos seus casos toda semana automaticamente — tente de novo mais tarde.",

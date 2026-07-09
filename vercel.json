@@ -5,6 +5,10 @@
       "schedule": "0 8 * * 1"
     },
     {
+      "path":     "/api/cron/uscis-sandbox-traffic",
+      "schedule": "30 15 * * 1-5"
+    },
+    {
       "path":     "/api/cron/visa-bulletin",
       "schedule": "0 10 10 * *"
     },

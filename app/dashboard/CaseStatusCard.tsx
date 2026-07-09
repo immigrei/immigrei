@@ -42,7 +42,14 @@ function statusStyle(result: { isApproved: boolean; isDenied: boolean }) {
   return { box: "bg-amber-tint border-amber", badge: "bg-amber text-ink", label: "Em andamento" };
 }
 
-export default function CaseStatusCard({ initialCases }: { initialCases: UserCase[] }) {
+export default function CaseStatusCard({
+  initialCases,
+  sandboxMode = false,
+}: {
+  initialCases: UserCase[];
+  // Torch sandbox: só receipts de teste do USCIS respondem, M-F 7h-20h EST.
+  sandboxMode?: boolean;
+}) {
   const [cases, setCases] = useState<UserCase[]>(initialCases);
   const [receipt, setReceipt] = useState("");
   const [label, setLabel] = useState("");
@@ -117,6 +124,15 @@ export default function CaseStatusCard({ initialCases }: { initialCases: UserCas
       </div>
 
       <div className="px-6 py-5">
+        {sandboxMode && (
+          <div className="mb-4 px-4 py-3 rounded-xl bg-amber-tint border border-amber text-xs text-amber-deep leading-relaxed">
+            <span className="font-bold">Modo de teste.</span> Estamos conectados ao
+            ambiente de testes do USCIS: apenas números de recibo de teste (ex:
+            EAC9999103403) respondem, de segunda a sexta, 7h–20h no horário de Nova
+            York. Números reais funcionarão quando o USCIS liberar nosso acesso de
+            produção.
+          </div>
+        )}
         {/* Existing cases */}
         {cases.length > 0 && (
           <div className="flex flex-col gap-2 mb-5">
