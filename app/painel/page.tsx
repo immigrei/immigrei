@@ -39,16 +39,20 @@ interface Strategy {
   guardrails:  GuardRail[];
   kitId:       string;
   kitLabel:    string;
+  // Jornadas sem kit próprio (I-130, N-400, I-90) apontam o CTA para outra
+  // rota do app em vez de /documentos/[kitId].
+  ctaHref?:    string;
+  ctaDesc?:    string;
 }
 
-function getStrategy(profile: Profile): Strategy {
+export function getStrategy(profile: Profile): Strategy {
   const { visa_type, location, main_goal, full_name } = profile;
   const nome = full_name?.split(" ")[0] ?? "você";
 
   // ── F-1 do Brasil ────────────────────────────────────────────────────
   if (visa_type === "f1" && location === "brasil") {
     return {
-      titulo:    `Jornada do ${nome}`,
+      titulo:    `Jornada de ${nome}`,
       subtitulo: "F-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer obter o visto F-1 para estudar nos EUA. O processo passa pelo consulado americano no Brasil — sem saída prévia dos EUA necessária.`,
       etapas: [
@@ -73,7 +77,7 @@ function getStrategy(profile: Profile): Strategy {
   // ── F-1 COS nos EUA ──────────────────────────────────────────────────
   if (visa_type === "f1" && location === "eua") {
     return {
-      titulo:    `Jornada do ${nome}`,
+      titulo:    `Jornada de ${nome}`,
       subtitulo: "F-1 · Change of Status — dentro dos EUA",
       situacao:  `Você está nos EUA e quer mudar para o F-1 sem sair do país. O processo usa o formulário I-539 direto com o USCIS — sem entrevista consular, mas exige status válido no protocolo.`,
       destaque: { tipo: "alerta", texto: "Seu status atual precisa estar válido no dia do protocolo do I-539. Verifique o I-94 antes de qualquer passo." },
@@ -100,7 +104,7 @@ function getStrategy(profile: Profile): Strategy {
   // ── F-1 Renovação ────────────────────────────────────────────────────
   if (visa_type === "f1" && main_goal === "renovar_visto") {
     return {
-      titulo:    `Jornada do ${nome}`,
+      titulo:    `Jornada de ${nome}`,
       subtitulo: "F-1 · Manutenção de status",
       situacao:  `Você já tem o F-1 e precisa estender o programa, transferir de escola ou renovar o carimbo do visto para poder viajar. Cada situação tem um caminho diferente.`,
       etapas: [
@@ -121,7 +125,7 @@ function getStrategy(profile: Profile): Strategy {
   // ── M-1 do Brasil ────────────────────────────────────────────────────
   if (visa_type === "m1" && location === "brasil") {
     return {
-      titulo:    `Jornada do ${nome}`,
+      titulo:    `Jornada de ${nome}`,
       subtitulo: "M-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer o M-1 para fazer um curso técnico ou vocacional nos EUA. O processo é similar ao F-1, mas com a taxa SEVIS mais baixa e foco em programa vocacional.`,
       etapas: [
@@ -143,7 +147,7 @@ function getStrategy(profile: Profile): Strategy {
   // ── H-1B ─────────────────────────────────────────────────────────────
   if (visa_type === "h1b") {
     return {
-      titulo:    `Jornada do ${nome}`,
+      titulo:    `Jornada de ${nome}`,
       subtitulo: "H-1B · Trabalho especializado",
       situacao:  `O H-1B é patrocinado pelo seu empregador americano — você não pode protocolar sozinho. O processo envolve o Departamento do Trabalho, o USCIS e o sorteio anual. Seu papel é garantir que os documentos estejam perfeitos.`,
       destaque: { tipo: "alerta", texto: "O H-1B está sujeito a sorteio anual. O período de registro é em março. Fora dessa janela, não há como entrar na fila." },
@@ -168,7 +172,7 @@ function getStrategy(profile: Profile): Strategy {
   // ── O-1 ──────────────────────────────────────────────────────────────
   if (visa_type === "o1") {
     return {
-      titulo:    `Jornada do ${nome}`,
+      titulo:    `Jornada de ${nome}`,
       subtitulo: "O-1 · Habilidade extraordinária",
       situacao:  `O O-1 não tem sorteio, não tem cap. Mas exige evidências sólidas de reconhecimento nacional ou internacional — prêmios, mídia, salário acima da média, contribuições originais. Um empregador ou agente americano precisa fazer a petição.`,
       destaque: { tipo: "ok", texto: "Sem cap e sem sorteio — pode ser protocolado a qualquer momento do ano." },
@@ -189,10 +193,152 @@ function getStrategy(profile: Profile): Strategy {
     };
   }
 
-  // ── EB-2 NIW ─────────────────────────────────────────────────────────
+  // ── Green Card holder — jornadas por objetivo ────────────────────────
+  // visa_type "green_card" = quem JÁ TEM o green card (onboarding salva
+  // direto). Quem está BUSCANDO o green card via NIW chega como "eb2niw"
+  // (id do card em /vistos) — jornada própria mais abaixo.
   if (visa_type === "green_card") {
+    if (main_goal === "trazer_familia") {
+      return {
+        titulo:    `Jornada de ${nome}`,
+        subtitulo: "Petição de familiar · I-130 — categorias F2A / F2B",
+        situacao:  `Como residente permanente, você pode peticionar seu cônjuge e filhos solteiros. Menores de 21 anos entram na categoria F2A — fila frequentemente curta ou zerada — e 21+ na F2B, com espera maior. O Immigrei acompanha o Boletim de Vistos por você, todo mês.`,
+        destaque: { tipo: "ok", texto: "Se você se naturalizar durante o processo, a petição sobe de categoria: cônjuge e filhos menores viram parentes imediatos — sem fila." },
+        etapas: [
+          { num: "1", estado: "agora",   titulo: "Confirmar quem você pode peticionar", desc: "Residente peticiona cônjuge e filhos solteiros. Pais, irmãos e filhos casados, só quando você for cidadão." },
+          { num: "2", estado: "proximo", titulo: "Reunir documentos",                   desc: "Green card (frente e verso), certidões de casamento/nascimento com tradução e provas de vínculo genuíno." },
+          { num: "3", estado: "proximo", titulo: "Protocolar o I-130",                  desc: "US$625 online ou US$675 em papel. A data de recebimento vira sua priority date — a posição na fila.", tag: "US$625" },
+          { num: "4", estado: "futuro",  titulo: "Acompanhar o Boletim de Vistos",      desc: "Brasil entra em 'All Chargeability'. Quando a sua priority date ficar current, o caso avança — o Immigrei avisa.", tag: "Mensal" },
+          { num: "5", estado: "futuro",  titulo: "Consulado (DS-260) ou ajuste (I-485)", desc: "Familiar fora dos EUA: NVC + entrevista consular. Nos EUA em status válido: I-485 quando a data permitir." },
+          { num: "✓", estado: "futuro",  titulo: "Green Card do familiar aprovado",     desc: "Seu familiar se torna residente permanente." },
+        ],
+        guardrails: [
+          { tipo: "proibido", texto: "O familiar não deve entrar de turista ou ESTA com intenção de ficar enquanto espera a fila — intenção imigratória na entrada pode comprometer a petição inteira." },
+          { tipo: "atencao",  texto: "Casamento do filho cancela a petição de residente — F2A e F2B exigem filho solteiro. Só cidadãos peticionam filhos casados (F3)." },
+          { tipo: "atencao",  texto: "Filho que completa 21 anos pode trocar de categoria (F2A → F2B). A lei CSPA pode 'congelar' a idade — vale análise profissional." },
+        ],
+        kitId:    "",
+        kitLabel: "Acompanhar o Boletim de Vistos",
+        ctaHref:  "/dashboard",
+        ctaDesc:  "O painel mostra a fila da sua categoria, atualizada todo mês",
+      };
+    }
+
+    if (main_goal === "cidadania") {
+      return {
+        titulo:    `Jornada de ${nome}`,
+        subtitulo: "Naturalização · N-400",
+        situacao:  `Você já tem o green card — a naturalização é a última etapa da jornada. Regra geral: 5 anos como residente, ou 3 se casado(a) e vivendo com cidadão americano. Dá para protocolar até 90 dias antes de completar o prazo.`,
+        etapas: [
+          { num: "1", estado: "agora",   titulo: "Conferir o relógio",       desc: "5 anos de residência (ou 3, com cidadão) + residência contínua e presença física em pelo menos metade do período." },
+          { num: "2", estado: "proximo", titulo: "Levantar o histórico",     desc: "Viagens dos últimos 5 anos, endereços, empregos e impostos em dia. O N-400 pergunta tudo." },
+          { num: "3", estado: "proximo", titulo: "Protocolar o N-400",       desc: "US$710 online ou US$760 em papel. Renda entre 150–400% da linha da pobreza paga US$380.", tag: "US$710" },
+          { num: "4", estado: "futuro",  titulo: "Biometria e entrevista",   desc: "Teste de inglês e cívica (as perguntas são públicas, no site do USCIS) + revisão do seu histórico." },
+          { num: "✓", estado: "futuro",  titulo: "Cerimônia de juramento",   desc: "Você se torna cidadão americano. 🇺🇸" },
+        ],
+        guardrails: [
+          { tipo: "atencao",  texto: "Viagens de 6 meses ou mais podem quebrar a residência contínua — some as ausências antes de protocolar." },
+          { tipo: "proibido", texto: "Não protocole com pendências criminais ou de impostos sem análise profissional — o N-400 reabre todo o seu histórico de imigração." },
+        ],
+        kitId:    "",
+        kitLabel: "Preparação com profissional verificado",
+        ctaHref:  "/profissionais",
+        ctaDesc:  "Revisão do histórico e preparação para a entrevista",
+      };
+    }
+
+    if (main_goal === "renovar_visto") {
+      return {
+        titulo:    `Jornada de ${nome}`,
+        subtitulo: "Renovação do Green Card · I-90",
+        situacao:  `O cartão de 10 anos se renova com o I-90 — processo direto com o USCIS, sem entrevista consular. Renove se já venceu ou vence nos próximos 6 meses.`,
+        destaque: { tipo: "alerta", texto: "Green Card CONDICIONAL de 2 anos (por casamento)? O caminho é o I-751 nos 90 dias antes do vencimento — nunca o I-90." },
+        etapas: [
+          { num: "1", estado: "agora",   titulo: "Conferir o cartão",           desc: "Vencido ou a vencer em 6 meses: hora de renovar. Condicional de 2 anos: é I-751, outro processo." },
+          { num: "2", estado: "proximo", titulo: "Protocolar o I-90",           desc: "US$415 online ou US$465 em papel, direto na conta USCIS.", tag: "US$415" },
+          { num: "3", estado: "futuro",  titulo: "Recibo estende a validade",   desc: "O I-797 de recebimento estende o cartão vencido — guarde junto do cartão antigo para trabalho e viagens." },
+          { num: "4", estado: "futuro",  titulo: "Biometria (se convocada)",    desc: "Reuso de biometria é comum — muitos casos nem têm apontamento." },
+          { num: "✓", estado: "futuro",  titulo: "Novo cartão de 10 anos",      desc: "Residência segue valendo — o cartão é a prova, não o status." },
+        ],
+        guardrails: [
+          { tipo: "atencao", texto: "Não viaje com o cartão vencido sem o recibo I-797 — a reentrada pode complicar." },
+        ],
+        kitId:    "",
+        kitLabel: "Falar com um profissional verificado",
+        ctaHref:  "/profissionais",
+        ctaDesc:  "Dúvidas sobre condicional, ausências longas ou cartão perdido",
+      };
+    }
+
+    // Demais objetivos: visão geral do residente permanente.
     return {
-      titulo:    `Jornada do ${nome}`,
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "Residente permanente · manter e avançar",
+      situacao:  `Seu green card está ativo — a jornada agora é proteger a residência e escolher o próximo passo. Estes são os caminhos abertos para você hoje.`,
+      etapas: [
+        { num: "A", estado: "agora", titulo: "Manter a residência",        desc: "Evite ausências de 6+ meses dos EUA. Para ficar até 2 anos fora, o Reentry Permit (I-131) precisa ser pedido ANTES de sair." },
+        { num: "B", estado: "agora", titulo: "Renovar o cartão (I-90)",    desc: "Cartão de 10 anos vencido ou a vencer em 6 meses. Condicional de 2 anos usa o I-751." },
+        { num: "C", estado: "agora", titulo: "Peticionar a família (I-130)", desc: "Cônjuge e filhos solteiros nas categorias F2A / F2B — o Immigrei acompanha a fila no Boletim de Vistos." },
+        { num: "D", estado: "agora", titulo: "Caminho à cidadania (N-400)", desc: "5 anos como residente (ou 3, com cidadão americano). Pode protocolar 90 dias antes de completar." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "Declare imposto como residente todos os anos — declarar como 'non-resident' pode ser lido como abandono da residência." },
+      ],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Escolha o próximo passo com quem já percorreu o caminho",
+    };
+  }
+
+  // ── Cidadão americano ────────────────────────────────────────────────
+  if (visa_type === "citizen") {
+    if (main_goal === "trazer_familia") {
+      return {
+        titulo:    `Jornada de ${nome}`,
+        subtitulo: "Petição de familiar · cidadão americano",
+        situacao:  `Como cidadão, você tem a porta mais forte da imigração familiar: parentes imediatos (cônjuge, pais e filhos solteiros menores de 21) não entram em fila. Filhos 21+, filhos casados e irmãos entram em categorias com espera (F1, F3, F4).`,
+        etapas: [
+          { num: "1", estado: "agora",   titulo: "Definir a categoria",              desc: "Parente imediato: sem fila. F1 / F3 / F4: fila de anos a décadas — confira no Boletim de Vistos. Noivo(a) no exterior: K-1." },
+          { num: "2", estado: "proximo", titulo: "Reunir provas",                    desc: "Prova de cidadania (passaporte ou certificado), certidões com tradução e provas de vínculo genuíno." },
+          { num: "3", estado: "proximo", titulo: "Protocolar o I-130 (ou I-129F)",   desc: "US$625 online ou US$675 em papel. Noivo(a): I-129F para o K-1.", tag: "US$625" },
+          { num: "4", estado: "futuro",  titulo: "NVC ou ajuste de status",          desc: "Familiar fora dos EUA: NVC + DS-260 + consulado. Nos EUA com entrada legal: I-485 — cônjuge pode incluir trabalho (I-765) junto." },
+          { num: "✓", estado: "futuro",  titulo: "Green Card do familiar aprovado",  desc: "Seu familiar se torna residente permanente." },
+        ],
+        guardrails: [
+          { tipo: "proibido", texto: "O familiar não deve entrar de turista ou ESTA com intenção de imigrar — intenção na entrada pode comprometer a petição inteira." },
+          { tipo: "atencao",  texto: "Irmãos (F4) enfrentam fila de décadas — vale checar rotas paralelas para quem não pode esperar." },
+        ],
+        kitId:    "",
+        kitLabel: "Falar com um profissional verificado",
+        ctaHref:  "/profissionais",
+        ctaDesc:  "Categoria certa e timing — antes de protocolar",
+      };
+    }
+
+    // Objetivo "entender_direitos" (e demais): os direitos básicos, direto.
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "Cidadania americana · seus direitos",
+      situacao:  `Você chegou ao topo da jornada — a cidadania não expira e não se perde por morar fora. Estes são os direitos básicos que ela garante.`,
+      etapas: [
+        { num: "A", estado: "agora", titulo: "Votar e ter passaporte americano", desc: "Voto em eleições federais e estaduais. Passaporte via DS-11 — a prova de cidadania mais prática." },
+        { num: "B", estado: "agora", titulo: "Morar fora sem perder nada",       desc: "Ausências longas não ameaçam a cidadania — diferente do green card." },
+        { num: "C", estado: "agora", titulo: "Peticionar a família",             desc: "Cônjuge, pais e filhos menores solteiros sem fila; demais categorias via I-130." },
+        { num: "D", estado: "agora", titulo: "Empregos e proteção plenos",       desc: "Cargos públicos federais, júri e a proteção consular americana no exterior." },
+      ],
+      guardrails: [],
+      kitId:    "",
+      kitLabel: "Trazer alguém da família?",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Petição de familiares com um profissional verificado",
+    };
+  }
+
+  // ── EB-2 NIW ─────────────────────────────────────────────────────────
+  if (visa_type === "eb2niw") {
+    return {
+      titulo:    `Jornada de ${nome}`,
       subtitulo: "EB-2 NIW · Green Card por interesse nacional",
       situacao:  `O EB-2 NIW é a rota de green card que dispensa patrocínio de empregador. Você mesmo submete a petição I-140 ao USCIS, demonstrando que seu trabalho beneficia os EUA. Após a aprovação, o caminho depende de onde você está.`,
       etapas: [
@@ -215,7 +361,7 @@ function getStrategy(profile: Profile): Strategy {
 
   // ── Fallback genérico ─────────────────────────────────────────────────
   return {
-    titulo:    `Jornada do ${nome}`,
+    titulo:    `Jornada de ${nome}`,
     subtitulo: "Seu caminho de imigração",
     situacao:  "Complete seu perfil para vermos sua estratégia personalizada.",
     etapas: [
@@ -402,13 +548,13 @@ export default function PainelPage() {
               Próximo passo
             </p>
             <p className="text-sm font-semibold text-cream">{s.kitLabel}</p>
-            <p className="text-xs text-pine-tint mt-0.5">Guia completo passo a passo em português</p>
+            <p className="text-xs text-pine-tint mt-0.5">{s.ctaDesc ?? "Guia completo passo a passo em português"}</p>
           </div>
           <button
-            onClick={() => router.push(`/documentos/${s.kitId}`)}
+            onClick={() => router.push(s.ctaHref ?? `/documentos/${s.kitId}`)}
             className="flex-shrink-0 bg-amber text-pine-deep font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-amber-deep transition-colors"
           >
-            Ver kit →
+            {s.ctaHref ? "Abrir →" : "Ver kit →"}
           </button>
         </div>
 

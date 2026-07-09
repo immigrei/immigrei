@@ -152,10 +152,13 @@ function inferirKitRecomendado(profile: Profile | null): string | null {
     if (location === "eua" && main_goal === "renovar_visto") return "j1-extensao";
     return "j1";
   }
-  if (visa_type === "eb2niw" || visa_type === "green_card") {
+  if (visa_type === "eb2niw") {
     if (location === "eua")    return "eb2niw";
     return "eb2niw-brasil";
   }
+  // Residentes e cidadãos não têm kit de visto — jornada deles é I-130,
+  // N-400, I-90 (painel). Mostra o catálogo completo, sem destaque.
+  if (visa_type === "green_card" || visa_type === "citizen") return null;
   if (visa_type === "b1" || visa_type === "b1b2") return "b1";
   if (visa_type === "e2")      return "e2";
   if (visa_type === "e1")      return null; // sem kit E-1 ainda — mostra o catálogo completo
