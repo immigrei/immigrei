@@ -231,3 +231,13 @@ describe("saídas para quem entrou de ESTA/VWP", () => {
     expect(r.some((x) => x.visa.includes("ESTA do jeito certo"))).toBe(true);
   });
 });
+
+// Ponte L-1A → EB-1C: quem está de L-1 buscando green card recebe o manual.
+describe("manual da ponte L-1A → EB-1C", () => {
+  it("L-1 nos EUA + objetivo green card → /caminhos/l1-para-eb1c", () => {
+    expect(hrefs({
+      q_location: "in_us", q_current_status: "in_status",
+      q_current_visa: "l1", q_change_goal: "green_card", q_gc_path: "employer",
+    })).toContain("/caminhos/l1-para-eb1c");
+  });
+});

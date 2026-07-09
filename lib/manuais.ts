@@ -588,6 +588,117 @@ export const MANUAIS: Record<string, Manual> = {
     fonteLeis: ["vistos/o1.md", "negativas/o1-negado.md", "conceitos/priority-date.md"],
     verificadoEm: "2026-07-07",
   },
+
+  "l1-para-eb1c": {
+    slug: "l1-para-eb1c",
+    badge: "L-1A → GREEN CARD",
+    titulo: "Do L-1A ao Green Card: a ponte EB-1C do executivo",
+    subtitulo:
+      "A transferência que te trouxe é a mesma história que sustenta sua residência permanente — sem sorteio e sem PERM. O timing é tudo.",
+    oQueE: [
+      "O L-1A tem uma vantagem que quase ninguém explica na chegada: ele foi desenhado com uma saída de cima. A categoria EB-1C do Green Card usa os MESMOS conceitos do seu visto — gerente ou executivo, empresa do mesmo grupo, operação real nos dois países. As provas que aprovaram sua transferência são, em grande parte, as provas da sua residência permanente (INA §203(b)(1)(C)).",
+      "E a ponte dispensa as duas maiores dores do Green Card por emprego: não há sorteio e não há PERM — a certificação trabalhista que consome 1–2 anos no EB-2/EB-3 patrocinado. O que existe é um relógio: o L-1A tem teto de 7 anos, e a ponte precisa começar com folga. Este manual mostra quem se qualifica, o que trava e a ordem certa dos passos.",
+    ],
+    quemPode: [
+      "Quem está de L-1A (ou se qualificaria) exercendo função gerencial ou executiva de verdade — gestão de pessoas ou de uma função essencial do negócio",
+      "Quem trabalhou pelo menos 1 ano (nos últimos 3 antes da transferência) na empresa do grupo fora dos EUA, como gerente ou executivo",
+      "Quem tem empregador americano do mesmo grupo corporativo (matriz, filial, subsidiária ou afiliada) disposto a peticionar — o I-140 é da empresa",
+      "Empresa americana operando de verdade há pelo menos 1 ano — vendas, contratos, folha, não presença de fachada",
+    ],
+    quemNaoPode: [
+      {
+        titulo: "Auto-petição do EB-1C",
+        texto:
+          "Não existe. O peticionário é sempre o empregador americano — inclusive quando o executivo é dono do grupo, é a EMPRESA dos EUA que protocola. Quem busca Green Card sem empregador olha para o EB-2 NIW ou EB-1A.",
+        base: "8 CFR §204.5(j)(1)",
+      },
+      {
+        titulo: "Novo escritório com menos de 1 ano de operação",
+        texto:
+          "O L-1A de novo escritório é aprovado com o negócio ainda no papel — o EB-1C, não. A empresa americana precisa completar 1 ano de operação real (doing business) antes do I-140. Protocolar antes disso é negativa anunciada.",
+        base: "8 CFR §204.5(j)(3)(i)(D)",
+      },
+      {
+        titulo: "Função que não é gerencial de verdade",
+        texto:
+          "Título de gerente no crachá não basta: o USCIS olha o organograma, quem você gerencia (ou qual função essencial), e quanto do seu dia é operacional. L-1B (conhecimento especializado) não é EB-1C — a rota dele passa por promoção real a L-1A ou por EB-2/EB-3.",
+        base: "INA §101(a)(44) / 8 CFR §204.5(j)(2)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "Teto de 7 anos do L-1A",
+        texto:
+          "O L-1A não se estende para sempre. Entre I-140 e I-485 o processo consome 1–2 anos — quem começa a ponte no ano 5 ou 6 está apostando o status na sorte. O momento certo de planejar é AGORA.",
+        tone: "clay",
+      },
+      {
+        titulo: "Novo escritório: a janela do ano 1",
+        texto:
+          "Se seu L-1A é de novo escritório, o primeiro ano decide tudo: a extensão exige provar crescimento real, e é essa mesma operação que sustenta o EB-1C depois. Cada contratação e contrato documentado conta duas vezes.",
+        tone: "amber",
+      },
+      {
+        titulo: "Dual intent: sem medo de pedir",
+        texto:
+          "O L-1 aceita a intenção de imigrar: o I-140 pendente ou aprovado não prejudica extensões nem reentradas. A ponte anda em paralelo ao seu status, não contra ele.",
+        tone: "pine",
+      },
+      {
+        titulo: "Premium processing no I-140",
+        texto: "O EB-1C aceita premium processing — decisão do I-140 em 45 dias úteis, tirando meses de incerteza da ponte.",
+        tone: "pine",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Auditar o caso antes do relógio apertar",
+        texto:
+          "Confira os 4 pilares: seu 1 ano lá fora como gerente/executivo, a relação corporativa entre as empresas, o 1 ano de operação americana e a sua função atual no organograma.",
+      },
+      {
+        titulo: "Documentar a função gerencial",
+        texto:
+          "Organograma, descrição real do cargo, quem reporta a você, decisões que só você toma. É o coração do EB-1C — e onde a maioria das negativas nasce.",
+      },
+      {
+        titulo: "I-140 protocolado pela empresa",
+        texto:
+          "O empregador americano protocola com o dossiê corporativo dos dois lados. Premium processing opcional. O protocolo trava sua priority date.",
+      },
+      {
+        titulo: "Manter o L-1A durante a fila",
+        texto:
+          "A fila EB-1 para o Brasil costuma andar rápido (acompanhe no seu painel, que segue o Boletim de Vistos) — e o dual intent mantém extensões e viagens tranquilas.",
+      },
+      {
+        titulo: "Data current: I-485 e o cartão",
+        texto:
+          "Com a priority date current, entra o ajuste de status (I-485) — cônjuge e filhos menores de 21 entram juntos como derivados.",
+      },
+    ],
+    kit: { kitId: "l1", label: "Kit L-1 — transferência intraempresarial", preco: "R$ 147" },
+    fontesOficiais: [
+      {
+        label: "USCIS — Employment-Based Immigration: First Preference EB-1",
+        url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/employment-based-immigration-first-preference-eb-1",
+      },
+      {
+        label: "8 CFR §204.5(j) — requisitos do EB-1C",
+        url: "https://www.ecfr.gov/current/title-8/chapter-I/subchapter-B/part-204/section-204.5",
+      },
+      {
+        label: "8 CFR §214.2(l) — regras do L-1 (teto e dual intent)",
+        url: "https://www.ecfr.gov/current/title-8/chapter-I/subchapter-B/part-214/section-214.2",
+      },
+      {
+        label: "Dept. of State — Visa Bulletin",
+        url: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html",
+      },
+    ],
+    fonteLeis: ["vistos/eb1c.md", "conceitos/priority-date.md"],
+    verificadoEm: "pendente",
+  },
 };
 
 export function getManual(slug: string): Manual | undefined {

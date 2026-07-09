@@ -811,6 +811,16 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       href: "/caminhos/h1b-transferencia",
     });
   }
+  if (inUs && currentVisa === "l1" && changeGoal === "green_card") {
+    results.push({
+      visa: "L-1A → EB-1C: a ponte do executivo (guia passo a passo)",
+      forms: "I-140 (EB-1C) pela empresa + I-485",
+      description:
+        "A transferência que te trouxe é a mesma história que sustenta o Green Card — sem sorteio e sem PERM. O teto de 7 anos do L-1A faz do timing a decisão mais importante; o manual mostra a ordem certa.",
+      priority: "high",
+      href: "/caminhos/l1-para-eb1c",
+    });
+  }
   if (inUs && currentVisa === "o1" && changeGoal === "green_card") {
     results.push({
       visa: "O-1 → Green Card por autopetição (guia passo a passo)",

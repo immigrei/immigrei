@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 type Availability = "all" | "treaty-only";
@@ -16,6 +17,9 @@ interface Visto {
   degrau: string;  // o plano de crescimento p/ quem ainda não está pronto
   destaque: { tipo: "star" | "warning" | "block"; texto: string } | null;
   stats: { label: string; valor: string; ok: boolean }[];
+  // Passo a passo da ponte rumo ao Green Card ("direto, reto e sem curva"):
+  // quando o manual/motor existe, o card linka direto para ele.
+  rumoGc?: { label: string; href: string };
   availability: Availability;
 }
 
@@ -45,6 +49,7 @@ const vistosEstudo: Visto[] = [
       { label: "Rumo ao Green Card", valor: "Indireto — via OPT → H-1B", ok: true },
       { label: "Família", valor: "F-2 (cônjuge não trabalha)", ok: false },
     ],
+    rumoGc: { label: "Passo a passo: F-1 → H-1B", href: "/caminhos/f1-para-h1b" },
     availability: "all",
   },
   {
@@ -70,6 +75,7 @@ const vistosEstudo: Visto[] = [
       { label: "Rumo ao Green Card", valor: "Indireto — trocando p/ F-1 (consulado) ou família", ok: true },
       { label: "Família", valor: "M-2 (cônjuge não trabalha)", ok: false },
     ],
+    rumoGc: { label: "Passo a passo: M-1 → F-1 pelo consulado", href: "/caminhos/m1-para-f1-consulado" },
     availability: "all",
   },
   {
@@ -95,6 +101,7 @@ const vistosEstudo: Visto[] = [
       { label: "Rumo ao Green Card", valor: "Possível — livre do 212(e), ou após 2 anos/waiver", ok: true },
       { label: "Família", valor: "J-2 (cônjuge PODE pedir permissão de trabalho)", ok: true },
     ],
+    rumoGc: { label: "Passo a passo: J-1 → F-1 e a regra dos 2 anos", href: "/caminhos/j1-para-f1" },
     availability: "all",
   },
   {
@@ -144,6 +151,7 @@ const vistosEstudo: Visto[] = [
       { label: "Rumo ao Green Card", valor: "Sim — perfil casa com EB-1A/NIW", ok: true },
       { label: "Família", valor: "O-3 (cônjuge não trabalha)", ok: false },
     ],
+    rumoGc: { label: "Passo a passo: O-1 → Green Card por autopetição", href: "/caminhos/o1-autopeticao-greencard" },
     availability: "all",
   },
 ];
@@ -220,6 +228,7 @@ const vistosNegocios: Visto[] = [
       { label: "Rumo ao Green Card", valor: "Indireto — mudando de categoria (ex.: B → F-1) ou família", ok: true },
       { label: "Família", valor: "Cada pessoa solicita o seu", ok: true },
     ],
+    rumoGc: { label: "Passo a passo: B-2 → F-1 por dentro dos EUA", href: "/casos/cos-b2-f1" },
     availability: "all",
   },
   {
@@ -244,6 +253,7 @@ const vistosNegocios: Visto[] = [
       { label: "Rumo ao Green Card", valor: "Sim — dual intent, via EB-1C", ok: true },
       { label: "Família", valor: "L-2 (cônjuge PODE trabalhar)", ok: true },
     ],
+    rumoGc: { label: "Passo a passo: L-1A → EB-1C (Green Card)", href: "/caminhos/l1-para-eb1c" },
     availability: "all",
   },
   {
@@ -407,6 +417,17 @@ function VistoCard({
           </div>
         ))}
       </div>
+
+      {/* Ponte rumo ao Green Card — link direto para o passo a passo */}
+      {!locked && visto.rumoGc && (
+        <Link
+          href={visto.rumoGc.href}
+          onClick={(e) => e.stopPropagation()}
+          className="text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors"
+        >
+          🧭 {visto.rumoGc.label} →
+        </Link>
+      )}
 
       {/* CTA */}
       {!locked && (
