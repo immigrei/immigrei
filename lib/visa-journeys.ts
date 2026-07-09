@@ -17,6 +17,10 @@ export type JourneyStep = {
   docs?: string[];
   uscisUrl?: string;
   avgDays?: number; // typical USCIS processing time, when meaningful
+  // Superfície do produto que executa este passo ("direto, reto e sem
+  // curva"): kit em /documentos, manual em /caminhos ou motor em /casos.
+  // Testado contra os catálogos reais em visa-journeys.test.ts.
+  link?: { label: string; href: string };
 };
 
 export type VisaJourney = {
@@ -49,6 +53,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         title: "Entrevista no consulado",
         description: "Formulário DS-160, agendamento e entrevista para o carimbo do visto F-1.",
         docs: ["DS-160", "I-20", "Comprovantes financeiros"],
+        link: { label: "Kit de documentos F-1 (consulado)", href: "/documentos/f1" },
       },
       {
         id: "entrada",
@@ -59,6 +64,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         id: "manter_status",
         title: "Manter o status de estudante",
         description: "Matrícula em tempo integral e progresso acadêmico mantêm seu F-1 válido.",
+        link: { label: "Kit de renovação e manutenção F-1", href: "/documentos/f1-renovacao" },
       },
       {
         id: "opt_cpt",
@@ -72,6 +78,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         id: "proximo_passo",
         title: "Próximo passo da jornada",
         description: "Transição para H-1B, O-1 ou Green Card, dependendo do seu caminho.",
+        link: { label: "Passo a passo: F-1 → H-1B", href: "/caminhos/f1-para-h1b" },
       },
     ],
   },
@@ -93,6 +100,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         docs: ["Formulário I-129", "LCA certificada", "Diploma e credenciais"],
         uscisUrl: "https://www.uscis.gov/i-129",
         avgDays: 60,
+        link: { label: "Kit de documentos H-1B", href: "/documentos/h1b" },
       },
       {
         id: "aprovacao",
@@ -114,12 +122,14 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         title: "Extensão ou transferência",
         description: "Extensões além de 6 anos são possíveis com o processo de Green Card em andamento.",
         avgDays: 60,
+        link: { label: "Passo a passo: transferência de H-1B", href: "/caminhos/h1b-transferencia" },
       },
       {
         id: "green_card",
         title: "Caminho para o Green Card",
         description: "PERM + I-140 (EB-2/EB-3) patrocinado pelo empregador, ou EB-2 NIW por conta própria.",
         uscisUrl: "https://www.uscis.gov/i-140",
+        link: { label: "Kit EB-2 NIW — autopetição", href: "/documentos/eb2niw" },
       },
     ],
   },
@@ -146,6 +156,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         docs: ["Formulário I-129", "Portfólio de evidências", "Advisory opinion"],
         uscisUrl: "https://www.uscis.gov/i-129",
         avgDays: 45,
+        link: { label: "Kit de documentos O-1", href: "/documentos/o1" },
       },
       {
         id: "aprovacao",
@@ -162,6 +173,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         title: "Caminho para o Green Card",
         description: "O perfil O-1 costuma sustentar um caso EB-1A ou EB-2 NIW.",
         uscisUrl: "https://www.uscis.gov/i-140",
+        link: { label: "Passo a passo: O-1 → Green Card por autopetição", href: "/caminhos/o1-autopeticao-greencard" },
       },
     ],
   },
@@ -183,6 +195,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         docs: ["Formulário I-129", "Prova de vínculo entre as empresas"],
         uscisUrl: "https://www.uscis.gov/i-129",
         avgDays: 60,
+        link: { label: "Kit de documentos L-1", href: "/documentos/l1" },
       },
       {
         id: "consulado",
@@ -199,6 +212,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         title: "Caminho para o Green Card",
         description: "Executivos L-1A têm caminho direto pelo EB-1C, sem PERM.",
         uscisUrl: "https://www.uscis.gov/i-140",
+        link: { label: "Passo a passo: L-1A → EB-1C (Green Card)", href: "/caminhos/l1-para-eb1c" },
       },
     ],
   },
@@ -232,6 +246,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         id: "mudanca_status",
         title: "Mudança de status",
         description: "Estudar (F-1), trabalhar (H-1B e outros) ou outros caminhos exigem mudança de status antes do prazo vencer.",
+        link: { label: "Validar a mudança B → F-1 (motor de casos)", href: "/casos/cos-b2-f1" },
       },
     ],
   },
@@ -370,11 +385,13 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         title: "Entrevista no consulado",
         description: "DS-160, agendamento e entrevista para o visto J-1.",
         docs: ["DS-160", "DS-2019"],
+        link: { label: "Kit de documentos J-1", href: "/documentos/j1" },
       },
       {
         id: "manter_status",
         title: "No programa, em status J-1",
         description: "Siga as regras do programa. Atenção à regra dos 2 anos (212(e)), se aplicável ao seu caso.",
+        link: { label: "Kit de extensão J-1", href: "/documentos/j1-extensao" },
       },
       {
         id: "waiver_ou_retorno",
@@ -386,6 +403,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         id: "proximo_passo",
         title: "Próximo passo da jornada",
         description: "Transição para F-1, H-1B, O-1 ou Green Card, conforme seu caminho.",
+        link: { label: "Passo a passo: J-1 → F-1 e a regra dos 2 anos", href: "/caminhos/j1-para-f1" },
       },
     ],
   },
@@ -408,6 +426,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         docs: ["Formulário I-140", "Petition letter"],
         uscisUrl: "https://www.uscis.gov/i-140",
         avgDays: 300,
+        link: { label: "Kit EB-2 NIW — autopetição", href: "/documentos/eb2niw" },
       },
       {
         id: "fila",
@@ -426,6 +445,127 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         id: "green_card",
         title: "Green Card aprovado",
         description: "Residência permanente — e o relógio da cidadania começa a contar. 🇺🇸",
+      },
+    ],
+  },
+
+  m1: {
+    visaType: "m1",
+    name: "M-1 — Estudante técnico",
+    currentStepId: "manter_status",
+    steps: [
+      {
+        id: "aceite_escola",
+        title: "Aceite na escola vocacional e I-20 (versão M)",
+        description: "A escola certificada pelo SEVP emite o I-20 — com prova de fundos para o curso inteiro, não só o 1º ano.",
+        docs: ["Carta de aceite", "Formulário I-20 (M)"],
+      },
+      {
+        id: "sevis",
+        title: "Pagamento da taxa SEVIS (I-901)",
+        description: "Taxa obrigatória do sistema SEVIS antes da entrevista no consulado.",
+        uscisUrl: "https://www.fmjfee.com",
+      },
+      {
+        id: "consulado",
+        title: "Entrevista no consulado",
+        description: "DS-160, agendamento e entrevista para o visto M-1.",
+        docs: ["DS-160", "I-20 (M)", "Comprovantes financeiros"],
+        link: { label: "Kit de documentos M-1", href: "/documentos/m1" },
+      },
+      {
+        id: "manter_status",
+        title: "Manter o status de estudante técnico",
+        description: "Carga integral no curso. Atenção: o prazo do M-1 é data fixa no I-94 (não 'D/S') — extensões via I-539.",
+        docs: ["Formulário I-539 (extensão)"],
+        uscisUrl: "https://www.uscis.gov/i-539",
+      },
+      {
+        id: "practical_training",
+        title: "Practical training pós-curso",
+        description: "1 mês de treinamento para cada 4 de estudo (máx. 6 meses), com I-765 aprovado antes de trabalhar.",
+        docs: ["Formulário I-765"],
+        uscisUrl: "https://www.uscis.gov/i-765",
+        avgDays: 90,
+      },
+      {
+        id: "proximo_passo",
+        title: "Próximo passo da jornada",
+        description: "Quer universidade? M-1 → F-1 é vedado por dentro dos EUA — o caminho existente é pelo consulado.",
+        link: { label: "Passo a passo: M-1 → F-1 pelo consulado", href: "/caminhos/m1-para-f1-consulado" },
+      },
+    ],
+  },
+
+  e2: {
+    visaType: "e2",
+    name: "E-2 — Investidor por tratado",
+    currentStepId: "operar",
+    steps: [
+      {
+        id: "tratado",
+        title: "Cidadania de país com tratado",
+        description: "O E-2 exige cidadania de país-membro (o Brasil não tem tratado — a porta comum é a segunda cidadania europeia).",
+      },
+      {
+        id: "investimento",
+        title: "Investimento comprometido em negócio real",
+        description: "Capital substancial e em risco — empresa aberta, plano de negócios e fundos já aplicados ou em escrow.",
+        docs: ["Plano de negócios", "Prova de origem e aplicação dos fundos"],
+      },
+      {
+        id: "consulado",
+        title: "Aplicação no consulado",
+        description: "DS-160 + DS-156E com o dossiê do negócio, e a entrevista de investidor.",
+        docs: ["DS-160", "DS-156E"],
+        link: { label: "Kit de documentos E-2", href: "/documentos/e2" },
+      },
+      {
+        id: "operar",
+        title: "Operar o negócio em status E-2",
+        description: "O negócio precisa ser real e mais que marginal — gerar renda além do sustento próprio. Renovações sem limite enquanto operar.",
+      },
+      {
+        id: "ponte_gc",
+        title: "Caminho para o Green Card",
+        description: "O E-2 não leva direto — as pontes comuns são EB-5 (investimento maior), EB-1C (executivo multinacional) ou EB-2 NIW.",
+        uscisUrl: "https://www.uscis.gov/working-in-the-united-states/permanent-workers",
+      },
+    ],
+  },
+
+  e1: {
+    visaType: "e1",
+    name: "E-1 — Comércio por tratado",
+    currentStepId: "operar",
+    steps: [
+      {
+        id: "tratado",
+        title: "Cidadania de país com tratado",
+        description: "Como o E-2, exige cidadania de país-membro — o Brasil não tem tratado E-1.",
+      },
+      {
+        id: "comercio",
+        title: "Comércio substancial com os EUA",
+        description: "Mais de 50% do volume de comércio da empresa entre os EUA e o país do tratado, com histórico documentado.",
+        docs: ["Contratos e faturas do comércio bilateral"],
+      },
+      {
+        id: "consulado",
+        title: "Aplicação no consulado",
+        description: "DS-160 + DS-156E com a documentação comercial da empresa.",
+        docs: ["DS-160", "DS-156E"],
+      },
+      {
+        id: "operar",
+        title: "Comerciando em status E-1",
+        description: "Renovações sem limite enquanto o comércio substancial continuar. Cônjuge pode trabalhar.",
+      },
+      {
+        id: "ponte_gc",
+        title: "Caminho para o Green Card",
+        description: "Não é direto — executivos podem olhar o EB-1C; perfis qualificados, o EB-2 NIW.",
+        uscisUrl: "https://www.uscis.gov/working-in-the-united-states/permanent-workers",
       },
     ],
   },

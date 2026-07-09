@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { VisaJourney } from "@/lib/visa-journeys";
 
 /**
@@ -95,6 +96,18 @@ export default function JourneyTimeline({ journey }: { journey: VisaJourney }) {
                       </a>
                     )}
                   </div>
+                )}
+                {step.link && (
+                  <Link
+                    href={step.link.href}
+                    className={`inline-block mt-2 text-xs font-bold underline underline-offset-4 transition-colors ${
+                      isCurrent
+                        ? "text-amber-deep hover:text-ink"
+                        : "text-pine hover:text-pine-deep"
+                    }`}
+                  >
+                    🧭 {step.link.label} →
+                  </Link>
                 )}
               </div>
             </li>
