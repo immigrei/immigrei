@@ -13,8 +13,8 @@ import checklists from "../app/documentos/[vistoId]/data";
 // Ids selecionáveis no catálogo /vistos — direto da fonte.
 const CATALOG_IDS = [...vistosEstudo, ...vistosNegocios].map((v) => v.id);
 
-// Motores de caso existentes em /casos.
-const CASE_ENGINES = new Set(["/casos/cos-b2-f1"]);
+// Motores de caso em /casos e superfícies estáticas fora de kits/manuais.
+const CASE_ENGINES = new Set(["/casos/cos-b2-f1", "/escolas"]);
 
 describe("todo visto do catálogo tem jornada no dashboard", () => {
   it.each(CATALOG_IDS)("visto %s → jornada", (id) => {

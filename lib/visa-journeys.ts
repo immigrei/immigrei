@@ -41,6 +41,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         title: "Aceite na escola e I-20",
         description: "A escola aprovada pelo SEVP emite o formulário I-20, que comprova sua vaga.",
         docs: ["Carta de aceite", "Formulário I-20"],
+        link: { label: "Buscar escolas certificadas", href: "/escolas" },
       },
       {
         id: "sevis",
@@ -459,6 +460,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         title: "Aceite na escola vocacional e I-20 (versão M)",
         description: "A escola certificada pelo SEVP emite o I-20 — com prova de fundos para o curso inteiro, não só o 1º ano.",
         docs: ["Carta de aceite", "Formulário I-20 (M)"],
+        link: { label: "Buscar escolas certificadas", href: "/escolas" },
       },
       {
         id: "sevis",
