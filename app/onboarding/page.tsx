@@ -176,7 +176,12 @@ export const questionMap: Record<string, Question> = {
       { value: "family_gc",           label: "Familiar próximo com Green Card",           icon: "🟢" },
       { value: "none",                label: "Não tenho vínculos familiares",             icon: "❌" },
     ],
-    next: (a) => a === "none" ? "q_permanent_path" : "results",
+    // Overstay sem vínculos vai direto aos resultados — os caminhos de
+    // residência por mérito/investimento pressupõem status válido.
+    next: (a, all) =>
+      a === "none" && all.q_current_status !== "overstay"
+        ? "q_permanent_path"
+        : "results",
   },
 
   q_permanent_path: {
@@ -270,7 +275,10 @@ export const questionMap: Record<string, Question> = {
     next: (a) => {
       if (a === "in_status" || a === "pending_uscis") return "q_current_visa";
       if (a === "unsure")      return "results"; // conferir o I-94 vem antes de qualquer rota
-      if (a === "overstay")    return "results";
+      // Overstay: os vínculos familiares decidem se existe caminho por
+      // dentro (ajuste por parente imediato, INA §245(a)) — perguntar antes
+      // de mostrar as saídas.
+      if (a === "overstay")    return "q_family_ties";
       if (a === "green_card")  return "q_gc_goal";
       return "q_citizen_goal"; // citizen
     },
@@ -695,13 +703,33 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       priority: "high",
       urgent: true,
     });
-    results.push({
-      visa: "Ajuste de status por parente imediato (se aplicável)",
-      forms: "I-130 + I-485",
-      description:
-        "Quem entrou nos EUA com inspeção e é cônjuge, pai/mãe ou filho(a) de cidadão americano pode, em muitos casos, ajustar o status por dentro — sem sair e sem acionar as barras (INA §245(a)). A elegibilidade é uma análise jurídica individual.",
-      priority: "high",
-    });
+    if (familyTies === "spouse_citizen" || familyTies === "parent_child_citizen") {
+      // Fonte: content/leis/conceitos/unlawful-presence.md — quem ajusta por
+      // dentro via parente imediato pode nunca acionar as barras de 3/10 anos.
+      results.push({
+        visa: "✅ Existe um caminho por dentro para o seu caso",
+        forms: "I-130 + I-485 (podem ser protocolados juntos)",
+        description:
+          "Cônjuge, pais e filhos solteiros menores de 21 anos de cidadão americano que entraram nos EUA com inspeção podem ajustar o status por dentro, mesmo com overstay (INA §245(a)). Como você não sai do país, as barras de 3/10 anos nunca disparam. A forma de entrada e as provas do vínculo genuíno decidem o caso — monte-o com um profissional.",
+        priority: "high",
+      });
+    } else if (familyTies === "family_gc") {
+      results.push({
+        visa: "O caminho existe — e melhora com o tempo",
+        forms: "I-130 (categoria F2A)",
+        description:
+          "Seu familiar residente já pode protocolar o I-130 agora — a data de protocolo garante seu lugar na fila F2A. Com overstay, o ajuste por dentro nessa categoria em regra não é permitido; mas se o seu familiar se naturalizar, você vira parente imediato e o caminho por dentro abre (INA §245(a)). Não saia dos EUA sem análise — as barras disparam na saída.",
+        priority: "high",
+      });
+    } else {
+      results.push({
+        visa: "Ajuste de status por parente imediato (se aplicável)",
+        forms: "I-130 + I-485",
+        description:
+          "Quem entrou nos EUA com inspeção e é cônjuge, pai/mãe ou filho(a) de cidadão americano pode, em muitos casos, ajustar o status por dentro — sem sair e sem acionar as barras (INA §245(a)). A elegibilidade é uma análise jurídica individual.",
+        priority: "high",
+      });
+    }
     results.push({
       visa: "Perdão por dificuldade extrema (waiver)",
       forms: "I-601 / I-601A",
@@ -1333,8 +1361,10 @@ export function deriveMainGoal(a: Answers): string {
   if (a.q_change_goal === "change_status" || a.q_change_goal === "work_change") return "regularizar_status";
   if (a.q_gc_goal === "naturalization") return "cidadania";
   if (a.q_gc_goal === "renew") return "renovar_visto";
-  if (a.q_gc_goal === "family" || a.q_family_ties && a.q_family_ties !== "none") return "trazer_familia";
+  // Overstay vem antes dos vínculos familiares: quem passou do prazo está
+  // regularizando o próprio status, mesmo quando a saída é via família.
   if (a.q_current_status === "overstay") return "regularizar_status";
+  if (a.q_gc_goal === "family" || a.q_family_ties && a.q_family_ties !== "none") return "trazer_familia";
   if (a.q_goal === "live" || a.q_permanent_path) return "green_card";
   // In-US study/work/business = mudança de status (guidance no dashboard);
   // primeiro pedido a partir do exterior continua "outro".

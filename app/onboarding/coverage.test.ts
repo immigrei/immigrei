@@ -95,6 +95,45 @@ describe("cobertura do onboarding sobre o catálogo do produto", () => {
     expect(r.length).toBeGreaterThan(0);
     for (const x of r) expect(x.href ?? "").not.toMatch(/^\/(documentos|caminhos|casos)/);
   });
+
+  // Overstay pergunta os vínculos familiares e personaliza a saída — caso
+  // real do fundador: casou e protocolou I-130 + I-485 por dentro.
+  describe("overstay com vínculo familiar mostra o caminho por dentro", () => {
+    const overstay = (ties: string): Answers => ({
+      q_location: "in_us", q_current_status: "overstay", q_family_ties: ties,
+    });
+
+    it("cônjuge de cidadão → ajuste I-130 + I-485 sem 'se aplicável'", () => {
+      const r = recs(overstay("spouse_citizen"));
+      const card = r.find((x) => x.forms.includes("I-130 + I-485"));
+      expect(card).toBeDefined();
+      expect(card!.visa).not.toContain("se aplicável");
+      expect(card!.description).toContain("245(a)");
+      expect(deriveDestination(overstay("spouse_citizen"), r)).toEqual({ kind: "profissionais" });
+    });
+
+    it("pais/filhos de cidadão → mesmo caminho por dentro", () => {
+      const r = recs(overstay("parent_child_citizen"));
+      expect(r.some((x) => x.forms.includes("I-130 + I-485") && !x.visa.includes("se aplicável"))).toBe(true);
+    });
+
+    it("parente com green card → F2A com fila e alerta de saída", () => {
+      const r = recs(overstay("family_gc"));
+      const card = r.find((x) => x.forms.includes("F2A"));
+      expect(card).toBeDefined();
+      expect(card!.description).toContain("Não saia dos EUA");
+    });
+
+    it("sem vínculos → mantém orientação genérica com saídas", () => {
+      const r = recs(overstay("none"));
+      expect(r.length).toBeGreaterThan(0);
+      expect(r.some((x) => x.visa.includes("se aplicável"))).toBe(true);
+    });
+
+    it("overstay + vínculo familiar → main_goal regularizar_status, não trazer_familia", () => {
+      expect(deriveMainGoal(overstay("spouse_citizen"))).toBe("regularizar_status");
+    });
+  });
 });
 
 // Green card e cidadão não passam pela vitrine de vistos: o perfil é salvo
@@ -281,7 +320,16 @@ describe("todo perfil do onboarding tem um destino", () => {
   it.each(profiles.map((p) => [JSON.stringify(p), p] as const))(
     "%s",
     (_label, answers) => {
-      const destino = deriveDestination(answers, recs(answers));
+      const r = recs(answers);
+      // Luz no fim do túnel: nenhum perfil termina sem pelo menos uma
+      // recomendação acionável (não bloqueada) na tela de resultados.
+      expect(r.length, "perfil sem nenhuma recomendação").toBeGreaterThan(0);
+      expect(
+        r.some((x) => !x.blocked),
+        "perfil só com recomendações bloqueadas"
+      ).toBe(true);
+
+      const destino = deriveDestination(answers, r);
       if (destino.kind === "vistos") {
         // Chegou à vitrine → precisa ter pelo menos um card em destaque.
         const focus = new URLSearchParams(destino.query).get("focus");
