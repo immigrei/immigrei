@@ -56,6 +56,10 @@ export default function DocumentosVistoPage() {
 
   useEffect(() => {
     if (!vistoId) return;
+    fetch(`/api/checklist?vistoId=${vistoId}`)
+      .then((r) => (r.ok ? r.json() : { items: [] }))
+      .then((d) => setMarcados(new Set((d.items ?? []) as string[])))
+      .catch(() => {});
     fetch(`/api/user-documents?vistoId=${vistoId}`)
       .then((r) => (r.ok ? r.json() : { documents: [] }))
       .then((d) => {
@@ -82,11 +86,18 @@ export default function DocumentosVistoPage() {
   }
 
   const toggle = (id: string) => {
+    const checked = !marcados.has(id);
     setMarcados((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      checked ? next.add(id) : next.delete(id);
       return next;
     });
+    // Persiste sem bloquear a UI; deslogado (401) segue funcionando localmente.
+    fetch("/api/checklist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vistoId, documentoId: id, checked }),
+    }).catch(() => {});
   };
 
   const pickFile = (docId: string) => {

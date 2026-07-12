@@ -6,6 +6,7 @@ import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import OptionsList from "@/app/components/OptionsList";
 import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
+import { applyProgress, type DoneWhen, type ProgressSignals } from "@/lib/journey-progress";
 
 interface ChosenSchool {
   school_name: string;
@@ -34,6 +35,9 @@ interface Etapa {
   data?:  string;
   tag?:   string;
   href?:  string; // makes the step card a link (e.g. /escolas)
+  // Real-data completion signal (see lib/journey-progress.ts). Steps without
+  // it never auto-complete — they depend on events outside the app.
+  doneWhen?: DoneWhen;
 }
 
 interface GuardRail {
@@ -67,10 +71,10 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "F-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer obter o visto F-1 para estudar nos EUA. O processo passa pelo consulado americano no Brasil — sem saída prévia dos EUA necessária.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Matrícula + I-20",         desc: "Confirme a matrícula em escola SEVP e solicite o I-20 ao DSO.", href: "/escolas" },
-        { num: "2", estado: "proximo", titulo: "Pagar taxa SEVIS",          desc: "US$350 em fls.dhs.gov. Guarde o comprovante I-901.", tag: "US$350" },
-        { num: "3", estado: "proximo", titulo: "Preencher DS-160",          desc: "Formulário do Departamento de Estado — campo a campo no kit." },
-        { num: "4", estado: "proximo", titulo: "Montar dossiê",             desc: "Extrato pessoal, vínculo com Brasil, carta de sponsor se aplicável." },
+        { num: "1", estado: "agora",   titulo: "Matrícula + I-20",         desc: "Confirme a matrícula em escola SEVP e solicite o I-20 ao DSO.", href: "/escolas", doneWhen: { itens: ["i20"] } },
+        { num: "2", estado: "proximo", titulo: "Pagar taxa SEVIS",          desc: "US$350 em fls.dhs.gov. Guarde o comprovante I-901.", tag: "US$350", doneWhen: { itens: ["i901"] } },
+        { num: "3", estado: "proximo", titulo: "Preencher DS-160",          desc: "Formulário do Departamento de Estado — campo a campo no kit.", doneWhen: { itens: ["ds160"] } },
+        { num: "4", estado: "proximo", titulo: "Montar dossiê",             desc: "Extrato pessoal, vínculo com Brasil, carta de sponsor se aplicável.", doneWhen: { itens: ["financeiro", "vinculo"] } },
         { num: "5", estado: "futuro",  titulo: "Agendar entrevista",        desc: "Consulados em SP, RJ, Recife, Brasília ou Porto Alegre." },
         { num: "6", estado: "futuro",  titulo: "Entrevista consular",       desc: "2–5 minutos. O cônsul já leu o dossiê. Seja direto e confiante.", tag: "2–8 semanas" },
         { num: "✓", estado: "futuro",  titulo: "Visto aprovado + viagem",   desc: "F-1 no passaporte. Visto válido para entrar nos EUA." },
@@ -93,12 +97,12 @@ export function getStrategy(profile: Profile): Strategy {
       situacao:  `Você está nos EUA e quer mudar para o F-1 sem sair do país. O processo usa o formulário I-539 direto com o USCIS — sem entrevista consular, mas exige status válido no protocolo.`,
       destaque: { tipo: "alerta", texto: "Seu status atual precisa estar válido no dia do protocolo do I-539. Verifique o I-94 antes de qualquer passo." },
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Verificar status no I-94",    desc: "i94.cbp.dhs.gov — confirme que você ainda está em status válido." },
-        { num: "2", estado: "proximo", titulo: "Escolher escola SEVP próxima", desc: "Escola presencial longe da sua residência resulta em negação.", href: "/escolas" },
-        { num: "3", estado: "proximo", titulo: "Obter o I-20",                desc: "Escola emite o I-20 após matrícula confirmada." },
-        { num: "4", estado: "proximo", titulo: "Reunir documentação financeira", desc: "Extrato pessoal de 6 meses. No seu nome. PDF oficial do banco.", tag: "Crítico" },
-        { num: "5", estado: "proximo", titulo: "Preencher e enviar I-539",    desc: "Taxa US$370 por money order. Endereço varia por estado.", tag: "US$370" },
-        { num: "6", estado: "futuro",  titulo: "Receber I-797 de recebimento", desc: "Guarde este documento — prova que você protocolou em status." },
+        { num: "1", estado: "agora",   titulo: "Verificar status no I-94",    desc: "i94.cbp.dhs.gov — confirme que você ainda está em status válido.", doneWhen: { itens: ["status-valido"] } },
+        { num: "2", estado: "proximo", titulo: "Escolher escola SEVP próxima", desc: "Escola presencial longe da sua residência resulta em negação.", href: "/escolas", doneWhen: { school: true } },
+        { num: "3", estado: "proximo", titulo: "Obter o I-20",                desc: "Escola emite o I-20 após matrícula confirmada.", doneWhen: { itens: ["i20-cos"] } },
+        { num: "4", estado: "proximo", titulo: "Reunir documentação financeira", desc: "Extrato pessoal de 6 meses. No seu nome. PDF oficial do banco.", tag: "Crítico", doneWhen: { itens: ["extrato-pessoal"] } },
+        { num: "5", estado: "proximo", titulo: "Preencher e enviar I-539",    desc: "Taxa US$370 por money order. Endereço varia por estado.", tag: "US$370", doneWhen: { itens: ["i539"] } },
+        { num: "6", estado: "futuro",  titulo: "Receber I-797 de recebimento", desc: "Guarde este documento — prova que você protocolou em status.", doneWhen: { itens: ["i797-recebimento"] } },
         { num: "7", estado: "futuro",  titulo: "Aprovação do I-539",          desc: "Prazo médio: 4–8 meses. Premium Processing disponível.", tag: "4–8 meses" },
         { num: "✓", estado: "futuro",  titulo: "F-1 aprovado — início das aulas", desc: "Status F-1 ativo, pode começar o programa." },
       ],
@@ -140,9 +144,9 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "M-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer o M-1 para fazer um curso técnico ou vocacional nos EUA. O processo é similar ao F-1, mas com a taxa SEVIS mais baixa e foco em programa vocacional.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Escola técnica SEVP + I-20 M-1",  desc: "Matrícula em escola vocacional credenciada. I-20 M-1 é diferente do F-1.", href: "/escolas" },
-        { num: "2", estado: "proximo", titulo: "Taxa SEVIS M-1",                   desc: "US$200 (menor que o F-1) em fls.dhs.gov.", tag: "US$200" },
-        { num: "3", estado: "proximo", titulo: "DS-160 + dossiê",                  desc: "Campo a campo no kit. Mesmo processo do F-1 com variações para M-1." },
+        { num: "1", estado: "agora",   titulo: "Escola técnica SEVP + I-20 M-1",  desc: "Matrícula em escola vocacional credenciada. I-20 M-1 é diferente do F-1.", href: "/escolas", doneWhen: { itens: ["i20"] } },
+        { num: "2", estado: "proximo", titulo: "Taxa SEVIS M-1",                   desc: "US$200 (menor que o F-1) em fls.dhs.gov.", tag: "US$200", doneWhen: { itens: ["i901"] } },
+        { num: "3", estado: "proximo", titulo: "DS-160 + dossiê",                  desc: "Campo a campo no kit. Mesmo processo do F-1 com variações para M-1.", doneWhen: { itens: ["ds160", "financeiro"] } },
         { num: "4", estado: "futuro",  titulo: "Entrevista consular",              desc: "O cônsul vai perguntar sobre plano de carreira pós-curso. Prepare uma resposta clara." },
         { num: "✓", estado: "futuro",  titulo: "Visto M-1 aprovado",              desc: "Duração máxima de 1 ano (prorrogável)." },
       ],
@@ -386,10 +390,12 @@ export function getStrategy(profile: Profile): Strategy {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+// Verde é reservado para "feito" — etapa concluída com dado real do usuário.
+// "proximo" e "futuro" ficam neutros para não parecerem concluídos.
 const estadoStyle: Record<Etapa["estado"], { dot: string; card: string; data: string }> = {
-  feito:   { dot: "bg-ink-faint border-ink-faint text-cream",            card: "opacity-60 border-pine-tint",         data: "text-ink-faint" },
+  feito:   { dot: "bg-pine border-pine-deep text-cream",                 card: "border-pine/40 bg-pine-tint/40",      data: "text-pine-deep" },
   agora:   { dot: "bg-amber border-amber-deep text-pine-deep shadow-amber/30 shadow-md", card: "border-amber",  data: "text-amber-deep" },
-  proximo: { dot: "bg-pine border-pine-deep text-cream",                 card: "border-pine",                         data: "text-pine-deep" },
+  proximo: { dot: "bg-cream-2 border-ink-faint text-ink-soft",           card: "border-pine-tint",                    data: "text-ink-soft" },
   futuro:  { dot: "bg-cream-2 border-pine-tint text-ink-faint",          card: "border-pine-tint",                    data: "text-ink-faint" },
   alerta:  { dot: "bg-clay border-clay text-cream",                      card: "border-clay",                         data: "text-clay" },
 };
@@ -397,13 +403,37 @@ const estadoStyle: Record<Etapa["estado"], { dot: string; card: string; data: st
 export default function PainelPage() {
   const router  = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [satisfeitos, setSatisfeitos] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/profile")
-      .then((r) => r.json())
-      .then((d) => { setProfile(d.profile ?? null); setLoading(false); })
-      .catch(() => setLoading(false));
+    (async () => {
+      try {
+        const d = await fetch("/api/profile").then((r) => r.json());
+        const p: Profile | null = d.profile ?? null;
+        setProfile(p);
+
+        // Progresso real: itens marcados no checklist do kit + arquivos no cofre.
+        const kitId = p ? getStrategy(p).kitId : "";
+        if (kitId) {
+          const [check, docs] = await Promise.all([
+            fetch(`/api/checklist?vistoId=${kitId}`)
+              .then((r) => (r.ok ? r.json() : { items: [] }))
+              .catch(() => ({ items: [] })),
+            fetch(`/api/user-documents?vistoId=${kitId}`)
+              .then((r) => (r.ok ? r.json() : { documents: [] }))
+              .catch(() => ({ documents: [] })),
+          ]);
+          setSatisfeitos(new Set<string>([
+            ...((check.items ?? []) as string[]),
+            ...((docs.documents ?? []) as { documento_id: string }[]).map((a) => a.documento_id),
+          ]));
+        }
+      } catch {
+        // perfil indisponível — cai no estado "complete o onboarding"
+      }
+      setLoading(false);
+    })();
   }, []);
 
   if (loading) {
@@ -430,6 +460,8 @@ export default function PainelPage() {
   }
 
   const s = getStrategy(profile);
+  const signals: ProgressSignals = { hasSchool: Boolean(profile.chosen_school), satisfeitos };
+  const etapas = applyProgress(s.etapas, signals);
 
   return (
     <AppShell>
@@ -478,7 +510,7 @@ export default function PainelPage() {
             <div className="absolute left-4 top-5 bottom-5 w-px bg-pine-tint" />
 
             <div className="flex flex-col gap-4">
-              {s.etapas.map((etapa, i) => {
+              {etapas.map((etapa, i) => {
                 const st = estadoStyle[etapa.estado];
                 const escola = etapa.href === "/escolas" ? profile.chosen_school : null;
                 const cardContent = (
@@ -510,7 +542,7 @@ export default function PainelPage() {
                   <div key={i} className="flex gap-4 relative">
                     {/* dot */}
                     <div className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center text-[11px] font-bold z-10 ${st.dot}`}>
-                      {etapa.num}
+                      {etapa.estado === "feito" ? "✓" : etapa.num}
                     </div>
                     {/* card */}
                     {etapa.href ? (
