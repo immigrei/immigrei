@@ -100,10 +100,34 @@ export const questionMap: Record<string, Question> = {
     id: "q_study_type",
     text: "Qual tipo de curso você pretende fazer?",
     options: [
-      { value: "university", label: "Graduação ou pós-graduação em universidade", icon: "🏛️" },
-      { value: "language",   label: "Curso de idiomas",                           icon: "🗣️" },
-      { value: "vocational", label: "Curso técnico / vocacional",                 icon: "🔧" },
-      { value: "exchange",   label: "Intercâmbio, pesquisa ou programa cultural", icon: "🔄" },
+      {
+        value: "university",
+        label: "Graduação ou pós-graduação em universidade",
+        icon: "🏛️",
+        info:
+          "Leva ao F-1, o visto de estudante acadêmico. Emitido com o I-20 da instituição, permite estudar em tempo integral e trabalhar no campus e via OPT/CPT ligado ao curso.",
+      },
+      {
+        value: "language",
+        label: "Curso de idiomas",
+        icon: "🗣️",
+        info:
+          "Cursos de idiomas em geral também usam o F-1, com I-20 da escola. Alguns programas patrocinados funcionam como J-1 — a escola informa qual se aplica.",
+      },
+      {
+        value: "vocational",
+        label: "Curso técnico / vocacional",
+        icon: "🔧",
+        info:
+          "Leva ao M-1, o visto para cursos técnicos e profissionalizantes credenciados pelo SEVP. Tem regras mais rígidas que o F-1 — inclusive para mudar de status depois.",
+      },
+      {
+        value: "exchange",
+        label: "Intercâmbio, pesquisa ou programa cultural",
+        icon: "🔄",
+        info:
+          "Leva ao J-1, para programas com patrocinador (intercâmbio, pesquisa, au pair). Atenção à regra dos 2 anos (212(e)): em alguns casos, exige retornar ao país de origem antes de outros vistos.",
+      },
     ],
     next: () => "results",
   },
@@ -113,10 +137,34 @@ export const questionMap: Record<string, Question> = {
     id: "q_work_type",
     text: "Como será seu vínculo de trabalho?",
     options: [
-      { value: "employer_offer", label: "Tenho oferta de emprego de empresa americana",             icon: "🤝" },
-      { value: "intracompany",   label: "Sou transferido pela minha empresa para os EUA",           icon: "🏢" },
-      { value: "extraordinary",  label: "Sou reconhecido na minha área (artista, atleta, cientista)", icon: "⭐" },
-      { value: "self",           label: "Sou autônomo / freelancer / sem oferta ainda",             icon: "🧑‍💻" },
+      {
+        value: "employer_offer",
+        label: "Tenho oferta de emprego de empresa americana",
+        icon: "🤝",
+        info:
+          "O caminho clássico é o H-1B: exige graduação na área da vaga e passa por sorteio anual (registro em março). O empregador conduz a petição.",
+      },
+      {
+        value: "intracompany",
+        label: "Sou transferido pela minha empresa para os EUA",
+        icon: "🏢",
+        info:
+          "Leva ao L-1: para quem trabalha há pelo menos 1 ano em empresa com matriz, filial ou afiliada nos EUA. Sem sorteio — e ponte natural para o Green Card EB-1C.",
+      },
+      {
+        value: "extraordinary",
+        label: "Sou reconhecido na minha área (artista, atleta, cientista)",
+        icon: "⭐",
+        info:
+          "Leva ao O-1, para quem tem reconhecimento sólido na área (prêmios, imprensa, publicações, salário destacado). Sem sorteio e sem cota anual.",
+      },
+      {
+        value: "self",
+        label: "Sou autônomo / freelancer / sem oferta ainda",
+        icon: "🧑‍💻",
+        info:
+          "Sem oferta de emprego, as portas reais são o O-1 (petição via agente) e o Green Card EB-2 NIW por autopetição — ambos dependem de portfólio e formação sólida.",
+      },
     ],
     next: (a) => a === "employer_offer" ? "q_education" : "results",
   },
@@ -143,24 +191,32 @@ export const questionMap: Record<string, Question> = {
         label: "Quero investir e operar um negócio nos EUA",
         icon: "💰",
         subtitle: "Abertura de empresa, capital em risco",
+        info:
+          "O caminho típico é o E-2 (investidor por tratado, a partir de ~$100k) — mas o Brasil não tem tratado com os EUA. Para brasileiros, as alternativas são o EB-5 ou o L-1 via filial da própria empresa.",
       },
       {
         value: "invest_permanent",
         label: "Quero investir e obter residência permanente",
         icon: "🏠",
         subtitle: "A partir de $800k — caminho para Green Card",
+        info:
+          "Leva ao EB-5: investimento de $800k a $1.05M em projeto que crie pelo menos 10 empregos americanos, com Green Card direto. Disponível para brasileiros.",
       },
       {
         value: "trade",
         label: "Tenho empresa que comercializa com os EUA",
         icon: "📦",
         subtitle: "Exportação, importação, serviços",
+        info:
+          "O caminho típico é o E-1 (comércio por tratado) — indisponível para brasileiros por falta de tratado. As alternativas são o B-1 para as viagens e o L-1 via filial nos EUA.",
       },
       {
         value: "meetings",
         label: "Preciso fazer reuniões, negociações ou visitar clientes",
         icon: "🤝",
         subtitle: "Sem trabalhar ou receber salário americano",
+        info:
+          "Leva ao B-1 (visitante de negócios): reuniões, contratos, negociações e conferências. Não autoriza trabalho remunerado nem receber salário americano.",
       },
     ],
     next: () => "q_nationality",
@@ -171,10 +227,34 @@ export const questionMap: Record<string, Question> = {
     id: "q_family_ties",
     text: "Você tem vínculos com cidadãos americanos ou titulares de Green Card?",
     options: [
-      { value: "spouse_citizen",      label: "Cônjuge ou noivo/a cidadão americano",     icon: "💍" },
-      { value: "parent_child_citizen",label: "Filho/pais cidadãos americanos",            icon: "👨‍👩‍👧" },
-      { value: "family_gc",           label: "Familiar próximo com Green Card",           icon: "🟢" },
-      { value: "none",                label: "Não tenho vínculos familiares",             icon: "❌" },
+      {
+        value: "spouse_citizen",
+        label: "Cônjuge ou noivo/a cidadão americano",
+        icon: "💍",
+        info:
+          "Parente imediato de cidadão: noivos usam o K-1 (casamento nos EUA em até 90 dias); cônjuges já casados, o IR-1/CR-1 pelo consulado. Sem fila de espera.",
+      },
+      {
+        value: "parent_child_citizen",
+        label: "Filho/pais cidadãos americanos",
+        icon: "👨‍👩‍👧",
+        info:
+          "Categoria IR (parente imediato): prioridade máxima, sem fila de espera. O cidadão americano protocola a petição I-130.",
+      },
+      {
+        value: "family_gc",
+        label: "Familiar próximo com Green Card",
+        icon: "🟢",
+        info:
+          "Residentes permanentes peticionam cônjuge e filhos solteiros (categorias F2A/F2B). Há fila, que varia por categoria — dá para acompanhar no visa bulletin.",
+      },
+      {
+        value: "none",
+        label: "Não tenho vínculos familiares",
+        icon: "❌",
+        info:
+          "Sem vínculo familiar, os caminhos para os EUA passam por emprego, mérito, investimento, proteção humanitária ou loteria — a próxima pergunta detalha cada um.",
+      },
     ],
     // Overstay sem vínculos vai direto aos resultados — os caminhos de
     // residência por mérito/investimento pressupõem status válido.
@@ -303,23 +383,69 @@ export const questionMap: Record<string, Question> = {
     subtitle:
       "A do seu I-94 ou da última aprovação do USCIS — pode ser diferente do visto carimbado no passaporte.",
     options: [
-      { value: "b1b2", label: "B-1/B-2 — Turismo / Negócios", icon: "🛂" },
-      { value: "f1",   label: "F-1 — Estudante acadêmico",    icon: "🎓" },
-      { value: "j1",   label: "J-1 — Intercâmbio",            icon: "🔄" },
-      { value: "h1b",  label: "H-1B — Trabalho especializado", icon: "🏢" },
-      { value: "l1",   label: "L-1 — Transferência intraempresarial", icon: "🌐" },
-      { value: "m1",   label: "M-1 — Estudante vocacional / técnico",  icon: "🔧" },
-      { value: "o1",   label: "O-1 — Habilidade extraordinária",       icon: "⭐" },
+      {
+        value: "b1b2",
+        label: "B-1/B-2 — Turismo / Negócios",
+        icon: "🛂",
+        info:
+          "Visto de visita: turismo, tratamento médico e reuniões de negócios — sem trabalhar. A permanência é a que consta no I-94, em geral até 6 meses por entrada.",
+      },
+      {
+        value: "f1",
+        label: "F-1 — Estudante acadêmico",
+        icon: "🎓",
+        info:
+          "Estudante em instituição SEVP, com I-20. Permite trabalho no campus e OPT/CPT ligado ao curso. O I-94 costuma dizer \"D/S\" (duração do status).",
+      },
+      {
+        value: "j1",
+        label: "J-1 — Intercâmbio",
+        icon: "🔄",
+        info:
+          "Programas patrocinados de intercâmbio, com DS-2019. Alguns casos têm a regra dos 2 anos (212(e)), que muda os caminhos seguintes — confira no seu formulário.",
+      },
+      {
+        value: "h1b",
+        label: "H-1B — Trabalho especializado",
+        icon: "🏢",
+        info:
+          "Trabalho com patrocínio de empregador. É portátil (dá para trocar de empregador sem novo sorteio) e um dos caminhos mais comuns até o Green Card por emprego.",
+      },
+      {
+        value: "l1",
+        label: "L-1 — Transferência intraempresarial",
+        icon: "🌐",
+        info:
+          "Transferência dentro da mesma empresa multinacional. Para executivos e gerentes (L-1A), é a ponte natural para o Green Card EB-1C.",
+      },
+      {
+        value: "m1",
+        label: "M-1 — Estudante vocacional / técnico",
+        icon: "🔧",
+        info:
+          "Estudante de curso técnico/profissionalizante. Regras mais rígidas: a lei veda a mudança M-1 → F-1 por dentro dos EUA — essa rota é consular.",
+      },
+      {
+        value: "o1",
+        label: "O-1 — Habilidade extraordinária",
+        icon: "⭐",
+        info:
+          "Para quem tem reconhecimento sólido na área, sem cota nem sorteio. Esse perfil costuma sustentar autopetição de Green Card (EB-1A ou EB-2 NIW).",
+      },
       {
         value: "dependent",
         label: "Dependente — F-2, H-4, L-2 ou J-2",
         icon: "👪",
+        info:
+          "Status vinculado ao titular principal. Estudo e trabalho variam por categoria: L-2 e J-2 podem trabalhar com autorização; H-4 só em casos específicos; F-2 não trabalha.",
       },
       {
         value: "esta_vwp",
         label: "Entrei sem visto (ESTA / Visa Waiver)",
         icon: "🛬",
         subtitle: "Passaporte europeu ou de país do VWP",
+        info:
+          "Entrada sem visto pelo Visa Waiver Program: até 90 dias, sem extensão nem mudança de status por dentro dos EUA (8 CFR §248). Os próximos passos são planejados pelo consulado.",
       },
       { value: "other",label: "Outra categoria",              icon: "📄" },
     ],
@@ -336,19 +462,41 @@ export const questionMap: Record<string, Question> = {
     subtitle:
       "Pelo ESTA não dá para estender a estadia nem mudar de status por dentro — mas dá para planejar a próxima entrada do jeito certo.",
     options: [
-      { value: "study",  label: "Estudar nos EUA",             icon: "🎓" },
-      { value: "work",   label: "Trabalhar nos EUA",           icon: "💼" },
-      { value: "invest", label: "Investir ou empreender",      icon: "💰" },
+      {
+        value: "study",
+        label: "Estudar nos EUA",
+        icon: "🎓",
+        info:
+          "O caminho real é o F-1 pelo consulado: garantir o I-20 da escola, sair dos EUA dentro dos 90 dias e aplicar de fora. Estudar em tempo integral com ESTA não é permitido.",
+      },
+      {
+        value: "work",
+        label: "Trabalhar nos EUA",
+        icon: "💼",
+        info:
+          "As rotas são consulares: O-1 (reconhecimento na área), H-1B (graduação + sorteio anual) ou L-1 (transferência pela própria empresa).",
+      },
+      {
+        value: "invest",
+        label: "Investir ou empreender",
+        icon: "💰",
+        info:
+          "Quem entra de ESTA tem passaporte de país do VWP — na maioria, também de tratado: E-2 (investimento a partir de ~$100k) e E-1 (comércio bilateral), ambos pelo consulado.",
+      },
       {
         value: "family_citizen",
         label: "Sou cônjuge ou parente imediato de cidadão americano",
         icon: "💍",
         subtitle: "Cônjuge, pai/mãe ou filho(a) solteiro(a) menor de 21 de cidadão",
+        info:
+          "Exceção estreita do VWP: parentes imediatos de cidadão podem, em muitos casos, ajustar o status por dentro (INA §245(a)). A regra dos 90 dias e a prova de intenção pesam — análise individual.",
       },
       {
         value: "plan_return",
         label: "Só visitando — quero planejar visitas futuras",
         icon: "✈️",
+        info:
+          "O ESTA permite até 90 dias por entrada, sem extensão. Entradas muito frequentes levantam suspeita de 'morar de ESTA' e podem custar a autorização.",
       },
     ],
     next: () => "results",
@@ -376,11 +524,41 @@ export const questionMap: Record<string, Question> = {
     id: "q_target_visa",
     text: "Para qual tipo de visto você quer mudar?",
     options: [
-      { value: "f1",   label: "F-1 — Estudante acadêmico",           icon: "🎓" },
-      { value: "m1",   label: "M-1 — Estudante vocacional / técnico", icon: "🔧" },
-      { value: "j1",   label: "J-1 — Intercâmbio",                   icon: "🔄" },
-      { value: "h1b",  label: "H-1B — Trabalho especializado",        icon: "🏢" },
-      { value: "o1",   label: "O-1 — Habilidade extraordinária",      icon: "⭐" },
+      {
+        value: "f1",
+        label: "F-1 — Estudante acadêmico",
+        icon: "🎓",
+        info:
+          "Estudante em tempo integral com I-20 de escola SEVP. Por dentro dos EUA, a mudança é via I-539 — o prazo do seu I-94 é o fator crítico do timing.",
+      },
+      {
+        value: "m1",
+        label: "M-1 — Estudante vocacional / técnico",
+        icon: "🔧",
+        info:
+          "Cursos técnicos e profissionalizantes com I-20 de escola M. Atenção: uma vez em M-1, a lei veda mudar para F-1 por dentro dos EUA.",
+      },
+      {
+        value: "j1",
+        label: "J-1 — Intercâmbio",
+        icon: "🔄",
+        info:
+          "Programas com patrocinador e DS-2019. Verifique a regra dos 2 anos (212(e)) antes de planejar — ela pode mudar o caminho inteiro.",
+      },
+      {
+        value: "h1b",
+        label: "H-1B — Trabalho especializado",
+        icon: "🏢",
+        info:
+          "Precisa de empregador patrocinador, graduação na área da vaga e passar no sorteio anual (registro em março, início em outubro).",
+      },
+      {
+        value: "o1",
+        label: "O-1 — Habilidade extraordinária",
+        icon: "⭐",
+        info:
+          "Sem sorteio e sem cota: petição via empregador ou agente, sustentada por um dossiê de reconhecimento na sua área (prêmios, imprensa, publicações).",
+      },
       { value: "other",label: "Outro / Não tenho certeza",            icon: "🤔" },
     ],
     next: () => "q_process",
@@ -390,10 +568,34 @@ export const questionMap: Record<string, Question> = {
     id: "q_gc_path",
     text: "Qual é o seu caminho para o Green Card?",
     options: [
-      { value: "employer", label: "Por patrocínio de empregador",           icon: "🏢" },
-      { value: "family",   label: "Por vínculo familiar com cidadão / GC", icon: "👨‍👩‍👧" },
-      { value: "merit",    label: "Por mérito (EB-1, EB-2 NIW)",           icon: "⭐" },
-      { value: "unsure",   label: "Não tenho certeza",                     icon: "🤔" },
+      {
+        value: "employer",
+        label: "Por patrocínio de empregador",
+        icon: "🏢",
+        info:
+          "Categorias EB-2/EB-3: o empregador conduz a certificação trabalhista (PERM) e a petição I-140. É o caminho mais comum para o Green Card por emprego.",
+      },
+      {
+        value: "family",
+        label: "Por vínculo familiar com cidadão / GC",
+        icon: "👨‍👩‍👧",
+        info:
+          "Petição I-130 por parente: parentes imediatos de cidadão (cônjuge, pais, filhos menores de 21) não têm fila; as demais categorias têm filas que variam de anos a décadas.",
+      },
+      {
+        value: "merit",
+        label: "Por mérito (EB-1, EB-2 NIW)",
+        icon: "⭐",
+        info:
+          "Autopetição: EB-1A para carreira de destaque internacional, EB-2 NIW para trabalho de interesse nacional. Sem patrocinador e sem sorteio.",
+      },
+      {
+        value: "unsure",
+        label: "Não tenho certeza",
+        icon: "🤔",
+        info:
+          "Sem problema — mostramos os caminhos mais comuns (patrocínio e autopetição) para você começar a comparar.",
+      },
     ],
     next: (a) => a === "family" ? "q_family_ties" : "q_process",
   },
@@ -403,10 +605,34 @@ export const questionMap: Record<string, Question> = {
     id: "q_gc_goal",
     text: "O que você deseja fazer?",
     options: [
-      { value: "renew",          label: "Renovar meu Green Card",                          icon: "🔄" },
-      { value: "naturalization", label: "Solicitar naturalização (cidadania)",             icon: "🇺🇸" },
-      { value: "family",         label: "Trazer ou peticionar familiar",                  icon: "👨‍👩‍👧" },
-      { value: "reentry",        label: "Solicitar permissão de reentrada (Reentry Permit)", icon: "✈️" },
+      {
+        value: "renew",
+        label: "Renovar meu Green Card",
+        icon: "🔄",
+        info:
+          "I-90 para o cartão de 10 anos. Se o seu é o condicional de 2 anos (por casamento), o caminho é o I-751, protocolado nos 90 dias antes do vencimento — nunca o I-90.",
+      },
+      {
+        value: "naturalization",
+        label: "Solicitar naturalização (cidadania)",
+        icon: "🇺🇸",
+        info:
+          "N-400: em regra, 5 anos como residente permanente (3 se casado e vivendo com cidadão americano), mais residência contínua, presença física e teste de inglês/cívica.",
+      },
+      {
+        value: "family",
+        label: "Trazer ou peticionar familiar",
+        icon: "👨‍👩‍👧",
+        info:
+          "I-130 para cônjuge e filhos solteiros: menores de 21 na F2A (fila frequentemente curta) e 21+ na F2B (fila mais longa). Dá para acompanhar no visa bulletin.",
+      },
+      {
+        value: "reentry",
+        label: "Solicitar permissão de reentrada (Reentry Permit)",
+        icon: "✈️",
+        info:
+          "I-131: protege o Green Card em ausências de até 2 anos. Precisa ser protocolado ANTES de sair dos EUA — a biometria também é feita aqui.",
+      },
     ],
     next: (a) => a === "family" ? "q_family_ties" : "q_process",
   },
