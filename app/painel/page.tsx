@@ -161,18 +161,20 @@ export function getStrategy(profile: Profile): Strategy {
 
   // ── H-1B ─────────────────────────────────────────────────────────────
   if (visa_type === "h1b") {
+    // Os ids dos itens diferem entre o kit consular ("h1b") e o COS ("h1b-cos").
+    const cos = location === "eua";
     return {
       titulo:    `Jornada de ${nome}`,
       subtitulo: "H-1B · Trabalho especializado",
       situacao:  `O H-1B é patrocinado pelo seu empregador americano — você não pode protocolar sozinho. O processo envolve o Departamento do Trabalho, o USCIS e o sorteio anual. Seu papel é garantir que os documentos estejam perfeitos.`,
       destaque: { tipo: "alerta", texto: "O H-1B está sujeito a sorteio anual. O período de registro é em março. Fora dessa janela, não há como entrar na fila." },
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Reunir documentos para o empregador", desc: "Diploma, histórico, currículo, documentos de identidade — veja o kit completo." },
+        { num: "1", estado: "agora",   titulo: "Reunir documentos para o empregador", desc: "Diploma, histórico, currículo, documentos de identidade — veja o kit completo.", doneWhen: { itens: cos ? ["diploma-h1b-cos", "curriculo-h1b-cos"] : ["diploma", "curriculo"] } },
         { num: "2", estado: "proximo", titulo: "Empregador submete o registro (março)", desc: "Período de registro: 1–18 de março. O empregador faz online.", tag: "Março" },
         { num: "3", estado: "proximo", titulo: "Sorteio + notificação",                desc: "USCIS seleciona aleatoriamente. Resultados em abril." },
-        { num: "4", estado: "futuro",  titulo: "LCA aprovada pelo DOL",               desc: "Labor Condition Application — o empregador submete em ~7 dias." },
-        { num: "5", estado: "futuro",  titulo: "I-129 submetido ao USCIS",            desc: "Petição completa após a LCA. Prazo padrão ou Premium Processing." },
-        { num: "6", estado: "futuro",  titulo: "I-797 aprovado + entrevista/COS",     desc: "Entrevista consular se fora dos EUA, ou COS se já está aqui.", tag: "I-797" },
+        { num: "4", estado: "futuro",  titulo: "LCA aprovada pelo DOL",               desc: "Labor Condition Application — o empregador submete em ~7 dias.", doneWhen: { itens: cos ? ["lca-cos"] : ["lca"] } },
+        { num: "5", estado: "futuro",  titulo: "I-129 submetido ao USCIS",            desc: "Petição completa após a LCA. Prazo padrão ou Premium Processing.", doneWhen: { itens: cos ? ["i129-cos"] : ["i129"] } },
+        { num: "6", estado: "futuro",  titulo: "I-797 aprovado + entrevista/COS",     desc: "Entrevista consular se fora dos EUA, ou COS se já está aqui.", tag: "I-797", doneWhen: { itens: cos ? ["i797-cos"] : ["i797"] } },
         { num: "✓", estado: "futuro",  titulo: "H-1B ativo — início do trabalho",    desc: "Válido a partir de 1º de outubro do mesmo ano." },
       ],
       guardrails: [
@@ -186,16 +188,18 @@ export function getStrategy(profile: Profile): Strategy {
 
   // ── O-1 ──────────────────────────────────────────────────────────────
   if (visa_type === "o1") {
+    // Os ids dos itens diferem entre o kit consular ("o1") e o COS ("o1-cos").
+    const cos = location === "eua";
     return {
       titulo:    `Jornada de ${nome}`,
       subtitulo: "O-1 · Habilidade extraordinária",
       situacao:  `O O-1 não tem sorteio, não tem cap. Mas exige evidências sólidas de reconhecimento nacional ou internacional — prêmios, mídia, salário acima da média, contribuições originais. Um empregador ou agente americano precisa fazer a petição.`,
       destaque: { tipo: "ok", texto: "Sem cap e sem sorteio — pode ser protocolado a qualquer momento do ano." },
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Mapear evidências de habilidade extraordinária", desc: "Prêmios, cobertura de mídia, salário, publicações, membros em associações. O kit lista as categorias USCIS." },
-        { num: "2", estado: "proximo", titulo: "Advisory Opinion da associação da área",         desc: "Carta de uma associação profissional ou sindicato reconhecido." },
-        { num: "3", estado: "proximo", titulo: "Empregador ou agente protocola o I-129",         desc: "Com toda a documentação de suporte. Advogado de imigração é altamente recomendado.", tag: "I-129" },
-        { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                                 desc: "Aprovação em 2–4 meses (padrão) ou 15 dias úteis (Premium Processing)." },
+        { num: "1", estado: "agora",   titulo: "Mapear evidências de habilidade extraordinária", desc: "Prêmios, cobertura de mídia, salário, publicações, membros em associações. O kit lista as categorias USCIS.", doneWhen: { algum: cos ? ["premios-cos", "midia-cos", "salario-alto-cos", "contribuicoes-cos", "membros-cos"] : ["premios", "midia", "salario", "contribuicoes", "membro-associacoes"] } },
+        { num: "2", estado: "proximo", titulo: "Advisory Opinion da associação da área",         desc: "Carta de uma associação profissional ou sindicato reconhecido.", doneWhen: { itens: cos ? ["advisory-opinion"] : ["consulta"] } },
+        { num: "3", estado: "proximo", titulo: "Empregador ou agente protocola o I-129",         desc: "Com toda a documentação de suporte. Advogado de imigração é altamente recomendado.", tag: "I-129", doneWhen: cos ? undefined : { itens: ["i129o"] } },
+        { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                                 desc: "Aprovação em 2–4 meses (padrão) ou 15 dias úteis (Premium Processing).", doneWhen: { itens: cos ? ["i797-o1-cos"] : ["i797"] } },
         { num: "5", estado: "futuro",  titulo: "Entrevista consular ou COS",                     desc: "Se fora dos EUA: entrevista. Se já nos EUA: COS com o mesmo I-129." },
         { num: "✓", estado: "futuro",  titulo: "O-1 ativo",                                     desc: "Válido por até 3 anos, renovável." },
       ],
@@ -352,16 +356,19 @@ export function getStrategy(profile: Profile): Strategy {
 
   // ── EB-2 NIW ─────────────────────────────────────────────────────────
   if (visa_type === "eb2niw") {
+    // Kit "eb2niw" (nos EUA) cobre da evidência ao I-485; o "eb2niw-brasil"
+    // começa no I-140 aprovado e segue a rota consular (NVC + DS-260).
+    const nosEua = location === "eua";
     return {
       titulo:    `Jornada de ${nome}`,
       subtitulo: "EB-2 NIW · Green Card por interesse nacional",
       situacao:  `O EB-2 NIW é a rota de green card que dispensa patrocínio de empregador. Você mesmo submete a petição I-140 ao USCIS, demonstrando que seu trabalho beneficia os EUA. Após a aprovação, o caminho depende de onde você está.`,
       etapas: [
         { num: "1", estado: "agora",   titulo: "Construir o caso NIW",               desc: "Os 3 critérios do teste Matter of Dhanasar: mérito, importância nacional, interesse em dispensar a oferta de emprego." },
-        { num: "2", estado: "proximo", titulo: "Reunir evidências",                  desc: "Publicações, citações, cartas de especialistas independentes, impacto do trabalho." },
-        { num: "3", estado: "proximo", titulo: "I-140 submetido ao USCIS",           desc: "Auto-petição. Taxa: US$715. Com carta de petição (cover letter) argumentando o NIW.", tag: "US$715" },
-        { num: "4", estado: "futuro",  titulo: "I-140 aprovado + Visa Bulletin",     desc: "Aguardar número de visto disponível no Boletim de Vistos (EB-2 Brasil pode ter fila)." },
-        { num: "5", estado: "futuro",  titulo: location === "eua" ? "I-485 — Ajuste de Status" : "NVC + DS-260 + consulado", desc: location === "eua" ? "Formulário I-485 + exame médico (I-693) + biometria." : "NVC processa o caso, DS-260 online, documentos civis, entrevista consular.", tag: location === "eua" ? "AOS" : "Consular" },
+        { num: "2", estado: "proximo", titulo: "Reunir evidências",                  desc: "Publicações, citações, cartas de especialistas independentes, impacto do trabalho.", doneWhen: nosEua ? { algum: ["publicacoes", "citacoes", "cartas-recomendacao"] } : undefined },
+        { num: "3", estado: "proximo", titulo: "I-140 submetido ao USCIS",           desc: "Auto-petição. Taxa: US$715. Com carta de petição (cover letter) argumentando o NIW.", tag: "US$715", doneWhen: { itens: nosEua ? ["i140"] : ["i140-aprovado"] } },
+        { num: "4", estado: "futuro",  titulo: "I-140 aprovado + Visa Bulletin",     desc: "Aguardar número de visto disponível no Boletim de Vistos (EB-2 Brasil pode ter fila).", doneWhen: nosEua ? undefined : { itens: ["i140-aprovado", "boletim-vistos"] } },
+        { num: "5", estado: "futuro",  titulo: nosEua ? "I-485 — Ajuste de Status" : "NVC + DS-260 + consulado", desc: nosEua ? "Formulário I-485 + exame médico (I-693) + biometria." : "NVC processa o caso, DS-260 online, documentos civis, entrevista consular.", tag: nosEua ? "AOS" : "Consular", doneWhen: { itens: nosEua ? ["i485"] : ["ds260"] } },
         { num: "✓", estado: "futuro",  titulo: "Green Card aprovado",               desc: "Residência permanente nos EUA." },
       ],
       guardrails: [
