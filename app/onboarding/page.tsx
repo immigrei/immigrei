@@ -37,7 +37,9 @@ type Question = {
 
 // ─── Question Tree ────────────────────────────────────────────────────────────
 
-const questionMap: Record<string, Question> = {
+// Exportado para o teste de cobertura, que percorre o grafo inteiro de
+// perguntas e garante que todo perfil termina em um destino definido.
+export const questionMap: Record<string, Question> = {
 
   // ── 1. Entry point ───────────────────────────────────────────────────────
   q_location: {
@@ -483,6 +485,56 @@ export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
   if (a.q_business_type === "trade" && a.q_nationality === "treaty") add("e1");
 
   return [...ids];
+}
+
+// ─── Destination derivation ───────────────────────────────────────────────────
+
+// Para onde os resultados do onboarding levam. Regra: a vitrine de vistos só
+// recebe quem tem algo para destacar nela (focus); beneficiários de petição
+// familiar (K-1, IR/CR, F-2), overstay e perfis sem card no catálogo vão
+// direto para ajuda profissional — "Qual é o seu visto?" é a pergunta errada
+// para eles.
+export type Destination =
+  | { kind: "i94" }
+  | { kind: "dashboard"; visaType: "green_card" | "citizen" }
+  | { kind: "profissionais" }
+  | { kind: "vistos"; query: string };
+
+export function deriveDestination(a: Answers, results: VisaResult[]): Destination {
+  // Sem o I-94 conferido, nenhuma rota é confiável — o próximo passo é o
+  // site oficial do CBP, não a vitrine de vistos.
+  if (a.q_current_status === "unsure") return { kind: "i94" };
+
+  // Green Card / cidadão: a jornada já está definida (I-90, N-400, petições).
+  if (a.q_current_status === "green_card") return { kind: "dashboard", visaType: "green_card" };
+  if (a.q_current_status === "citizen") return { kind: "dashboard", visaType: "citizen" };
+
+  // Overstay, ajuste por parente imediato (exceção do VWP) e beneficiários
+  // de petição familiar: as jornadas de visto padrão não se aplicam.
+  if (
+    a.q_current_status === "overstay" ||
+    a.q_esta_goal === "family_citizen" ||
+    (a.q_family_ties && a.q_family_ties !== "none")
+  ) {
+    return { kind: "profissionais" };
+  }
+
+  const params = new URLSearchParams();
+  if (a.q_nationality) params.set("nationality", a.q_nationality);
+  // Entrou de ESTA = passaporte de país do VWP: destrava E-1/E-2 na
+  // vitrine sem perguntar a cidadania de novo.
+  else if (a.q_current_visa === "esta_vwp") params.set("nationality", "treaty");
+  if (a.q_location) params.set("location", a.q_location === "in_us" ? "eua" : "brasil");
+  params.set("goal", deriveMainGoal(a));
+
+  const focus = deriveFocusIds(a, results);
+  // Vitrine sem nada para destacar = perfil sem caminho de visto mapeado
+  // (asilo, EB-5, dependentes…) — melhor um profissional que um catálogo
+  // genérico.
+  if (focus.length === 0) return { kind: "profissionais" };
+  params.set("focus", focus.join(","));
+
+  return { kind: "vistos", query: params.toString() };
 }
 
 export function computeRecommendations(answers: Answers): VisaResult[] {
@@ -1531,6 +1583,7 @@ export default function OnboardingPage() {
   if (phase === "results") {
     const hasUrgent  = recommendations.some((r) => r.urgent && !r.blocked);
     const hasBlocked = recommendations.some((r) => r.blocked);
+    const destino    = deriveDestination(answers, recommendations);
 
     return (
       <main className="min-h-screen bg-cream flex flex-col pb-10">
@@ -1682,9 +1735,7 @@ export default function OnboardingPage() {
               {saveError}
             </p>
           )}
-          {answers.q_current_status === "unsure" ? (
-            // Sem o I-94 conferido, nenhuma rota é confiável — o próximo
-            // passo é o site oficial do CBP, não a vitrine de vistos.
+          {destino.kind === "i94" ? (
             <a
               href="https://i94.cbp.dhs.gov/"
               target="_blank"
@@ -1694,16 +1745,9 @@ export default function OnboardingPage() {
             >
               Conferir meu I-94 no site oficial →
             </a>
-          ) : answers.q_current_status === "green_card" ||
-            answers.q_current_status === "citizen" ? (
-            // Green Card / cidadão: a jornada já está definida (I-90, N-400,
-            // petições) — vai direto ao painel, sem escolher visto.
+          ) : destino.kind === "dashboard" ? (
             <button
-              onClick={() =>
-                saveProfileAndGoToDashboard(
-                  answers.q_current_status === "citizen" ? "citizen" : "green_card"
-                )
-              }
+              onClick={() => saveProfileAndGoToDashboard(destino.visaType)}
               disabled={savingProfile}
               className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
               style={{ fontFamily: "var(--font-body)" }}
@@ -1712,35 +1756,17 @@ export default function OnboardingPage() {
             </button>
           ) : (
             <button
-              onClick={() => {
-                // Overstay e ajuste por parente imediato (exceção do VWP):
-                // as jornadas de visto padrão não se aplicam — o próximo
-                // passo real é ajuda profissional.
-                if (
-                  answers.q_current_status === "overstay" ||
-                  answers.q_esta_goal === "family_citizen"
-                ) {
-                  router.push("/profissionais");
-                  return;
-                }
-                const params = new URLSearchParams();
-                if (answers.q_nationality) params.set("nationality", answers.q_nationality);
-                // Entrou de ESTA = passaporte de país do VWP: destrava
-                // E-1/E-2 na vitrine sem perguntar a cidadania de novo.
-                else if (answers.q_current_visa === "esta_vwp")
-                  params.set("nationality", "treaty");
-                if (answers.q_location)
-                  params.set("location", answers.q_location === "in_us" ? "eua" : "brasil");
-                params.set("goal", deriveMainGoal(answers));
-                const focus = deriveFocusIds(answers, recommendations);
-                if (focus.length > 0) params.set("focus", focus.join(","));
-                router.push(`/vistos?${params.toString()}`);
-              }}
+              onClick={() =>
+                router.push(
+                  destino.kind === "profissionais"
+                    ? "/profissionais"
+                    : `/vistos?${destino.query}`
+                )
+              }
               className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              {answers.q_current_status === "overstay" ||
-              answers.q_esta_goal === "family_citizen"
+              {destino.kind === "profissionais"
                 ? "Encontrar ajuda profissional →"
                 : "Ver minha jornada em detalhe →"}
             </button>

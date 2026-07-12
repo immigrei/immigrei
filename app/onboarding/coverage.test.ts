@@ -9,8 +9,10 @@ import { describe, expect, it } from "vitest";
 import {
   attachKitLinks,
   computeRecommendations,
+  deriveDestination,
   deriveFocusIds,
   deriveMainGoal,
+  questionMap,
 } from "./page";
 
 type Answers = Record<string, string>;
@@ -230,6 +232,65 @@ describe("saídas para quem entrou de ESTA/VWP", () => {
     const r = recs(esta("plan_return"));
     expect(r.some((x) => x.visa.includes("ESTA do jeito certo"))).toBe(true);
   });
+});
+
+// Beneficiários de petição familiar (K-1, IR/CR, F-2) não escolhem visto na
+// vitrine — a jornada deles é a petição que o parente protocola. O destino
+// certo é ajuda profissional. Regressão do caso real: perfil F-2 caía na
+// vitrine genérica sem nenhum destaque.
+describe("perfis familiares vão para ajuda profissional, não para a vitrine", () => {
+  const casos: Array<{ nome: string; answers: Answers }> = [
+    { nome: "reunir com família + cônjuge cidadão (K-1/IR-1)",
+      answers: { q_location: "outside", q_goal: "family", q_family_ties: "spouse_citizen" } },
+    { nome: "reunir com família + pais/filhos cidadãos (IR-1/IR-2)",
+      answers: { q_location: "outside", q_goal: "family", q_family_ties: "parent_child_citizen" } },
+    { nome: "morar permanentemente + parente com green card (F-2)",
+      answers: { q_location: "outside", q_goal: "live", q_family_ties: "family_gc" } },
+  ];
+
+  it.each(casos)("$nome → /profissionais, com recomendações na tela", ({ answers }) => {
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    expect(deriveDestination(answers, r)).toEqual({ kind: "profissionais" });
+  });
+});
+
+// Prova exaustiva: caminha TODOS os percursos possíveis do grafo de
+// perguntas e garante que cada perfil completo termina em um destino
+// definido — e que a vitrine só recebe quem tem card para destacar.
+// Se uma pergunta/resposta nova criar um perfil órfão, este teste quebra.
+describe("todo perfil do onboarding tem um destino", () => {
+  function walk(questionId: string, answers: Answers, profiles: Answers[]) {
+    const q = questionMap[questionId];
+    expect(q, `pergunta "${questionId}" não existe no questionMap`).toBeDefined();
+    for (const opt of q.options) {
+      const next = { ...answers, [q.id]: opt.value };
+      const nextId = typeof q.next === "string" ? q.next : q.next(opt.value, next);
+      if (nextId === "results") profiles.push(next);
+      else walk(nextId, next, profiles);
+    }
+  }
+
+  const profiles: Answers[] = [];
+  walk("q_location", {}, profiles);
+
+  it("o grafo gera uma quantidade razoável de perfis completos", () => {
+    expect(profiles.length).toBeGreaterThan(20);
+  });
+
+  it.each(profiles.map((p) => [JSON.stringify(p), p] as const))(
+    "%s",
+    (_label, answers) => {
+      const destino = deriveDestination(answers, recs(answers));
+      if (destino.kind === "vistos") {
+        // Chegou à vitrine → precisa ter pelo menos um card em destaque.
+        const focus = new URLSearchParams(destino.query).get("focus");
+        expect(focus, "perfil chegou à vitrine sem nenhum card para destacar").toBeTruthy();
+      } else {
+        expect(["i94", "dashboard", "profissionais"]).toContain(destino.kind);
+      }
+    }
+  );
 });
 
 // Ponte L-1A → EB-1C: quem está de L-1 buscando green card recebe o manual.
