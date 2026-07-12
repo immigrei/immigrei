@@ -273,6 +273,17 @@ export default function VistosPage() {
 
   return (
     <main className="min-h-screen bg-cream px-4 py-12 md:py-16 pb-28">
+      {/* Back — o onboarding guarda o progresso na sessão e reabre nos resultados */}
+      <div className="max-w-5xl mx-auto mb-6">
+        <button
+          onClick={() => router.push("/onboarding")}
+          className="text-ink-faint hover:text-ink transition-colors text-sm font-medium flex items-center gap-1"
+          style={{ fontFamily: "var(--font-body)" }}
+        >
+          ← Voltar
+        </button>
+      </div>
+
       {/* Page header */}
       <section className="max-w-2xl mx-auto text-center mb-14">
         <span

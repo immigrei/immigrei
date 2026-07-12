@@ -1254,6 +1254,11 @@ function buildSequence(answers: Answers): string[] {
 
 // ─── UI Component ─────────────────────────────────────────────────────────────
 
+// Guarda o progresso do questionário na sessão: quem navega para /vistos e
+// volta (botão Voltar de lá ou do navegador) retoma de onde parou, em vez de
+// recomeçar do zero.
+const ONBOARDING_STATE_KEY = "immigrei_onboarding_state";
+
 export default function OnboardingPage() {
   const router = useRouter();
   const { isLoaded, isSignedIn } = useUser();
@@ -1264,6 +1269,27 @@ export default function OnboardingPage() {
   const [resuming, setResuming] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(ONBOARDING_STATE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved.phase === "questions" || saved.phase === "results") setPhase(saved.phase);
+      if (saved.answers && typeof saved.answers === "object") setAnswers(saved.answers);
+      if (Array.isArray(saved.history) && saved.history.length > 0) setHistory(saved.history);
+    } catch {
+      // estado corrompido: segue do começo
+    }
+  }, []);
+
+  useEffect(() => {
+    if (phase === "welcome") return;
+    sessionStorage.setItem(
+      ONBOARDING_STATE_KEY,
+      JSON.stringify({ phase, answers, history })
+    );
+  }, [phase, answers, history]);
 
   // After the sign-up round-trip, finish the save the user started on /vistos
   // while logged out. The selection was stashed in localStorage; now that the
@@ -1448,6 +1474,17 @@ export default function OnboardingPage() {
     return (
       <main className="min-h-screen bg-cream flex flex-col pb-10">
         <div className="max-w-lg mx-auto w-full px-6 py-10 flex flex-col gap-6">
+
+          {/* Back to last question */}
+          <div>
+            <button
+              onClick={() => setPhase("questions")}
+              className="text-ink-faint hover:text-ink transition-colors text-sm font-medium flex items-center gap-1"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              ← Voltar
+            </button>
+          </div>
 
           {/* Header */}
           <div className="text-center pt-4">
@@ -1651,6 +1688,7 @@ export default function OnboardingPage() {
           {/* Restart */}
           <button
             onClick={() => {
+              sessionStorage.removeItem(ONBOARDING_STATE_KEY);
               setAnswers({});
               setHistory(["q_location"]);
               setPhase("welcome");
