@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppShell from "@/app/components/AppShell";
 import checklists, { type Agencia } from "./data";
 
@@ -13,6 +13,31 @@ const agenciaBadge: Record<Agencia, { label: string; color: string }> = {
   EOIR:  { label: "EOIR",  color: "bg-clay/10 text-clay" },
 };
 
+interface Anexo {
+  id: string;
+  documento_id: string;
+  file_name: string;
+  size_bytes: number;
+  created_at: string;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function PaperclipIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="16" height="16" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </svg>
+  );
+}
+
 export default function DocumentosVistoPage() {
   const params = useParams();
   const router = useRouter();
@@ -21,6 +46,27 @@ export default function DocumentosVistoPage() {
 
   const allDocIds = checklist?.grupos.flatMap((g) => g.documentos.map((d) => d.id)) ?? [];
   const [marcados, setMarcados] = useState<Set<string>>(new Set());
+
+  // ── Anexos (cofre de documentos) ────────────────────────────────────────
+  const [anexos, setAnexos] = useState<Record<string, Anexo[]>>({});
+  const [enviando, setEnviando] = useState<Set<string>>(new Set());
+  const [erroUpload, setErroUpload] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pendingDocId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!vistoId) return;
+    fetch(`/api/user-documents?vistoId=${vistoId}`)
+      .then((r) => (r.ok ? r.json() : { documents: [] }))
+      .then((d) => {
+        const byDoc: Record<string, Anexo[]> = {};
+        for (const a of (d.documents ?? []) as Anexo[]) {
+          (byDoc[a.documento_id] ??= []).push(a);
+        }
+        setAnexos(byDoc);
+      })
+      .catch(() => {});
+  }, [vistoId]);
 
   if (!checklist) {
     return (
@@ -43,6 +89,69 @@ export default function DocumentosVistoPage() {
     });
   };
 
+  const pickFile = (docId: string) => {
+    pendingDocId.current = docId;
+    fileInputRef.current?.click();
+  };
+
+  const uploadFile = async (file: File) => {
+    const docId = pendingDocId.current;
+    pendingDocId.current = null;
+    if (!docId) return;
+
+    setErroUpload(null);
+    setEnviando((prev) => new Set(prev).add(docId));
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("vistoId", vistoId);
+      form.append("documentoId", docId);
+      const res = await fetch("/api/user-documents", { method: "POST", body: form });
+      if (res.status === 401) {
+        router.push("/sign-up");
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErroUpload(data.error ?? "Não conseguimos enviar o arquivo. Tente novamente.");
+        return;
+      }
+      setAnexos((prev) => ({
+        ...prev,
+        [docId]: [...(prev[docId] ?? []), data.document as Anexo],
+      }));
+    } catch {
+      setErroUpload("Não conseguimos enviar o arquivo. Tente novamente.");
+    } finally {
+      setEnviando((prev) => {
+        const next = new Set(prev);
+        next.delete(docId);
+        return next;
+      });
+    }
+  };
+
+  const verAnexo = async (anexo: Anexo) => {
+    const res = await fetch(`/api/user-documents?fileId=${anexo.id}`);
+    if (!res.ok) return;
+    const { url } = await res.json();
+    if (url) window.open(url, "_blank", "noopener");
+  };
+
+  const excluirAnexo = async (anexo: Anexo) => {
+    if (!confirm(`Excluir "${anexo.file_name}"?`)) return;
+    const res = await fetch("/api/user-documents", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: anexo.id }),
+    });
+    if (!res.ok) return;
+    setAnexos((prev) => ({
+      ...prev,
+      [anexo.documento_id]: (prev[anexo.documento_id] ?? []).filter((a) => a.id !== anexo.id),
+    }));
+  };
+
   const totalObrigatorios = allDocIds.filter((id) => {
     const doc = checklist.grupos.flatMap((g) => g.documentos).find((d) => d.id === id);
     return doc?.obrigatorio;
@@ -58,6 +167,19 @@ export default function DocumentosVistoPage() {
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto px-4 py-8">
+
+        {/* Input único de arquivo — reaproveitado por todos os itens */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.heic"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (file) uploadFile(file);
+          }}
+        />
 
         {/* Back */}
         <button
@@ -100,6 +222,13 @@ export default function DocumentosVistoPage() {
           )}
         </div>
 
+        {/* Erro de upload */}
+        {erroUpload && (
+          <div className="bg-clay/5 border border-clay/30 rounded-2xl px-4 py-3 mb-6">
+            <p className="text-xs text-clay leading-relaxed">{erroUpload}</p>
+          </div>
+        )}
+
         {/* Grupos */}
         {checklist.grupos.map((grupo) => (
           <div key={grupo.titulo} className="mb-8">
@@ -114,12 +243,23 @@ export default function DocumentosVistoPage() {
               {grupo.documentos.map((doc) => {
                 const checked = marcados.has(doc.id);
                 const badge = agenciaBadge[doc.agencia];
+                const docAnexos = anexos[doc.id] ?? [];
+                const temAnexo = docAnexos.length > 0;
+                const subindo = enviando.has(doc.id);
                 return (
-                  <button
+                  <div
                     key={doc.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => toggle(doc.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggle(doc.id);
+                      }
+                    }}
                     className={[
-                      "w-full text-left rounded-2xl border p-4 transition-all duration-150",
+                      "w-full text-left rounded-2xl border p-4 transition-all duration-150 cursor-pointer",
                       checked
                         ? "bg-pine-tint border-pine/30"
                         : "bg-cream-2 border-pine-tint hover:border-pine/20",
@@ -165,9 +305,65 @@ export default function DocumentosVistoPage() {
                             </span>
                           )}
                         </div>
+
+                        {/* Anexos */}
+                        {temAnexo && (
+                          <div className="mt-3 flex flex-col gap-1.5">
+                            {docAnexos.map((anexo) => (
+                              <div
+                                key={anexo.id}
+                                className="flex items-center gap-2 bg-cream rounded-xl px-3 py-2 border border-pine-tint"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <PaperclipIcon className="flex-shrink-0 text-sage" />
+                                <span className="flex-1 min-w-0 truncate text-xs text-ink font-medium">
+                                  {anexo.file_name}
+                                </span>
+                                <span className="flex-shrink-0 text-[10px] text-ink-faint">
+                                  {formatBytes(anexo.size_bytes)}
+                                </span>
+                                <button
+                                  onClick={() => verAnexo(anexo)}
+                                  className="flex-shrink-0 text-[11px] font-bold text-pine hover:text-pine-deep transition-colors"
+                                >
+                                  Ver
+                                </button>
+                                <button
+                                  onClick={() => excluirAnexo(anexo)}
+                                  className="flex-shrink-0 text-[11px] font-bold text-clay/70 hover:text-clay transition-colors"
+                                >
+                                  Excluir
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
+
+                      {/* Clips — anexar documento */}
+                      <button
+                        aria-label={`Anexar arquivo: ${doc.nome}`}
+                        title="Anexar documento (PDF, JPG, PNG — até 10 MB)"
+                        disabled={subindo}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          pickFile(doc.id);
+                        }}
+                        className={[
+                          "flex-shrink-0 w-9 h-9 rounded-full border flex items-center justify-center transition-all mt-0.5",
+                          temAnexo
+                            ? "bg-sage/10 border-sage/40 text-sage hover:bg-sage/20"
+                            : "bg-cream border-pine-tint text-ink-faint hover:text-pine hover:border-pine/30",
+                        ].join(" ")}
+                      >
+                        {subindo ? (
+                          <span className="w-4 h-4 rounded-full border-2 border-pine-tint border-t-pine animate-spin" />
+                        ) : (
+                          <PaperclipIcon />
+                        )}
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
