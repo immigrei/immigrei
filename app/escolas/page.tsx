@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 type Campus = {
   school_name: string;
@@ -32,6 +34,43 @@ export default function EscolasPage() {
   const [data, setData]     = useState<ApiResult | null>(null);
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const router = useRouter();
+  const { isSignedIn } = useUser();
+  const [chosenCode, setChosenCode] = useState<string | null>(null);
+  const [savingCode, setSavingCode] = useState<string | null>(null);
+  const [saveError, setSaveError]   = useState(false);
+
+  // Signed-in users see their current pick highlighted.
+  useEffect(() => {
+    if (!isSignedIn) return;
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((d) => setChosenCode(d.profile?.chosen_school?.campus_code ?? null))
+      .catch(() => {});
+  }, [isSignedIn]);
+
+  async function chooseSchool(c: Campus) {
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+    setSaveError(false);
+    setSavingCode(c.campus_code);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chosen_school: c }),
+      });
+      if (!res.ok) throw new Error();
+      setChosenCode(c.campus_code);
+    } catch {
+      setSaveError(true);
+    } finally {
+      setSavingCode(null);
+    }
+  }
 
   const load = useCallback(async (query: string, st: string, tp: string, pg: number) => {
     setLoading(true);
@@ -126,6 +165,14 @@ export default function EscolasPage() {
           </div>
         </div>
 
+        {saveError && (
+          <div className="bg-amber-tint border border-amber/40 rounded-2xl px-4 py-3 mb-4">
+            <p className="text-xs font-semibold text-amber-deep leading-relaxed">
+              Não conseguimos salvar sua escolha agora. Tente de novo em instantes.
+            </p>
+          </div>
+        )}
+
         {/* Results */}
         {loading && !data ? (
           <p className="text-ink-faint text-center py-12">Carregando escolas…</p>
@@ -169,6 +216,29 @@ export default function EscolasPage() {
                         </span>
                       )}
                     </div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-3">
+                    {chosenCode === c.campus_code ? (
+                      <>
+                        <span className="px-3 py-1.5 rounded-xl bg-pine-tint text-pine text-xs font-bold">
+                          ✓ Sua escola
+                        </span>
+                        <Link
+                          href="/painel"
+                          className="text-xs font-bold text-pine underline hover:text-pine-deep transition-colors"
+                        >
+                          Ver na sua jornada →
+                        </Link>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => chooseSchool(c)}
+                        disabled={savingCode !== null}
+                        className="px-3 py-1.5 rounded-xl border border-pine text-pine text-xs font-bold hover:bg-pine hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {savingCode === c.campus_code ? "Salvando…" : "Escolher esta escola"}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

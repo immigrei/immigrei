@@ -11,10 +11,18 @@ export async function POST(req: NextRequest) {
 
   const user = await currentUser();
   const body = await req.json().catch(() => ({}));
-  const { visa_type, arrival_date, main_goal, location, nationality } = body;
+  const { visa_type, arrival_date, main_goal, location, nationality, chosen_school } = body;
 
-  if (!visa_type && !arrival_date && !main_goal && !location && !nationality) {
+  if (!visa_type && !arrival_date && !main_goal && !location && !nationality && chosen_school === undefined) {
     return NextResponse.json({ error: "No fields to save" }, { status: 400 });
+  }
+
+  // chosen_school: campus snapshot from /escolas, or null to clear it.
+  if (chosen_school !== undefined && chosen_school !== null) {
+    const s = chosen_school;
+    if (typeof s !== "object" || !s.school_name || !s.city || !s.state || !s.campus_code) {
+      return NextResponse.json({ error: "Invalid chosen_school" }, { status: 400 });
+    }
   }
 
   const row: Record<string, unknown> = {
@@ -31,6 +39,18 @@ export async function POST(req: NextRequest) {
   if (main_goal) row.main_goal = main_goal;
   if (location) row.location = location;
   if (nationality) row.nationality = nationality;
+  if (chosen_school !== undefined) {
+    row.chosen_school = chosen_school === null ? null : {
+      school_name: String(chosen_school.school_name),
+      campus_name: String(chosen_school.campus_name ?? chosen_school.school_name),
+      city:        String(chosen_school.city),
+      state:       String(chosen_school.state),
+      campus_code: String(chosen_school.campus_code),
+      accepts_f:   Boolean(chosen_school.accepts_f),
+      accepts_m:   Boolean(chosen_school.accepts_m),
+      chosen_at:   new Date().toISOString(),
+    };
+  }
 
   const { error } = await supabaseAdmin
     .from("profiles")

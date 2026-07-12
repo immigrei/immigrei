@@ -2,9 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import OptionsList from "@/app/components/OptionsList";
 import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
+
+interface ChosenSchool {
+  school_name: string;
+  campus_name: string;
+  city:        string;
+  state:       string;
+  campus_code: string;
+}
 
 interface Profile {
   full_name:    string | null;
@@ -12,6 +21,7 @@ interface Profile {
   location:     "brasil" | "eua" | null;
   main_goal:    string | null;
   arrival_date: string | null;
+  chosen_school?: ChosenSchool | null;
 }
 
 // ── Strategy engine ───────────────────────────────────────────────────────────
@@ -23,6 +33,7 @@ interface Etapa {
   estado: "feito" | "agora" | "proximo" | "futuro" | "alerta";
   data?:  string;
   tag?:   string;
+  href?:  string; // makes the step card a link (e.g. /escolas)
 }
 
 interface GuardRail {
@@ -56,7 +67,7 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "F-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer obter o visto F-1 para estudar nos EUA. O processo passa pelo consulado americano no Brasil — sem saída prévia dos EUA necessária.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Matrícula + I-20",         desc: "Confirme a matrícula em escola SEVP e solicite o I-20 ao DSO." },
+        { num: "1", estado: "agora",   titulo: "Matrícula + I-20",         desc: "Confirme a matrícula em escola SEVP e solicite o I-20 ao DSO.", href: "/escolas" },
         { num: "2", estado: "proximo", titulo: "Pagar taxa SEVIS",          desc: "US$350 em fls.dhs.gov. Guarde o comprovante I-901.", tag: "US$350" },
         { num: "3", estado: "proximo", titulo: "Preencher DS-160",          desc: "Formulário do Departamento de Estado — campo a campo no kit." },
         { num: "4", estado: "proximo", titulo: "Montar dossiê",             desc: "Extrato pessoal, vínculo com Brasil, carta de sponsor se aplicável." },
@@ -83,7 +94,7 @@ export function getStrategy(profile: Profile): Strategy {
       destaque: { tipo: "alerta", texto: "Seu status atual precisa estar válido no dia do protocolo do I-539. Verifique o I-94 antes de qualquer passo." },
       etapas: [
         { num: "1", estado: "agora",   titulo: "Verificar status no I-94",    desc: "i94.cbp.dhs.gov — confirme que você ainda está em status válido." },
-        { num: "2", estado: "proximo", titulo: "Escolher escola SEVP próxima", desc: "Escola presencial longe da sua residência resulta em negação." },
+        { num: "2", estado: "proximo", titulo: "Escolher escola SEVP próxima", desc: "Escola presencial longe da sua residência resulta em negação.", href: "/escolas" },
         { num: "3", estado: "proximo", titulo: "Obter o I-20",                desc: "Escola emite o I-20 após matrícula confirmada." },
         { num: "4", estado: "proximo", titulo: "Reunir documentação financeira", desc: "Extrato pessoal de 6 meses. No seu nome. PDF oficial do banco.", tag: "Crítico" },
         { num: "5", estado: "proximo", titulo: "Preencher e enviar I-539",    desc: "Taxa US$370 por money order. Endereço varia por estado.", tag: "US$370" },
@@ -129,7 +140,7 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "M-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer o M-1 para fazer um curso técnico ou vocacional nos EUA. O processo é similar ao F-1, mas com a taxa SEVIS mais baixa e foco em programa vocacional.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Escola técnica SEVP + I-20 M-1",  desc: "Matrícula em escola vocacional credenciada. I-20 M-1 é diferente do F-1." },
+        { num: "1", estado: "agora",   titulo: "Escola técnica SEVP + I-20 M-1",  desc: "Matrícula em escola vocacional credenciada. I-20 M-1 é diferente do F-1.", href: "/escolas" },
         { num: "2", estado: "proximo", titulo: "Taxa SEVIS M-1",                   desc: "US$200 (menor que o F-1) em fls.dhs.gov.", tag: "US$200" },
         { num: "3", estado: "proximo", titulo: "DS-160 + dossiê",                  desc: "Campo a campo no kit. Mesmo processo do F-1 com variações para M-1." },
         { num: "4", estado: "futuro",  titulo: "Entrevista consular",              desc: "O cônsul vai perguntar sobre plano de carreira pós-curso. Prepare uma resposta clara." },
@@ -469,6 +480,32 @@ export default function PainelPage() {
             <div className="flex flex-col gap-4">
               {s.etapas.map((etapa, i) => {
                 const st = estadoStyle[etapa.estado];
+                const escola = etapa.href === "/escolas" ? profile.chosen_school : null;
+                const cardContent = (
+                  <>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-semibold text-ink leading-snug">{etapa.titulo}</p>
+                      {etapa.tag && (
+                        <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-ink/10 text-ink-soft">
+                          {etapa.tag}
+                        </span>
+                      )}
+                    </div>
+                    {escola ? (
+                      <p className="text-xs text-ink-soft mt-1 leading-relaxed">
+                        <span className="font-bold text-pine">✓ {escola.school_name}</span>
+                        {" — "}{escola.city}, {escola.state}. Toque para trocar de escola.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-ink-soft mt-1 leading-relaxed">{etapa.desc}</p>
+                    )}
+                    {etapa.href && !escola && (
+                      <p className="text-xs font-bold text-pine mt-1.5">
+                        Buscar escolas certificadas →
+                      </p>
+                    )}
+                  </>
+                );
                 return (
                   <div key={i} className="flex gap-4 relative">
                     {/* dot */}
@@ -476,17 +513,18 @@ export default function PainelPage() {
                       {etapa.num}
                     </div>
                     {/* card */}
-                    <div className={`flex-1 rounded-2xl border bg-cream-2 px-4 py-3 mb-0.5 ${st.card}`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-semibold text-ink leading-snug">{etapa.titulo}</p>
-                        {etapa.tag && (
-                          <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-ink/10 text-ink-soft">
-                            {etapa.tag}
-                          </span>
-                        )}
+                    {etapa.href ? (
+                      <Link
+                        href={etapa.href}
+                        className={`flex-1 rounded-2xl border bg-cream-2 px-4 py-3 mb-0.5 hover:border-pine hover:shadow-sm transition-all ${st.card}`}
+                      >
+                        {cardContent}
+                      </Link>
+                    ) : (
+                      <div className={`flex-1 rounded-2xl border bg-cream-2 px-4 py-3 mb-0.5 ${st.card}`}>
+                        {cardContent}
                       </div>
-                      <p className="text-xs text-ink-soft mt-1 leading-relaxed">{etapa.desc}</p>
-                    </div>
+                    )}
                   </div>
                 );
               })}
