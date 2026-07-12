@@ -24,6 +24,7 @@ type Option = {
   label: string;
   icon: string;
   subtitle?: string;
+  info?: string; // texto educacional aberto pelo botão ⓘ do card
 };
 
 type Question = {
@@ -180,10 +181,48 @@ const questionMap: Record<string, Question> = {
     id: "q_permanent_path",
     text: "Como você pretende buscar residência permanente?",
     options: [
-      { value: "work_gc",  label: "Por meio de emprego / patrocinador", icon: "💼" },
-      { value: "merit",    label: "Por mérito ou habilidade extraordinária", icon: "⭐" },
-      { value: "asylum",   label: "Tenho fundado temor de perseguição (asilo)", icon: "🛡️" },
-      { value: "lottery",  label: "Loteria de vistos (DV Lottery)", icon: "🎲" },
+      {
+        value: "work_gc",
+        label: "Por meio de emprego / patrocinador",
+        icon: "💼",
+        info:
+          "Uma empresa americana patrocina seu Green Card (categorias EB-2/EB-3). O empregador conduz a certificação trabalhista (PERM) e a petição — é o caminho mais comum para quem tem oferta de emprego nos EUA.",
+      },
+      {
+        value: "merit",
+        label: "Por mérito ou habilidade extraordinária",
+        icon: "⭐",
+        info:
+          "Categorias de autopetição (EB-1, EB-2 NIW) para quem tem carreira de destaque, pesquisa ou trabalho de interesse nacional. Não depende de empregador nem de sorteio — você mesmo peticiona.",
+      },
+      {
+        value: "invest",
+        label: "Por investimento (EB-5)",
+        icon: "💰",
+        info:
+          "Green Card por investimento: a partir de US$ 800 mil em projeto que crie pelo menos 10 empregos americanos. Disponível para brasileiros — é um dos poucos caminhos que não exige patrocinador nem vínculo familiar.",
+      },
+      {
+        value: "asylum",
+        label: "Tenho fundado temor de perseguição (asilo)",
+        icon: "🛡️",
+        info:
+          "Proteção para quem sofre perseguição por raça, religião, nacionalidade, opinião política ou grupo social. O pedido de asilo (I-589) só pode ser feito dentro dos EUA ou na fronteira — de fora, o caminho é o programa de refugiados, por indicação do ACNUR.",
+      },
+      {
+        value: "lottery",
+        label: "Loteria de vistos (DV Lottery)",
+        icon: "🎲",
+        info:
+          "Sorteio anual e gratuito do governo americano (inscrições entre outubro e novembro) para países com baixa imigração. Atenção: o Brasil tem ficado fora da lista de países elegíveis nos últimos anos.",
+      },
+      {
+        value: "unsure",
+        label: "Ainda não sei / quero comparar",
+        icon: "🤔",
+        info:
+          "Sem problema — mostramos os caminhos de Green Card mais comuns para você começar a comparar com calma.",
+      },
     ],
     next: () => "results",
   },
@@ -1129,7 +1168,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
         priority: "medium",
       });
     }
-    if (gcPath === "unsure") {
+    if (gcPath === "unsure" || permanentPath === "unsure") {
       results.push({
         visa: "EB-2 NIW (Green Card por Interesse Nacional)",
         forms: "I-140 + I-485 (ou NVC consular)",
@@ -1143,6 +1182,24 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
         description:
           "Se o seu empregador topar patrocinar, a empresa conduz o processo de certificação e petição.",
         priority: "medium",
+      });
+    }
+    if (permanentPath === "unsure") {
+      results.push({
+        visa: "EB-5 (Green Card por Investimento)",
+        forms: "I-526E + processo consular (NVC)",
+        description:
+          "Para quem tem capital: investimento de $800k a $1.05M em projeto que crie 10 empregos americanos. Caminho direto para o Green Card, sem patrocinador — disponível para brasileiros.",
+        priority: "medium",
+      });
+    }
+    if (permanentPath === "invest") {
+      results.push({
+        visa: "EB-5 (Green Card por Investimento)",
+        forms: "I-526E + I-485 (ajuste) ou NVC (consular)",
+        description:
+          "Investimento de $800k (em área de alto desemprego ou projeto regional) a $1.05M em negócio que crie pelo menos 10 empregos americanos. Caminho direto para o Green Card — disponível para brasileiros.",
+        priority: "high",
       });
     }
     if (permanentPath === "merit" || gcPath === "merit") {
@@ -1162,11 +1219,13 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       });
     }
     if (permanentPath === "asylum") {
+      // Não existe "asilo consular": o I-589 só é protocolado dentro dos EUA
+      // ou na fronteira (INA §208). De fora, a via é o programa de refugiados.
       results.push({
-        visa: "Asilo Político",
-        forms: "I-589 (se nos EUA) ou solicitação consular",
+        visa: "Asilo / Refúgio",
+        forms: "I-589 (somente dentro dos EUA) ou USRAP via ACNUR (de fora)",
         description:
-          "Para quem tem fundado temor de perseguição por raça, religião, nacionalidade ou grupo social.",
+          "Proteção para quem tem fundado temor de perseguição por raça, religião, nacionalidade, opinião política ou grupo social. Importante: o pedido de asilo só pode ser feito dentro dos EUA ou na fronteira — de fora, o caminho é o programa de refugiados (USRAP), por indicação do ACNUR. Caso sensível: procure um advogado de imigração licenciado.",
         priority: "high",
       });
     }
@@ -1261,6 +1320,8 @@ export default function OnboardingPage() {
   const [answers, setAnswers] = useState<Answers>({});
   const [history, setHistory] = useState<string[]>(["q_location"]);
   const [animating, setAnimating] = useState(false);
+  // Chave "questionId:value" do card com o painel ⓘ aberto (um por vez).
+  const [openInfo, setOpenInfo] = useState<string | null>(null);
   const [resuming, setResuming] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -1730,39 +1791,72 @@ export default function OnboardingPage() {
           <div className="flex flex-col gap-3 flex-1">
             {currentQuestion?.options.map((opt) => {
               const selected = currentAnswer === opt.value;
+              const infoKey  = `${currentQuestionId}:${opt.value}`;
+              const infoOpen = openInfo === infoKey;
               return (
-                <button
-                  key={opt.value}
-                  onClick={() => selectAnswer(opt.value)}
-                  className={`w-full flex items-start gap-4 px-5 py-4 rounded-2xl border-2 text-left transition-all duration-150 ${
-                    selected
-                      ? "border-amber bg-amber-tint"
-                      : "border-pine-tint bg-cream-2 hover:border-pine/40 hover:bg-pine-tint/50"
-                  }`}
-                >
-                  <span className="text-2xl flex-shrink-0 mt-0.5">{opt.icon}</span>
-                  <div className="flex-1">
-                    <span
-                      className={`font-medium text-base block ${
-                        selected ? "text-ink" : "text-ink-soft"
+                <div key={opt.value}>
+                  <div className="relative">
+                    <button
+                      onClick={() => selectAnswer(opt.value)}
+                      className={`w-full flex items-start gap-4 px-5 py-4 rounded-2xl border-2 text-left transition-all duration-150 ${
+                        opt.info ? "pr-14" : ""
+                      } ${
+                        selected
+                          ? "border-amber bg-amber-tint"
+                          : "border-pine-tint bg-cream-2 hover:border-pine/40 hover:bg-pine-tint/50"
                       }`}
-                      style={{ fontFamily: "var(--font-body)" }}
                     >
-                      {opt.label}
-                    </span>
-                    {opt.subtitle && (
-                      <span
-                        className="text-xs text-ink-faint mt-0.5 block"
+                      <span className="text-2xl flex-shrink-0 mt-0.5">{opt.icon}</span>
+                      <div className="flex-1">
+                        <span
+                          className={`font-medium text-base block ${
+                            selected ? "text-ink" : "text-ink-soft"
+                          }`}
+                          style={{ fontFamily: "var(--font-body)" }}
+                        >
+                          {opt.label}
+                        </span>
+                        {opt.subtitle && (
+                          <span
+                            className="text-xs text-ink-faint mt-0.5 block"
+                            style={{ fontFamily: "var(--font-body)" }}
+                          >
+                            {opt.subtitle}
+                          </span>
+                        )}
+                      </div>
+                      {selected && (
+                        <span className="ml-auto text-amber flex-shrink-0 mt-0.5">✓</span>
+                      )}
+                    </button>
+                    {opt.info && (
+                      <button
+                        type="button"
+                        aria-label={`Mais informações sobre: ${opt.label}`}
+                        aria-expanded={infoOpen}
+                        onClick={() => setOpenInfo(infoOpen ? null : infoKey)}
+                        className={`absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center transition-colors ${
+                          infoOpen
+                            ? "border-pine bg-pine text-cream-2"
+                            : "border-pine/40 bg-cream text-pine hover:bg-pine-tint"
+                        }`}
                         style={{ fontFamily: "var(--font-body)" }}
                       >
-                        {opt.subtitle}
-                      </span>
+                        i
+                      </button>
                     )}
                   </div>
-                  {selected && (
-                    <span className="ml-auto text-amber flex-shrink-0 mt-0.5">✓</span>
+                  {opt.info && infoOpen && (
+                    <div className="mt-2 mx-1 rounded-xl bg-pine-tint/50 border border-pine-tint px-4 py-3">
+                      <p
+                        className="text-xs text-ink-soft leading-relaxed"
+                        style={{ fontFamily: "var(--font-body)" }}
+                      >
+                        {opt.info}
+                      </p>
+                    </div>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
