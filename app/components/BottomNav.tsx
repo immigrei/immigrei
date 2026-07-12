@@ -60,6 +60,33 @@ const tabs = [
     ),
   },
   {
+    href: "/comunidade",
+    label: "Comunidade",
+    icon: (active: boolean) => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle
+          cx="8.5" cy="8" r="3.5"
+          stroke="currentColor"
+          strokeWidth={active ? 2.2 : 1.7}
+          fill={active ? "currentColor" : "none"}
+          fillOpacity={active ? 0.12 : 0}
+        />
+        <path
+          d="M2 19.5C2 16.7386 4.91015 14.5 8.5 14.5C12.0899 14.5 15 16.7386 15 19.5"
+          stroke="currentColor"
+          strokeWidth={active ? 2.2 : 1.7}
+          strokeLinecap="round"
+        />
+        <path
+          d="M15.5 5.1C16.9459 5.6 18 6.98 18 8.6C18 10.22 16.9459 11.6 15.5 12.1M18.5 19.5C21 18.5 22 16.5 20.5 14.8"
+          stroke="currentColor"
+          strokeWidth={active ? 2.2 : 1.7}
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
     href: "/profissionais",
     label: "Profissionais",
     icon: (active: boolean) => (
