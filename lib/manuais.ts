@@ -43,7 +43,7 @@ export type Manual = {
   quemNaoPode: ManualBloqueio[];
   prazos: ManualPrazo[];
   passos: ManualPasso[]; // high-level only — the detailed version is the kit
-  kit: { kitId: string; label: string; preco: string };
+  kit: { kitId: string; label: string };
   fontesOficiais: { label: string; url: string }[];
   fonteLeis: string[]; // content/leis files backing this manual (internal traceability)
   verificadoEm: string; // "pendente" until reviewed against the official sources
@@ -137,7 +137,7 @@ export const MANUAIS: Record<string, Manual> = {
         texto: "Visto no passaporte, entrada até 30 dias antes das aulas — e a jornada recomeça no caminho certo.",
       },
     ],
-    kit: { kitId: "f1", label: "Kit F-1 pelo consulado", preco: "R$ 197" },
+    kit: { kitId: "f1", label: "Kit F-1 pelo consulado" },
     fontesOficiais: [
       {
         label: "8 CFR §248.1 — vedações de mudança de status",
@@ -241,7 +241,7 @@ export const MANUAIS: Record<string, Manual> = {
         texto: "Aprovada a petição, seu status muda automaticamente — sem sair dos EUA, sem consulado.",
       },
     ],
-    kit: { kitId: "h1b-cos", label: "Kit H-1B — mudança de status", preco: "R$ 197" },
+    kit: { kitId: "h1b-cos", label: "Kit H-1B — mudança de status" },
     fontesOficiais: [
       {
         label: "8 CFR §214.2(f) — regras do F-1 (OPT, cap-gap)",
@@ -346,7 +346,7 @@ export const MANUAIS: Record<string, Manual> = {
         texto: "Aprovado, seu SEVIS ativa no novo I-20 — e a jornada continua no caminho acadêmico.",
       },
     ],
-    kit: { kitId: "f1-cos", label: "Kit F-1 — mudança de status (I-539)", preco: "R$ 247" },
+    kit: { kitId: "f1-cos", label: "Kit F-1 — mudança de status (I-539)" },
     fontesOficiais: [
       {
         label: "Dept. of State — Waiver of the Exchange Visitor Two-Year Requirement",
@@ -460,7 +460,7 @@ export const MANUAIS: Record<string, Manual> = {
           "Aprovada a petição, o I-797 traz seu novo I-94. Guarde tudo — o histórico limpo é seu maior ativo na próxima troca ou no Green Card.",
       },
     ],
-    kit: { kitId: "h1b-cos", label: "Kit H-1B — mudança de status", preco: "R$ 197" },
+    kit: { kitId: "h1b-cos", label: "Kit H-1B — mudança de status" },
     fontesOficiais: [
       {
         label: "INA §214(n) — portabilidade do H-1B (AC21 §105)",
@@ -566,7 +566,7 @@ export const MANUAIS: Record<string, Manual> = {
           "Quando sua priority date fica current no Boletim de Vistos, entra o ajuste de status — e o Green Card fecha a jornada.",
       },
     ],
-    kit: { kitId: "eb2niw", label: "Kit EB-2 NIW — auto-petição", preco: "R$ 347" },
+    kit: { kitId: "eb2niw", label: "Kit EB-2 NIW — auto-petição" },
     fontesOficiais: [
       {
         label: "8 CFR §214.2(o) — regras do O-1",
@@ -677,7 +677,7 @@ export const MANUAIS: Record<string, Manual> = {
           "Com a priority date current, entra o ajuste de status (I-485) — cônjuge e filhos menores de 21 entram juntos como derivados.",
       },
     ],
-    kit: { kitId: "l1", label: "Kit L-1 — transferência intraempresarial", preco: "R$ 147" },
+    kit: { kitId: "l1", label: "Kit L-1 — transferência intraempresarial" },
     fontesOficiais: [
       {
         label: "USCIS — Employment-Based Immigration: First Preference EB-1",

@@ -154,7 +154,7 @@ export default async function CaminhoPage({
             href={`/documentos/${manual.kit.kitId}`}
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-bold text-ink hover:bg-amber-deep transition-colors"
           >
-            Ver o kit — {manual.kit.preco} →
+            Ver o kit →
           </Link>
         </div>
 

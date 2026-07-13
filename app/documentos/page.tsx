@@ -15,7 +15,6 @@ interface Kit {
   codigo:     string;
   titulo:     string;
   descricao:  string;
-  preco:      string;
   caminho:    "consulado" | "cos" | "manutencao";
   alerta?:    string;
   restrito?:  boolean; // ex: E-2 não disponível para brasileiros
@@ -24,92 +23,92 @@ interface Kit {
 const KITS: Kit[] = [
   // ── F-1 ──────────────────────────────────────────────────────────────
   {
-    id: "f1", codigo: "F-1", caminho: "consulado", preco: "R$ 197",
+    id: "f1", codigo: "F-1", caminho: "consulado",
     titulo:   "Visto F-1 via consulado",
     descricao:"DS-160 + entrevista consular. Para quem está no Brasil e quer estudar nos EUA.",
   },
   {
-    id: "f1-cos", codigo: "F-1", caminho: "cos", preco: "R$ 247",
+    id: "f1-cos", codigo: "F-1", caminho: "cos",
     titulo:   "Mudança para F-1 dentro dos EUA",
     descricao:"Formulário I-539 direto com o USCIS. Para quem já está nos EUA com outro visto.",
     alerta:   "Seu status atual precisa estar válido no protocolo.",
   },
   {
-    id: "f1-renovacao", codigo: "F-1", caminho: "manutencao", preco: "R$ 147",
+    id: "f1-renovacao", codigo: "F-1", caminho: "manutencao",
     titulo:   "Renovação, extensão e transferência F-1",
     descricao:"Estender o I-20, transferir de escola ou renovar o carimbo para viajar. Já tem F-1.",
   },
   // ── M-1 ──────────────────────────────────────────────────────────────
   {
-    id: "m1", codigo: "M-1", caminho: "consulado", preco: "R$ 197",
+    id: "m1", codigo: "M-1", caminho: "consulado",
     titulo:   "Visto M-1 via consulado",
     descricao:"Curso técnico ou vocacional. DS-160 + entrevista consular. Para quem está no Brasil.",
   },
   {
-    id: "m1-cos", codigo: "M-1", caminho: "cos", preco: "R$ 247",
+    id: "m1-cos", codigo: "M-1", caminho: "cos",
     titulo:   "Mudança para M-1 dentro dos EUA",
     descricao:"Formulário I-539. Atenção: M-1 dentro dos EUA não pode mudar para F-1 depois.",
     alerta:   "Restrição permanente: M-1 não vira F-1 dentro dos EUA.",
   },
   // ── J-1 ──────────────────────────────────────────────────────────────
   {
-    id: "j1", codigo: "J-1", caminho: "consulado", preco: "R$ 147",
+    id: "j1", codigo: "J-1", caminho: "consulado",
     titulo:   "Visto J-1 via consulado",
     descricao:"Intercâmbio cultural patrocinado. DS-160 + DS-2019 do patrocinador autorizado.",
   },
   {
-    id: "j1-extensao", codigo: "J-1", caminho: "manutencao", preco: "R$ 97",
+    id: "j1-extensao", codigo: "J-1", caminho: "manutencao",
     titulo:   "Extensão do J-1 via patrocinador",
     descricao:"Extensão feita pelo patrocinador no SEVIS, sem formulário USCIS. Inclui guia da regra dos 2 anos.",
   },
   // ── H-1B ─────────────────────────────────────────────────────────────
   {
-    id: "h1b", codigo: "H-1B", caminho: "consulado", preco: "R$ 197",
+    id: "h1b", codigo: "H-1B", caminho: "consulado",
     titulo:   "H-1B — Guia para o funcionário",
     descricao:"O empregador faz a petição. Este kit te orienta sobre o que reunir e entregar ao RH/advogado.",
     alerta:   "Sujeito a sorteio anual. Cap de 65.000 vagas + 20.000 para mestrado.",
   },
   {
-    id: "h1b-cos", codigo: "H-1B", caminho: "cos", preco: "R$ 197",
+    id: "h1b-cos", codigo: "H-1B", caminho: "cos",
     titulo:   "H-1B Change of Status — dentro dos EUA",
     descricao:"Para quem já está nos EUA e o empregador vai pedir o H-1B com COS. Guia do que o funcionário precisa providenciar.",
   },
   // ── O-1 ──────────────────────────────────────────────────────────────
   {
-    id: "o1", codigo: "O-1", caminho: "consulado", preco: "R$ 197",
+    id: "o1", codigo: "O-1", caminho: "consulado",
     titulo:   "O-1 — Habilidade extraordinária via consulado",
     descricao:"Sem sorteio, sem cap. Exige empregador ou agente americano e evidências robustas de reconhecimento.",
   },
   {
-    id: "o1-cos", codigo: "O-1", caminho: "cos", preco: "R$ 197",
+    id: "o1-cos", codigo: "O-1", caminho: "cos",
     titulo:   "O-1 Change of Status — dentro dos EUA",
     descricao:"Para quem já está nos EUA. O empregador ou agente protocola o I-129 com pedido de COS.",
   },
   // ── L-1 ──────────────────────────────────────────────────────────────
   {
-    id: "l1", codigo: "L-1", caminho: "consulado", preco: "R$ 147",
+    id: "l1", codigo: "L-1", caminho: "consulado",
     titulo:   "L-1 — Transferência intracompanhia via consulado",
     descricao:"Para executivos, gerentes e especialistas transferidos. A empresa nos dois países precisa ter vínculo corporativo.",
   },
   {
-    id: "l1-cos", codigo: "L-1", caminho: "cos", preco: "R$ 147",
+    id: "l1-cos", codigo: "L-1", caminho: "cos",
     titulo:   "L-1 Change of Status — dentro dos EUA",
     descricao:"Já está nos EUA com outro visto e vai ser transferido pela empresa. Guia de documentos para o RH.",
   },
   // ── EB-2 NIW ─────────────────────────────────────────────────────────
   {
-    id: "eb2niw", codigo: "EB-2 NIW", caminho: "cos", preco: "R$ 347",
+    id: "eb2niw", codigo: "EB-2 NIW", caminho: "cos",
     titulo:   "EB-2 NIW — Ajuste de Status (dentro dos EUA)",
     descricao:"Green card por interesse nacional. Auto-petição via I-140 + I-485. Para quem já está nos EUA.",
   },
   {
-    id: "eb2niw-brasil", codigo: "EB-2 NIW", caminho: "consulado", preco: "R$ 297",
+    id: "eb2niw-brasil", codigo: "EB-2 NIW", caminho: "consulado",
     titulo:   "EB-2 NIW — Processamento consular (fora dos EUA)",
     descricao:"Após aprovação do I-140, processo segue pelo NVC e entrevista no consulado americano no Brasil.",
   },
   // ── E-2 ──────────────────────────────────────────────────────────────
   {
-    id: "e2", codigo: "E-2", caminho: "consulado", preco: "R$ 347",
+    id: "e2", codigo: "E-2", caminho: "consulado",
     titulo:   "E-2 — Visto de Investidor (países com tratado)",
     descricao:"Para nacionais de países com tratado com os EUA: Portugal, Alemanha, França, Itália, Espanha, Japão, Coreia do Sul e outros.",
     alerta:   "NÃO disponível para brasileiros. Verifique se seu país tem tratado E-2 com os EUA.",
@@ -117,7 +116,7 @@ const KITS: Kit[] = [
   },
   // ── B-1/B-2 ──────────────────────────────────────────────────────────
   {
-    id: "b1", codigo: "B-1/B-2", caminho: "consulado", preco: "R$ 97",
+    id: "b1", codigo: "B-1/B-2", caminho: "consulado",
     titulo:   "B-1/B-2 — Turismo e negócios via consulado",
     descricao:"DS-160 + entrevista consular. Inclui orientações sobre prova de vínculo com o Brasil e documentação financeira.",
   },
@@ -260,8 +259,8 @@ export default function DocumentosPage() {
         ))}
 
         <p className="text-xs text-ink-faint mt-6 leading-relaxed border-t border-pine-tint pt-5">
-          Kits são compras únicas, independentes da mensalidade. Cada kit inclui guia passo a passo,
-          checklist interativo e modelos de carta. Não substituem aconselhamento jurídico.
+          Cada kit inclui guia passo a passo, checklist interativo e modelos de carta.
+          Não substituem aconselhamento jurídico.
         </p>
       </div>
     </AppShell>
@@ -294,7 +293,6 @@ function KitCard({ kit, destaque, onClick }: { kit: Kit; destaque?: boolean; onC
             </span>
           )}
         </div>
-        <span className="text-sm font-bold text-pine flex-shrink-0">{kit.preco}</span>
       </div>
 
       <p className="text-sm font-semibold text-ink mb-1">{kit.titulo}</p>
