@@ -64,6 +64,35 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
+// Reset onboarding: clears only the journey fields so the user can redo the
+// questionnaire. Never deletes the row — user_documents, user_checklist_items
+// and community tables cascade on profile deletion, and the vault must survive.
+export async function DELETE() {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { error } = await supabaseAdmin
+    .from("profiles")
+    .update({
+      visa_type: null,
+      arrival_date: null,
+      main_goal: null,
+      location: null,
+      nationality: null,
+      chosen_school: null,
+      onboarding_completed: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("clerk_user_id", userId);
+
+  if (error) {
+    console.error("Supabase reset error:", error);
+    return NextResponse.json({ error: "Failed to reset onboarding" }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}
+
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
