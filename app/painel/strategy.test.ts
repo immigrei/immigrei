@@ -6,7 +6,7 @@
  * recebia a jornada EB-2 NIW.
  */
 import { describe, expect, it } from "vitest";
-import { getFamilyTiesCard, getStrategy } from "./page";
+import { getFamilyTiesCard, getStrategy } from "@/lib/strategy";
 
 // Formata em YYYY-MM-DD usando componentes locais — evita o desvio de fuso
 // horário do toISOString() (que converte para UTC e pode voltar/adiantar um dia).

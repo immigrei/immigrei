@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { VisaJourney } from "@/lib/visa-journeys";
+import type { Etapa } from "@/lib/strategy";
 
 /**
  * Vertical timeline of the user's immigration journey.
- * Steps before currentStepId are done, the current one is highlighted,
- * the rest are upcoming.
+ * Sourced from lib/strategy's getStrategy(profile) — the same engine behind
+ * /painel — so consular (DS-160, entrevista) vs Change-of-Status steps match
+ * profile.location instead of a generic per-visa list.
  */
-export default function JourneyTimeline({ journey }: { journey: VisaJourney }) {
-  const currentIndex = journey.steps.findIndex((s) => s.id === journey.currentStepId);
-
+export default function JourneyTimeline({ name, etapas }: { name: string; etapas: Etapa[] }) {
   return (
     <div className="bg-cream-2 rounded-2xl border border-pine-tint overflow-hidden mb-5">
       <div className="px-6 py-4 border-b border-pine-tint flex items-center justify-between">
@@ -16,18 +15,18 @@ export default function JourneyTimeline({ journey }: { journey: VisaJourney }) {
           Sua jornada
         </p>
         <span className="text-xs font-semibold text-pine bg-pine-tint px-2.5 py-1 rounded-full">
-          {journey.name}
+          {name}
         </span>
       </div>
 
       <ol className="px-6 py-5">
-        {journey.steps.map((step, i) => {
-          const isDone = currentIndex >= 0 && i < currentIndex;
-          const isCurrent = i === currentIndex;
-          const isLast = i === journey.steps.length - 1;
+        {etapas.map((etapa, i) => {
+          const isDone = etapa.estado === "feito";
+          const isCurrent = etapa.estado === "agora";
+          const isLast = i === etapas.length - 1;
 
           return (
-            <li key={step.id} className="relative flex gap-4 pb-1">
+            <li key={i} className="relative flex gap-4 pb-1">
               {/* Connector line */}
               {!isLast && (
                 <span
@@ -48,7 +47,7 @@ export default function JourneyTimeline({ journey }: { journey: VisaJourney }) {
                     : "bg-cream border-2 border-pine-tint text-ink-faint"
                 }`}
               >
-                {isDone ? "✓" : i + 1}
+                {isDone ? "✓" : etapa.num}
               </span>
 
               {/* Content */}
@@ -59,7 +58,7 @@ export default function JourneyTimeline({ journey }: { journey: VisaJourney }) {
                       isCurrent ? "text-ink" : isDone ? "text-ink-soft" : "text-ink-soft"
                     }`}
                   >
-                    {step.title}
+                    {etapa.titulo}
                   </p>
                   {isCurrent && (
                     <span className="text-[10px] font-bold uppercase tracking-wider text-amber-deep bg-amber-tint px-2 py-0.5 rounded-full">
@@ -68,45 +67,25 @@ export default function JourneyTimeline({ journey }: { journey: VisaJourney }) {
                   )}
                 </div>
                 <p className="text-xs text-ink-soft leading-relaxed mt-1">
-                  {step.description}
+                  {etapa.desc}
                 </p>
-                {(step.docs?.length || step.uscisUrl || step.avgDays) && (
+                {etapa.tag && (
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                    {step.docs?.map((doc) => (
-                      <span
-                        key={doc}
-                        className="text-[11px] text-pine bg-pine-tint px-2 py-0.5 rounded-full"
-                      >
-                        📄 {doc}
-                      </span>
-                    ))}
-                    {step.avgDays && (
-                      <span className="text-[11px] text-ink-faint">
-                        ⏱ ~{step.avgDays} dias
-                      </span>
-                    )}
-                    {step.uscisUrl && (
-                      <a
-                        href={step.uscisUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] text-pine underline underline-offset-2"
-                      >
-                        Fonte oficial ↗
-                      </a>
-                    )}
+                    <span className="text-[11px] text-pine bg-pine-tint px-2 py-0.5 rounded-full">
+                      {etapa.tag}
+                    </span>
                   </div>
                 )}
-                {step.link && (
+                {etapa.href && (
                   <Link
-                    href={step.link.href}
+                    href={etapa.href}
                     className={`inline-block mt-2 text-xs font-bold underline underline-offset-4 transition-colors ${
                       isCurrent
                         ? "text-amber-deep hover:text-ink"
                         : "text-pine hover:text-pine-deep"
                     }`}
                   >
-                    🧭 {step.link.label} →
+                    🧭 Continuar →
                   </Link>
                 )}
               </div>

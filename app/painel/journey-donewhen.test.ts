@@ -4,7 +4,7 @@
  * nunca fica verde e a etapa trava em silêncio; este teste pega o typo.
  */
 import { describe, expect, it } from "vitest";
-import { getStrategy } from "./page";
+import { getStrategy } from "@/lib/strategy";
 import checklists from "@/app/documentos/[vistoId]/data";
 
 type Profile = Parameters<typeof getStrategy>[0];
