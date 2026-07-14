@@ -1,5 +1,5 @@
-import { UserButton } from "@clerk/nextjs";
 import BottomNav from "./BottomNav";
+import HeaderUserButton from "./HeaderUserButton";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +11,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         >
           Immigrei
         </span>
-        <UserButton />
+        <HeaderUserButton />
       </header>
 
       <main className="flex-1 pb-28">

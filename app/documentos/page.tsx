@@ -195,6 +195,7 @@ export default function DocumentosPage() {
   const router  = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mostrarTodos, setMostrarTodos] = useState(false);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -205,6 +206,10 @@ export default function DocumentosPage() {
 
   const recomendadoId = inferirKitRecomendado(profile);
   const recomendado   = KITS.find((k) => k.id === recomendadoId);
+
+  // Sem kit recomendado (perfil incompleto, residente, etc.) o catálogo
+  // completo é a única coisa a mostrar — abre expandido direto.
+  const catalogoAberto = mostrarTodos || (!loading && !recomendado);
 
   // Agrupar os demais kits por código de visto
   const grupos = Object.entries(GRUPOS_LABEL).map(([codigo, label]) => ({
@@ -239,13 +244,25 @@ export default function DocumentosPage() {
         {!loading && recomendado && (
           <div className="mb-8">
             <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-3" style={{ letterSpacing: "0.1em" }}>
-              Recomendado para você
+              Seu caminho
             </p>
             <KitCard kit={recomendado} destaque onClick={() => router.push(`/documentos/${recomendado.id}`)} />
+
+            {!catalogoAberto && (
+              <button
+                onClick={() => setMostrarTodos(true)}
+                className="w-full mt-4 flex items-center justify-center gap-1.5 text-sm font-medium text-pine border border-pine-tint rounded-2xl py-3 hover:bg-pine-tint transition-colors"
+              >
+                Explorar outros vistos
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+            )}
           </div>
         )}
 
-        {!loading && grupos.map((grupo) => (
+        {catalogoAberto && grupos.map((grupo) => (
           <div key={grupo.codigo} className="mb-7">
             <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-3" style={{ letterSpacing: "0.1em" }}>
               {grupo.codigo} · {grupo.label}

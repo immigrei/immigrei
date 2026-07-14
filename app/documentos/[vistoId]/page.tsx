@@ -77,8 +77,8 @@ export default function DocumentosVistoPage() {
       <AppShell>
         <div className="max-w-2xl mx-auto px-6 py-10 text-center">
           <p className="text-ink-soft">Visto não encontrado.</p>
-          <button onClick={() => router.push("/vistos")} className="mt-4 text-pine underline text-sm">
-            Voltar para vistos
+          <button onClick={() => router.push("/documentos")} className="mt-4 text-pine underline text-sm">
+            Voltar para documentos
           </button>
         </div>
       </AppShell>
@@ -192,15 +192,18 @@ export default function DocumentosVistoPage() {
           }}
         />
 
-        {/* Back */}
+        {/* Back — volta para a tela de origem (painel ou documentos), não para a vitrine de vistos */}
         <button
-          onClick={() => router.push("/vistos")}
+          onClick={() => {
+            if (window.history.length > 1) router.back();
+            else router.push("/documentos");
+          }}
           className="flex items-center gap-1.5 text-ink-soft text-sm mb-6 hover:text-pine transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
-          Voltar para vistos
+          Voltar
         </button>
 
         {/* Header */}
