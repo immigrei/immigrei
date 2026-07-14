@@ -159,7 +159,7 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "A", estado: "agora",   titulo: "Extensão do I-20 (programa vai vencer)", desc: "Solicite ao DSO da sua escola antes do vencimento. Sem USCIS, sem taxa federal." },
         { num: "B", estado: "agora",   titulo: "Transferência para outra escola",         desc: "DSO atual libera o SEVIS. Você tem 15 dias para começar na nova escola." },
-        { num: "C", estado: "agora",   titulo: "Renovação do carimbo (para viajar)",      desc: "Sair dos EUA pode acionar barreiras de reentrada. Consulte seu DSO antes.", tag: "Risco" },
+        { num: "C", estado: "agora",   titulo: "Renovação do carimbo (para viajar)",      desc: "Sair dos EUA pode acionar barreiras de reentrada. Consulte seu DSO antes. Exige novo DS-160 e entrevista no consulado.", tag: "Risco", linkExterno: { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" } },
       ],
       guardrails: [
         { tipo: "proibido", texto: "Não transfira de escola sem fazer a transferência SEVIS primeiro — você perde o status F-1." },
@@ -178,10 +178,11 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "M-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer o M-1 para fazer um curso técnico ou vocacional nos EUA. O processo é similar ao F-1, mas com a taxa SEVIS mais baixa e foco em programa vocacional.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Escola técnica SEVP + I-20 M-1",  desc: "Matrícula em escola vocacional credenciada. I-20 M-1 é diferente do F-1.", href: "/escolas", doneWhen: { itens: ["i20"] } },
-        { num: "2", estado: "proximo", titulo: "Taxa SEVIS M-1",                   desc: "US$200 (menor que o F-1) em fls.dhs.gov.", tag: "US$200", doneWhen: { itens: ["i901"] } },
-        { num: "3", estado: "proximo", titulo: "DS-160 + dossiê",                  desc: "Campo a campo no kit. Mesmo processo do F-1 com variações para M-1.", doneWhen: { itens: ["ds160", "financeiro"] } },
-        { num: "4", estado: "futuro",  titulo: "Entrevista consular",              desc: "O cônsul vai perguntar sobre plano de carreira pós-curso. Prepare uma resposta clara." },
+        { num: "1", estado: "agora",   titulo: "Buscar escola e confirmar matrícula",  desc: "Escolha um programa técnico/vocacional certificado pelo SEVP e confirme a matrícula com o DSO.", href: "/escolas", doneWhen: { school: true } },
+        { num: "2", estado: "proximo", titulo: "Receber o I-20 M-1",                    desc: "A escola emite o I-20 (versão M) após a matrícula confirmada — nele está o seu SEVIS ID.", doneWhen: { itens: ["i20"] } },
+        { num: "3", estado: "proximo", titulo: "Pagar a taxa SEVIS (I-901)",            desc: "US$200 (menor que o F-1), com o SEVIS ID do I-20 em mãos.", tag: "US$200", linkExterno: { label: "Pagar em fmjfee.com", url: "https://www.fmjfee.com/" }, doneWhen: { itens: ["i901"] } },
+        { num: "4", estado: "proximo", titulo: "Preencher o DS-160 + montar dossiê",    desc: "Campo a campo no kit. Mesmo processo do F-1 com variações para M-1.", linkExterno: { label: "Preencher em ceac.state.gov", url: "https://ceac.state.gov/genniv/" }, doneWhen: { itens: ["ds160", "financeiro"] } },
+        { num: "5", estado: "futuro",  titulo: "Agendar a entrevista",                  desc: "O cônsul vai perguntar sobre plano de carreira pós-curso. Prepare uma resposta clara.", linkExterno: { label: "Agendar em ais.usvisa-info.com", url: "https://ais.usvisa-info.com/pt-br/niv" } },
         { num: "✓", estado: "futuro",  titulo: "Visto M-1 aprovado",              desc: "Duração máxima de 1 ano (prorrogável)." },
       ],
       guardrails: [
@@ -231,9 +232,9 @@ export function getStrategy(profile: Profile): Strategy {
         { num: "1", estado: "agora",   titulo: "Reunir documentos para o empregador", desc: "Diploma, histórico, currículo, documentos de identidade — veja o kit completo.", doneWhen: { itens: cos ? ["diploma-h1b-cos", "curriculo-h1b-cos"] : ["diploma", "curriculo"] } },
         { num: "2", estado: "proximo", titulo: "Empregador submete o registro (março)", desc: "Período de registro: 1–18 de março. O empregador faz online.", tag: "Março" },
         { num: "3", estado: "proximo", titulo: "Sorteio + notificação",                desc: "USCIS seleciona aleatoriamente. Resultados em abril." },
-        { num: "4", estado: "futuro",  titulo: "LCA aprovada pelo DOL",               desc: "Labor Condition Application — o empregador submete em ~7 dias.", doneWhen: { itens: cos ? ["lca-cos"] : ["lca"] } },
-        { num: "5", estado: "futuro",  titulo: "I-129 submetido ao USCIS",            desc: "Petição completa após a LCA. Prazo padrão ou Premium Processing.", doneWhen: { itens: cos ? ["i129-cos"] : ["i129"] } },
-        { num: "6", estado: "futuro",  titulo: "I-797 aprovado + entrevista/COS",     desc: "Entrevista consular se fora dos EUA, ou COS se já está aqui.", tag: "I-797", doneWhen: { itens: cos ? ["i797-cos"] : ["i797"] } },
+        { num: "4", estado: "futuro",  titulo: "LCA aprovada pelo DOL",               desc: "Labor Condition Application — o empregador submete em ~7 dias.", tag: "LCA", linkExterno: { label: "Consultar em flag.dol.gov", url: "https://flag.dol.gov/programs/LCA" }, doneWhen: { itens: cos ? ["lca-cos"] : ["lca"] } },
+        { num: "5", estado: "futuro",  titulo: "I-129 submetido ao USCIS",            desc: "Petição completa após a LCA. Prazo padrão ou Premium Processing.", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" }, doneWhen: { itens: cos ? ["i129-cos"] : ["i129"] } },
+        { num: "6", estado: "futuro",  titulo: "I-797 aprovado + entrevista/COS",     desc: "Entrevista consular se fora dos EUA, ou COS se já está aqui.", tag: "I-797", linkExterno: cos ? undefined : { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" }, doneWhen: { itens: cos ? ["i797-cos"] : ["i797"] } },
         { num: "✓", estado: "futuro",  titulo: "H-1B ativo — início do trabalho",    desc: "Válido a partir de 1º de outubro do mesmo ano." },
       ],
       guardrails: [
@@ -257,9 +258,9 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Mapear evidências de habilidade extraordinária", desc: "Prêmios, cobertura de mídia, salário, publicações, membros em associações. O kit lista as categorias USCIS.", doneWhen: { algum: cos ? ["premios-cos", "midia-cos", "salario-alto-cos", "contribuicoes-cos", "membros-cos"] : ["premios", "midia", "salario", "contribuicoes", "membro-associacoes"] } },
         { num: "2", estado: "proximo", titulo: "Advisory Opinion da associação da área",         desc: "Carta de uma associação profissional ou sindicato reconhecido.", doneWhen: { itens: cos ? ["advisory-opinion"] : ["consulta"] } },
-        { num: "3", estado: "proximo", titulo: "Empregador ou agente protocola o I-129",         desc: "Com toda a documentação de suporte. Advogado de imigração é altamente recomendado.", tag: "I-129", doneWhen: cos ? undefined : { itens: ["i129o"] } },
+        { num: "3", estado: "proximo", titulo: "Empregador ou agente protocola o I-129",         desc: "Com toda a documentação de suporte. Advogado de imigração é altamente recomendado.", tag: "I-129", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" }, doneWhen: cos ? undefined : { itens: ["i129o"] } },
         { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                                 desc: "Aprovação em 2–4 meses (padrão) ou 15 dias úteis (Premium Processing).", doneWhen: { itens: cos ? ["i797-o1-cos"] : ["i797"] } },
-        { num: "5", estado: "futuro",  titulo: "Entrevista consular ou COS",                     desc: "Se fora dos EUA: entrevista. Se já nos EUA: COS com o mesmo I-129." },
+        { num: "5", estado: "futuro",  titulo: "Entrevista consular ou COS",                     desc: "Se fora dos EUA: entrevista. Se já nos EUA: COS com o mesmo I-129.", linkExterno: cos ? undefined : { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" } },
         { num: "✓", estado: "futuro",  titulo: "O-1 ativo",                                     desc: "Válido por até 3 anos, renovável." },
       ],
       guardrails: [
@@ -285,9 +286,9 @@ export function getStrategy(profile: Profile): Strategy {
         etapas: [
           { num: "1", estado: "agora",   titulo: "Confirmar quem você pode peticionar", desc: "Residente peticiona cônjuge e filhos solteiros. Pais, irmãos e filhos casados, só quando você for cidadão." },
           { num: "2", estado: "proximo", titulo: "Reunir documentos",                   desc: "Green card (frente e verso), certidões de casamento/nascimento com tradução e provas de vínculo genuíno." },
-          { num: "3", estado: "proximo", titulo: "Protocolar o I-130",                  desc: "US$625 online ou US$675 em papel. A data de recebimento vira sua priority date — a posição na fila.", tag: "US$625" },
-          { num: "4", estado: "futuro",  titulo: "Acompanhar o Boletim de Vistos",      desc: "Brasil entra em 'All Chargeability'. Quando a sua priority date ficar current, o caso avança — o Immigrei avisa.", tag: "Mensal" },
-          { num: "5", estado: "futuro",  titulo: "Consulado (DS-260) ou ajuste (I-485)", desc: "Familiar fora dos EUA: NVC + entrevista consular. Nos EUA em status válido: I-485 quando a data permitir." },
+          { num: "3", estado: "proximo", titulo: "Protocolar o I-130",                  desc: "US$625 online ou US$675 em papel. A data de recebimento vira sua priority date — a posição na fila.", tag: "US$625", linkExterno: { label: "Formulário em uscis.gov/i-130", url: "https://www.uscis.gov/i-130" } },
+          { num: "4", estado: "futuro",  titulo: "Acompanhar o Boletim de Vistos",      desc: "Brasil entra em 'All Chargeability'. Quando a sua priority date ficar current, o caso avança — o Immigrei avisa.", tag: "Mensal", linkExterno: { label: "Boletim em travel.state.gov", url: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html" } },
+          { num: "5", estado: "futuro",  titulo: "Consulado (DS-260) ou ajuste (I-485)", desc: "Familiar fora dos EUA: NVC + entrevista consular. Nos EUA em status válido: I-485 quando a data permitir.", linkExterno: { label: "Formulário em uscis.gov/i-485", url: "https://www.uscis.gov/i-485" } },
           { num: "✓", estado: "futuro",  titulo: "Green Card do familiar aprovado",     desc: "Seu familiar se torna residente permanente." },
         ],
         guardrails: [
@@ -310,7 +311,7 @@ export function getStrategy(profile: Profile): Strategy {
         etapas: [
           { num: "1", estado: "agora",   titulo: "Conferir o relógio",       desc: "5 anos de residência (ou 3, com cidadão) + residência contínua e presença física em pelo menos metade do período." },
           { num: "2", estado: "proximo", titulo: "Levantar o histórico",     desc: "Viagens dos últimos 5 anos, endereços, empregos e impostos em dia. O N-400 pergunta tudo." },
-          { num: "3", estado: "proximo", titulo: "Protocolar o N-400",       desc: "US$710 online ou US$760 em papel. Renda entre 150–400% da linha da pobreza paga US$380.", tag: "US$710" },
+          { num: "3", estado: "proximo", titulo: "Protocolar o N-400",       desc: "US$710 online ou US$760 em papel. Renda entre 150–400% da linha da pobreza paga US$380.", tag: "US$710", linkExterno: { label: "Formulário em uscis.gov/n-400", url: "https://www.uscis.gov/n-400" } },
           { num: "4", estado: "futuro",  titulo: "Biometria e entrevista",   desc: "Teste de inglês e cívica (as perguntas são públicas, no site do USCIS) + revisão do seu histórico." },
           { num: "✓", estado: "futuro",  titulo: "Cerimônia de juramento",   desc: "Você se torna cidadão americano. 🇺🇸" },
         ],
@@ -333,7 +334,7 @@ export function getStrategy(profile: Profile): Strategy {
         destaque: { tipo: "alerta", texto: "Green Card CONDICIONAL de 2 anos (por casamento)? O caminho é o I-751 nos 90 dias antes do vencimento — nunca o I-90." },
         etapas: [
           { num: "1", estado: "agora",   titulo: "Conferir o cartão",           desc: "Vencido ou a vencer em 6 meses: hora de renovar. Condicional de 2 anos: é I-751, outro processo." },
-          { num: "2", estado: "proximo", titulo: "Protocolar o I-90",           desc: "US$415 online ou US$465 em papel, direto na conta USCIS.", tag: "US$415" },
+          { num: "2", estado: "proximo", titulo: "Protocolar o I-90",           desc: "US$415 online ou US$465 em papel, direto na conta USCIS.", tag: "US$415", linkExterno: { label: "Formulário em uscis.gov/i-90", url: "https://www.uscis.gov/i-90" } },
           { num: "3", estado: "futuro",  titulo: "Recibo estende a validade",   desc: "O I-797 de recebimento estende o cartão vencido — guarde junto do cartão antigo para trabalho e viagens." },
           { num: "4", estado: "futuro",  titulo: "Biometria (se convocada)",    desc: "Reuso de biometria é comum — muitos casos nem têm apontamento." },
           { num: "✓", estado: "futuro",  titulo: "Novo cartão de 10 anos",      desc: "Residência segue valendo — o cartão é a prova, não o status." },
@@ -354,10 +355,10 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "Residente permanente · manter e avançar",
       situacao:  `Seu green card está ativo — a jornada agora é proteger a residência e escolher o próximo passo. Estes são os caminhos abertos para você hoje.`,
       etapas: [
-        { num: "A", estado: "agora", titulo: "Manter a residência",        desc: "Evite ausências de 6+ meses dos EUA. Para ficar até 2 anos fora, o Reentry Permit (I-131) precisa ser pedido ANTES de sair." },
-        { num: "B", estado: "agora", titulo: "Renovar o cartão (I-90)",    desc: "Cartão de 10 anos vencido ou a vencer em 6 meses. Condicional de 2 anos usa o I-751." },
-        { num: "C", estado: "agora", titulo: "Peticionar a família (I-130)", desc: "Cônjuge e filhos solteiros nas categorias F2A / F2B — o Immigrei acompanha a fila no Boletim de Vistos." },
-        { num: "D", estado: "agora", titulo: "Caminho à cidadania (N-400)", desc: "5 anos como residente (ou 3, com cidadão americano). Pode protocolar 90 dias antes de completar." },
+        { num: "A", estado: "agora", titulo: "Manter a residência",        desc: "Evite ausências de 6+ meses dos EUA. Para ficar até 2 anos fora, o Reentry Permit (I-131) precisa ser pedido ANTES de sair.", linkExterno: { label: "Formulário em uscis.gov/i-131", url: "https://www.uscis.gov/i-131" } },
+        { num: "B", estado: "agora", titulo: "Renovar o cartão (I-90)",    desc: "Cartão de 10 anos vencido ou a vencer em 6 meses. Condicional de 2 anos usa o I-751.", linkExterno: { label: "Formulário em uscis.gov/i-90", url: "https://www.uscis.gov/i-90" } },
+        { num: "C", estado: "agora", titulo: "Peticionar a família (I-130)", desc: "Cônjuge e filhos solteiros nas categorias F2A / F2B — o Immigrei acompanha a fila no Boletim de Vistos.", linkExterno: { label: "Formulário em uscis.gov/i-130", url: "https://www.uscis.gov/i-130" } },
+        { num: "D", estado: "agora", titulo: "Caminho à cidadania (N-400)", desc: "5 anos como residente (ou 3, com cidadão americano). Pode protocolar 90 dias antes de completar.", linkExterno: { label: "Formulário em uscis.gov/n-400", url: "https://www.uscis.gov/n-400" } },
       ],
       guardrails: [
         { tipo: "atencao", texto: "Declare imposto como residente todos os anos — declarar como 'non-resident' pode ser lido como abandono da residência." },
@@ -379,7 +380,7 @@ export function getStrategy(profile: Profile): Strategy {
         etapas: [
           { num: "1", estado: "agora",   titulo: "Definir a categoria",              desc: "Parente imediato: sem fila. F1 / F3 / F4: fila de anos a décadas — confira no Boletim de Vistos. Noivo(a) no exterior: K-1." },
           { num: "2", estado: "proximo", titulo: "Reunir provas",                    desc: "Prova de cidadania (passaporte ou certificado), certidões com tradução e provas de vínculo genuíno." },
-          { num: "3", estado: "proximo", titulo: "Protocolar o I-130 (ou I-129F)",   desc: "US$625 online ou US$675 em papel. Noivo(a): I-129F para o K-1.", tag: "US$625" },
+          { num: "3", estado: "proximo", titulo: "Protocolar o I-130 (ou I-129F)",   desc: "US$625 online ou US$675 em papel. Noivo(a): I-129F para o K-1.", tag: "US$625", linkExterno: { label: "I-130 em uscis.gov · I-129F em uscis.gov/i-129f", url: "https://www.uscis.gov/i-130" } },
           { num: "4", estado: "futuro",  titulo: "NVC ou ajuste de status",          desc: "Familiar fora dos EUA: NVC + DS-260 + consulado. Nos EUA com entrada legal: I-485 — cônjuge pode incluir trabalho (I-765) junto." },
           { num: "✓", estado: "futuro",  titulo: "Green Card do familiar aprovado",  desc: "Seu familiar se torna residente permanente." },
         ],
@@ -400,7 +401,7 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "Cidadania americana · seus direitos",
       situacao:  `Você chegou ao topo da jornada — a cidadania não expira e não se perde por morar fora. Estes são os direitos básicos que ela garante.`,
       etapas: [
-        { num: "A", estado: "agora", titulo: "Votar e ter passaporte americano", desc: "Voto em eleições federais e estaduais. Passaporte via DS-11 — a prova de cidadania mais prática." },
+        { num: "A", estado: "agora", titulo: "Votar e ter passaporte americano", desc: "Voto em eleições federais e estaduais. Passaporte via DS-11 — a prova de cidadania mais prática.", linkExterno: { label: "Formulários em travel.state.gov", url: "https://travel.state.gov/content/travel/en/passports/how-apply/forms.html" } },
         { num: "B", estado: "agora", titulo: "Morar fora sem perder nada",       desc: "Ausências longas não ameaçam a cidadania — diferente do green card." },
         { num: "C", estado: "agora", titulo: "Peticionar a família",             desc: "Cônjuge, pais e filhos menores solteiros sem fila; demais categorias via I-130." },
         { num: "D", estado: "agora", titulo: "Empregos e proteção plenos",       desc: "Cargos públicos federais, júri e a proteção consular americana no exterior." },
@@ -425,9 +426,9 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Construir o caso NIW",               desc: "Os 3 critérios do teste Matter of Dhanasar: mérito, importância nacional, interesse em dispensar a oferta de emprego." },
         { num: "2", estado: "proximo", titulo: "Reunir evidências",                  desc: "Publicações, citações, cartas de especialistas independentes, impacto do trabalho.", doneWhen: nosEua ? { algum: ["publicacoes", "citacoes", "cartas-recomendacao"] } : undefined },
-        { num: "3", estado: "proximo", titulo: "I-140 submetido ao USCIS",           desc: "Auto-petição. Taxa: US$715. Com carta de petição (cover letter) argumentando o NIW.", tag: "US$715", doneWhen: { itens: nosEua ? ["i140"] : ["i140-aprovado"] } },
-        { num: "4", estado: "futuro",  titulo: "I-140 aprovado + Visa Bulletin",     desc: "Aguardar número de visto disponível no Boletim de Vistos (EB-2 Brasil pode ter fila).", doneWhen: nosEua ? undefined : { itens: ["i140-aprovado", "boletim-vistos"] } },
-        { num: "5", estado: "futuro",  titulo: nosEua ? "I-485 — Ajuste de Status" : "NVC + DS-260 + consulado", desc: nosEua ? "Formulário I-485 + exame médico (I-693) + biometria." : "NVC processa o caso, DS-260 online, documentos civis, entrevista consular.", tag: nosEua ? "AOS" : "Consular", doneWhen: { itens: nosEua ? ["i485"] : ["ds260"] } },
+        { num: "3", estado: "proximo", titulo: "I-140 submetido ao USCIS",           desc: "Auto-petição. Taxa: US$715. Com carta de petição (cover letter) argumentando o NIW.", tag: "US$715", linkExterno: { label: "Formulário em uscis.gov/i-140", url: "https://www.uscis.gov/i-140" }, doneWhen: { itens: nosEua ? ["i140"] : ["i140-aprovado"] } },
+        { num: "4", estado: "futuro",  titulo: "I-140 aprovado + Visa Bulletin",     desc: "Aguardar número de visto disponível no Boletim de Vistos (EB-2 Brasil pode ter fila).", linkExterno: { label: "Boletim em travel.state.gov", url: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html" }, doneWhen: nosEua ? undefined : { itens: ["i140-aprovado", "boletim-vistos"] } },
+        { num: "5", estado: "futuro",  titulo: nosEua ? "I-485 — Ajuste de Status" : "NVC + DS-260 + consulado", desc: nosEua ? "Formulário I-485 + exame médico (I-693) + biometria." : "NVC processa o caso, DS-260 online, documentos civis, entrevista consular.", tag: nosEua ? "AOS" : "Consular", linkExterno: nosEua ? { label: "Formulário em uscis.gov/i-485", url: "https://www.uscis.gov/i-485" } : { label: "NVC em travel.state.gov", url: "https://travel.state.gov/content/travel/en/us-visas/immigrate/national-visa-center.html" }, doneWhen: { itens: nosEua ? ["i485"] : ["ds260"] } },
         { num: "✓", estado: "futuro",  titulo: "Green Card aprovado",               desc: "Residência permanente nos EUA." },
       ],
       guardrails: [
@@ -456,8 +457,8 @@ export function getStrategy(profile: Profile): Strategy {
       situacao:  `Você está nos EUA em status B-1/B-2. O prazo que vale é o do seu I-94, não o carimbo do visto no passaporte — ele define até quando você pode ficar.`,
       destaque,
       etapas: [
-        { num: "1", estado: dias !== null ? "feito" : "agora", titulo: "Conferir o prazo do I-94",  desc: "i94.cbp.dhs.gov mostra a data exata de saída obrigatória — cadastre no seu perfil (início) para acompanhar aqui." },
-        { num: "2", estado: "proximo", titulo: "Extensão de permanência (I-539)",  desc: "Pedida antes do I-94 vencer, com justificativa (ex: negócio ainda em andamento).", tag: "US$370" },
+        { num: "1", estado: dias !== null ? "feito" : "agora", titulo: "Conferir o prazo do I-94",  desc: "i94.cbp.dhs.gov mostra a data exata de saída obrigatória — cadastre no seu perfil (início) para acompanhar aqui.", linkExterno: { label: "Consultar em i94.cbp.dhs.gov", url: "https://i94.cbp.dhs.gov/" } },
+        { num: "2", estado: "proximo", titulo: "Extensão de permanência (I-539)",  desc: "Pedida antes do I-94 vencer, com justificativa (ex: negócio ainda em andamento).", tag: "US$370", linkExterno: { label: "Formulário em uscis.gov/i-539", url: "https://www.uscis.gov/i-539" } },
         { num: "3", estado: "proximo", titulo: "Mudança de status, se for o caso", desc: "Quer estudar (F-1), trabalhar ou seguir outro caminho? Muda-se de status antes do prazo vencer — não depois." },
         { num: "✓", estado: "futuro",  titulo: "Status resolvido",                desc: "Extensão aprovada, novo status aprovado, ou saída dentro do prazo." },
       ],
@@ -479,10 +480,10 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "B-1/B-2 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer o visto B-1/B-2 para negócios ou turismo nos EUA. O processo é direto: DS-160 + entrevista, sem I-20 nem taxa SEVIS.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Preencher o DS-160",              desc: "Formulário do Departamento de Estado — campo a campo no kit.", doneWhen: { itens: ["ds160"] } },
+        { num: "1", estado: "agora",   titulo: "Preencher o DS-160",              desc: "Formulário do Departamento de Estado — campo a campo no kit.", linkExterno: { label: "Preencher em ceac.state.gov", url: "https://ceac.state.gov/genniv/" }, doneWhen: { itens: ["ds160"] } },
         { num: "2", estado: "proximo", titulo: "Montar o dossiê de negócios",     desc: "Carta de convite da empresa americana e carta da empresa brasileira confirmando cargo e propósito.", doneWhen: { itens: ["carta-convite", "carta-empresa-br"] } },
         { num: "3", estado: "proximo", titulo: "Provar vínculo com o Brasil",     desc: "Emprego, imóvel, família — o que mostra que você vai voltar.", doneWhen: { itens: ["vinculo", "financeiro"] } },
-        { num: "4", estado: "futuro",  titulo: "Agendar e comparecer à entrevista", desc: "Consulados em SP, RJ, Recife, Brasília ou Porto Alegre." },
+        { num: "4", estado: "futuro",  titulo: "Agendar e comparecer à entrevista", desc: "Consulados em SP, RJ, Recife, Brasília ou Porto Alegre.", linkExterno: { label: "Agendar em ais.usvisa-info.com", url: "https://ais.usvisa-info.com/pt-br/niv" } },
         { num: "✓", estado: "futuro",  titulo: "Visto aprovado",                 desc: "B-1/B-2 no passaporte, pronto para viajar." },
       ],
       guardrails: [
@@ -502,9 +503,9 @@ export function getStrategy(profile: Profile): Strategy {
       situacao:  `Você está no Brasil e vai para os EUA como intercambista. O J-1 é patrocinado por uma organização autorizada pelo Departamento de Estado — o DS-2019 substitui o I-20 do F-1.`,
       etapas: [
         { num: "1", estado: "agora",   titulo: "Programa + DS-2019",       desc: "O patrocinador autorizado emite o DS-2019, base do seu J-1.", doneWhen: { itens: ["ds2019"] } },
-        { num: "2", estado: "proximo", titulo: "Pagar a taxa SEVIS",       desc: "US$220 (Work and Travel) ou US$35 (outros programas) em fmjfee.com.", doneWhen: { itens: ["sevis"] } },
-        { num: "3", estado: "proximo", titulo: "Preencher DS-160",         desc: "Formulário do Departamento de Estado — campo a campo no kit.", doneWhen: { itens: ["ds160"] } },
-        { num: "4", estado: "futuro",  titulo: "Entrevista consular",      desc: "Leve o DS-2019 e a carta do patrocinador." },
+        { num: "2", estado: "proximo", titulo: "Pagar a taxa SEVIS",       desc: "US$220 (Work and Travel) ou US$35 (outros programas), com o SEVIS ID do DS-2019.", tag: "US$220/US$35", linkExterno: { label: "Pagar em fmjfee.com", url: "https://www.fmjfee.com/" }, doneWhen: { itens: ["sevis"] } },
+        { num: "3", estado: "proximo", titulo: "Preencher DS-160",         desc: "Formulário do Departamento de Estado — campo a campo no kit.", linkExterno: { label: "Preencher em ceac.state.gov", url: "https://ceac.state.gov/genniv/" }, doneWhen: { itens: ["ds160"] } },
+        { num: "4", estado: "futuro",  titulo: "Entrevista consular",      desc: "Leve o DS-2019 e a carta do patrocinador.", linkExterno: { label: "Agendar em ais.usvisa-info.com", url: "https://ais.usvisa-info.com/pt-br/niv" } },
         { num: "✓", estado: "futuro",  titulo: "Visto J-1 aprovado",       desc: "Pronto para o intercâmbio." },
       ],
       guardrails: [
@@ -524,7 +525,7 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Solicitar extensão ao patrocinador",   desc: "Antes do vencimento do DS-2019 — geralmente com 30 a 60 dias de aviso.", doneWhen: { itens: ["solicitar-extensao-j1"] } },
         { num: "2", estado: "proximo", titulo: "Justificativa para a extensão",        desc: "Conclusão do programa, aprovação acadêmica ou continuidade de projeto — o patrocinador define os critérios.", doneWhen: { itens: ["justificativa-extensao-j1"] } },
-        { num: "3", estado: "proximo", titulo: "Confirmar a regra dos 2 anos",         desc: "Campo 'Exchange Visitor Subject to Two-Year Rule' no DS-2019, ou pergunte ao patrocinador.", doneWhen: { itens: ["regra-2-anos-check"] } },
+        { num: "3", estado: "proximo", titulo: "Confirmar a regra dos 2 anos",         desc: "Campo 'Exchange Visitor Subject to Two-Year Rule' no DS-2019, ou pergunte ao patrocinador.", linkExterno: { label: "Consultar em j1visa.state.gov", url: "https://j1visa.state.gov/basics/" }, doneWhen: { itens: ["regra-2-anos-check"] } },
         { num: "4", estado: "proximo", titulo: "Receber o DS-2019 atualizado",         desc: "Emitido pelo patrocinador após aprovação no SEVIS — sem passar pelo USCIS ou consulado.", doneWhen: { itens: ["ds2019-atualizado"] } },
         { num: "✓", estado: "futuro",  titulo: "Programa estendido — próximo passo",   desc: "Waiver obtido, 2 anos cumpridos, ou sem restrição: F-1, H-1B e outros ficam abertos." },
       ],
@@ -550,14 +551,14 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: cos ? [
         { num: "1", estado: "agora",   titulo: "Confirmar tempo e cargo na empresa",     desc: "1 ano contínuo nos últimos 3 anos, em função executiva, gerencial ou especialista.", doneWhen: { itens: ["docs-status-l1"] } },
         { num: "2", estado: "proximo", titulo: "Comprovar 1 ano de trabalho no exterior", desc: "Contracheques, contrato e registros corporativos da empresa estrangeira.", doneWhen: { itens: ["contracheques-exterior", "contrato-exterior"] } },
-        { num: "3", estado: "proximo", titulo: "I-129 com classificação L e COS",         desc: "A empresa americana submete ao USCIS — sem consulado, sem DS-160.", tag: "I-129", doneWhen: { itens: ["i129-l1-cos"] } },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação L e COS",         desc: "A empresa americana submete ao USCIS — sem consulado, sem DS-160.", tag: "I-129", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" }, doneWhen: { itens: ["i129-l1-cos"] } },
         { num: "4", estado: "futuro",  titulo: "I-797 aprovado com Change of Status",     desc: "Confirma a mudança de status para L-1 dentro dos EUA.", doneWhen: { itens: ["i797-l1-cos"] } },
         { num: "✓", estado: "futuro",  titulo: "L-1 ativo — início do trabalho",          desc: "L-1A: até 7 anos. L-1B: até 5 anos. Cônjuge (L-2) pode trabalhar." },
       ] : [
         { num: "1", estado: "agora",   titulo: "Confirmar tempo e cargo na empresa", desc: "1 ano contínuo nos últimos 3 anos, em função executiva, gerencial ou especialista." },
         { num: "2", estado: "proximo", titulo: "Empresa reúne a documentação",       desc: "Registros corporativos e prova de que as entidades nos dois países são a mesma organização.", doneWhen: { itens: ["docs-empresa"] } },
-        { num: "3", estado: "proximo", titulo: "I-129 com classificação L",          desc: "A empresa americana submete ao USCIS.", tag: "I-129", doneWhen: { itens: ["i129l"] } },
-        { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                     desc: "Aprovação da petição, seguida de entrevista consular para o carimbo do visto.", doneWhen: { itens: ["i797"] } },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação L",          desc: "A empresa americana submete ao USCIS.", tag: "I-129", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" }, doneWhen: { itens: ["i129l"] } },
+        { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                     desc: "Aprovação da petição, seguida de entrevista consular para o carimbo do visto.", linkExterno: { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" }, doneWhen: { itens: ["i797"] } },
         { num: "✓", estado: "futuro",  titulo: "L-1 ativo — início do trabalho",     desc: "L-1A: até 7 anos. L-1B: até 5 anos. Cônjuge (L-2) pode trabalhar." },
       ],
       guardrails: [
@@ -579,7 +580,7 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Confirmar os 4 requisitos",           desc: "Nacionalidade de país com tratado, investimento substancial, controle de pelo menos 50% e papel ativo na gestão." },
         { num: "2", estado: "proximo", titulo: "Montar o plano de negócios",          desc: "Prova de origem e aplicação dos fundos, mais o plano do negócio nos EUA." },
-        { num: "3", estado: "proximo", titulo: "I-129 com classificação E-2 e COS",   desc: "Submetido ao USCIS — sem consulado, sem DS-160." },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação E-2 e COS",   desc: "Submetido ao USCIS — sem consulado, sem DS-160.", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" } },
         { num: "✓", estado: "futuro",  titulo: "E-2 aprovado",                       desc: "Renovável sem limite enquanto o negócio operar de verdade." },
       ],
       guardrails: [
@@ -601,8 +602,8 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Confirmar os 4 requisitos", desc: "Nacionalidade de país com tratado, investimento substancial, controle de pelo menos 50% e papel ativo na gestão.", doneWhen: { itens: ["nacionalidade-tratado", "investimento-substancial", "propriedade-empresa", "papel-ativo"] } },
         { num: "2", estado: "proximo", titulo: "Montar o plano de negócios", desc: "Prova de origem e aplicação dos fundos, mais o plano do negócio nos EUA." },
-        { num: "3", estado: "proximo", titulo: "DS-160 + DS-156E",           desc: "Formulários do Departamento de Estado, com o dossiê completo do negócio." },
-        { num: "4", estado: "futuro",  titulo: "Entrevista de investidor",   desc: "O cônsul avalia o negócio e sua participação ativa nele." },
+        { num: "3", estado: "proximo", titulo: "DS-160 + DS-156E",           desc: "Formulários do Departamento de Estado, com o dossiê completo do negócio.", linkExterno: { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" } },
+        { num: "4", estado: "futuro",  titulo: "Entrevista de investidor",   desc: "O cônsul avalia o negócio e sua participação ativa nele.", linkExterno: { label: "Agendar em ais.usvisa-info.com", url: "https://ais.usvisa-info.com/pt-br/niv" } },
         { num: "✓", estado: "futuro",  titulo: "E-2 aprovado",              desc: "Renovável sem limite enquanto o negócio operar de verdade." },
       ],
       guardrails: [
@@ -622,7 +623,7 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Confirmar o comércio substancial",   desc: "Histórico documentado: contratos e faturas mostrando o volume bilateral entre os dois países." },
         { num: "2", estado: "proximo", titulo: "Montar o dossiê comercial",          desc: "Documentação da empresa e do comércio, sem os formulários consulares." },
-        { num: "3", estado: "proximo", titulo: "I-129 com classificação E-1 e COS",  desc: "Submetido ao USCIS — sem consulado, sem DS-160." },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação E-1 e COS",  desc: "Submetido ao USCIS — sem consulado, sem DS-160.", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" } },
         { num: "✓", estado: "futuro",  titulo: "E-1 aprovado",                      desc: "Renovável sem limite enquanto o comércio substancial continuar." },
       ],
       guardrails: [
@@ -643,8 +644,8 @@ export function getStrategy(profile: Profile): Strategy {
       situacao:  `O E-1 exige nacionalidade de país com tratado de comércio com os EUA e mais de 50% do volume de comércio da empresa entre os dois países.`,
       etapas: [
         { num: "1", estado: "agora",   titulo: "Confirmar o comércio substancial", desc: "Histórico documentado: contratos e faturas mostrando o volume bilateral entre os dois países." },
-        { num: "2", estado: "proximo", titulo: "Montar o dossiê comercial",        desc: "DS-160 + DS-156E com a documentação da empresa." },
-        { num: "3", estado: "futuro",  titulo: "Entrevista consular",              desc: "O cônsul avalia o volume e a natureza do comércio." },
+        { num: "2", estado: "proximo", titulo: "Montar o dossiê comercial",        desc: "DS-160 + DS-156E com a documentação da empresa.", linkExterno: { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" } },
+        { num: "3", estado: "futuro",  titulo: "Entrevista consular",              desc: "O cônsul avalia o volume e a natureza do comércio.", linkExterno: { label: "Agendar em ais.usvisa-info.com", url: "https://ais.usvisa-info.com/pt-br/niv" } },
         { num: "✓", estado: "futuro",  titulo: "E-1 aprovado",                    desc: "Renovável sem limite enquanto o comércio substancial continuar." },
       ],
       guardrails: [
@@ -665,8 +666,8 @@ export function getStrategy(profile: Profile): Strategy {
       situacao:  `Você está buscando (ou já tem) asilo nos EUA. Esse caminho tem prazos rígidos e consequências sérias se não for seguido com cuidado — cada passo merece atenção redobrada.`,
       destaque: { tipo: "alerta", texto: "O pedido de asilo (I-589) precisa, em regra, ser apresentado até 1 ano após a chegada aos EUA." },
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Protocolar o I-589",              desc: "Pedido de asilo, com evidências do caso.", tag: "1 ano" },
-        { num: "2", estado: "proximo", titulo: "Autorização de trabalho (I-765)", desc: "Pode ser pedida 150 dias após protocolar o asilo." },
+        { num: "1", estado: "agora",   titulo: "Protocolar o I-589",              desc: "Pedido de asilo, com evidências do caso.", tag: "1 ano", linkExterno: { label: "Formulário em uscis.gov/i-589", url: "https://www.uscis.gov/i-589" } },
+        { num: "2", estado: "proximo", titulo: "Autorização de trabalho (I-765)", desc: "Pode ser pedida 150 dias após protocolar o asilo.", linkExterno: { label: "Formulário em uscis.gov/i-765", url: "https://www.uscis.gov/i-765" } },
         { num: "3", estado: "proximo", titulo: "Entrevista ou audiência",         desc: "Caso afirmativo: entrevista no USCIS. Caso defensivo: audiências na corte de imigração." },
         { num: "4", estado: "futuro",  titulo: "Decisão do caso",                 desc: "Asilo concedido garante permanência e caminho para o Green Card." },
         { num: "✓", estado: "futuro",  titulo: "Green Card (I-485)",              desc: "1 ano após a concessão do asilo, você pode pedir a residência permanente." },
