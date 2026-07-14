@@ -17,6 +17,7 @@ interface Kit {
   descricao:  string;
   caminho:    "consulado" | "cos" | "manutencao";
   alerta?:    string;
+  preco?:     string;  // etiqueta de preço do kit (ex: OPT "R$ 147")
   restrito?:  boolean; // ex: E-2 não disponível para brasileiros
 }
 

@@ -143,6 +143,7 @@ export default function FormularioPage() {
   }
 
   async function handleExport() {
+    if (!form) return;
     setShowErrors(true);
     if (!canExport) {
       document.getElementById("export-panel")?.scrollIntoView({ behavior: "smooth" });
