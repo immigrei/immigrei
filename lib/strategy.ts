@@ -132,11 +132,12 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Verificar status no I-94",    desc: "i94.cbp.dhs.gov — confirme que você ainda está em status válido.", doneWhen: { itens: ["status-valido"] } },
         { num: "2", estado: "proximo", titulo: "Escolher escola SEVP próxima", desc: "Escola presencial longe da sua residência resulta em negação.", href: "/escolas", doneWhen: { school: true } },
-        { num: "3", estado: "proximo", titulo: "Obter o I-20",                desc: "Escola emite o I-20 após matrícula confirmada.", doneWhen: { itens: ["i20-cos"] } },
-        { num: "4", estado: "proximo", titulo: "Reunir documentação financeira", desc: "Extrato pessoal de 6 meses. No seu nome. PDF oficial do banco.", tag: "Crítico", doneWhen: { itens: ["extrato-pessoal"] } },
-        { num: "5", estado: "proximo", titulo: "Preencher e enviar I-539",    desc: "Taxa US$370 por money order. Endereço varia por estado.", tag: "US$370", doneWhen: { itens: ["i539"] } },
-        { num: "6", estado: "futuro",  titulo: "Receber I-797 de recebimento", desc: "Guarde este documento — prova que você protocolou em status.", doneWhen: { itens: ["i797-recebimento"] } },
-        { num: "7", estado: "futuro",  titulo: "Aprovação do I-539",          desc: "Prazo médio: 4–8 meses. Premium Processing disponível.", tag: "4–8 meses" },
+        { num: "3", estado: "proximo", titulo: "Obter o I-20",                desc: "Escola emite o I-20 após matrícula confirmada — nele está o seu SEVIS ID, usado no próximo passo.", doneWhen: { itens: ["i20-cos"] } },
+        { num: "4", estado: "proximo", titulo: "Pagar a taxa SEVIS (I-901)",  desc: "Obrigatória mesmo por dentro dos EUA: US$350 com o SEVIS ID do I-20, ANTES de enviar o I-539.", tag: "US$350", linkExterno: { label: "Pagar em fmjfee.com", url: "https://www.fmjfee.com/" }, doneWhen: { itens: ["i901-cos"] } },
+        { num: "5", estado: "proximo", titulo: "Reunir documentação financeira", desc: "Extrato pessoal de 6 meses. No seu nome. PDF oficial do banco.", tag: "Crítico", doneWhen: { itens: ["extrato-pessoal"] } },
+        { num: "6", estado: "proximo", titulo: "Preencher e enviar I-539",    desc: "Taxa US$370 por money order. Endereço varia por estado.", tag: "US$370", linkExterno: { label: "Formulário em uscis.gov/i-539", url: "https://www.uscis.gov/i-539" }, doneWhen: { itens: ["i539"] } },
+        { num: "7", estado: "futuro",  titulo: "Receber I-797 de recebimento", desc: "Guarde este documento — prova que você protocolou em status.", doneWhen: { itens: ["i797-recebimento"] } },
+        { num: "8", estado: "futuro",  titulo: "Aprovação do I-539",          desc: "Prazo médio: 4–8 meses. Premium Processing disponível.", tag: "4–8 meses" },
         { num: "✓", estado: "futuro",  titulo: "F-1 aprovado — início das aulas", desc: "Status F-1 ativo, pode começar o programa." },
       ],
       guardrails: [
@@ -201,10 +202,11 @@ export function getStrategy(profile: Profile): Strategy {
       destaque: { tipo: "alerta", texto: "Quem entra no M-1 NÃO pode mudar para F-1 dentro dos EUA depois. Se houver qualquer chance de querer curso acadêmico no futuro, avalie o F-1 antes de escolher o M-1." },
       etapas: [
         { num: "1", estado: "agora",   titulo: "Confirmar que o M-1 é a escolha definitiva", desc: "A restrição M-1 → F-1 dentro dos EUA não tem exceção — vale ler com calma antes de seguir.", doneWhen: { itens: ["restricao-m1-f1"] } },
-        { num: "2", estado: "proximo", titulo: "Escola técnica SEVP + I-20 (versão M)",      desc: "I-20 M-1 com prova de fundos para o curso inteiro, não só o 1º ano.", href: "/escolas", doneWhen: { itens: ["i20-m1-cos"] } },
-        { num: "3", estado: "proximo", titulo: "Preencher e enviar o I-539",                 desc: "Taxa US$370 por money order. Exige status válido no protocolo — confira seu I-94 antes.", tag: "US$370", doneWhen: { itens: ["i539-m1"] } },
-        { num: "4", estado: "proximo", titulo: "Reunir documentação financeira",             desc: "Extrato pessoal de 6 meses cobrindo mensalidade, moradia e despesas do curso.", doneWhen: { itens: ["extrato-pessoal-m1"] } },
-        { num: "5", estado: "futuro",  titulo: "Receber o I-797 de recebimento",              desc: "Prova que você protocolou em status. Prazo médio: 4–8 meses.", doneWhen: { itens: ["i797-m1"] } },
+        { num: "2", estado: "proximo", titulo: "Escola técnica SEVP + I-20 (versão M)",      desc: "I-20 M-1 com prova de fundos para o curso inteiro, não só o 1º ano — nele está o seu SEVIS ID.", href: "/escolas", doneWhen: { itens: ["i20-m1-cos"] } },
+        { num: "3", estado: "proximo", titulo: "Pagar a taxa SEVIS (I-901)",                 desc: "Obrigatória mesmo por dentro dos EUA: US$350 com o SEVIS ID do I-20, ANTES de enviar o I-539.", tag: "US$350", linkExterno: { label: "Pagar em fmjfee.com", url: "https://www.fmjfee.com/" }, doneWhen: { itens: ["i901-m1-cos"] } },
+        { num: "4", estado: "proximo", titulo: "Preencher e enviar o I-539",                 desc: "Taxa US$370 por money order. Exige status válido no protocolo — confira seu I-94 antes.", tag: "US$370", linkExterno: { label: "Formulário em uscis.gov/i-539", url: "https://www.uscis.gov/i-539" }, doneWhen: { itens: ["i539-m1"] } },
+        { num: "5", estado: "proximo", titulo: "Reunir documentação financeira",             desc: "Extrato pessoal de 6 meses cobrindo mensalidade, moradia e despesas do curso.", doneWhen: { itens: ["extrato-pessoal-m1"] } },
+        { num: "6", estado: "futuro",  titulo: "Receber o I-797 de recebimento",              desc: "Prova que você protocolou em status. Prazo médio: 4–8 meses.", doneWhen: { itens: ["i797-m1"] } },
         { num: "✓", estado: "futuro",  titulo: "M-1 aprovado — início do curso",              desc: "Status M-1 ativo, curso pode começar." },
       ],
       guardrails: [
