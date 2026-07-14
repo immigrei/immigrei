@@ -133,6 +133,95 @@ export async function sendCaseStatusUpdate({
   await getResend().emails.send({ from: FROM, to, subject, html });
 }
 
+// ── I-94 deadline approaching ────────────────────────────────────────────
+
+export async function sendI94DeadlineAlert({
+  to,
+  userName,
+  daysLeft,
+  i94ExpiryDate,
+}: {
+  to:            string;
+  userName:      string;
+  daysLeft:      number;
+  i94ExpiryDate: string; // "YYYY-MM-DD"
+}) {
+  const vencido = daysLeft < 0;
+  const hoje    = daysLeft === 0;
+
+  const emoji = vencido ? "🚨" : daysLeft <= 7 ? "⏰" : "📅";
+  const subject = vencido
+    ? `${emoji} Seu I-94 venceu — Immigrei`
+    : hoje
+      ? `${emoji} Seu I-94 vence hoje — Immigrei`
+      : `${emoji} Faltam ${daysLeft} dia${daysLeft === 1 ? "" : "s"} para o seu I-94 vencer — Immigrei`;
+
+  const statusColor = vencido ? "#C2542F" : daysLeft <= 7 ? "#E8A33D" : "#1E5E4E";
+  const statusBg    = vencido ? "rgba(194,84,47,.08)" : daysLeft <= 7 ? "#FBEDD4" : "#E4EFE9";
+  const [y, m, d] = i94ExpiryDate.split("-");
+  const dataFormatada = `${d}/${m}/${y}`;
+
+  const mensagem = vencido
+    ? `Seu I-94 venceu há ${Math.abs(daysLeft)} dia${Math.abs(daysLeft) === 1 ? "" : "s"} (${dataFormatada}). Isso já conta como presença irregular — quanto antes você agir, mais opções ficam abertas.`
+    : hoje
+      ? `Seu I-94 vence hoje (${dataFormatada}). Se uma extensão ou mudança de status ainda não foi protocolada, este é o último dia para isso acontecer em status válido.`
+      : `Seu I-94 vence em ${dataFormatada} — faltam ${daysLeft} dia${daysLeft === 1 ? "" : "s"}. Extensão (I-539) ou mudança de status precisam ser protocoladas antes do vencimento, não depois.`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <span style="font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;">Immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8B958F;margin:0 0 12px;">
+        Prazo do I-94
+      </p>
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        ${vencido ? "Seu I-94 venceu" : hoje ? "Seu I-94 vence hoje" : `Faltam ${daysLeft} dia${daysLeft === 1 ? "" : "s"}`}
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;">
+        Olá${userName ? ", " + userName : ""}!
+      </p>
+
+      <div style="padding:14px 16px;background:${statusBg};border-radius:10px;border:1px solid ${statusColor}33;margin-bottom:20px;">
+        <p style="font-size:15px;font-weight:600;color:${statusColor};margin:0;line-height:1.5;">
+          ${mensagem}
+        </p>
+      </div>
+
+      <div style="background:#F4EEE2;border-radius:10px;padding:12px 16px;margin-bottom:24px;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#8B958F;">
+          Data do seu I-94
+        </span><br>
+        <span style="font-size:15px;font-weight:600;color:#1B2520;">
+          ${dataFormatada}
+        </span>
+      </div>
+
+      <a href="${APP_URL}/dashboard"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
+        Ver minha jornada →
+      </a>
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">A data do I-94 é a que você mesmo cadastrou no Immigrei — confirme em <strong>i94.cbp.dhs.gov</strong> se tiver dúvida.</p>
+      <p style="margin:6px 0 0">Não somos um escritório de advocacia. Para decisões, consulte um profissional.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
 // ── Visa Bulletin updated ──────────────────────────────────────────────────
 
 export async function sendBulletinUpdate({

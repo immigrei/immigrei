@@ -15,6 +15,10 @@
     {
       "path":     "/api/cron/consulados",
       "schedule": "0 9 1 * *"
+    },
+    {
+      "path":     "/api/cron/i94-deadlines",
+      "schedule": "0 13 * * *"
     }
   ]
 }

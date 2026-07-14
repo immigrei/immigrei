@@ -103,25 +103,52 @@ describe("getStrategy — visa_types sem branch dedicado caíam no fallback gen�
     expect(s.kitId).toBe("j1");
   });
 
-  it("j1 nos EUA → jornada da regra dos 2 anos", () => {
+  it("j1 nos EUA → jornada da regra dos 2 anos, kit de extensão real (não CTA vazio)", () => {
     const s = getStrategy(profile({ visa_type: "j1", location: "eua" }));
     expect(s.situacao).toContain("212(e)");
+    expect(s.kitId).toBe("j1-extensao");
   });
 
-  it("l1 → kit l1", () => {
-    const s = getStrategy(profile({ visa_type: "l1" }));
+  it("m1 nos EUA → mudança de status (kit m1-cos), não o fallback genérico", () => {
+    const s = getStrategy(profile({ visa_type: "m1", location: "eua" }));
+    expect(s.kitId).toBe("m1-cos");
+    expect(s.situacao).not.toContain("Complete seu perfil");
+  });
+
+  it("l1 no Brasil → kit consular l1 (DS-160 + entrevista)", () => {
+    const s = getStrategy(profile({ visa_type: "l1", location: "brasil" }));
     expect(s.kitId).toBe("l1");
   });
 
-  it("e2 → kit e2", () => {
-    const s = getStrategy(profile({ visa_type: "e2" }));
+  it("l1 nos EUA → kit l1-cos (Change of Status, nenhum item exige DS-160)", () => {
+    const s = getStrategy(profile({ visa_type: "l1", location: "eua" }));
+    expect(s.kitId).toBe("l1-cos");
+    const itensExigidos = s.etapas.flatMap((e) => e.doneWhen?.itens ?? []);
+    expect(itensExigidos).not.toContain("ds160");
+  });
+
+  it("e2 via consulado (fora dos EUA) → kit e2", () => {
+    const s = getStrategy(profile({ visa_type: "e2", location: "brasil" }));
     expect(s.kitId).toBe("e2");
   });
 
-  it("e1 → jornada dedicada, sem kit", () => {
-    const s = getStrategy(profile({ visa_type: "e1" }));
+  it("e2 nos EUA → mudança de status por I-129, sem DS-160 e sem kit ainda", () => {
+    const s = getStrategy(profile({ visa_type: "e2", location: "eua" }));
+    expect(s.kitId).toBe("");
+    expect(s.ctaHref).toBe("/profissionais");
+    expect(JSON.stringify(s.etapas)).not.toContain("DS-160 + DS-156E");
+  });
+
+  it("e1 fora dos EUA → jornada consular dedicada, sem kit", () => {
+    const s = getStrategy(profile({ visa_type: "e1", location: "brasil" }));
     expect(s.situacao).not.toContain("Complete seu perfil");
     expect(s.ctaHref).toBe("/profissionais");
+  });
+
+  it("e1 nos EUA → mudança de status por I-129, sem DS-160", () => {
+    const s = getStrategy(profile({ visa_type: "e1", location: "eua" }));
+    expect(s.ctaHref).toBe("/profissionais");
+    expect(JSON.stringify(s.etapas)).not.toContain("DS-160 + DS-156E");
   });
 
   it("asylee → jornada de asilo com alerta de prazo", () => {

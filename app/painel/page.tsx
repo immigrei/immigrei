@@ -8,6 +8,7 @@ import OptionsList from "@/app/components/OptionsList";
 import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
 import { applyProgress, type DoneWhen, type ProgressSignals } from "@/lib/journey-progress";
 import { traduzirStatus } from "@/lib/uscis-status-pt";
+import { daysUntilI94Expiry } from "@/lib/i94";
 import type { UserCase } from "@/app/dashboard/CaseStatusCard";
 
 interface ChosenSchool {
@@ -51,14 +52,6 @@ const FAMILY_TIES_CARD: Record<string, { titulo: string; texto: string }> = {
 export function getFamilyTiesCard(familyTies: string | null | undefined) {
   if (!familyTies) return null;
   return FAMILY_TIES_CARD[familyTies] ?? null;
-}
-
-function i94DaysLeft(dateStr: string): number {
-  const [year, month, day] = dateStr.split("-");
-  const due = new Date(Number(year), Number(month) - 1, Number(day));
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 // ── Strategy engine ───────────────────────────────────────────────────────────
@@ -192,6 +185,30 @@ export function getStrategy(profile: Profile): Strategy {
       ],
       kitId:    "m1",
       kitLabel: "Kit M-1 via consulado",
+    };
+  }
+
+  // ── M-1 — mudança de status dentro dos EUA ────────────────────────────
+  if (visa_type === "m1") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "M-1 · Mudança de status — dentro dos EUA",
+      situacao:  `Você está nos EUA com outro status e quer mudar para o M-1 para fazer um curso técnico ou vocacional. O processo usa o I-539 — sem sair do país, sem entrevista consular. Mas a restrição do M-1 é permanente: não dá pra voltar depois.`,
+      destaque: { tipo: "alerta", texto: "Quem entra no M-1 NÃO pode mudar para F-1 dentro dos EUA depois. Se houver qualquer chance de querer curso acadêmico no futuro, avalie o F-1 antes de escolher o M-1." },
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar que o M-1 é a escolha definitiva", desc: "A restrição M-1 → F-1 dentro dos EUA não tem exceção — vale ler com calma antes de seguir.", doneWhen: { itens: ["restricao-m1-f1"] } },
+        { num: "2", estado: "proximo", titulo: "Escola técnica SEVP + I-20 (versão M)",      desc: "I-20 M-1 com prova de fundos para o curso inteiro, não só o 1º ano.", href: "/escolas", doneWhen: { itens: ["i20-m1-cos"] } },
+        { num: "3", estado: "proximo", titulo: "Preencher e enviar o I-539",                 desc: "Taxa US$370 por money order. Exige status válido no protocolo — confira seu I-94 antes.", tag: "US$370", doneWhen: { itens: ["i539-m1"] } },
+        { num: "4", estado: "proximo", titulo: "Reunir documentação financeira",             desc: "Extrato pessoal de 6 meses cobrindo mensalidade, moradia e despesas do curso.", doneWhen: { itens: ["extrato-pessoal-m1"] } },
+        { num: "5", estado: "futuro",  titulo: "Receber o I-797 de recebimento",              desc: "Prova que você protocolou em status. Prazo médio: 4–8 meses.", doneWhen: { itens: ["i797-m1"] } },
+        { num: "✓", estado: "futuro",  titulo: "M-1 aprovado — início do curso",              desc: "Status M-1 ativo, curso pode começar." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "Não comece o curso antes da aprovação do I-539." },
+        { tipo: "atencao",  texto: "M-1 é data fixa no I-94 (não 'D/S' como o F-1) — atenção redobrada ao prazo." },
+      ],
+      kitId:    "m1-cos",
+      kitLabel: "Kit M-1 — mudança de status",
     };
   }
 
@@ -419,7 +436,7 @@ export function getStrategy(profile: Profile): Strategy {
 
   // ── B-1/B-2 — dentro dos EUA (I-94, extensão, mudança de status) ──────
   if ((visa_type === "b1" || visa_type === "b1b2") && location === "eua") {
-    const dias = i94_expiry_date ? i94DaysLeft(i94_expiry_date) : null;
+    const dias = i94_expiry_date ? daysUntilI94Expiry(i94_expiry_date) : null;
     const destaque: Strategy["destaque"] = dias === null
       ? { tipo: "alerta", texto: "Confira seu prazo em i94.cbp.dhs.gov e cadastre no seu perfil para acompanhar a contagem aqui." }
       : dias < 0
@@ -492,50 +509,84 @@ export function getStrategy(profile: Profile): Strategy {
     };
   }
 
-  // ── J-1 — já nos EUA, em programa ──────────────────────────────────────
+  // ── J-1 — já nos EUA, em programa (extensão via patrocinador) ─────────
   if (visa_type === "j1") {
     return {
       titulo:    `Jornada de ${nome}`,
       subtitulo: "J-1 · Intercâmbio — dentro dos EUA",
       situacao:  `Você está no programa J-1. O que importa agora é seguir as regras do patrocinador e saber se a regra dos 2 anos (INA §212(e)) se aplica ao seu caso — ela muda o que você pode fazer depois.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Confirmar a regra dos 2 anos",  desc: "Olhe o campo correspondente no seu DS-2019, ou pergunte ao patrocinador." },
-        { num: "2", estado: "proximo", titulo: "Seguir as regras do programa",  desc: "Frequência, horas e atividades aprovadas pelo patrocinador." },
-        { num: "3", estado: "proximo", titulo: "Planejar o próximo passo",      desc: "Sujeito à regra: waiver ou 2 anos no Brasil antes de H, L, K ou Green Card. Sem a regra: F-1, H-1B e outros ficam abertos." },
-        { num: "✓", estado: "futuro",  titulo: "Programa concluído",           desc: "Waiver obtido, 2 anos cumpridos, ou sem restrição — pronto para o próximo passo." },
+        { num: "1", estado: "agora",   titulo: "Solicitar extensão ao patrocinador",   desc: "Antes do vencimento do DS-2019 — geralmente com 30 a 60 dias de aviso.", doneWhen: { itens: ["solicitar-extensao-j1"] } },
+        { num: "2", estado: "proximo", titulo: "Justificativa para a extensão",        desc: "Conclusão do programa, aprovação acadêmica ou continuidade de projeto — o patrocinador define os critérios.", doneWhen: { itens: ["justificativa-extensao-j1"] } },
+        { num: "3", estado: "proximo", titulo: "Confirmar a regra dos 2 anos",         desc: "Campo 'Exchange Visitor Subject to Two-Year Rule' no DS-2019, ou pergunte ao patrocinador.", doneWhen: { itens: ["regra-2-anos-check"] } },
+        { num: "4", estado: "proximo", titulo: "Receber o DS-2019 atualizado",         desc: "Emitido pelo patrocinador após aprovação no SEVIS — sem passar pelo USCIS ou consulado.", doneWhen: { itens: ["ds2019-atualizado"] } },
+        { num: "✓", estado: "futuro",  titulo: "Programa estendido — próximo passo",   desc: "Waiver obtido, 2 anos cumpridos, ou sem restrição: F-1, H-1B e outros ficam abertos." },
       ],
       guardrails: [
         { tipo: "proibido", texto: "Sujeito à regra dos 2 anos, você não pode mudar para H, L ou Green Card sem cumprir os 2 anos ou obter o waiver primeiro." },
       ],
-      kitId:    "",
-      kitLabel: "Falar com um profissional verificado",
-      ctaHref:  "/profissionais",
-      ctaDesc:  "Confirmar a regra dos 2 anos e o waiver por no-objection",
+      kitId:    "j1-extensao",
+      kitLabel: "Kit J-1 — extensão via patrocinador",
     };
   }
 
   // ── L-1 ──────────────────────────────────────────────────────────────
   if (visa_type === "l1") {
+    // "l1" (consular) exige DS-160 + entrevista; "l1-cos" (já nos EUA) muda
+    // de status pelo I-129 direto com o USCIS — sem consulado, sem DS-160.
+    const cos = location === "eua";
     return {
       titulo:    `Jornada de ${nome}`,
-      subtitulo: "L-1 · Transferência intraempresarial",
-      situacao:  `O L-1 é patrocinado pela empresa americana — exige que você tenha trabalhado na empresa fora dos EUA por pelo menos 1 ano nos últimos 3, em cargo executivo, gerencial ou de conhecimento especializado. Você não protocola sozinho.`,
-      etapas: [
+      subtitulo: cos ? "L-1 · Change of Status — dentro dos EUA" : "L-1 · Transferência intraempresarial",
+      situacao:  cos
+        ? `Você está nos EUA com outro status e sua empresa quer regularizar sua situação como L-1 sem que você saia do país. Empresa americana e estrangeira precisam ter relação corporativa comprovada, e você precisa ter trabalhado no exterior por pelo menos 1 ano nos últimos 3.`
+        : `O L-1 é patrocinado pela empresa americana — exige que você tenha trabalhado na empresa fora dos EUA por pelo menos 1 ano nos últimos 3, em cargo executivo, gerencial ou de conhecimento especializado. Você não protocola sozinho.`,
+      etapas: cos ? [
+        { num: "1", estado: "agora",   titulo: "Confirmar tempo e cargo na empresa",     desc: "1 ano contínuo nos últimos 3 anos, em função executiva, gerencial ou especialista.", doneWhen: { itens: ["docs-status-l1"] } },
+        { num: "2", estado: "proximo", titulo: "Comprovar 1 ano de trabalho no exterior", desc: "Contracheques, contrato e registros corporativos da empresa estrangeira.", doneWhen: { itens: ["contracheques-exterior", "contrato-exterior"] } },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação L e COS",         desc: "A empresa americana submete ao USCIS — sem consulado, sem DS-160.", tag: "I-129", doneWhen: { itens: ["i129-l1-cos"] } },
+        { num: "4", estado: "futuro",  titulo: "I-797 aprovado com Change of Status",     desc: "Confirma a mudança de status para L-1 dentro dos EUA.", doneWhen: { itens: ["i797-l1-cos"] } },
+        { num: "✓", estado: "futuro",  titulo: "L-1 ativo — início do trabalho",          desc: "L-1A: até 7 anos. L-1B: até 5 anos. Cônjuge (L-2) pode trabalhar." },
+      ] : [
         { num: "1", estado: "agora",   titulo: "Confirmar tempo e cargo na empresa", desc: "1 ano contínuo nos últimos 3 anos, em função executiva, gerencial ou especialista." },
         { num: "2", estado: "proximo", titulo: "Empresa reúne a documentação",       desc: "Registros corporativos e prova de que as entidades nos dois países são a mesma organização.", doneWhen: { itens: ["docs-empresa"] } },
         { num: "3", estado: "proximo", titulo: "I-129 com classificação L",          desc: "A empresa americana submete ao USCIS.", tag: "I-129", doneWhen: { itens: ["i129l"] } },
-        { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                     desc: "Aprovação da petição — ou entrevista consular se você estiver fora dos EUA.", doneWhen: { itens: ["i797"] } },
+        { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                     desc: "Aprovação da petição, seguida de entrevista consular para o carimbo do visto.", doneWhen: { itens: ["i797"] } },
         { num: "✓", estado: "futuro",  titulo: "L-1 ativo — início do trabalho",     desc: "L-1A: até 7 anos. L-1B: até 5 anos. Cônjuge (L-2) pode trabalhar." },
       ],
       guardrails: [
         { tipo: "atencao", texto: "Executivos em L-1A têm caminho direto ao Green Card pelo EB-1C, sem PERM." },
       ],
-      kitId:    "l1",
-      kitLabel: "Kit L-1 — transferência intraempresarial",
+      kitId:    cos ? "l1-cos" : "l1",
+      kitLabel: cos ? "Kit L-1 Change of Status" : "Kit L-1 — transferência intraempresarial",
     };
   }
 
-  // ── E-2 ──────────────────────────────────────────────────────────────
+  // ── E-2 — mudança de status dentro dos EUA ────────────────────────────
+  // Ainda não existe kit de documentos para essa rota (só a consular, "e2"),
+  // então o CTA vai para /profissionais em vez de um checklist inexistente.
+  if (visa_type === "e2" && location === "eua") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "E-2 · Investidor por tratado — dentro dos EUA",
+      situacao:  `Você está nos EUA e quer o E-2 sem passar pelo consulado. A mudança de status usa o I-129 direto com o USCIS — sem DS-160, sem entrevista — mas os requisitos de nacionalidade, investimento e gestão ativa são os mesmos.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar os 4 requisitos",           desc: "Nacionalidade de país com tratado, investimento substancial, controle de pelo menos 50% e papel ativo na gestão." },
+        { num: "2", estado: "proximo", titulo: "Montar o plano de negócios",          desc: "Prova de origem e aplicação dos fundos, mais o plano do negócio nos EUA." },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação E-2 e COS",   desc: "Submetido ao USCIS — sem consulado, sem DS-160." },
+        { num: "✓", estado: "futuro",  titulo: "E-2 aprovado",                       desc: "Renovável sem limite enquanto o negócio operar de verdade." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "O E-2 não leva direto ao Green Card — as pontes comuns são EB-5, EB-1C (executivo) ou EB-2 NIW." },
+      ],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Ainda não temos kit de documentos pronto para essa rota — comece com uma conversa",
+    };
+  }
+
+  // ── E-2 via consulado ──────────────────────────────────────────────────
   if (visa_type === "e2") {
     return {
       titulo:    `Jornada de ${nome}`,
@@ -556,7 +607,29 @@ export function getStrategy(profile: Profile): Strategy {
     };
   }
 
-  // ── E-1 ──────────────────────────────────────────────────────────────
+  // ── E-1 — mudança de status dentro dos EUA ────────────────────────────
+  if (visa_type === "e1" && location === "eua") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "E-1 · Comércio por tratado — dentro dos EUA",
+      situacao:  `Você está nos EUA e quer o E-1 sem passar pelo consulado. A mudança de status usa o I-129 direto com o USCIS — sem DS-160, sem entrevista — mas o volume de comércio bilateral exigido é o mesmo.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar o comércio substancial",   desc: "Histórico documentado: contratos e faturas mostrando o volume bilateral entre os dois países." },
+        { num: "2", estado: "proximo", titulo: "Montar o dossiê comercial",          desc: "Documentação da empresa e do comércio, sem os formulários consulares." },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação E-1 e COS",  desc: "Submetido ao USCIS — sem consulado, sem DS-160." },
+        { num: "✓", estado: "futuro",  titulo: "E-1 aprovado",                      desc: "Renovável sem limite enquanto o comércio substancial continuar." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "O E-1 não leva direto ao Green Card — executivos podem olhar o EB-1C; perfis qualificados, o EB-2 NIW." },
+      ],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Ainda não temos kit de documentos pronto para essa rota — comece com uma conversa",
+    };
+  }
+
+  // ── E-1 via consulado ──────────────────────────────────────────────────
   if (visa_type === "e1") {
     return {
       titulo:    `Jornada de ${nome}`,

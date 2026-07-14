@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { daysUntilI94Expiry } from "@/lib/i94";
 
 /**
  * Manual I-94 expiry date — the deadline that actually governs how long
@@ -15,14 +16,6 @@ function formatDate(dateStr: string) {
     month: "long",
     year: "numeric",
   });
-}
-
-function daysLeft(dateStr: string): number {
-  const [year, month, day] = dateStr.split("-");
-  const due = new Date(Number(year), Number(month) - 1, Number(day));
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function urgencyStyle(days: number): { text: string; badge: string } {
@@ -114,7 +107,7 @@ export default function I94Field({ initialValue }: { initialValue: string | null
     );
   }
 
-  const days = daysLeft(value);
+  const days = daysUntilI94Expiry(value);
   const style = urgencyStyle(days);
 
   return (
