@@ -88,6 +88,20 @@ export default function JourneyTimeline({ name, etapas }: { name: string; etapas
                     🧭 Continuar →
                   </Link>
                 )}
+                {etapa.linkExterno && (
+                  <a
+                    href={etapa.linkExterno.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-block mt-2 text-xs font-bold underline underline-offset-4 transition-colors ${
+                      isCurrent
+                        ? "text-amber-deep hover:text-ink"
+                        : "text-pine hover:text-pine-deep"
+                    }`}
+                  >
+                    {etapa.linkExterno.label} ↗
+                  </a>
+                )}
               </div>
             </li>
           );

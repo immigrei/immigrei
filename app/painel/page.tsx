@@ -222,6 +222,17 @@ export default function PainelPage() {
                         Buscar escolas certificadas →
                       </p>
                     )}
+                    {etapa.linkExterno && (
+                      <a
+                        href={etapa.linkExterno.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-block text-xs font-bold text-pine mt-1.5 underline underline-offset-2"
+                      >
+                        {etapa.linkExterno.label} ↗
+                      </a>
+                    )}
                   </>
                 );
                 return (

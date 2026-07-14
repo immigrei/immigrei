@@ -63,6 +63,10 @@ export interface Etapa {
   data?:  string;
   tag?:   string;
   href?:  string; // makes the step card a link (e.g. /escolas)
+  // Link direto para o site oficial onde a etapa é executada (ex: pagar a
+  // taxa SEVIS, preencher o DS-160, agendar a entrevista). Diferente de
+  // `href`, que navega dentro do próprio Immigrei.
+  linkExterno?: { label: string; url: string };
   // Real-data completion signal (see lib/journey-progress.ts). Steps without
   // it never auto-complete — they depend on events outside the app.
   doneWhen?: DoneWhen;
@@ -99,13 +103,14 @@ export function getStrategy(profile: Profile): Strategy {
       subtitulo: "F-1 via consulado · saindo do Brasil",
       situacao:  `Você está no Brasil e quer obter o visto F-1 para estudar nos EUA. O processo passa pelo consulado americano no Brasil — sem saída prévia dos EUA necessária.`,
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Matrícula + I-20",         desc: "Confirme a matrícula em escola SEVP e solicite o I-20 ao DSO.", href: "/escolas", doneWhen: { itens: ["i20"] } },
-        { num: "2", estado: "proximo", titulo: "Pagar taxa SEVIS",          desc: "US$350 em fls.dhs.gov. Guarde o comprovante I-901.", tag: "US$350", doneWhen: { itens: ["i901"] } },
-        { num: "3", estado: "proximo", titulo: "Preencher DS-160",          desc: "Formulário do Departamento de Estado — campo a campo no kit.", doneWhen: { itens: ["ds160"] } },
-        { num: "4", estado: "proximo", titulo: "Montar dossiê",             desc: "Extrato pessoal, vínculo com Brasil, carta de sponsor se aplicável.", doneWhen: { itens: ["financeiro", "vinculo"] } },
-        { num: "5", estado: "futuro",  titulo: "Agendar entrevista",        desc: "Consulados em SP, RJ, Recife, Brasília ou Porto Alegre." },
-        { num: "6", estado: "futuro",  titulo: "Entrevista consular",       desc: "2–5 minutos. O cônsul já leu o dossiê. Seja direto e confiante.", tag: "2–8 semanas" },
-        { num: "✓", estado: "futuro",  titulo: "Visto aprovado + viagem",   desc: "F-1 no passaporte. Visto válido para entrar nos EUA." },
+        { num: "1", estado: "agora",   titulo: "Buscar escola e confirmar matrícula",  desc: "Escolha um programa certificado pelo SEVP e confirme a matrícula com o DSO da escola.", href: "/escolas", doneWhen: { school: true } },
+        { num: "2", estado: "proximo", titulo: "Receber o I-20",                       desc: "A escola emite o I-20 após a matrícula confirmada — nele está o seu SEVIS ID, usado no próximo passo.", doneWhen: { itens: ["i20"] } },
+        { num: "3", estado: "proximo", titulo: "Pagar a taxa SEVIS (I-901)",           desc: "US$350, com o SEVIS ID do I-20 em mãos. Guarde o comprovante.", tag: "US$350", linkExterno: { label: "Pagar em fmjfee.com", url: "https://www.fmjfee.com/" }, doneWhen: { itens: ["i901"] } },
+        { num: "4", estado: "proximo", titulo: "Preencher o DS-160",                   desc: "Formulário do Departamento de Estado — campo a campo no kit. Leva de 1 a 2 horas; guarde o número de confirmação.", linkExterno: { label: "Preencher em ceac.state.gov", url: "https://ceac.state.gov/genniv/" }, doneWhen: { itens: ["ds160"] } },
+        { num: "5", estado: "proximo", titulo: "Montar dossiê",                        desc: "Extrato pessoal, vínculo com Brasil, carta de sponsor se aplicável.", doneWhen: { itens: ["financeiro", "vinculo"] } },
+        { num: "6", estado: "futuro",  titulo: "Agendar a entrevista",                 desc: "Pague a taxa de visto (~US$185) e marque o horário no consulado mais próximo — SP, RJ, Recife, Brasília ou Porto Alegre.", tag: "~US$185", linkExterno: { label: "Agendar em ais.usvisa-info.com", url: "https://ais.usvisa-info.com/pt-br/niv" } },
+        { num: "7", estado: "futuro",  titulo: "Entrevista consular",                  desc: "2–5 minutos. O cônsul já leu o dossiê. Seja direto e confiante.", tag: "2–8 semanas" },
+        { num: "✓", estado: "futuro",  titulo: "Visto aprovado + viagem",              desc: "F-1 no passaporte. Visto válido para entrar nos EUA." },
       ],
       guardrails: [
         { tipo: "atencao",  texto: "Escola a mais de 2h de onde você vai morar pode causar negação por 'programa presencial implausível'." },
