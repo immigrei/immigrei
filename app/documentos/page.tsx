@@ -38,6 +38,11 @@ const KITS: Kit[] = [
     titulo:   "Renovação, extensão e transferência F-1",
     descricao:"Estender o I-20, transferir de escola ou renovar o carimbo para viajar. Já tem F-1.",
   },
+  {
+    id: "f1-opt", codigo: "F-1", caminho: "manutencao", preco: "R$ 147",
+    titulo:   "OPT — autorização de trabalho (I-765)",
+    descricao:"Preencha o I-765 em português e exporte o formulário oficial em inglês. Para quem vai trabalhar na área depois de formar.",
+  },
   // ── M-1 ──────────────────────────────────────────────────────────────
   {
     id: "m1", codigo: "M-1", caminho: "consulado",

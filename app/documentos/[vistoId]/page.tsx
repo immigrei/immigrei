@@ -320,6 +320,19 @@ export default function DocumentosVistoPage() {
                           )}
                         </div>
 
+                        {/* Preencher formulário oficial em PT-BR e exportar */}
+                        {doc.formId && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/documentos/${vistoId}/formulario/${doc.formId}`);
+                            }}
+                            className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-amber px-3.5 py-2 text-xs font-bold text-ink hover:bg-amber-deep transition-colors"
+                          >
+                            Preencher em português e exportar →
+                          </button>
+                        )}
+
                         {/* Anexos */}
                         {temAnexo && (
                           <div className="mt-3 flex flex-col gap-1.5">

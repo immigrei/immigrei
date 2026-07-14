@@ -74,6 +74,7 @@ export const VISA_JOURNEYS: Record<string, VisaJourney> = {
         docs: ["Formulário I-765 (para OPT)"],
         uscisUrl: "https://www.uscis.gov/i-765",
         avgDays: 90,
+        link: { label: "Preencher o I-765 (OPT) em português", href: "/documentos/f1-opt" },
       },
       {
         id: "proximo_passo",

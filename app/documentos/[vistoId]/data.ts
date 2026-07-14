@@ -14,6 +14,10 @@ export interface Documento {
   descricao: string;
   agencia: Agencia;
   formulario?: string;
+  // When set, this item has an interactive PT-BR filler that exports the
+  // official form in English (see lib/forms/*). Links to
+  // /documentos/[vistoId]/formulario/[formId].
+  formId?: string;
   obrigatorio: boolean;
 }
 
@@ -994,6 +998,82 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao: "Transcript e carta da escola confirmando que você está regularmente matriculado e em dia com o programa.",
             agencia: "DOS",
             obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "f1-opt": {
+    vistoId: "f1-opt",
+    codigo: "F-1",
+    nome: "OPT — autorização de trabalho (I-765)",
+    intro: "Você concluiu (ou vai concluir) o curso e quer trabalhar na sua área com o OPT. O pedido vai ao USCIS pelo Formulário I-765, com a recomendação de OPT do seu DSO no I-20. Aqui você preenche o I-765 em português e exporta o formulário oficial em inglês.",
+    kit: {
+      caminho: "manutencao",
+      preco: "R$ 147",
+    },
+    grupos: [
+      {
+        titulo: "Formulário do USCIS",
+        descricao: "Preencha em português e exporte o formulário oficial em inglês",
+        documentos: [
+          {
+            id: "i765",
+            nome: "I-765 — Pedido de Autorização de Trabalho",
+            descricao: "O formulário do EAD para o OPT. Preencha aqui em português; o Immigrei exporta o PDF oficial preenchido em inglês para você conferir, assinar e enviar.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            formId: "i-765",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Documentos da escola",
+        descricao: "Emitidos pelo seu DSO — sem eles o USCIS nega o OPT",
+        documentos: [
+          {
+            id: "i20-opt",
+            nome: "I-20 com a recomendação de OPT do DSO",
+            descricao: "O DSO registra a recomendação de OPT no SEVIS e emite um I-20 novo com essa anotação. O pedido do I-765 precisa ser enviado dentro de 30 dias após essa recomendação.",
+            agencia: "USCIS",
+            formulario: "I-20",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Comprovantes para anexar ao I-765",
+        descricao: "Enviados junto do formulário",
+        documentos: [
+          {
+            id: "foto-passport",
+            nome: "2 fotos padrão passaporte (EUA)",
+            descricao: "Fotos coloridas 2x2 polegadas, tiradas nos últimos 30 dias.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "i94-opt",
+            nome: "Cópia do I-94 mais recente",
+            descricao: "Baixe em i94.cbp.dhs.gov. Comprova sua entrada e status atual.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "passport-opt",
+            nome: "Cópia do passaporte e do visto F-1",
+            descricao: "Página de identificação do passaporte (válido) e o carimbo/visto F-1.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "ead-anterior",
+            nome: "Cópia de EAD anterior (se já teve)",
+            descricao: "Se você já teve um EAD antes, inclua frente e verso. Se nunca teve, pule.",
+            agencia: "USCIS",
+            obrigatorio: false,
           },
         ],
       },
