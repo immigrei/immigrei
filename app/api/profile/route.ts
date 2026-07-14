@@ -11,10 +11,22 @@ export async function POST(req: NextRequest) {
 
   const user = await currentUser();
   const body = await req.json().catch(() => ({}));
-  const { visa_type, arrival_date, main_goal, location, nationality, chosen_school } = body;
+  const { visa_type, arrival_date, main_goal, location, nationality, chosen_school, i94_expiry_date, family_ties } = body;
 
-  if (!visa_type && !arrival_date && !main_goal && !location && !nationality && chosen_school === undefined) {
+  if (
+    !visa_type && !arrival_date && !main_goal && !location && !nationality &&
+    chosen_school === undefined && i94_expiry_date === undefined && family_ties === undefined
+  ) {
     return NextResponse.json({ error: "No fields to save" }, { status: 400 });
+  }
+
+  if (i94_expiry_date !== undefined && i94_expiry_date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(i94_expiry_date)) {
+    return NextResponse.json({ error: "Invalid i94_expiry_date" }, { status: 400 });
+  }
+
+  const VALID_FAMILY_TIES = ["spouse_citizen", "parent_child_citizen", "family_gc", "none"];
+  if (family_ties !== undefined && family_ties !== null && !VALID_FAMILY_TIES.includes(family_ties)) {
+    return NextResponse.json({ error: "Invalid family_ties" }, { status: 400 });
   }
 
   // chosen_school: campus snapshot from /escolas, or null to clear it.
@@ -39,6 +51,8 @@ export async function POST(req: NextRequest) {
   if (main_goal) row.main_goal = main_goal;
   if (location) row.location = location;
   if (nationality) row.nationality = nationality;
+  if (i94_expiry_date !== undefined) row.i94_expiry_date = i94_expiry_date;
+  if (family_ties !== undefined) row.family_ties = family_ties;
   if (chosen_school !== undefined) {
     row.chosen_school = chosen_school === null ? null : {
       school_name: String(chosen_school.school_name),
@@ -80,6 +94,8 @@ export async function DELETE() {
       location: null,
       nationality: null,
       chosen_school: null,
+      i94_expiry_date: null,
+      family_ties: null,
       onboarding_completed: false,
       updated_at: new Date().toISOString(),
     })

@@ -5,6 +5,7 @@ import { ensureProfile } from "@/lib/profile";
 import { getJourney } from "@/lib/visa-journeys";
 import { isDeniedStatus, isUscisSandbox } from "@/lib/uscis";
 import JourneyTimeline from "./JourneyTimeline";
+import I94Field from "./I94Field";
 import CaseStatusCard, { UserCase } from "./CaseStatusCard";
 import StrategicOptionsCard from "./StrategicOptionsCard";
 import VisaBulletinWidget from "./VisaBulletinWidget";
@@ -131,6 +132,7 @@ export default async function DashboardPage() {
                 value={GOAL_LABELS[profile.main_goal] ?? profile.main_goal}
               />
             )}
+            <I94Field initialValue={profile.i94_expiry_date ?? null} />
           </div>
         </div>
 

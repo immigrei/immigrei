@@ -6,7 +6,16 @@
  * recebia a jornada EB-2 NIW.
  */
 import { describe, expect, it } from "vitest";
-import { getStrategy } from "./page";
+import { getFamilyTiesCard, getStrategy } from "./page";
+
+// Formata em YYYY-MM-DD usando componentes locais — evita o desvio de fuso
+// horário do toISOString() (que converte para UTC e pode voltar/adiantar um dia).
+function toLocalDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 function profile(over: Partial<Parameters<typeof getStrategy>[0]>) {
   return {
@@ -71,5 +80,121 @@ describe("getStrategy — CTA", () => {
     const s = getStrategy(profile({ visa_type: "green_card", main_goal: "trazer_familia" }));
     expect(s.kitId).toBe("");
     expect(s.ctaHref).toBe("/dashboard");
+  });
+});
+
+// Regressão: nenhum visa_type salvo pelo onboarding pode cair no fallback
+// genérico "Complete seu perfil" — cada um precisa de uma jornada própria.
+describe("getStrategy — visa_types sem branch dedicado caíam no fallback genérico", () => {
+  it("b1/b1b2 nos EUA → jornada de prazo do I-94, não o fallback", () => {
+    const s = getStrategy(profile({ visa_type: "b1", location: "eua", main_goal: "renovar_visto" }));
+    expect(s.situacao).not.toContain("Complete seu perfil");
+    expect(s.situacao).toContain("I-94");
+  });
+
+  it("b1/b1b2 no Brasil → kit consular b1", () => {
+    const s = getStrategy(profile({ visa_type: "b1b2", location: "brasil" }));
+    expect(s.kitId).toBe("b1");
+    expect(s.situacao).not.toContain("Complete seu perfil");
+  });
+
+  it("j1 no Brasil → kit consular j1", () => {
+    const s = getStrategy(profile({ visa_type: "j1", location: "brasil" }));
+    expect(s.kitId).toBe("j1");
+  });
+
+  it("j1 nos EUA → jornada da regra dos 2 anos", () => {
+    const s = getStrategy(profile({ visa_type: "j1", location: "eua" }));
+    expect(s.situacao).toContain("212(e)");
+  });
+
+  it("l1 → kit l1", () => {
+    const s = getStrategy(profile({ visa_type: "l1" }));
+    expect(s.kitId).toBe("l1");
+  });
+
+  it("e2 → kit e2", () => {
+    const s = getStrategy(profile({ visa_type: "e2" }));
+    expect(s.kitId).toBe("e2");
+  });
+
+  it("e1 → jornada dedicada, sem kit", () => {
+    const s = getStrategy(profile({ visa_type: "e1" }));
+    expect(s.situacao).not.toContain("Complete seu perfil");
+    expect(s.ctaHref).toBe("/profissionais");
+  });
+
+  it("asylee → jornada de asilo com alerta de prazo", () => {
+    const s = getStrategy(profile({ visa_type: "asylee" }));
+    expect(s.destaque?.texto).toContain("I-589");
+  });
+
+  it("outro → jornada de situação em definição, não o fallback genérico", () => {
+    const s = getStrategy(profile({ visa_type: "outro" }));
+    expect(s.situacao).not.toContain("Complete seu perfil");
+  });
+
+  it("visa_type null → mantém o fallback genérico (perfil de fato incompleto)", () => {
+    const s = getStrategy(profile({ visa_type: null }));
+    expect(s.situacao).toContain("Complete seu perfil");
+  });
+});
+
+describe("getStrategy — B-1/B-2 usa o prazo real do I-94 quando cadastrado", () => {
+  it("sem i94_expiry_date → alerta genérico pedindo para cadastrar", () => {
+    const s = getStrategy(profile({ visa_type: "b1", location: "eua" }));
+    expect(s.destaque?.tipo).toBe("alerta");
+    expect(s.destaque?.texto).toContain("cadastre no seu perfil");
+    expect(s.etapas[0].estado).toBe("agora");
+  });
+
+  it("i94_expiry_date no passado → alerta de presença irregular, etapa 1 marcada feito", () => {
+    const ontem = new Date();
+    ontem.setDate(ontem.getDate() - 1);
+    const s = getStrategy(profile({
+      visa_type: "b1b2",
+      location: "eua",
+      i94_expiry_date: toLocalDateStr(ontem),
+    }));
+    expect(s.destaque?.texto).toContain("venceu");
+    expect(s.destaque?.texto).toContain("presença irregular");
+    expect(s.etapas[0].estado).toBe("feito");
+  });
+
+  it("i94_expiry_date confortavelmente no futuro → destaque 'ok'", () => {
+    const futuro = new Date();
+    futuro.setDate(futuro.getDate() + 90);
+    const s = getStrategy(profile({
+      visa_type: "b1",
+      location: "eua",
+      i94_expiry_date: toLocalDateStr(futuro),
+    }));
+    expect(s.destaque?.tipo).toBe("ok");
+  });
+});
+
+describe("getFamilyTiesCard — porta de Green Card por vínculo familiar", () => {
+  it("spouse_citizen → card de cônjuge/noivo de cidadão", () => {
+    const card = getFamilyTiesCard("spouse_citizen");
+    expect(card?.titulo).toContain("cônjuge ou noivo");
+  });
+
+  it("parent_child_citizen → card de filho/pai de cidadão", () => {
+    const card = getFamilyTiesCard("parent_child_citizen");
+    expect(card?.titulo).toContain("filho ou pai/mãe");
+  });
+
+  it("family_gc → card de familiar com Green Card", () => {
+    const card = getFamilyTiesCard("family_gc");
+    expect(card?.titulo).toContain("Green Card");
+  });
+
+  it("none → sem card (sem vínculo)", () => {
+    expect(getFamilyTiesCard("none")).toBeNull();
+  });
+
+  it("null/undefined → sem card (pergunta nunca respondida)", () => {
+    expect(getFamilyTiesCard(null)).toBeNull();
+    expect(getFamilyTiesCard(undefined)).toBeNull();
   });
 });

@@ -1679,7 +1679,14 @@ export default function OnboardingPage() {
         });
         if (res.ok) {
           localStorage.removeItem("immigrei_pending_profile");
-          router.replace("/dashboard");
+          // Sem visa_type no payload = veio do CTA "Encontrar ajuda
+          // profissional" (vínculo familiar), não da vitrine — não tem
+          // jornada escolhida ainda, então /dashboard só bateria de volta
+          // no /onboarding.
+          const hasVisaType = (() => {
+            try { return Boolean(JSON.parse(pending)?.visa_type); } catch { return false; }
+          })();
+          router.replace(hasVisaType ? "/dashboard" : "/profissionais");
           return;
         }
       } catch {
@@ -1747,6 +1754,7 @@ export default function OnboardingPage() {
       visa_type: visaType,
       main_goal: deriveMainGoal(answers),
       location: "eua",
+      ...(answers.q_family_ties ? { family_ties: answers.q_family_ties } : {}),
     };
     try {
       const res = await fetch("/api/profile", {
@@ -1764,6 +1772,40 @@ export default function OnboardingPage() {
     } catch {
       setSaveError("Não conseguimos salvar agora. Tente novamente.");
       setSavingProfile(false);
+    }
+  }
+
+  // Quem tem vínculo familiar (cônjuge/filho de cidadão, ou parente com Green
+  // Card) sai direto para /profissionais sem passar pela vitrine de vistos —
+  // mas a resposta do questionário precisa ser salva antes, senão o painel
+  // nunca sabe desse vínculo e a pessoa não tem perfil algum ao voltar.
+  async function saveProfileAndGoToProfissionais() {
+    if (savingProfile) return;
+    setSavingProfile(true);
+    setSaveError(null);
+    const payload = {
+      main_goal: deriveMainGoal(answers),
+      location: answers.q_location === "in_us" ? "eua" : "brasil",
+      ...(answers.q_nationality ? { nationality: answers.q_nationality } : {}),
+      ...(answers.q_family_ties ? { family_ties: answers.q_family_ties } : {}),
+    };
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.status === 401) {
+        localStorage.setItem("immigrei_pending_profile", JSON.stringify(payload));
+        router.push("/sign-up");
+        return;
+      }
+    } catch {
+      // Perfil não salvou — ainda assim levamos para /profissionais, que é
+      // o pedido explícito do usuário; a próxima visita tenta salvar de novo.
+    } finally {
+      setSavingProfile(false);
+      router.push("/profissionais");
     }
   }
 
@@ -2013,17 +2055,16 @@ export default function OnboardingPage() {
           ) : (
             <button
               onClick={() =>
-                router.push(
-                  destino.kind === "profissionais"
-                    ? "/profissionais"
-                    : `/vistos?${destino.query}`
-                )
+                destino.kind === "profissionais"
+                  ? saveProfileAndGoToProfissionais()
+                  : router.push(`/vistos?${destino.query}`)
               }
-              className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
+              disabled={destino.kind === "profissionais" && savingProfile}
+              className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
               style={{ fontFamily: "var(--font-body)" }}
             >
               {destino.kind === "profissionais"
-                ? "Encontrar ajuda profissional →"
+                ? (savingProfile ? "Salvando sua jornada..." : "Encontrar ajuda profissional →")
                 : "Ver minha jornada em detalhe →"}
             </button>
           )}

@@ -7,6 +7,8 @@ import AppShell from "@/app/components/AppShell";
 import OptionsList from "@/app/components/OptionsList";
 import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
 import { applyProgress, type DoneWhen, type ProgressSignals } from "@/lib/journey-progress";
+import { traduzirStatus } from "@/lib/uscis-status-pt";
+import type { UserCase } from "@/app/dashboard/CaseStatusCard";
 
 interface ChosenSchool {
   school_name: string;
@@ -17,12 +19,46 @@ interface ChosenSchool {
 }
 
 interface Profile {
-  full_name:    string | null;
-  visa_type:    string | null;
-  location:     "brasil" | "eua" | null;
-  main_goal:    string | null;
-  arrival_date: string | null;
-  chosen_school?: ChosenSchool | null;
+  full_name:       string | null;
+  visa_type:       string | null;
+  location:        "brasil" | "eua" | null;
+  main_goal:       string | null;
+  arrival_date:    string | null;
+  i94_expiry_date?: string | null;
+  family_ties?:    string | null;
+  chosen_school?:  ChosenSchool | null;
+}
+
+// Vínculo familiar com cidadão/residente (q_family_ties no onboarding) abre
+// uma porta de Green Card que costuma ser mais rápida do que o caminho de
+// visto que a pessoa está seguindo — vale destacar isso no painel mesmo
+// quando a jornada principal do usuário não é sobre família.
+const FAMILY_TIES_CARD: Record<string, { titulo: string; texto: string }> = {
+  spouse_citizen: {
+    titulo: "Você tem cônjuge ou noivo(a) cidadão americano",
+    texto:  "Parente imediato de cidadão não entra em fila. Noivos usam o K-1 (casar nos EUA em até 90 dias); cônjuges já casados, o IR-1/CR-1 pelo consulado ou o I-130 + I-485 se já estiver nos EUA em status válido.",
+  },
+  parent_child_citizen: {
+    titulo: "Você é filho ou pai/mãe de cidadão americano",
+    texto:  "Categoria de parente imediato (IR): prioridade máxima, sem fila de espera. O cidadão americano protocola a petição I-130 por você.",
+  },
+  family_gc: {
+    titulo: "Você tem familiar próximo com Green Card",
+    texto:  "Residentes permanentes peticionam cônjuge e filhos solteiros (categorias F2A/F2B). Há fila — acompanhe a data de prioridade no Boletim de Vistos.",
+  },
+};
+
+export function getFamilyTiesCard(familyTies: string | null | undefined) {
+  if (!familyTies) return null;
+  return FAMILY_TIES_CARD[familyTies] ?? null;
+}
+
+function i94DaysLeft(dateStr: string): number {
+  const [year, month, day] = dateStr.split("-");
+  const due = new Date(Number(year), Number(month) - 1, Number(day));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 // ── Strategy engine ───────────────────────────────────────────────────────────
@@ -61,7 +97,7 @@ interface Strategy {
 }
 
 export function getStrategy(profile: Profile): Strategy {
-  const { visa_type, location, main_goal, full_name } = profile;
+  const { visa_type, location, main_goal, full_name, i94_expiry_date } = profile;
   const nome = full_name?.split(" ")[0] ?? "você";
 
   // ── F-1 do Brasil ────────────────────────────────────────────────────
@@ -381,6 +417,210 @@ export function getStrategy(profile: Profile): Strategy {
     };
   }
 
+  // ── B-1/B-2 — dentro dos EUA (I-94, extensão, mudança de status) ──────
+  if ((visa_type === "b1" || visa_type === "b1b2") && location === "eua") {
+    const dias = i94_expiry_date ? i94DaysLeft(i94_expiry_date) : null;
+    const destaque: Strategy["destaque"] = dias === null
+      ? { tipo: "alerta", texto: "Confira seu prazo em i94.cbp.dhs.gov e cadastre no seu perfil para acompanhar a contagem aqui." }
+      : dias < 0
+        ? { tipo: "alerta", texto: `Seu I-94 venceu há ${Math.abs(dias)} dia${Math.abs(dias) === 1 ? "" : "s"}. Isso já conta como presença irregular — fale com um profissional o quanto antes.` }
+        : dias <= 30
+          ? { tipo: "alerta", texto: `Faltam ${dias} dia${dias === 1 ? "" : "s"} para o seu I-94 vencer. Extensão ou mudança de status precisam ser protocoladas antes disso.` }
+          : { tipo: "ok", texto: `Seu I-94 vale até ${dias} dias a partir de hoje. Tudo em ordem por enquanto.` };
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "B-1/B-2 · Turismo ou negócios — dentro dos EUA",
+      situacao:  `Você está nos EUA em status B-1/B-2. O prazo que vale é o do seu I-94, não o carimbo do visto no passaporte — ele define até quando você pode ficar.`,
+      destaque,
+      etapas: [
+        { num: "1", estado: dias !== null ? "feito" : "agora", titulo: "Conferir o prazo do I-94",  desc: "i94.cbp.dhs.gov mostra a data exata de saída obrigatória — cadastre no seu perfil (início) para acompanhar aqui." },
+        { num: "2", estado: "proximo", titulo: "Extensão de permanência (I-539)",  desc: "Pedida antes do I-94 vencer, com justificativa (ex: negócio ainda em andamento).", tag: "US$370" },
+        { num: "3", estado: "proximo", titulo: "Mudança de status, se for o caso", desc: "Quer estudar (F-1), trabalhar ou seguir outro caminho? Muda-se de status antes do prazo vencer — não depois." },
+        { num: "✓", estado: "futuro",  titulo: "Status resolvido",                desc: "Extensão aprovada, novo status aprovado, ou saída dentro do prazo." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "B-1/B-2 não autoriza trabalho remunerado nos EUA, nem para empresa brasileira remota — só reuniões, negociações e turismo." },
+        { tipo: "atencao",  texto: "Passar do prazo do I-94 sem pedido de extensão ou mudança de status protocolado começa a contar presença irregular." },
+      ],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Extensão, mudança de status ou dúvida sobre o prazo do I-94",
+    };
+  }
+
+  // ── B-1/B-2 via consulado · saindo do Brasil ──────────────────────────
+  if (visa_type === "b1" || visa_type === "b1b2") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "B-1/B-2 via consulado · saindo do Brasil",
+      situacao:  `Você está no Brasil e quer o visto B-1/B-2 para negócios ou turismo nos EUA. O processo é direto: DS-160 + entrevista, sem I-20 nem taxa SEVIS.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Preencher o DS-160",              desc: "Formulário do Departamento de Estado — campo a campo no kit.", doneWhen: { itens: ["ds160"] } },
+        { num: "2", estado: "proximo", titulo: "Montar o dossiê de negócios",     desc: "Carta de convite da empresa americana e carta da empresa brasileira confirmando cargo e propósito.", doneWhen: { itens: ["carta-convite", "carta-empresa-br"] } },
+        { num: "3", estado: "proximo", titulo: "Provar vínculo com o Brasil",     desc: "Emprego, imóvel, família — o que mostra que você vai voltar.", doneWhen: { itens: ["vinculo", "financeiro"] } },
+        { num: "4", estado: "futuro",  titulo: "Agendar e comparecer à entrevista", desc: "Consulados em SP, RJ, Recife, Brasília ou Porto Alegre." },
+        { num: "✓", estado: "futuro",  titulo: "Visto aprovado",                 desc: "B-1/B-2 no passaporte, pronto para viajar." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "B-1/B-2 não autoriza trabalho remunerado nos EUA — só reuniões, negociações e turismo." },
+        { tipo: "atencao",  texto: "O cônsul avalia intenção de voltar ao Brasil. Vínculos fracos são o motivo mais comum de negativa." },
+      ],
+      kitId:    "b1",
+      kitLabel: "Kit B-1/B-2 via consulado",
+    };
+  }
+
+  // ── J-1 via consulado · saindo do Brasil ──────────────────────────────
+  if (visa_type === "j1" && location !== "eua") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "J-1 via consulado · intercâmbio",
+      situacao:  `Você está no Brasil e vai para os EUA como intercambista. O J-1 é patrocinado por uma organização autorizada pelo Departamento de Estado — o DS-2019 substitui o I-20 do F-1.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Programa + DS-2019",       desc: "O patrocinador autorizado emite o DS-2019, base do seu J-1.", doneWhen: { itens: ["ds2019"] } },
+        { num: "2", estado: "proximo", titulo: "Pagar a taxa SEVIS",       desc: "US$220 (Work and Travel) ou US$35 (outros programas) em fmjfee.com.", doneWhen: { itens: ["sevis"] } },
+        { num: "3", estado: "proximo", titulo: "Preencher DS-160",         desc: "Formulário do Departamento de Estado — campo a campo no kit.", doneWhen: { itens: ["ds160"] } },
+        { num: "4", estado: "futuro",  titulo: "Entrevista consular",      desc: "Leve o DS-2019 e a carta do patrocinador." },
+        { num: "✓", estado: "futuro",  titulo: "Visto J-1 aprovado",       desc: "Pronto para o intercâmbio." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "Confira se seu programa está sujeito à regra dos 2 anos (INA §212(e)) — isso muda o que você pode fazer depois." },
+      ],
+      kitId:    "j1",
+      kitLabel: "Kit J-1 via consulado",
+    };
+  }
+
+  // ── J-1 — já nos EUA, em programa ──────────────────────────────────────
+  if (visa_type === "j1") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "J-1 · Intercâmbio — dentro dos EUA",
+      situacao:  `Você está no programa J-1. O que importa agora é seguir as regras do patrocinador e saber se a regra dos 2 anos (INA §212(e)) se aplica ao seu caso — ela muda o que você pode fazer depois.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar a regra dos 2 anos",  desc: "Olhe o campo correspondente no seu DS-2019, ou pergunte ao patrocinador." },
+        { num: "2", estado: "proximo", titulo: "Seguir as regras do programa",  desc: "Frequência, horas e atividades aprovadas pelo patrocinador." },
+        { num: "3", estado: "proximo", titulo: "Planejar o próximo passo",      desc: "Sujeito à regra: waiver ou 2 anos no Brasil antes de H, L, K ou Green Card. Sem a regra: F-1, H-1B e outros ficam abertos." },
+        { num: "✓", estado: "futuro",  titulo: "Programa concluído",           desc: "Waiver obtido, 2 anos cumpridos, ou sem restrição — pronto para o próximo passo." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "Sujeito à regra dos 2 anos, você não pode mudar para H, L ou Green Card sem cumprir os 2 anos ou obter o waiver primeiro." },
+      ],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Confirmar a regra dos 2 anos e o waiver por no-objection",
+    };
+  }
+
+  // ── L-1 ──────────────────────────────────────────────────────────────
+  if (visa_type === "l1") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "L-1 · Transferência intraempresarial",
+      situacao:  `O L-1 é patrocinado pela empresa americana — exige que você tenha trabalhado na empresa fora dos EUA por pelo menos 1 ano nos últimos 3, em cargo executivo, gerencial ou de conhecimento especializado. Você não protocola sozinho.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar tempo e cargo na empresa", desc: "1 ano contínuo nos últimos 3 anos, em função executiva, gerencial ou especialista." },
+        { num: "2", estado: "proximo", titulo: "Empresa reúne a documentação",       desc: "Registros corporativos e prova de que as entidades nos dois países são a mesma organização.", doneWhen: { itens: ["docs-empresa"] } },
+        { num: "3", estado: "proximo", titulo: "I-129 com classificação L",          desc: "A empresa americana submete ao USCIS.", tag: "I-129", doneWhen: { itens: ["i129l"] } },
+        { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                     desc: "Aprovação da petição — ou entrevista consular se você estiver fora dos EUA.", doneWhen: { itens: ["i797"] } },
+        { num: "✓", estado: "futuro",  titulo: "L-1 ativo — início do trabalho",     desc: "L-1A: até 7 anos. L-1B: até 5 anos. Cônjuge (L-2) pode trabalhar." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "Executivos em L-1A têm caminho direto ao Green Card pelo EB-1C, sem PERM." },
+      ],
+      kitId:    "l1",
+      kitLabel: "Kit L-1 — transferência intraempresarial",
+    };
+  }
+
+  // ── E-2 ──────────────────────────────────────────────────────────────
+  if (visa_type === "e2") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "E-2 · Investidor por tratado",
+      situacao:  `O E-2 exige nacionalidade de país com tratado de investimento com os EUA e um negócio real, com investimento substancial e participação ativa sua na gestão.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar os 4 requisitos", desc: "Nacionalidade de país com tratado, investimento substancial, controle de pelo menos 50% e papel ativo na gestão.", doneWhen: { itens: ["nacionalidade-tratado", "investimento-substancial", "propriedade-empresa", "papel-ativo"] } },
+        { num: "2", estado: "proximo", titulo: "Montar o plano de negócios", desc: "Prova de origem e aplicação dos fundos, mais o plano do negócio nos EUA." },
+        { num: "3", estado: "proximo", titulo: "DS-160 + DS-156E",           desc: "Formulários do Departamento de Estado, com o dossiê completo do negócio." },
+        { num: "4", estado: "futuro",  titulo: "Entrevista de investidor",   desc: "O cônsul avalia o negócio e sua participação ativa nele." },
+        { num: "✓", estado: "futuro",  titulo: "E-2 aprovado",              desc: "Renovável sem limite enquanto o negócio operar de verdade." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "O E-2 não leva direto ao Green Card — as pontes comuns são EB-5, EB-1C (executivo) ou EB-2 NIW." },
+      ],
+      kitId:    "e2",
+      kitLabel: "Kit E-2 — visto de investidor",
+    };
+  }
+
+  // ── E-1 ──────────────────────────────────────────────────────────────
+  if (visa_type === "e1") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "E-1 · Comércio por tratado",
+      situacao:  `O E-1 exige nacionalidade de país com tratado de comércio com os EUA e mais de 50% do volume de comércio da empresa entre os dois países.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar o comércio substancial", desc: "Histórico documentado: contratos e faturas mostrando o volume bilateral entre os dois países." },
+        { num: "2", estado: "proximo", titulo: "Montar o dossiê comercial",        desc: "DS-160 + DS-156E com a documentação da empresa." },
+        { num: "3", estado: "futuro",  titulo: "Entrevista consular",              desc: "O cônsul avalia o volume e a natureza do comércio." },
+        { num: "✓", estado: "futuro",  titulo: "E-1 aprovado",                    desc: "Renovável sem limite enquanto o comércio substancial continuar." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "O E-1 não leva direto ao Green Card — executivos podem olhar o EB-1C; perfis qualificados, o EB-2 NIW." },
+      ],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Montar o dossiê de comércio substancial com quem já fez",
+    };
+  }
+
+  // ── Asilo ou refúgio ─────────────────────────────────────────────────
+  if (visa_type === "asylee") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "Asilo ou refúgio",
+      situacao:  `Você está buscando (ou já tem) asilo nos EUA. Esse caminho tem prazos rígidos e consequências sérias se não for seguido com cuidado — cada passo merece atenção redobrada.`,
+      destaque: { tipo: "alerta", texto: "O pedido de asilo (I-589) precisa, em regra, ser apresentado até 1 ano após a chegada aos EUA." },
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Protocolar o I-589",              desc: "Pedido de asilo, com evidências do caso.", tag: "1 ano" },
+        { num: "2", estado: "proximo", titulo: "Autorização de trabalho (I-765)", desc: "Pode ser pedida 150 dias após protocolar o asilo." },
+        { num: "3", estado: "proximo", titulo: "Entrevista ou audiência",         desc: "Caso afirmativo: entrevista no USCIS. Caso defensivo: audiências na corte de imigração." },
+        { num: "4", estado: "futuro",  titulo: "Decisão do caso",                 desc: "Asilo concedido garante permanência e caminho para o Green Card." },
+        { num: "✓", estado: "futuro",  titulo: "Green Card (I-485)",              desc: "1 ano após a concessão do asilo, você pode pedir a residência permanente." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "Perder o prazo de 1 ano sem exceção documentada pode fechar a porta do asilo afirmativo — não deixe para depois." },
+      ],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Casos de asilo exigem acompanhamento próximo — comece com uma conversa",
+    };
+  }
+
+  // ── Situação em definição ("outro") ───────────────────────────────────
+  if (visa_type === "outro") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "Situação em definição",
+      situacao:  `Sua situação ainda não se encaixa em um caminho claro — isso é comum e tem solução. O primeiro passo é reunir o que você já tem e mapear as portas abertas.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Reunir seus documentos",       desc: "I-94, vistos anteriores, petições e prazos — tudo o que mostra onde você está hoje." },
+        { num: "2", estado: "proximo", titulo: "Mapear os caminhos possíveis", desc: "Estudo, trabalho, família ou investimento — cada porta tem requisitos próprios." },
+        { num: "✓", estado: "futuro",  titulo: "Caminho definido",             desc: "Com a situação mapeada, o Immigrei mostra o próximo passo certo." },
+      ],
+      guardrails: [],
+      kitId:    "",
+      kitLabel: "Falar com um profissional verificado",
+      ctaHref:  "/profissionais",
+      ctaDesc:  "Para casos complexos, uma consulta certa vale mais que mil buscas no Google",
+    };
+  }
+
   // ── Fallback genérico ─────────────────────────────────────────────────
   return {
     titulo:    `Jornada de ${nome}`,
@@ -407,9 +647,22 @@ const estadoStyle: Record<Etapa["estado"], { dot: string; card: string; data: st
   alerta:  { dot: "bg-clay border-clay text-cream",                      card: "border-clay",                         data: "text-clay" },
 };
 
+// Última atualização do caso: "hoje às 14:32", "ontem às 09:10" ou "12/07/2026".
+function formatUltimaAtualizacao(iso: string): string {
+  const d = new Date(iso);
+  const hoje = new Date();
+  const ontem = new Date(hoje);
+  ontem.setDate(hoje.getDate() - 1);
+  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  if (d.toDateString() === hoje.toDateString()) return `hoje às ${hora}`;
+  if (d.toDateString() === ontem.toDateString()) return `ontem às ${hora}`;
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 export default function PainelPage() {
   const router  = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [cases, setCases] = useState<UserCase[]>([]);
   const [satisfeitos, setSatisfeitos] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -419,6 +672,11 @@ export default function PainelPage() {
         const d = await fetch("/api/profile").then((r) => r.json());
         const p: Profile | null = d.profile ?? null;
         setProfile(p);
+
+        fetch("/api/uscis/case-status")
+          .then((r) => (r.ok ? r.json() : { cases: [] }))
+          .then((body) => setCases(Array.isArray(body?.cases) ? body.cases : []))
+          .catch(() => setCases([]));
 
         // Progresso real: itens marcados no checklist do kit + arquivos no cofre.
         const kitId = p ? getStrategy(p).kitId : "";
@@ -469,6 +727,7 @@ export default function PainelPage() {
   const s = getStrategy(profile);
   const signals: ProgressSignals = { hasSchool: Boolean(profile.chosen_school), satisfeitos };
   const etapas = applyProgress(s.etapas, signals);
+  const familyCard = getFamilyTiesCard(profile.family_ties);
 
   return (
     <AppShell>
@@ -492,6 +751,50 @@ export default function PainelPage() {
           </p>
           <p className="text-sm text-ink leading-relaxed">{s.situacao}</p>
         </div>
+
+        {/* Porta de Green Card por vínculo familiar — vale para qualquer
+            jornada principal, não só quem está seguindo o caminho de família */}
+        {familyCard && (
+          <Link
+            href="/profissionais"
+            className="block bg-amber-tint border border-amber/40 rounded-2xl px-5 py-4 mb-5 hover:border-amber transition-colors"
+          >
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-1" style={{ letterSpacing: "0.1em" }}>
+              Caminho em paralelo
+            </p>
+            <p className="text-sm font-semibold text-ink mb-1">{familyCard.titulo}</p>
+            <p className="text-xs text-ink-soft leading-relaxed mb-2">{familyCard.texto}</p>
+            <span className="text-xs font-bold text-pine">Falar com um profissional verificado →</span>
+          </Link>
+        )}
+
+        {/* Meu caso no USCIS — alimentado pela última busca feita no início */}
+        {cases.length > 0 && (
+          <Link
+            href="/dashboard"
+            className="block bg-cream-2 border border-pine-tint rounded-2xl px-5 py-4 mb-5 hover:border-pine transition-colors"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.1em" }}>
+                Meu caso no USCIS
+              </p>
+              <span className="text-xs font-bold text-pine">Ver detalhes →</span>
+            </div>
+            {cases.slice(0, 1).map((c) => (
+              <div key={c.id}>
+                <p className="text-sm font-semibold text-ink">{c.label || c.receipt_number}</p>
+                <p className="text-xs text-ink-soft mt-0.5">
+                  {c.last_status ? traduzirStatus(c.last_status).titulo : "Ainda não verificado"}
+                </p>
+                {c.last_checked_at && (
+                  <p className="text-[11px] text-ink-faint mt-1.5">
+                    Sua última atualização: {formatUltimaAtualizacao(c.last_checked_at)}
+                  </p>
+                )}
+              </div>
+            ))}
+          </Link>
+        )}
 
         {/* Destaque (alerta ou ok) */}
         {s.destaque && (
