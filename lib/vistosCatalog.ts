@@ -278,3 +278,32 @@ export const vistosNegocios: Visto[] = [
     availability: "all",
   },
 ];
+
+// ─── Lookup by recommendation title ─────────────────────────────────────────
+
+export const todosVistos: Visto[] = [...vistosEstudo, ...vistosNegocios];
+
+// Onboarding titles follow "CÓDIGO (Nome) [— sufixo]" for pure visa cards.
+// Process cards never put "(" right after the code — "F-1 → H-1B (guia
+// passo a passo)", "I-539 — Mudança de Status", "Transferência de H-1B
+// (novo empregador)" — so requiring `CODE (` keeps them on the simple format.
+const CODE_TO_ID: Record<string, string> = {
+  "F-1": "f1",
+  "M-1": "m1",
+  "J-1": "j1",
+  "H-1B": "h1b",
+  "O-1": "o1",
+  "L-1": "l1",
+  "B-1": "b1",
+  "B-2": "b1",
+  "B-1/B-2": "b1",
+  "E-1": "e1",
+  "E-2": "e2",
+  "EB-2 NIW": "eb2niw",
+};
+
+export function findCatalogVisto(title: string): Visto | null {
+  const code = Object.keys(CODE_TO_ID).find((c) => title.startsWith(`${c} (`));
+  if (!code) return null;
+  return todosVistos.find((v) => v.id === CODE_TO_ID[code]) ?? null;
+}

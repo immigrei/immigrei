@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
+import { findCatalogVisto } from "@/lib/vistosCatalog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1882,6 +1884,11 @@ export default function OnboardingPage() {
     const hasUrgent  = recommendations.some((r) => r.urgent && !r.blocked);
     const hasBlocked = recommendations.some((r) => r.blocked);
     const destino    = deriveDestination(answers, recommendations);
+    // Manuais que já aparecem como recomendação própria — o card rico
+    // esconde o link "rumo ao GC" quando apontaria para o mesmo lugar.
+    const linkedHrefs = new Set(
+      recommendations.map((r) => r.href).filter((h): h is string => Boolean(h))
+    );
 
     return (
       <main className="min-h-screen bg-cream flex flex-col pb-10">
@@ -1959,7 +1966,12 @@ export default function OnboardingPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {recommendations.map((rec) => (
+              {recommendations.map((rec) => {
+                // Recomendação de visto puro casa com um card do catálogo e
+                // ganha os blocos ricos de /vistos; processos (I-539, manuais
+                // de caminho, overstay) e bloqueados seguem no formato simples.
+                const catalogo = rec.blocked ? null : findCatalogVisto(rec.visa);
+                return (
                 <div
                   key={rec.visa}
                   className={[
@@ -1998,6 +2010,19 @@ export default function OnboardingPage() {
                   >
                     {rec.description}
                   </p>
+                  {catalogo && (
+                    <div
+                      className="flex flex-col gap-3 mb-4"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      <VistoCatalogDetails
+                        visto={catalogo}
+                        showRumoGc={
+                          !catalogo.rumoGc || !linkedHrefs.has(catalogo.rumoGc.href)
+                        }
+                      />
+                    </div>
+                  )}
                   {!rec.blocked && (
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-ink-faint">📋</span>
@@ -2019,7 +2044,8 @@ export default function OnboardingPage() {
                     </Link>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
