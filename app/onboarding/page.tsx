@@ -2201,14 +2201,25 @@ export default function OnboardingPage() {
             ↩ Recomeçar
           </button>
 
-          <p
-            className="text-xs text-ink-faint text-center leading-relaxed pb-4"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            As informações acima são educacionais e não constituem aconselhamento
-            jurídico. Para orientação legal específica, consulte um advogado de
-            imigração licenciado.
-          </p>
+          {isSignedIn ? (
+            <p
+              className="text-xs text-ink-faint text-center leading-relaxed pb-4"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              As informações acima são educacionais e não constituem aconselhamento
+              jurídico. Para orientação legal específica, consulte um advogado de
+              imigração licenciado.
+            </p>
+          ) : (
+            <p
+              className="text-xs text-ink-faint text-center leading-relaxed pb-4"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              <Link href="/termos" className="underline hover:text-ink-soft transition-colors">
+                Termos de uso
+              </Link>
+            </p>
+          )}
         </div>
       </main>
     );

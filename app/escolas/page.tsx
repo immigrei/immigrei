@@ -280,14 +280,16 @@ export default function EscolasPage() {
             . A certificação garante que a escola pode emitir o I-20, mas não é uma
             recomendação de qualidade. Antes de se matricular, pesquise a reputação
             da escola.{" "}
-            <a
-              href="https://studyinthestates.dhs.gov/school-search"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-pine font-medium"
-            >
-              Verificar na fonte oficial
-            </a>
+            {isSignedIn && (
+              <a
+                href="https://studyinthestates.dhs.gov/school-search"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-pine font-medium"
+              >
+                Verificar na fonte oficial
+              </a>
+            )}
           </p>
         </div>
       </div>
