@@ -685,7 +685,7 @@ function getRecommendations(answers: Answers): VisaResult[] {
 // ("Recomendados para você") e rebaixa os demais — nunca os esconde: todo
 // perfil mantém as rotas paralelas visíveis.
 const CATALOG_IDS = new Set([
-  "f1", "m1", "j1", "h1b", "o1", "l1", "b1", "e2", "e1", "eb2niw",
+  "f1", "m1", "j1", "h1b", "o1", "l1", "b1", "esta", "e2", "e1", "eb2niw",
 ]);
 
 export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
@@ -712,7 +712,7 @@ export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
   if (a.q_study_type === "university" || a.q_study_type === "language") add("f1");
   if (a.q_study_type === "vocational") add("m1");
   if (a.q_study_type === "exchange") add("j1");
-  if (a.q_goal === "visit") add("b1");
+  if (a.q_goal === "visit") add(a.q_nationality === "treaty" ? "esta" : "b1");
   // ESTA por dentro: as saídas são consulares — E-1 não tem kit, entra aqui.
   if (a.q_esta_goal === "invest") {
     add("e2");
