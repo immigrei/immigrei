@@ -2,7 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
-import { getJourney } from "@/lib/visa-journeys";
+import { getStrategy } from "@/lib/strategy";
 import { isDeniedStatus, isUscisSandbox } from "@/lib/uscis";
 import JourneyTimeline from "./JourneyTimeline";
 import I94Field from "./I94Field";
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
 
   if (!profile?.onboarding_completed) redirect("/onboarding");
 
-  const journey = getJourney(profile.visa_type);
+  const strategy = getStrategy(profile);
 
   const { data: userCases } = await supabase
     .from("user_cases")
@@ -154,26 +154,10 @@ export default async function DashboardPage() {
             />
           ))}
 
-        {/* Journey timeline.
-            profile.visa_type vem de uma escolha aspiracional ("Quero seguir
-            esse caminho" no /vistos e nas recomendações do onboarding), então
-            a jornada começa do primeiro passo — nenhuma etapa foi concluída.
-            Quando o perfil distinguir status atual de caminho desejado, volte
-            a usar journey.currentStepId para posicionar quem já tem o status. */}
-        {journey ? (
-          <JourneyTimeline
-            journey={{ ...journey, currentStepId: journey.steps[0].id }}
-          />
-        ) : (
-          <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">
-              Próximos passos
-            </p>
-            <p className="text-ink text-sm leading-relaxed">
-              Estamos montando o mapa completo da sua jornada com base nas suas respostas. Em breve você verá seus próximos passos aqui.
-            </p>
-          </div>
-        )}
+        {/* Journey timeline — mesmo getStrategy(profile) do /painel, então
+            consular (DS-160, entrevista) vs Change-of-Status segue
+            profile.location em vez de uma lista genérica por visto. */}
+        <JourneyTimeline name={strategy.subtitulo} etapas={strategy.etapas} />
 
         {/* Visa Bulletin */}
         <VisaBulletinWidget bulletin={bulletin} mainGoal={profile.main_goal} />
