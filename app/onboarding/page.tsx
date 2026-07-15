@@ -19,6 +19,9 @@ type VisaResult = {
   urgent?: boolean;
   blocked?: boolean; // nationality restriction
   href?: string;     // deep link to the product surface (kit, manual, case engine)
+  // Cards de "fale com um advogado agora" — carregam peso (vermelho, urgência)
+  // que só faz sentido depois que a pessoa já criou conta; escondidos antes do login.
+  professionalReferral?: boolean;
 };
 
 type Option = {
@@ -35,7 +38,22 @@ type Question = {
   subtitle?: string;
   options: Option[];
   next: string | ((answer: string, allAnswers: Answers) => string);
+  // Ação externa (ex.: conferir o I-94 no site do CBP) oferecida antes das
+  // opções — o usuário sai, confere e volta para responder.
+  externalLink?: { label: string; href: string };
 };
+
+// "unsure" no I-94 não é mais terminal: leva para q_i94_check, que resolve
+// para "in_status" ou "overstay" (ou permanece "unsure" se a pessoa ainda não
+// conseguiu conferir). O resto do motor de recomendação deve enxergar o
+// status resolvido, não o "unsure" bruto da primeira pergunta.
+function resolveCurrentStatus(a: Answers): string | undefined {
+  if (a.q_current_status === "unsure") {
+    if (a.q_i94_check === "in_status" || a.q_i94_check === "overstay") return a.q_i94_check;
+    return "unsure";
+  }
+  return a.q_current_status;
+}
 
 // ─── Question Tree ────────────────────────────────────────────────────────────
 
@@ -261,7 +279,7 @@ export const questionMap: Record<string, Question> = {
     // Overstay sem vínculos vai direto aos resultados — os caminhos de
     // residência por mérito/investimento pressupõem status válido.
     next: (a, all) =>
-      a === "none" && all.q_current_status !== "overstay"
+      a === "none" && resolveCurrentStatus(all) !== "overstay"
         ? "q_permanent_path"
         : "results",
   },
@@ -356,13 +374,35 @@ export const questionMap: Record<string, Question> = {
     ],
     next: (a) => {
       if (a === "in_status" || a === "pending_uscis") return "q_current_visa";
-      if (a === "unsure")      return "results"; // conferir o I-94 vem antes de qualquer rota
+      if (a === "unsure")      return "q_i94_check"; // confere o I-94 e volta pra continuar aqui dentro
       // Overstay: os vínculos familiares decidem se existe caminho por
       // dentro (ajuste por parente imediato, INA §245(a)) — perguntar antes
       // de mostrar as saídas.
       if (a === "overstay")    return "q_family_ties";
       if (a === "green_card")  return "q_gc_goal";
       return "q_citizen_goal"; // citizen
+    },
+  },
+
+  // ── "Não sei meu I-94" — sai para conferir no CBP e volta pra cá ──────────
+  q_i94_check: {
+    id: "q_i94_check",
+    text: "Confira seu I-94 e volte para continuar",
+    subtitle:
+      "Abra o site oficial do CBP, confira a data com o passaporte em mãos e responda abaixo o que você encontrou — sem sair da sua jornada.",
+    externalLink: {
+      label: "Conferir meu I-94 no site oficial →",
+      href: "https://i94.cbp.dhs.gov/",
+    },
+    options: [
+      { value: "in_status", label: "Estou dentro do prazo", icon: "✅" },
+      { value: "overstay",  label: "Passei do prazo (overstay)", icon: "⚠️" },
+      { value: "still_unsure", label: "Ainda não consegui verificar", icon: "🔎" },
+    ],
+    next: (a) => {
+      if (a === "in_status") return "q_current_visa";
+      if (a === "overstay")  return "q_family_ties";
+      return "results"; // still_unsure → mesmo card de fallback de antes
     },
   },
 
@@ -737,18 +777,21 @@ export type Destination =
   | { kind: "vistos"; query: string };
 
 export function deriveDestination(a: Answers, results: VisaResult[]): Destination {
-  // Sem o I-94 conferido, nenhuma rota é confiável — o próximo passo é o
-  // site oficial do CBP, não a vitrine de vistos.
-  if (a.q_current_status === "unsure") return { kind: "i94" };
+  const currentStatus = resolveCurrentStatus(a);
+
+  // Sem o I-94 conferido (ou ainda sem resposta ao q_i94_check), nenhuma
+  // rota é confiável — o próximo passo é o site oficial do CBP, não a
+  // vitrine de vistos.
+  if (currentStatus === "unsure") return { kind: "i94" };
 
   // Green Card / cidadão: a jornada já está definida (I-90, N-400, petições).
-  if (a.q_current_status === "green_card") return { kind: "dashboard", visaType: "green_card" };
-  if (a.q_current_status === "citizen") return { kind: "dashboard", visaType: "citizen" };
+  if (currentStatus === "green_card") return { kind: "dashboard", visaType: "green_card" };
+  if (currentStatus === "citizen") return { kind: "dashboard", visaType: "citizen" };
 
   // Overstay, ajuste por parente imediato (exceção do VWP) e beneficiários
   // de petição familiar: as jornadas de visto padrão não se aplicam.
   if (
-    a.q_current_status === "overstay" ||
+    currentStatus === "overstay" ||
     a.q_esta_goal === "family_citizen" ||
     (a.q_family_ties && a.q_family_ties !== "none")
   ) {
@@ -790,7 +833,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
   const education      = a.q_education;
   const businessType   = a.q_business_type;
   const familyTies     = a.q_family_ties;
-  const currentStatus  = a.q_current_status;
+  const currentStatus  = resolveCurrentStatus(a);
   const currentVisa    = a.q_current_visa;
   const changeGoal     = a.q_change_goal;
   const targetVisa     = a.q_target_visa;
@@ -843,6 +886,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
         description:
           "Essa exceção é real, mas cheia de detalhes de timing e prova de intenção. O Immigrei conecta você a profissionais verificados antes de qualquer decisão — evite protocolos por conta própria.",
         priority: "high",
+        professionalReferral: true,
       });
     }
 
@@ -972,6 +1016,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
         "Overstay tem saídas — mas quais valem para você depende de fatos do seu caso (data de entrada, forma de entrada, vínculos familiares). O Immigrei conecta você a profissionais verificados; até lá, evite viagens e novos protocolos por conta própria.",
       priority: "high",
       urgent: true,
+      professionalReferral: true,
     });
     return results;
   }
@@ -1591,7 +1636,7 @@ export function deriveMainGoal(a: Answers): string {
   if (a.q_gc_goal === "renew") return "renovar_visto";
   // Overstay vem antes dos vínculos familiares: quem passou do prazo está
   // regularizando o próprio status, mesmo quando a saída é via família.
-  if (a.q_current_status === "overstay") return "regularizar_status";
+  if (resolveCurrentStatus(a) === "overstay") return "regularizar_status";
   if (a.q_gc_goal === "family" || a.q_family_ties && a.q_family_ties !== "none") return "trazer_familia";
   if (a.q_goal === "live" || a.q_permanent_path) return "green_card";
   // In-US study/work/business = mudança de status (guidance no dashboard);
@@ -1619,6 +1664,25 @@ function buildSequence(answers: Answers): string[] {
     current = nextId;
   }
   return seq;
+}
+
+// ─── Pre-login summary ─────────────────────────────────────────────────────────
+
+// Antes do login, cortamos para o essencial: sem siglas de formulário, sem
+// links de saída, descrição reduzida a 1-2 frases em bullet. O objetivo é
+// convergir tudo para o botão "Ver minha jornada em detalhe" — depois do
+// login, o card mostra o conteúdo completo de novo.
+function summarizeForGuest(description: string): string[] {
+  const sentences = description.split(/(?<=[.!?])\s+/).filter(Boolean);
+  const bullets: string[] = [];
+  let total = 0;
+  for (const s of sentences) {
+    if (bullets.length >= 2) break;
+    if (total > 0 && total + s.length > 160) break;
+    bullets.push(s.trim());
+    total += s.length;
+  }
+  return bullets.length > 0 ? bullets : [description];
 }
 
 // ─── UI Component ─────────────────────────────────────────────────────────────
@@ -1881,6 +1945,11 @@ export default function OnboardingPage() {
 
   // ── Results ───────────────────────────────────────────────────────────────
   if (phase === "results") {
+    // Cards de "fale com um advogado" carregam peso demais para quem ainda
+    // nem criou conta — essa recomendação só aparece depois do login.
+    const visibleRecommendations = isSignedIn
+      ? recommendations
+      : recommendations.filter((r) => !r.professionalReferral);
     const hasUrgent  = recommendations.some((r) => r.urgent && !r.blocked);
     const hasBlocked = recommendations.some((r) => r.blocked);
     const destino    = deriveDestination(answers, recommendations);
@@ -1935,9 +2004,19 @@ export default function OnboardingPage() {
                 className="text-clay text-sm font-medium leading-relaxed"
                 style={{ fontFamily: "var(--font-body)" }}
               >
-                <strong>Atenção:</strong> Identificamos situações que requerem
-                cuidado especial. Recomendamos consulta com advogado de imigração
-                antes de qualquer ação.
+                {isSignedIn ? (
+                  <>
+                    <strong>Atenção:</strong> Identificamos situações que requerem
+                    cuidado especial. Recomendamos consulta com advogado de imigração
+                    antes de qualquer ação.
+                  </>
+                ) : (
+                  <>
+                    <strong>Atenção:</strong> Identificamos uma situação que pede
+                    cuidado especial. Crie sua conta para ver os caminhos possíveis
+                    para o seu caso.
+                  </>
+                )}
               </p>
             </div>
           )}
@@ -1957,16 +2036,17 @@ export default function OnboardingPage() {
           )}
 
           {/* Results list */}
-          {recommendations.length === 0 ? (
+          {visibleRecommendations.length === 0 ? (
             <div className="bg-cream-2 rounded-2xl p-6 text-center">
               <p className="text-ink-soft" style={{ fontFamily: "var(--font-body)" }}>
-                Seu perfil requer análise mais detalhada. Recomendamos consulta
-                com advogado de imigração.
+                {isSignedIn
+                  ? "Seu perfil requer análise mais detalhada. Recomendamos consulta com advogado de imigração."
+                  : "Seu perfil requer um olhar mais próximo. Crie sua conta para ver os caminhos possíveis."}
               </p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {recommendations.map((rec) => {
+              {visibleRecommendations.map((rec) => {
                 // Recomendação de visto puro casa com um card do catálogo e
                 // ganha os blocos ricos de /vistos; processos (I-539, manuais
                 // de caminho, overstay) e bloqueados seguem no formato simples.
@@ -2004,12 +2084,23 @@ export default function OnboardingPage() {
                       </span>
                     )}
                   </div>
-                  <p
-                    className="text-ink-soft text-sm mb-3 leading-relaxed"
-                    style={{ fontFamily: "var(--font-body)" }}
-                  >
-                    {rec.description}
-                  </p>
+                  {isSignedIn ? (
+                    <p
+                      className="text-ink-soft text-sm mb-3 leading-relaxed"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      {rec.description}
+                    </p>
+                  ) : (
+                    <ul className="text-ink-soft text-sm mb-3 leading-relaxed space-y-1.5">
+                      {summarizeForGuest(rec.description).map((bullet) => (
+                        <li key={bullet} className="flex gap-2" style={{ fontFamily: "var(--font-body)" }}>
+                          <span className="text-pine flex-shrink-0">•</span>
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {catalogo && (
                     <div
                       className="flex flex-col gap-3 mb-4"
@@ -2018,12 +2109,13 @@ export default function OnboardingPage() {
                       <VistoCatalogDetails
                         visto={catalogo}
                         showRumoGc={
-                          !catalogo.rumoGc || !linkedHrefs.has(catalogo.rumoGc.href)
+                          isSignedIn &&
+                          (!catalogo.rumoGc || !linkedHrefs.has(catalogo.rumoGc.href))
                         }
                       />
                     </div>
                   )}
-                  {!rec.blocked && (
+                  {!rec.blocked && isSignedIn && (
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-ink-faint">📋</span>
                       <span
@@ -2034,7 +2126,7 @@ export default function OnboardingPage() {
                       </span>
                     </div>
                   )}
-                  {!rec.blocked && rec.href && (
+                  {!rec.blocked && isSignedIn && rec.href && (
                     <Link
                       href={rec.href}
                       className="inline-block mt-3 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors"
@@ -2174,6 +2266,18 @@ export default function OnboardingPage() {
             </p>
           )}
           {!currentQuestion?.subtitle && <div className="mb-6" />}
+
+          {currentQuestion?.externalLink && (
+            <a
+              href={currentQuestion.externalLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full block text-center bg-amber text-ink font-bold py-3.5 px-6 rounded-2xl text-base mb-6 transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {currentQuestion.externalLink.label}
+            </a>
+          )}
 
           <div className="flex flex-col gap-3 flex-1">
             {currentQuestion?.options.map((opt) => {

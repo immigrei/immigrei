@@ -1,12 +1,11 @@
 /**
  * Path manuals ("manuais de caminho")
  *
- * The free educational layer between a path card ("Quero seguir este
- * caminho") and the paid kit. A manual tells the user EVERYTHING about a
- * path before any money changes hands: what it is, who qualifies, who is
- * legally blocked (and why), deadlines/risks, and a high-level walkthrough.
- * The kit holds the operational assets (templates, checklists, deep
- * step-by-step) — the manual builds the trust that sells it.
+ * The full educational guide for a path ("Quero seguir este caminho"):
+ * what it is, who qualifies, who is legally blocked (and why),
+ * deadlines/risks, and a high-level walkthrough. Rendered at
+ * /caminhos/{slug}, gated behind an active subscription — kits and manuals
+ * are subscription features, not separate one-off purchases.
  *
  * Content rules:
  * - PT-BR, brand voice (warm, direct, no legal jargon unexplained).

@@ -1,12 +1,19 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import AppShell from "@/app/components/AppShell";
 import { getManual, MANUAIS, type ManualPrazo } from "@/lib/manuais";
+import { getUserPlan } from "@/lib/plan";
 
 /**
- * Path manual page — the free "read everything before you buy" layer.
+ * Path manual page — the full step-by-step guide for a visa path.
  * One URL per path (/caminhos/{slug}); content comes from lib/manuais.ts,
  * which traces back to content/leis. Same skeleton for every visa.
+ *
+ * Gated: requires login and an active paid subscription (any plan — kits
+ * and manuals are subscription features, not separate one-off purchases).
+ * Signed-out visitors are sent to sign in; signed-in free-plan users see a
+ * teaser (header + first paragraph) with a CTA to /planos.
  */
 
 export function generateStaticParams() {
@@ -39,6 +46,11 @@ export default async function CaminhoPage({
   const manual = getManual(slug);
   if (!manual) notFound();
 
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+  const plan = await getUserPlan(userId);
+  const hasAccess = plan !== "free";
+
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto px-6 py-8">
@@ -54,6 +66,32 @@ export default async function CaminhoPage({
         </h1>
         <p className="text-sm text-ink-soft leading-relaxed mb-8">{manual.subtitulo}</p>
 
+        {!hasAccess ? (
+          <>
+            <section className="mb-8">
+              <SectionLabel>O que é este caminho</SectionLabel>
+              <p className="text-sm text-ink leading-relaxed">{manual.oQueE[0]}</p>
+            </section>
+            <div className="bg-pine rounded-2xl px-5 py-5 mb-6">
+              <p
+                className="text-xs font-bold uppercase tracking-widest text-pine-tint mb-1"
+                style={{ letterSpacing: "0.1em" }}
+              >
+                Continue sua jornada
+              </p>
+              <p className="text-sm font-semibold text-cream">
+                O guia completo — quem pode, quem não pode, prazos e o passo a passo — é exclusivo para assinantes.
+              </p>
+              <Link
+                href="/planos"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-bold text-ink hover:bg-amber-deep transition-colors"
+              >
+                Assinar para desbloquear →
+              </Link>
+            </div>
+          </>
+        ) : (
+        <>
         {/* O que é este caminho */}
         <section className="mb-8">
           <SectionLabel>O que é este caminho</SectionLabel>
@@ -176,6 +214,8 @@ export default async function CaminhoPage({
             ))}
           </ul>
         </section>
+        </>
+        )}
 
         {/* Disclaimer */}
         <div className="rounded-xl border border-pine-tint bg-cream-2 px-4 py-3">
