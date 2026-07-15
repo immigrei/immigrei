@@ -203,6 +203,31 @@ export const vistosNegocios: Visto[] = [
     availability: "treaty-only",
   },
   {
+    id: "esta",
+    codigo: "ESTA",
+    nome: "Autorização Eletrônica de Viagem",
+    badge: "Visita",
+    badgeColor: "clay",
+    descricao:
+      "Para visitas curtas de turismo ou negócios sem precisar de visto — só a autorização online, para quem tem passaporte de país do Visa Waiver Program.",
+    chave:
+      "Passaporte de país participante do VWP (a maioria da Europa e outros países com tratado) + ESTA aprovado antes de embarcar.",
+    degrau:
+      "Sem passaporte elegível ao VWP? O caminho é o B-1/B-2 pelo consulado — veja o card ao lado.",
+    destaque: {
+      tipo: "warning",
+      texto:
+        "Só dá para ficar até 90 dias, sem estender e sem mudar de status por dentro dos EUA. Exceção estreita: parente imediato de cidadão americano — análise individual.",
+    },
+    stats: [
+      { label: "Trabalho", valor: "Não", ok: false },
+      { label: "Duração", valor: "Até 90 dias, sem extensão", ok: false },
+      { label: "Rumo ao Green Card", valor: "Indireto — só por parente imediato de cidadão", ok: true },
+      { label: "Família", valor: "Cada pessoa solicita a própria autorização", ok: true },
+    ],
+    availability: "treaty-only",
+  },
+  {
     id: "b1",
     codigo: "B-1/B-2",
     nome: "Turismo e Negócios",
@@ -211,7 +236,7 @@ export const vistosNegocios: Visto[] = [
     descricao:
       "Para visitas: turismo, reuniões de negócios, feiras, tratamento médico, visita a família. É visita — não é vida nos EUA.",
     chave:
-      "Convencer o consulado dos seus vínculos com o Brasil: emprego, estudo, família e bens que provem a intenção de voltar.",
+      "Convencer o consulado dos seus vínculos com seu país de origem: emprego, estudo, família e bens que provem a intenção de voltar.",
     degrau:
       "A entrevista é o jogo inteiro. Organize os vínculos ANTES de agendar — e nunca use o B para trabalhar ou estudar em carga integral: isso fecha portas futuras.",
     destaque: {
@@ -297,6 +322,7 @@ const CODE_TO_ID: Record<string, string> = {
   "B-1": "b1",
   "B-2": "b1",
   "B-1/B-2": "b1",
+  "ESTA": "esta",
   "E-1": "e1",
   "E-2": "e2",
   "EB-2 NIW": "eb2niw",

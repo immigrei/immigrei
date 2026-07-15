@@ -201,8 +201,8 @@ export default function PainelPage() {
                 const escola = etapa.href === "/escolas" ? profile.chosen_school : null;
                 const cardContent = (
                   <>
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-semibold text-ink leading-snug">{etapa.titulo}</p>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <p className="flex-1 min-w-0 text-sm font-semibold text-ink leading-snug">{etapa.titulo}</p>
                       {etapa.tag && (
                         <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-ink/10 text-ink-soft">
                           {etapa.tag}
