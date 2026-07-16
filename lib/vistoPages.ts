@@ -533,6 +533,104 @@ export const VISTO_PAGES: Record<string, VistoPage> = {
     fonteLeis: ["vistos/o1.md"],
     verificadoEm: "2026-07-14",
   },
+
+  // ── B-1/B-2 — Visitante de Negócios e Turismo ──────────────────────────
+  b1: {
+    id: "b1",
+    tagline:
+      "O visto de visita — e, para muita gente, o primeiro capítulo da jornada: conhecer os EUA antes de escolher o caminho.",
+    oQueE: [
+      "O B-1/B-2 é o visto de visitante: negócios (B-1) e turismo, família ou tratamento médico (B-2). Normalmente os dois vêm juntos no mesmo visto. É um visto de visita — não autoriza trabalhar nem estudar.",
+      "Uma distinção que evita sustos: o visto (que pode valer 10 anos) não é a permissão de estadia. Quem define quanto tempo você pode ficar é o oficial do CBP na entrada, registrado no I-94 — tipicamente 6 meses. É essa data, não a do visto, que manda.",
+    ],
+    quemPode: [
+      "Quem demonstra vínculos com o Brasil que sustentem a volta: emprego, família, bens, estudos em andamento.",
+      "Quem comprova o propósito da viagem e os recursos para bancá-la (ou quem vai bancar).",
+      "Atenção: carta-convite ou promessa de sustento de amigos e família nos EUA não entra na decisão do consulado — o caso se sustenta nos seus vínculos, não nas garantias de terceiros.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Trabalhar com visto de visita encerra o status",
+        texto:
+          "Qualquer emprego ou salário de fonte americana é violação. O B-1 permite reuniões, negociações e conferências — não trabalho remunerado.",
+        base: "INA §101(a)(15)(B)",
+      },
+      {
+        titulo: "Estudar antes da aprovação do F-1 mata o pedido",
+        texto:
+          "Quem está de B-2 e quer estudar precisa da mudança de status aprovada ANTES de se matricular em curso acadêmico. Começar a estudar antes viola o status e bloqueia a aprovação.",
+        base: "8 CFR §214.2(b)(7)",
+      },
+      {
+        titulo: "Entrar já decidido a ficar é misrepresentation",
+        texto:
+          "Entrar como turista já com plano fechado de estudar, trabalhar ou imigrar pode ser lido como declaração falsa na entrada — inadmissibilidade permanente. Conduta inconsistente nos primeiros 90 dias gera presunção de má-fé.",
+        base: "INA §212(a)(6)(C)(i) e 9 FAM 302.9-4(B)(3)(g)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "A data do I-94 é o seu relógio",
+        texto:
+          "Diferente do F-1, o B tem data fixa de saída. Passou do I-94, a presença irregular conta automaticamente — e com 180 dias vêm as barreiras de 3 e 10 anos de reentrada.",
+        tone: "clay",
+      },
+      {
+        titulo: "Overstay anula o visto na hora",
+        texto:
+          "Ficar além do I-94 anula automaticamente o visto — inclusive o de 10 anos. Um novo só no consulado, no país de nacionalidade, e com o histórico pesando contra.",
+        tone: "clay",
+      },
+      {
+        titulo: "Extensão: protocole com 45 dias de folga",
+        texto:
+          "A extensão (I-539) precisa entrar ANTES do vencimento do I-94 — o USCIS recomenda pelo menos 45 dias de antecedência. Protocolada a tempo, a permanência segue autorizada enquanto o pedido está pendente. Quem entrou por ESTA não estende.",
+        tone: "amber",
+      },
+    ],
+    passos: [
+      {
+        titulo: "DS-160 e taxa consular",
+        texto:
+          "Preencha o DS-160 com atenção — as respostas viram registro permanente — e pague a taxa de aplicação.",
+      },
+      {
+        titulo: "Entrevista no consulado",
+        texto:
+          "A conversa gira em torno de propósito da viagem, vínculos com o Brasil e recursos. Documentos organizados valem mais que respostas decoradas.",
+      },
+      {
+        titulo: "Entrada e I-94",
+        texto:
+          "O CBP decide o prazo da sua estadia na entrada. Confira seu I-94 online logo depois de entrar — é essa data que define tudo.",
+      },
+      {
+        titulo: "Durante a visita",
+        texto:
+          "Sem trabalho, sem matrícula em curso acadêmico. Se os planos mudarem de verdade (estudar, negócio próprio), a mudança de status é o caminho — antes do vencimento.",
+      },
+    ],
+    pontes: [
+      { label: "Mudar de B-2 para F-1 por dentro dos EUA", href: "/casos/cos-b2-f1" },
+    ],
+    kit: { kitId: "b1", label: "Checklist completo do B-1/B-2" },
+    fontesOficiais: [
+      {
+        label: "Dept. of State — Visitor Visa",
+        url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+      },
+      {
+        label: "USCIS — Extend Your Stay",
+        url: "https://www.uscis.gov/visit-the-united-states/extend-your-stay",
+      },
+    ],
+    fonteLeis: [
+      "vistos/b1-b2.md",
+      "formularios/i-539.md",
+      "conceitos/unlawful-presence.md",
+    ],
+    verificadoEm: "2026-07-16",
+  },
 };
 
 export function getVistoPage(id: string): VistoPage | null {
