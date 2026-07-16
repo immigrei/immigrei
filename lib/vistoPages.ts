@@ -631,6 +631,111 @@ export const VISTO_PAGES: Record<string, VistoPage> = {
     ],
     verificadoEm: "2026-07-16",
   },
+
+  // ── L-1 — Transferência Intraempresa ───────────────────────────────────
+  l1: {
+    id: "l1",
+    tagline:
+      "A empresa que você construiu no Brasil vira a sua porta de entrada — sem sorteio, sem cota, e com ponte direta para o Green Card de executivo.",
+    oQueE: [
+      "O L-1 transfere você da sua empresa fora dos EUA para uma filial, subsidiária ou matriz americana: L-1A para executivos e gerentes, L-1B para quem carrega conhecimento especializado do negócio. É o empregador quem peticiona (I-129) — e não existe loteria nem época certa para aplicar.",
+      "Para brasileiros, ele tem um papel extra: como o Brasil não tem tratado com os EUA (E-1/E-2 indisponíveis), o L-1 \"new office\" é o caminho viável de quem quer abrir a operação americana da própria empresa.",
+    ],
+    quemPode: [
+      "Quem trabalhou na empresa fora dos EUA por 1 ano contínuo dentro dos últimos 3 anos.",
+      "Quem vai atuar como executivo/gerente (L-1A) ou com conhecimento especializado (L-1B) na operação americana.",
+      "Empresas com relação corporativa real entre Brasil e EUA (matriz, filial, subsidiária ou afiliada), operando de verdade nos dois países — fornecimento regular de bens ou serviços, não um escritório de fachada.",
+      "No new office: local físico já contratado e um plano que sustente posição executiva/gerencial em 1 ano.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Empresa de fachada não qualifica",
+        texto:
+          "\"Doing business\" exige operação regular, sistemática e contínua nos EUA e em pelo menos um outro país durante toda a estadia. Um endereço com agente registrado, sem operação real, derruba a petição.",
+        base: "8 CFR §214.2(l)(1)(ii)(H)",
+      },
+      {
+        titulo: "Menos de 1 ano contínuo na empresa lá fora",
+        texto:
+          "O ano de trabalho na organização estrangeira precisa ser contínuo e dentro dos últimos 3 anos. Períodos somados, prestação de serviço avulsa ou vínculo recente não fecham o requisito.",
+        base: "8 CFR §214.2(l)(3)",
+      },
+      {
+        titulo: "New office que não decola não renova",
+        texto:
+          "A estadia inicial de escritório novo é de apenas 1 ano — e a renovação exige provar que a operação cresceu a ponto de sustentar um executivo: funcionários, receita, estrutura. Sem isso, o caminho termina na primeira renovação.",
+        base: "8 CFR §214.2(l)(3)(v) e (l)(14)(ii)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "Teto de 7 anos (L-1A) / 5 anos (L-1B)",
+        texto:
+          "Estadia inicial de 3 anos (1 ano no new office) e extensões de até 2 anos por vez, até o teto. Depois dele não há renovação — por isso a ponte para o Green Card começa cedo.",
+        tone: "amber",
+      },
+      {
+        titulo: "New office: 1 ano para provar que funciona",
+        texto:
+          "Quem abre operação nova tem 1 ano até a primeira renovação — na prática, o prazo para contratar, faturar e montar a estrutura que justifica um executivo à frente.",
+        tone: "clay",
+      },
+      {
+        titulo: "EB-1C: a saída natural, com folga",
+        texto:
+          "O L-1A é a antessala do EB-1C, o Green Card de executivo multinacional — sem certificação trabalhista (PERM). A petição deve começar bem antes do teto dos 7 anos.",
+        tone: "pine",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Relação corporativa Brasil–EUA",
+        texto:
+          "Constitua (ou comprove) a entidade americana ligada à empresa brasileira — subsidiária, filial ou afiliada — com a documentação societária dos dois lados.",
+      },
+      {
+        titulo: "1 ano contínuo comprovado",
+        texto:
+          "Organize a prova do seu ano contínuo como executivo/gerente ou especialista na operação fora dos EUA, dentro dos últimos 3 anos.",
+      },
+      {
+        titulo: "Petição I-129 pelo empregador",
+        texto:
+          "A entidade americana protocola o I-129 com o dossiê corporativo. No new office, entram também o contrato do espaço físico e o plano de negócio.",
+      },
+      {
+        titulo: "Visto no consulado (ou mudança de status)",
+        texto:
+          "Aprovada a petição, o visto sai no consulado — ou, para quem já está nos EUA em outro status, via mudança de status por dentro.",
+      },
+      {
+        titulo: "Família junto, cônjuge trabalhando",
+        texto:
+          "Cônjuge e filhos solteiros menores de 21 entram de L-2 pela mesma duração — e o cônjuge (L-2S) tem autorização de trabalho automática, sem precisar de EAD.",
+      },
+      {
+        titulo: "A ponte para o Green Card",
+        texto:
+          "Com a operação americana consolidada, o mesmo dossiê corporativo, reforçado, vira a petição EB-1C — o Green Card de executivo, sem PERM e sem sorteio.",
+      },
+    ],
+    pontes: [
+      { label: "Passo a passo: L-1A → EB-1C (o Green Card de executivo)", href: "/caminhos/l1-para-eb1c" },
+    ],
+    kit: { kitId: "l1", label: "Checklist completo do L-1" },
+    fontesOficiais: [
+      {
+        label: "USCIS — L-1A Intracompany Transferee Executive or Manager",
+        url: "https://www.uscis.gov/working-in-the-united-states/temporary-workers/l-1a-intracompany-transferee-executive-or-manager",
+      },
+      {
+        label: "USCIS — L-1B Intracompany Transferee Specialized Knowledge",
+        url: "https://www.uscis.gov/working-in-the-united-states/temporary-workers/l-1b-intracompany-transferee-specialized-knowledge",
+      },
+    ],
+    fonteLeis: ["vistos/l1.md", "vistos/eb1c.md"],
+    verificadoEm: "2026-07-16",
+  },
 };
 
 export function getVistoPage(id: string): VistoPage | null {
