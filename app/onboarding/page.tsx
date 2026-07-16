@@ -722,7 +722,7 @@ function getRecommendations(answers: Answers): VisaResult[] {
 // ─── Focus derivation for /vistos ─────────────────────────────────────────────
 
 // Ids dos cards do catálogo em /vistos. A vitrine destaca estes caminhos
-// ("Recomendados para você") e rebaixa os demais — nunca os esconde: todo
+// ("Baseado no seu perfil") e rebaixa os demais — nunca os esconde: todo
 // perfil mantém as rotas paralelas visíveis.
 const CATALOG_IDS = new Set([
   "f1", "m1", "j1", "h1b", "o1", "l1", "b1", "esta", "e2", "e1", "eb2niw",

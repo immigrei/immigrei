@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
 import { todosVistos } from "@/lib/vistosCatalog";
 import { getVistoPage, VISTO_PAGES, type VistoPrazo } from "@/lib/vistoPages";
@@ -46,40 +45,32 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // pulling in the client-only siblings (ConfirmBar/VoltarButton use
 // next/navigation's useRouter, which needs a live App Router context).
 export function FontesOficiaisSection({
-  userId,
   fontesOficiais,
   verificadoEm,
 }: {
-  userId: string | null;
   fontesOficiais: { label: string; url: string }[];
   verificadoEm: string;
 }) {
   return (
     <section className="mb-6">
       <SectionLabel>Fontes oficiais</SectionLabel>
-      {userId ? (
-        <>
-          <ul className="space-y-1.5">
-            {fontesOficiais.map((f) => (
-              <li key={f.url}>
-                <a
-                  href={f.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-pine underline underline-offset-2"
-                >
-                  {f.label} ↗
-                </a>
-              </li>
-            ))}
-          </ul>
-          <p className="text-[10px] text-ink-faint mt-2">
-            Conteúdo verificado contra as fontes oficiais em {verificadoEm}.
-          </p>
-        </>
-      ) : (
-        <p className="text-xs text-ink-faint">Fontes oficiais disponíveis após login.</p>
-      )}
+      <ul className="space-y-1.5">
+        {fontesOficiais.map((f) => (
+          <li key={f.url}>
+            <a
+              href={f.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-pine underline underline-offset-2"
+            >
+              {f.label} ↗
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p className="text-[10px] text-ink-faint mt-2">
+        Conteúdo verificado contra as fontes oficiais em {verificadoEm}.
+      </p>
     </section>
   );
 }
@@ -93,10 +84,6 @@ export default async function VistoPage({
   const page = getVistoPage(id);
   const visto = todosVistos.find((v) => v.id === id);
   if (!page || !visto) notFound();
-
-  // /vistos(.*) is a public route (proxy.ts) — links to government sites
-  // only render for signed-in users, same rule as the rest of pre-login.
-  const { userId } = await auth();
 
   return (
     <main
@@ -261,7 +248,6 @@ export default async function VistoPage({
         </div>
 
         <FontesOficiaisSection
-          userId={userId}
           fontesOficiais={page.fontesOficiais}
           verificadoEm={page.verificadoEm}
         />

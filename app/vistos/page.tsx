@@ -262,17 +262,17 @@ export default function VistosPage() {
           className="inline-block text-xs font-bold uppercase tracking-widest text-pine mb-4"
           style={{ fontFamily: "var(--font-body)", letterSpacing: "0.15em" }}
         >
-          Sua jornada começa aqui
+          Caminhos de imigração
         </span>
         <h1
           className="text-4xl md:text-5xl text-ink mb-4 leading-tight"
           style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
         >
-          Qual é o seu visto?
+          Sua jornada começa aqui
         </h1>
         <p className="text-ink-soft text-lg leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
-          Selecione o visto que melhor descreve sua situação atual ou o caminho
-          que você quer seguir.
+          Estes são os caminhos possíveis para o seu perfil — escolha o que
+          mais combina com a sua situação hoje.
         </p>
       </section>
 
@@ -280,20 +280,22 @@ export default function VistosPage() {
       {recomendados.length > 0 && (
         <>
           <SectionHeader
-            title="Recomendados para você"
-            subtitle="Com base nas suas respostas, estes são os caminhos mais prováveis — os demais seguem abertos para comparar"
+            title="Baseado no seu perfil"
+            subtitle="Estes caminhos combinam com as respostas que você deu. Os demais seguem abertos logo abaixo, para comparar."
           />
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
-            {recomendados.map((v) => (
-              <VistoCard
-                key={v.id}
-                visto={v}
-                nationality={nationality}
-                selecionado={selecionado === v.id}
-                onSelect={() => setSelecionado(v.id)}
-                detailHref={detailHrefFor(v.id)}
-              />
-            ))}
+          <div className="max-w-2xl mx-auto bg-pine-tint/40 rounded-3xl p-4 md:p-6">
+            <div className="grid grid-cols-1 gap-5 items-start">
+              {recomendados.map((v) => (
+                <VistoCard
+                  key={v.id}
+                  visto={v}
+                  nationality={nationality}
+                  selecionado={selecionado === v.id}
+                  onSelect={() => setSelecionado(v.id)}
+                  detailHref={detailHrefFor(v.id)}
+                />
+              ))}
+            </div>
           </div>
         </>
       )}

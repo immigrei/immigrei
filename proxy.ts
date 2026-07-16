@@ -11,7 +11,6 @@ const isPublicRoute = createRouteMatcher([
   "/planos",
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/vistos(.*)",
   "/onboarding(.*)",
   // SEVP school directory: public government data, acquisition/SEO surface.
   "/escolas(.*)",
