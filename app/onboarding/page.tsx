@@ -1270,7 +1270,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       (education === "high_school" || education === "bachelor_ongoing")
     ) {
       results.push({
-        visa: "F-1 (Estudante Acadêmico) — caminho recomendado",
+        visa: "F-1 (Estudante Acadêmico)",
         forms: "DS-160 + I-20 (emitido pela universidade ou escola de idiomas)",
         description:
           "O H-1B exige graduação completa na área da vaga. Enquanto isso, o F-1 permite estudar nos EUA e trabalhar via OPT/CPT — o caminho mais comum até o visto de trabalho.",
@@ -1875,18 +1875,18 @@ export default function OnboardingPage() {
     }
   }
 
-  const recommendations = getRecommendations(answers);
+  // Fase 1 do fluxo de gates: o CTA força autenticação antes da vitrine de
+  // vistos (independente do proxy.ts), preservando nationality/location/
+  // goal/focus na URL de retorno via redirect_url do Clerk.
+  function goToVistos(query: string) {
+    if (!isSignedIn) {
+      router.push(`/sign-up?redirect_url=${encodeURIComponent(`/vistos?${query}`)}`);
+      return;
+    }
+    router.push(`/vistos?${query}`);
+  }
 
-  const priorityLabel: Record<string, string> = {
-    high: "Alta prioridade",
-    medium: "Recomendado",
-    low: "Possível",
-  };
-  const priorityStyle: Record<string, string> = {
-    high:   "bg-amber-tint text-amber-deep border border-amber/40",
-    medium: "bg-pine-tint text-pine border border-pine-tint",
-    low:    "bg-cream-2 text-ink-faint border border-pine-tint",
-  };
+  const recommendations = getRecommendations(answers);
 
   // ── Resuming save after sign-up ───────────────────────────────────────────
   if (resuming) {
@@ -1950,9 +1950,22 @@ export default function OnboardingPage() {
     const visibleRecommendations = isSignedIn
       ? recommendations
       : recommendations.filter((r) => !r.professionalReferral);
-    const hasUrgent  = recommendations.some((r) => r.urgent && !r.blocked);
-    const hasBlocked = recommendations.some((r) => r.blocked);
-    const destino    = deriveDestination(answers, recommendations);
+    // Um único card: o topo da lista já ordenada por prioridade. Quando o
+    // topo é um visto bloqueado por nacionalidade, o card exibido passa a
+    // ser a próxima alternativa viável da mesma lista (EB-5/L-1/B-1, sempre
+    // inserida logo após o bloqueio na engine) — nunca deixamos a pessoa
+    // sem saída.
+    const topMatch = visibleRecommendations[0];
+    const bestMatch = topMatch?.blocked
+      ? (visibleRecommendations.find((r) => !r.blocked) ?? topMatch)
+      : topMatch;
+    const blockedContext = topMatch?.blocked && bestMatch !== topMatch ? topMatch : null;
+    const isUrgent = Boolean(bestMatch?.urgent);
+    // Recomendação de visto puro casa com um card do catálogo e ganha os
+    // blocos ricos de /vistos; processos (I-539, manuais de caminho,
+    // overstay) e bloqueados seguem no formato simples.
+    const catalogo = bestMatch && !bestMatch.blocked ? findCatalogVisto(bestMatch.visa) : null;
+    const destino = deriveDestination(answers, recommendations);
     // Manuais que já aparecem como recomendação própria — o card rico
     // esconde o link "rumo ao GC" quando apontaria para o mesmo lugar.
     const linkedHrefs = new Set(
@@ -1992,12 +2005,12 @@ export default function OnboardingPage() {
               Encontramos seu caminho.
             </h1>
             <p className="text-ink-soft" style={{ fontFamily: "var(--font-body)" }}>
-              Com base no seu perfil, estes são os caminhos mais relevantes para você:
+              Baseado no seu perfil, este é o caminho que combina com as suas respostas:
             </p>
           </div>
 
           {/* Urgent alert */}
-          {hasUrgent && (
+          {isUrgent && (
             <div className="bg-clay/10 border border-clay rounded-2xl p-4 flex gap-3">
               <span className="text-xl flex-shrink-0">⚠️</span>
               <p
@@ -2021,22 +2034,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Blocked nationality note */}
-          {hasBlocked && (
-            <div className="bg-amber-tint border border-amber/40 rounded-2xl p-4 flex gap-3">
-              <span className="text-xl flex-shrink-0">🔒</span>
-              <p
-                className="text-amber-deep text-sm leading-relaxed"
-                style={{ fontFamily: "var(--font-body)" }}
-              >
-                Alguns vistos abaixo não estão disponíveis para a sua cidadania.
-                Indicamos as melhores alternativas para o seu perfil.
-              </p>
-            </div>
-          )}
-
-          {/* Results list */}
-          {visibleRecommendations.length === 0 ? (
+          {/* Best-match card */}
+          {!bestMatch ? (
             <div className="bg-cream-2 rounded-2xl p-6 text-center">
               <p className="text-ink-soft" style={{ fontFamily: "var(--font-body)" }}>
                 {isSignedIn
@@ -2045,99 +2044,91 @@ export default function OnboardingPage() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              {visibleRecommendations.map((rec) => {
-                // Recomendação de visto puro casa com um card do catálogo e
-                // ganha os blocos ricos de /vistos; processos (I-539, manuais
-                // de caminho, overstay) e bloqueados seguem no formato simples.
-                const catalogo = rec.blocked ? null : findCatalogVisto(rec.visa);
-                return (
-                <div
-                  key={rec.visa}
-                  className={[
-                    "bg-cream-2 rounded-2xl p-5",
-                    rec.blocked
-                      ? "opacity-60 border-2 border-clay/30"
-                      : rec.urgent
-                        ? "border-2 border-clay"
-                        : "border border-pine-tint",
-                  ].join(" ")}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3
-                      className={`font-bold text-base leading-tight ${rec.blocked ? "text-ink-faint line-through" : "text-pine"}`}
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      {rec.visa}
-                    </h3>
-                    {!rec.blocked && (
-                      <span
-                        className={`text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0 ${priorityStyle[rec.priority]}`}
-                        style={{ fontFamily: "var(--font-body)" }}
-                      >
-                        {priorityLabel[rec.priority]}
-                      </span>
-                    )}
-                    {rec.blocked && (
-                      <span className="text-xs font-bold px-2 py-1 rounded-full bg-clay/10 text-clay border border-clay/30 whitespace-nowrap flex-shrink-0">
-                        Indisponível
-                      </span>
-                    )}
-                  </div>
-                  {isSignedIn ? (
-                    <p
-                      className="text-ink-soft text-sm mb-3 leading-relaxed"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      {rec.description}
-                    </p>
-                  ) : (
-                    <ul className="text-ink-soft text-sm mb-3 leading-relaxed space-y-1.5">
-                      {summarizeForGuest(rec.description).map((bullet) => (
-                        <li key={bullet} className="flex gap-2" style={{ fontFamily: "var(--font-body)" }}>
-                          <span className="text-pine flex-shrink-0">•</span>
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {catalogo && (
-                    <div
-                      className="flex flex-col gap-3 mb-4"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      <VistoCatalogDetails
-                        visto={catalogo}
-                        showRumoGc={
-                          isSignedIn &&
-                          (!catalogo.rumoGc || !linkedHrefs.has(catalogo.rumoGc.href))
-                        }
-                      />
-                    </div>
-                  )}
-                  {!rec.blocked && isSignedIn && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-ink-faint">📋</span>
-                      <span
-                        className="text-xs text-ink-faint font-medium"
-                        style={{ fontFamily: "var(--font-body)" }}
-                      >
-                        {rec.forms}
-                      </span>
-                    </div>
-                  )}
-                  {!rec.blocked && isSignedIn && rec.href && (
-                    <Link
-                      href={rec.href}
-                      className="inline-block mt-3 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors"
-                      style={{ fontFamily: "var(--font-body)" }}
-                    >
-                      Abrir o guia completo →
-                    </Link>
-                  )}
+            <div
+              className={[
+                "bg-cream-2 rounded-2xl p-5",
+                bestMatch.blocked
+                  ? "opacity-60 border-2 border-clay/30"
+                  : bestMatch.urgent
+                    ? "border-2 border-clay"
+                    : "border border-pine-tint",
+              ].join(" ")}
+            >
+              {blockedContext && (
+                <div className="bg-amber-tint border border-amber/40 rounded-xl p-3 mb-4 flex gap-2">
+                  <span className="text-base flex-shrink-0">🔒</span>
+                  <p
+                    className="text-amber-deep text-xs leading-relaxed"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {blockedContext.description} Este é o caminho equivalente para o seu perfil.
+                  </p>
                 </div>
-                );
-              })}
+              )}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <h3
+                  className={`font-bold text-base leading-tight ${bestMatch.blocked ? "text-ink-faint line-through" : "text-pine"}`}
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  {bestMatch.visa}
+                </h3>
+                {bestMatch.blocked && (
+                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-clay/10 text-clay border border-clay/30 whitespace-nowrap flex-shrink-0">
+                    Indisponível
+                  </span>
+                )}
+              </div>
+              {isSignedIn ? (
+                <p
+                  className="text-ink-soft text-sm mb-3 leading-relaxed"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  {bestMatch.description}
+                </p>
+              ) : (
+                <ul className="text-ink-soft text-sm mb-3 leading-relaxed space-y-1.5">
+                  {summarizeForGuest(bestMatch.description).map((bullet) => (
+                    <li key={bullet} className="flex gap-2" style={{ fontFamily: "var(--font-body)" }}>
+                      <span className="text-pine flex-shrink-0">•</span>
+                      <span>{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {catalogo && (
+                <div
+                  className="flex flex-col gap-3 mb-4"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  <VistoCatalogDetails
+                    visto={catalogo}
+                    showRumoGc={
+                      isSignedIn &&
+                      (!catalogo.rumoGc || !linkedHrefs.has(catalogo.rumoGc.href))
+                    }
+                  />
+                </div>
+              )}
+              {!bestMatch.blocked && isSignedIn && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-ink-faint">📋</span>
+                  <span
+                    className="text-xs text-ink-faint font-medium"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    {bestMatch.forms}
+                  </span>
+                </div>
+              )}
+              {!bestMatch.blocked && isSignedIn && bestMatch.href && (
+                <Link
+                  href={bestMatch.href}
+                  className="inline-block mt-3 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  Abrir o guia completo →
+                </Link>
+              )}
             </div>
           )}
 
@@ -2175,7 +2166,7 @@ export default function OnboardingPage() {
               onClick={() =>
                 destino.kind === "profissionais"
                   ? saveProfileAndGoToProfissionais()
-                  : router.push(`/vistos?${destino.query}`)
+                  : goToVistos(destino.query)
               }
               disabled={destino.kind === "profissionais" && savingProfile}
               className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
