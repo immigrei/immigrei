@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
 import { vistosEstudo, vistosNegocios, type Visto } from "@/lib/vistosCatalog";
-import { hasVistoPage } from "@/lib/vistoPages";
 
 
 
@@ -29,15 +27,11 @@ function VistoCard({
   nationality,
   selecionado,
   onSelect,
-  detailHref,
 }: {
   visto: Visto;
   nationality: Nationality;
   selecionado: boolean;
   onSelect: () => void;
-  // Quando o visto tem página dedicada, o CTA navega para ela em vez de
-  // selecionar — a confirmação acontece lá (mesmo fluxo de salvamento).
-  detailHref?: string;
 }) {
   const locked =
     visto.availability === "treaty-only" && nationality === "brazilian";
@@ -107,17 +101,10 @@ function VistoCard({
       {/* Blocos de decisão compartilhados com os resultados do onboarding */}
       <VistoCatalogDetails visto={visto} showRumoGc={!locked} />
 
-      {/* CTA */}
-      {!locked && detailHref && (
-        <Link
-          href={detailHref}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full mt-auto block text-center rounded-xl py-3.5 text-sm font-semibold transition-all duration-150 bg-amber/80 text-ink hover:bg-amber hover:shadow-md hover:shadow-amber/20"
-        >
-          Quero seguir esse caminho →
-        </Link>
-      )}
-      {!locked && !detailHref && (
+      {/* CTA — sempre pelo fluxo de seleção: confirma aqui, e o próprio
+          confirmarVisto() manda quem não tem conta para o /sign-up. O
+          conteúdo aprofundado agora mora dentro do app, com assinatura. */}
+      {!locked && (
         <button
           onClick={(e) => { e.stopPropagation(); onSelect(); }}
           className={[
@@ -194,16 +181,6 @@ export default function VistosPage() {
 
   const todosVistos = [...vistosEstudo, ...vistosNegocios];
   const vistoSelecionado = todosVistos.find((v) => v.id === selecionado);
-
-  // Query repassada às páginas dedicadas — mantém o perfil vindo do
-  // onboarding vivo até a confirmação acontecer lá dentro.
-  const detailParams = new URLSearchParams();
-  if (rawNationality) detailParams.set("nationality", rawNationality);
-  if (location) detailParams.set("location", location);
-  if (mainGoal) detailParams.set("goal", mainGoal);
-  const detailQs = detailParams.toString();
-  const detailHrefFor = (id: string) =>
-    hasVistoPage(id) ? `/vistos/${id}${detailQs ? `?${detailQs}` : ""}` : undefined;
 
   const recomendados = focusIds
     .map((id) => todosVistos.find((v) => v.id === id))
@@ -291,7 +268,6 @@ export default function VistosPage() {
                 nationality={nationality}
                 selecionado={selecionado === v.id}
                 onSelect={() => setSelecionado(v.id)}
-                detailHref={detailHrefFor(v.id)}
               />
             ))}
           </div>
@@ -313,7 +289,6 @@ export default function VistosPage() {
                 nationality={nationality}
                 selecionado={selecionado === v.id}
                 onSelect={() => setSelecionado(v.id)}
-                detailHref={detailHrefFor(v.id)}
               />
             ))}
           </div>
@@ -335,7 +310,6 @@ export default function VistosPage() {
                 nationality={nationality}
                 selecionado={selecionado === v.id}
                 onSelect={() => setSelecionado(v.id)}
-                detailHref={detailHrefFor(v.id)}
               />
             ))}
           </div>

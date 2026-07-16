@@ -14,6 +14,12 @@ export interface Visto {
   degrau: string;  // o plano de crescimento p/ quem ainda não está pronto
   destaque: { tipo: "star" | "warning" | "block"; texto: string } | null;
   stats: { label: string; valor: string; ok: boolean }[];
+  // A ponte para o Green Card — nomeada, não escondida. 1-2 fatos concretos
+  // que geram interesse (o passo a passo completo fica para quem assina).
+  greenCard: {
+    headline: string;
+    fatos?: { rotulo: string; texto: string }[];
+  };
   // Passo a passo da ponte rumo ao Green Card ("direto, reto e sem curva"):
   // quando o manual/motor existe, o card linka direto para ele.
   rumoGc?: { label: string; href: string };
@@ -43,9 +49,15 @@ export const vistosEstudo: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Limitado (on-campus, OPT/CPT)", ok: true },
       { label: "Duração", valor: "Enquanto durar o curso (D/S)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Indireto — via OPT → H-1B", ok: true },
-      { label: "Família", valor: "F-2 (cônjuge não trabalha)", ok: false },
+      { label: "Família", valor: "F-2 (cônjuge não trabalha) · filhos <21 incluídos", ok: false },
     ],
+    greenCard: {
+      headline: "Indireto — abre depois do H-1B",
+      fatos: [
+        { rotulo: "Sem atalho direto", texto: "o F-1 não é dual intent — o Green Card só entra em jogo depois de virar H-1B." },
+        { rotulo: "Rota comum", texto: "OPT → H-1B → PERM/EB-2/EB-3 pelo empregador, ou EB-2 NIW por conta própria." },
+      ],
+    },
     rumoGc: { label: "Passo a passo: F-1 → H-1B", href: "/caminhos/f1-para-h1b" },
     availability: "all",
   },
@@ -69,9 +81,15 @@ export const vistosEstudo: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Não (estágio só após o curso)", ok: false },
       { label: "Duração", valor: "Duração do curso (máx. 1 ano, prorrogável)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Indireto — trocando p/ F-1 (consulado) ou família", ok: true },
-      { label: "Família", valor: "M-2 (cônjuge não trabalha)", ok: false },
+      { label: "Família", valor: "M-2 (cônjuge não trabalha) · filhos <21 incluídos", ok: false },
     ],
+    greenCard: {
+      headline: "Indireto — só trocando de categoria",
+      fatos: [
+        { rotulo: "Sem mudança direta", texto: "M-1 → F-1 só pelo consulado — mudar de status por dentro dos EUA é proibido." },
+        { rotulo: "Atenção ao H", texto: "se a formação do M-1 foi o que qualificou para o H, essa rota fica bloqueada." },
+      ],
+    },
     rumoGc: { label: "Passo a passo: M-1 → F-1 pelo consulado", href: "/caminhos/m1-para-f1-consulado" },
     availability: "all",
   },
@@ -95,9 +113,15 @@ export const vistosEstudo: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim, dentro do programa", ok: true },
       { label: "Duração", valor: "Varia por categoria (meses a 5 anos)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Possível — livre do 212(e), ou após 2 anos/waiver", ok: true },
-      { label: "Família", valor: "J-2 (cônjuge PODE pedir permissão de trabalho)", ok: true },
+      { label: "Família", valor: "J-2 (cônjuge PODE pedir permissão de trabalho) · filhos <21 incluídos", ok: true },
     ],
+    greenCard: {
+      headline: "Possível — depende da regra dos 2 anos",
+      fatos: [
+        { rotulo: "Sujeito ao 212(e)?", texto: "Green Card só depois dos 2 anos no Brasil — ou com waiver (DS-3035, no-objection é o mais comum para brasileiros)." },
+        { rotulo: "Livre da regra", texto: "segue direto, inclusive por família ou emprego." },
+      ],
+    },
     rumoGc: { label: "Passo a passo: J-1 → F-1 e a regra dos 2 anos", href: "/caminhos/j1-para-f1" },
     availability: "all",
   },
@@ -121,9 +145,15 @@ export const vistosEstudo: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim (no patrocinador)", ok: true },
       { label: "Duração", valor: "3 + 3 anos (máx. 6)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Sim — dual intent, patrocínio comum", ok: true },
-      { label: "Família", valor: "H-4 (cônjuge trabalha em certos casos)", ok: true },
+      { label: "Família", valor: "H-4 (cônjuge trabalha em certos casos) · filhos <21 incluídos", ok: true },
     ],
+    greenCard: {
+      headline: "Sim — dual intent, sem trocar de status",
+      fatos: [
+        { rotulo: "Dual intent", texto: "pedir o Green Card não compromete o H-1B nem futuras renovações ou reentradas." },
+        { rotulo: "Rota comum", texto: "PERM + EB-2/EB-3 pelo empregador, ou EB-2 NIW por autopetição." },
+      ],
+    },
     availability: "all",
   },
   {
@@ -145,9 +175,15 @@ export const vistosEstudo: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim (com o peticionário)", ok: true },
       { label: "Duração", valor: "3 anos + renovações sem limite", ok: true },
-      { label: "Rumo ao Green Card", valor: "Sim — perfil casa com EB-1A/NIW", ok: true },
-      { label: "Família", valor: "O-3 (cônjuge não trabalha)", ok: false },
+      { label: "Família", valor: "O-3 (cônjuge não trabalha) · filhos <21 incluídos", ok: false },
     ],
+    greenCard: {
+      headline: "Sim — quase dual intent",
+      fatos: [
+        { rotulo: "Sem risco à extensão", texto: "ter um I-140 pendente ou aprovado não é motivo para negar o O-1." },
+        { rotulo: "Autopetição", texto: "EB-1A e EB-2 NIW dispensam empregador e PERM — mas o padrão de prova é mais alto que o do O-1." },
+      ],
+    },
     rumoGc: { label: "Passo a passo: O-1 → Green Card por autopetição", href: "/caminhos/o1-autopeticao-greencard" },
     availability: "all",
   },
@@ -173,9 +209,15 @@ export const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim (no próprio negócio)", ok: true },
       { label: "Duração", valor: "Renovável sem limite (2–5 anos por vez)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Indireto — ponte para EB-5, EB-1C ou NIW", ok: true },
-      { label: "Família", valor: "Cônjuge PODE trabalhar", ok: true },
+      { label: "Família", valor: "Cônjuge PODE trabalhar · filhos <21 entram como dependentes", ok: true },
     ],
+    greenCard: {
+      headline: "Indireto — o investimento não conta sozinho",
+      fatos: [
+        { rotulo: "EB-5", texto: "pede um salto de valor — investimento bem maior que o do E-2." },
+        { rotulo: "EB-1C", texto: "abre se o seu papel no negócio for executivo, com estrutura multinacional por trás." },
+      ],
+    },
     availability: "treaty-only",
   },
   {
@@ -185,11 +227,11 @@ export const vistosNegocios: Visto[] = [
     badge: "Negócios",
     badgeColor: "ink",
     descricao:
-      "Para quem já tem empresa com comércio constante e substancial com os EUA — exportação, importação, serviços.",
+      "Para empresários que já fazem comércio com os EUA e são cidadãos de país com tratado de comércio (ex.: Portugal, Espanha e outros).",
     chave:
-      "Cidadania de país com tratado + mais de 50% do volume de comércio da empresa entre os EUA e o país do tratado.",
+      "Mais de 50% do volume de comércio da empresa entre os EUA e o país do tratado — documentado em contratos e faturas.",
     degrau:
-      "O degrau é o histórico: contratos e faturamento recorrentes com os EUA constroem o caso. Brasileiros precisam da segunda cidadania (como no E-2).",
+      "Sem tratado? A saída costuma ser a segunda cidadania. Sem histórico de comércio? Comece a documentar os contratos com os EUA agora.",
     destaque: {
       tipo: "block",
       texto: "O Brasil não tem tratado E-1 — disponível apenas com cidadania de país-membro.",
@@ -197,9 +239,15 @@ export const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim (na empresa do tratado)", ok: true },
       { label: "Duração", valor: "Renovável sem limite (2–5 anos por vez)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Indireto — via EB-1C (executivo) ou patrocínio", ok: true },
-      { label: "Família", valor: "Cônjuge PODE trabalhar", ok: true },
+      { label: "Família", valor: "Cônjuge PODE trabalhar · filhos <21 entram como dependentes", ok: true },
     ],
+    greenCard: {
+      headline: "Indireto (via EB-1C)",
+      fatos: [
+        { rotulo: "Sem PERM", texto: "pula a burocrática exigência de testar o mercado americano (economiza anos)." },
+        { rotulo: "Requisito", texto: "1 ano como gerente/executivo na multinacional fora dos EUA (em qualquer país)." },
+      ],
+    },
     availability: "treaty-only",
   },
   {
@@ -222,9 +270,15 @@ export const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Não", ok: false },
       { label: "Duração", valor: "Até 90 dias, sem extensão", ok: false },
-      { label: "Rumo ao Green Card", valor: "Indireto — só por parente imediato de cidadão", ok: true },
-      { label: "Família", valor: "Cada pessoa solicita a própria autorização", ok: true },
+      { label: "Família", valor: "Cada pessoa (inclusive crianças) solicita a própria autorização", ok: true },
     ],
+    greenCard: {
+      headline: "Indireto — só por laço familiar direto",
+      fatos: [
+        { rotulo: "Sem mudança pelo VWP", texto: "quem entra pelo ESTA não muda de status por dentro dos EUA — a regra geral exige sair." },
+        { rotulo: "Exceção estreita", texto: "parente imediato de cidadão americano (cônjuge, pai/mãe, filho) pode ajustar mesmo tendo entrado pelo ESTA." },
+      ],
+    },
     availability: "treaty-only",
   },
   {
@@ -247,9 +301,15 @@ export const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Não", ok: false },
       { label: "Duração", valor: "Até 6 meses por entrada (I-94 manda)", ok: true },
-      { label: "Rumo ao Green Card", valor: "Indireto — mudando de categoria (ex.: B → F-1) ou família", ok: true },
-      { label: "Família", valor: "Cada pessoa solicita o seu", ok: true },
+      { label: "Família", valor: "Cada pessoa, inclusive filhos, solicita o seu", ok: true },
     ],
+    greenCard: {
+      headline: "Indireto — depende de trocar de categoria",
+      fatos: [
+        { rotulo: "Sem dual intent", texto: "buscar Green Card logo após entrar de B levanta suspeita de má-fé na entrada." },
+        { rotulo: "Rota mais segura", texto: "trocar de categoria primeiro (ex.: para F-1) ou sair e voltar com o visto certo." },
+      ],
+    },
     rumoGc: { label: "Passo a passo: B-2 → F-1 por dentro dos EUA", href: "/casos/cos-b2-f1" },
     availability: "all",
   },
@@ -272,9 +332,15 @@ export const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Sim (na própria empresa)", ok: true },
       { label: "Duração", valor: "L-1A até 7 anos / L-1B até 5", ok: true },
-      { label: "Rumo ao Green Card", valor: "Sim — dual intent, via EB-1C", ok: true },
-      { label: "Família", valor: "L-2 (cônjuge PODE trabalhar)", ok: true },
+      { label: "Família", valor: "L-2 (cônjuge PODE trabalhar) · filhos <21 incluídos", ok: true },
     ],
+    greenCard: {
+      headline: "Sim — a ponte mais direta que existe",
+      fatos: [
+        { rotulo: "Sem PERM", texto: "dispensa a exigência de testar o mercado americano — o mesmo atalho do EB-1C." },
+        { rotulo: "Atenção ao teto", texto: "o L-1A vence em 7 anos — o ideal é entrar com o EB-1C com folga antes do limite." },
+      ],
+    },
     rumoGc: { label: "Passo a passo: L-1A → EB-1C (Green Card)", href: "/caminhos/l1-para-eb1c" },
     availability: "all",
   },
@@ -297,9 +363,11 @@ export const vistosNegocios: Visto[] = [
     stats: [
       { label: "Trabalho", valor: "Livre (é residência)", ok: true },
       { label: "Duração", valor: "Permanente (é o green card)", ok: true },
-      { label: "Rumo ao Green Card", valor: "É o próprio green card", ok: true },
       { label: "Família", valor: "Cônjuge e filhos <21 incluídos", ok: true },
     ],
+    greenCard: {
+      headline: "É o próprio green card",
+    },
     availability: "all",
   },
 ];

@@ -51,16 +51,37 @@ export default function VistoCatalogDetails({
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2">
-        {visto.stats.map((stat) => (
-          <div key={stat.label} className="bg-cream rounded-xl px-3 py-2.5">
-            <p className="text-ink-faint text-xs font-bold uppercase tracking-wider mb-0.5">
-              {stat.label}
-            </p>
-            <p className={`text-sm font-medium ${stat.ok ? "text-ink" : "text-clay"}`}>
-              {stat.valor}
-            </p>
-          </div>
-        ))}
+        {visto.stats.map((stat, i) => {
+          const wide = visto.stats.length % 2 === 1 && i === visto.stats.length - 1;
+          return (
+            <div
+              key={stat.label}
+              className={`bg-cream rounded-xl px-3 py-2.5 ${wide ? "col-span-2" : ""}`}
+            >
+              <p className="text-ink-faint text-xs font-bold uppercase tracking-wider mb-0.5">
+                {stat.label}
+              </p>
+              <p className={`text-sm font-medium ${stat.ok ? "text-ink" : "text-clay"}`}>
+                {stat.valor}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Green Card — bloco próprio: destino nomeado + fatos que geram interesse */}
+      <div className="bg-cream rounded-xl px-3 py-2.5">
+        <p className="text-ink-faint text-xs font-bold uppercase tracking-wider mb-0.5">Green Card</p>
+        <p className="text-sm font-medium text-ink">{visto.greenCard.headline}</p>
+        {visto.greenCard.fatos && visto.greenCard.fatos.length > 0 && (
+          <ul className="mt-1.5 space-y-1">
+            {visto.greenCard.fatos.map((f) => (
+              <li key={f.rotulo} className="text-xs text-ink-soft leading-relaxed">
+                <span className="font-semibold text-ink">{f.rotulo}:</span> {f.texto}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Ponte rumo ao Green Card — link direto para o passo a passo */}
