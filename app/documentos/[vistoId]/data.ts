@@ -1,4 +1,4 @@
-export type Agencia = "USCIS" | "NVC" | "DOS" | "DOL" | "EOIR";
+export type Agencia = "USCIS" | "NVC" | "DOS" | "DOL" | "EOIR" | "CBP";
 
 export type KitCaminho = "consulado" | "cos" | "manutencao";
 
@@ -2067,6 +2067,189 @@ const checklists: Record<string, ChecklistVisto> = {
               "Com resultados reais vs. projeções anteriores e planos para os próximos anos. Mostra que o negócio está crescendo e cumprindo o propósito original do E-2.",
             agencia: "DOS",
             obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  e1: {
+    vistoId: "e1",
+    codigo: "E-1",
+    nome: "Visto de Comerciante por Tratado",
+    intro:
+      "O E-1 é para nacionais de países com tratado de comércio com os EUA que mantêm comércio internacional substancial e contínuo com os americanos — exportação, importação, serviços, tecnologia.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 347",
+      alertaCritico:
+        "O E-1 NÃO está disponível para brasileiros — o Brasil não tem tratado de comércio e navegação com os EUA. Disponível para nacionais de países com tratado (lista em travel.state.gov), incluindo brasileiros com dupla cidadania qualificante.",
+    },
+    grupos: [
+      {
+        titulo: "Elegibilidade e requisitos básicos",
+        descricao: "Confirme antes de iniciar qualquer documentação",
+        documentos: [
+          {
+            id: "nacionalidade-tratado",
+            nome: "Confirmar nacionalidade de país com tratado E-1",
+            descricao:
+              "Você precisa ser nacional de um país com tratado de comércio e navegação com os EUA. A lista está em travel.state.gov. Brasileiros não são elegíveis — dupla cidadania de país com tratado qualifica.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "comercio-substancial",
+            nome: "Confirmar comércio substancial e contínuo com os EUA",
+            descricao:
+              "Fluxo contínuo de transações internacionais entre a sua empresa e os EUA. O número de transações pesa mais que o valor individual de cada uma — não há valor mínimo legal.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "comercio-principal",
+            nome: "Confirmar que 50%+ do comércio internacional é com os EUA",
+            descricao:
+              "Mais da metade do volume de comércio internacional da empresa precisa ser entre os EUA e o país do tratado. Comércio com outros países não conta para esse percentual.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Documentos do comércio",
+        descricao: "Comprovam o fluxo real e contínuo de transações com os EUA",
+        documentos: [
+          {
+            id: "contratos-comercio",
+            nome: "Contratos, faturas e conhecimentos de embarque",
+            descricao:
+              "Histórico de transações com clientes/fornecedores americanos: contratos assinados, invoices, bills of lading, comprovantes de pagamento internacional.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "demonstrativos-volume",
+            nome: "Demonstrativo do volume de comércio por país",
+            descricao:
+              "Planilha ou relatório contábil separando o comércio internacional por destino, comprovando que os EUA respondem por mais de 50% do volume.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "registros-empresa",
+            nome: "Registros corporativos e composição societária",
+            descricao:
+              "Documentos da empresa mostrando que 50%+ da propriedade é de nacionais do país do tratado.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Aplicação consular",
+        descricao: "O E-1 de fora dos EUA é sempre pelo consulado",
+        documentos: [
+          {
+            id: "ds-160",
+            nome: "Formulário DS-160 preenchido",
+            descricao: "Aplicação online de visto não-imigrante, com foto e confirmação impressa.",
+            agencia: "DOS",
+            formulario: "DS-160",
+            obrigatorio: true,
+          },
+          {
+            id: "ds-156e",
+            nome: "Formulário DS-156E (aplicação de tratado)",
+            descricao:
+              "Formulário específico das categorias E, com os dados da empresa, do comércio e do aplicante.",
+            agencia: "DOS",
+            formulario: "DS-156E",
+            obrigatorio: true,
+          },
+          {
+            id: "entrevista-consular",
+            nome: "Entrevista na seção de vistos E do consulado",
+            descricao:
+              "Consulados têm filas próprias para vistos de tratado. A empresa e o fluxo de comércio são o centro da conversa.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  esta: {
+    vistoId: "esta",
+    codigo: "ESTA",
+    nome: "Autorização de Viagem (Visa Waiver Program)",
+    intro:
+      "O ESTA é a autorização eletrônica para cidadãos de países do Visa Waiver Program visitarem os EUA por até 90 dias sem visto. Não vale para brasileiros — o Brasil não participa do programa.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 97",
+      alertaCritico:
+        "O Brasil NÃO participa do Visa Waiver Program — brasileiros usam o visto B-1/B-2. O ESTA vale para cidadãos dos ~40 países participantes (Europa Ocidental, Japão, Coreia do Sul, Austrália, Chile, entre outros). Os 90 dias não se estendem e não permitem mudança de status.",
+    },
+    grupos: [
+      {
+        titulo: "Elegibilidade",
+        descricao: "Confirme antes de aplicar",
+        documentos: [
+          {
+            id: "nacionalidade-vwp",
+            nome: "Confirmar cidadania de país do Visa Waiver Program",
+            descricao:
+              "A lista oficial está em travel.state.gov. Dupla cidadania ou visitas anteriores a certos países (Cuba desde 2021; Irã, Iraque, Coreia do Norte, Síria e outros desde 2011) removem a elegibilidade — nesses casos, o caminho é o visto B no consulado.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "epassport",
+            nome: "Passaporte eletrônico (e-passport) válido",
+            descricao:
+              "Obrigatório ter passaporte com chip eletrônico (símbolo na capa), válido por pelo menos 6 meses além da data planejada de saída dos EUA.",
+            agencia: "CBP",
+            obrigatorio: true,
+          },
+          {
+            id: "proposito-visita",
+            nome: "Confirmar que o propósito cabe numa visita",
+            descricao:
+              "Turismo, reuniões de negócios, conferências — o mesmo escopo do visto B. Estudar, trabalhar ou morar exigem o visto da categoria certa; entrar pelo VWP com outro plano é declaração falsa na entrada.",
+            agencia: "CBP",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Aplicação e viagem",
+        descricao: "O ESTA é 100% online, direto com o CBP",
+        documentos: [
+          {
+            id: "aplicacao-esta",
+            nome: "Aplicação ESTA no site oficial do CBP",
+            descricao:
+              "Somente em esta.cbp.dhs.gov (cuidado com sites intermediários que cobram a mais). Aplique assim que começar a planejar a viagem — a aprovação costuma sair em minutos, mas pode levar até 72h.",
+            agencia: "CBP",
+            obrigatorio: true,
+          },
+          {
+            id: "regra-90-dias",
+            nome: "Entender o limite inegociável de 90 dias",
+            descricao:
+              "A estadia máxima é 90 dias, sem extensão e sem mudança de status por dentro. Passar do prazo remove a elegibilidade futura ao VWP e inicia presença irregular automaticamente.",
+            agencia: "CBP",
+            obrigatorio: true,
+          },
+          {
+            id: "validade-esta",
+            nome: "Conferir a validade do ESTA antes de cada viagem",
+            descricao:
+              "A autorização vale para múltiplas entradas por até 2 anos (ou até o passaporte vencer, o que vier primeiro). Novo passaporte = novo ESTA.",
+            agencia: "CBP",
+            obrigatorio: false,
           },
         ],
       },

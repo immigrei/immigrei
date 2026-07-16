@@ -90,7 +90,7 @@ describe("VISTO_PAGES integrity", () => {
   it("helpers respondem coerentemente", () => {
     expect(hasVistoPage("f1")).toBe(true);
     expect(getVistoPage("f1")?.id).toBe("f1");
-    expect(hasVistoPage("e2")).toBe(false);
+    expect(hasVistoPage("e2")).toBe(true);
     expect(getVistoPage("nao-existe")).toBeNull();
   });
 });

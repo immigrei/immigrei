@@ -11,6 +11,7 @@ const agenciaBadge: Record<Agencia, { label: string; color: string }> = {
   DOS:   { label: "Consulado", color: "bg-ink/10 text-ink-soft" },
   DOL:   { label: "DOL",   color: "bg-pine-tint text-pine-deep" },
   EOIR:  { label: "EOIR",  color: "bg-clay/10 text-clay" },
+  CBP:   { label: "CBP",   color: "bg-pine-tint text-pine" },
 };
 
 interface Anexo {
