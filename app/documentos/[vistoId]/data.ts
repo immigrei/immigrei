@@ -2366,7 +2366,7 @@ const checklists: Record<string, ChecklistVisto> = {
             id: "i131",
             nome: "Formulário I-131 — permissão de VIAGEM enquanto o I-485 corre (advance parole)",
             descricao:
-              "Só para a rota do I-485: sair dos EUA sem o advance parole aprovado faz o USCIS considerar o pedido abandonado. Peça junto com o I-485 e só viaje com o documento em mãos.",
+              "Opcional, só para a rota do I-485. A regra geral é: protocolou o ajuste, fica nos EUA até o fim. O advance parole existe para emergências (só viaje com ele aprovado e em mãos — sair sem ele = pedido abandonado). Quem tem tempo de permanência irregular não deve viajar de jeito nenhum, nem com o parole: a saída pode ativar as barras de 3/10 anos.",
             agencia: "USCIS",
             formulario: "I-131",
             formId: "i-131",

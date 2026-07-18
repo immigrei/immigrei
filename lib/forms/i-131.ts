@@ -61,9 +61,10 @@ export const I131: FormSpec = {
       id: "tipo",
       titlePt: "O que você está pedindo",
       descriptionPt:
-        "⚠️ Este kit cobre o ADVANCE PAROLE: a permissão para viajar ao exterior e voltar enquanto seu " +
-        "I-485 está pendente. Sem ela, viajar = abandonar o pedido do green card. " +
-        "Só viaje depois que o documento for APROVADO e estiver em mãos.",
+        "⚠️ O ADVANCE PAROLE é opcional: a regra geral do ajuste é protocolar o I-485 e FICAR nos EUA até " +
+        "o green card chegar. Este documento existe para quem precisa poder viajar (emergências) — e só com " +
+        "ele APROVADO e em mãos; sair sem ele = pedido abandonado. Quem tem tempo de permanência irregular " +
+        "não deve viajar de jeito nenhum, nem com o parole: a saída pode ativar as barras de 3/10 anos.",
       questions: [
         {
           id: "app_type",
