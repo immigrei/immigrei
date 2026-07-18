@@ -10,6 +10,8 @@ import { I130 } from "./i-130";
 import { I130A } from "./i-130a";
 import { I864 } from "./i-864";
 import { I485 } from "./i-485";
+import { I131 } from "./i-131";
+import { I765AOS } from "./i-765-aos";
 
 export const FORMS: Record<string, FormSpec> = {
   [I765.id]: I765,
@@ -18,6 +20,8 @@ export const FORMS: Record<string, FormSpec> = {
   [I130A.id]: I130A,
   [I864.id]: I864,
   [I485.id]: I485,
+  [I131.id]: I131,
+  [I765AOS.id]: I765AOS,
 };
 
 export function getForm(formId: string): FormSpec | undefined {

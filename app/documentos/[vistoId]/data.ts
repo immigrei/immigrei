@@ -2353,6 +2353,26 @@ const checklists: Record<string, ChecklistVisto> = {
             obrigatorio: false,
           },
           {
+            id: "i765aos",
+            nome: "Formulário I-765 (c)(9) — permissão de TRABALHO enquanto o I-485 corre",
+            descricao:
+              "Só para quem escolheu a rota do I-485 (dentro dos EUA): o EAD categoria (c)(9) permite trabalhar legalmente enquanto o ajuste está pendente. Protocolado junto com o I-485, sem taxa adicional.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            formId: "i-765-aos",
+            obrigatorio: false,
+          },
+          {
+            id: "i131",
+            nome: "Formulário I-131 — permissão de VIAGEM enquanto o I-485 corre (advance parole)",
+            descricao:
+              "Só para a rota do I-485: sair dos EUA sem o advance parole aprovado faz o USCIS considerar o pedido abandonado. Peça junto com o I-485 e só viaje com o documento em mãos.",
+            agencia: "USCIS",
+            formulario: "I-131",
+            formId: "i-131",
+            obrigatorio: false,
+          },
+          {
             id: "documentos-civis",
             nome: "Documentos civis do imigrante",
             descricao:

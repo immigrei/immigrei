@@ -40,6 +40,11 @@ const SOURCES = {
     page: "https://www.uscis.gov/i-130",
     out: "public/forms/i-130a.pdf",
   },
+  "i-131": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-131.pdf",
+    page: "https://www.uscis.gov/i-131",
+    out: "public/forms/i-131.pdf",
+  },
   "i-485": {
     pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-485.pdf",
     page: "https://www.uscis.gov/i-485",
