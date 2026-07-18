@@ -2275,20 +2275,22 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "i130",
-            nome: "Formulário I-130 — Petition for Alien Relative",
+            nome: "Formulário I-130 — quem preenche é o PARENTE cidadão/green card (peticionário)",
             descricao:
-              "Preenchido e assinado pelo peticionário (o cidadão). Taxa atual: US$675 em papel ou US$625 online (my.uscis.gov). Cada beneficiário exige uma I-130 própria.",
+              "Preenchido e assinado pelo peticionário — o parente que É cidadão ou residente. Taxa atual: US$675 em papel ou US$625 online (my.uscis.gov). Cada beneficiário exige uma I-130 própria.",
             agencia: "USCIS",
             formulario: "I-130",
+            formId: "i-130",
             obrigatorio: true,
           },
           {
             id: "i130a",
-            nome: "Formulário I-130A — Supplemental Information for Spouse Beneficiary",
+            nome: "Formulário I-130A — quem preenche é QUEM VAI RECEBER o green card (cônjuge beneficiário)",
             descricao:
-              "Obrigatório somente quando o beneficiário é cônjuge — acompanha a I-130 no mesmo envelope. Filhos e pais não precisam.",
+              "Obrigatório somente quando o beneficiário é cônjuge — acompanha a I-130 no mesmo envelope. Filhos e pais não precisam. Se o beneficiário mora fora dos EUA, preenche mas não precisa assinar.",
             agencia: "USCIS",
             formulario: "I-130A",
+            formId: "i-130a",
             obrigatorio: false,
           },
           {
