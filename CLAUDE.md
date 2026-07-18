@@ -2,7 +2,7 @@
 
 > This file is read automatically by Claude Code every session.
 > Keep it updated as the product evolves.
-> Last updated: June 2026
+> Last updated: July 2026
 
 ---
 
@@ -214,17 +214,21 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## 10. Build Status
 
-- [x] Next.js project scaffolded
-- [x] Deployed to Vercel (immigrei.vercel.app)
-- [x] GitHub repo connected (immigrei/immigrei)
-- [x] Supabase project created — East US
-- [x] Clerk app created (Email, Google, Apple, Facebook)
-- [x] Stripe account created (test mode)
-- [ ] .env.local configured with all keys
-- [ ] Supabase + Clerk + Stripe packages installed
-- [ ] Auth flow (sign up / sign in)
-- [ ] User onboarding flow
-- [ ] Dashboard / immigration status view
-- [ ] Immigration path visualization
-- [ ] Professional network connection
-- [ ] Stripe payment flow
+**MVP foundation — all delivered:**
+
+- [x] Next.js project scaffolded, deployed to Vercel (immigrei.vercel.app)
+- [x] Supabase (East US) + Clerk (Email/Google/Apple/Facebook) + Stripe (test mode) — configured, packages installed, .env.local set
+- [x] Auth flow (sign up / sign in) — /vistos and /caminhos gated behind login
+- [x] User onboarding flow — branching questionnaire, single best-match result card
+- [x] Dashboard / immigration status view — /painel with data-driven journey progress
+- [x] Immigration path visualization — /caminhos manuals + /casos/cos-b2-f1 (GPS pathway)
+- [x] Professional network connection — /profissionais referral surface
+- [x] Stripe payment flow — checkout + webhook (app/api/stripe, app/api/webhooks/stripe)
+- [x] Legal knowledge base — content/leis; all 11 catalog visas have dedicated /vistos/[id] pages (Jul 16, 2026)
+- [x] Document vault, community tab, SEVP school directory (/escolas), I-94 cron
+
+**Known gaps / next up:**
+
+- [ ] E-1/E-2 change-of-status kit (L-1/J-1/M-1 already have one)
+- [ ] Stripe products created in dashboard (Base $9, Core $29, Concierge $1,499)
+- [ ] Denial-exit matrix completion (matriz de saídas por negativa)

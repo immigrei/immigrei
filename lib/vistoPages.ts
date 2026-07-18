@@ -533,6 +533,604 @@ export const VISTO_PAGES: Record<string, VistoPage> = {
     fonteLeis: ["vistos/o1.md"],
     verificadoEm: "2026-07-14",
   },
+
+  // ── B-1/B-2 — Visitante de Negócios e Turismo ──────────────────────────
+  b1: {
+    id: "b1",
+    tagline:
+      "O visto de visita — e, para muita gente, o primeiro capítulo da jornada: conhecer os EUA antes de escolher o caminho.",
+    oQueE: [
+      "O B-1/B-2 é o visto de visitante: negócios (B-1) e turismo, família ou tratamento médico (B-2). Normalmente os dois vêm juntos no mesmo visto. É um visto de visita — não autoriza trabalhar nem estudar.",
+      "Uma distinção que evita sustos: o visto (que pode valer 10 anos) não é a permissão de estadia. Quem define quanto tempo você pode ficar é o oficial do CBP na entrada, registrado no I-94 — tipicamente 6 meses. É essa data, não a do visto, que manda.",
+    ],
+    quemPode: [
+      "Quem demonstra vínculos com o Brasil que sustentem a volta: emprego, família, bens, estudos em andamento.",
+      "Quem comprova o propósito da viagem e os recursos para bancá-la (ou quem vai bancar).",
+      "Atenção: carta-convite ou promessa de sustento de amigos e família nos EUA não entra na decisão do consulado — o caso se sustenta nos seus vínculos, não nas garantias de terceiros.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Trabalhar com visto de visita encerra o status",
+        texto:
+          "Qualquer emprego ou salário de fonte americana é violação. O B-1 permite reuniões, negociações e conferências — não trabalho remunerado.",
+        base: "INA §101(a)(15)(B)",
+      },
+      {
+        titulo: "Estudar antes da aprovação do F-1 mata o pedido",
+        texto:
+          "Quem está de B-2 e quer estudar precisa da mudança de status aprovada ANTES de se matricular em curso acadêmico. Começar a estudar antes viola o status e bloqueia a aprovação.",
+        base: "8 CFR §214.2(b)(7)",
+      },
+      {
+        titulo: "Entrar já decidido a ficar é misrepresentation",
+        texto:
+          "Entrar como turista já com plano fechado de estudar, trabalhar ou imigrar pode ser lido como declaração falsa na entrada — inadmissibilidade permanente. Conduta inconsistente nos primeiros 90 dias gera presunção de má-fé.",
+        base: "INA §212(a)(6)(C)(i) e 9 FAM 302.9-4(B)(3)(g)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "A data do I-94 é o seu relógio",
+        texto:
+          "Diferente do F-1, o B tem data fixa de saída. Passou do I-94, a presença irregular conta automaticamente — e com 180 dias vêm as barreiras de 3 e 10 anos de reentrada.",
+        tone: "clay",
+      },
+      {
+        titulo: "Overstay anula o visto na hora",
+        texto:
+          "Ficar além do I-94 anula automaticamente o visto — inclusive o de 10 anos. Um novo só no consulado, no país de nacionalidade, e com o histórico pesando contra.",
+        tone: "clay",
+      },
+      {
+        titulo: "Extensão: protocole com 45 dias de folga",
+        texto:
+          "A extensão (I-539) precisa entrar ANTES do vencimento do I-94 — o USCIS recomenda pelo menos 45 dias de antecedência. Protocolada a tempo, a permanência segue autorizada enquanto o pedido está pendente. Quem entrou por ESTA não estende.",
+        tone: "amber",
+      },
+    ],
+    passos: [
+      {
+        titulo: "DS-160 e taxa consular",
+        texto:
+          "Preencha o DS-160 com atenção — as respostas viram registro permanente — e pague a taxa de aplicação.",
+      },
+      {
+        titulo: "Entrevista no consulado",
+        texto:
+          "A conversa gira em torno de propósito da viagem, vínculos com o Brasil e recursos. Documentos organizados valem mais que respostas decoradas.",
+      },
+      {
+        titulo: "Entrada e I-94",
+        texto:
+          "O CBP decide o prazo da sua estadia na entrada. Confira seu I-94 online logo depois de entrar — é essa data que define tudo.",
+      },
+      {
+        titulo: "Durante a visita",
+        texto:
+          "Sem trabalho, sem matrícula em curso acadêmico. Se os planos mudarem de verdade (estudar, negócio próprio), a mudança de status é o caminho — antes do vencimento.",
+      },
+    ],
+    pontes: [
+      { label: "Mudar de B-2 para F-1 por dentro dos EUA", href: "/casos/cos-b2-f1" },
+    ],
+    kit: { kitId: "b1", label: "Checklist completo do B-1/B-2" },
+    fontesOficiais: [
+      {
+        label: "Dept. of State — Visitor Visa",
+        url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+      },
+      {
+        label: "USCIS — Extend Your Stay",
+        url: "https://www.uscis.gov/visit-the-united-states/extend-your-stay",
+      },
+    ],
+    fonteLeis: [
+      "vistos/b1-b2.md",
+      "formularios/i-539.md",
+      "conceitos/unlawful-presence.md",
+    ],
+    verificadoEm: "2026-07-16",
+  },
+
+  // ── L-1 — Transferência Intraempresa ───────────────────────────────────
+  l1: {
+    id: "l1",
+    tagline:
+      "A empresa que você construiu no Brasil vira a sua porta de entrada — sem sorteio, sem cota, e com ponte direta para o Green Card de executivo.",
+    oQueE: [
+      "O L-1 transfere você da sua empresa fora dos EUA para uma filial, subsidiária ou matriz americana: L-1A para executivos e gerentes, L-1B para quem carrega conhecimento especializado do negócio. É o empregador quem peticiona (I-129) — e não existe loteria nem época certa para aplicar.",
+      "Para brasileiros, ele tem um papel extra: como o Brasil não tem tratado com os EUA (E-1/E-2 indisponíveis), o L-1 \"new office\" é o caminho viável de quem quer abrir a operação americana da própria empresa.",
+    ],
+    quemPode: [
+      "Quem trabalhou na empresa fora dos EUA por 1 ano contínuo dentro dos últimos 3 anos.",
+      "Quem vai atuar como executivo/gerente (L-1A) ou com conhecimento especializado (L-1B) na operação americana.",
+      "Empresas com relação corporativa real entre Brasil e EUA (matriz, filial, subsidiária ou afiliada), operando de verdade nos dois países — fornecimento regular de bens ou serviços, não um escritório de fachada.",
+      "No new office: local físico já contratado e um plano que sustente posição executiva/gerencial em 1 ano.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Empresa de fachada não qualifica",
+        texto:
+          "\"Doing business\" exige operação regular, sistemática e contínua nos EUA e em pelo menos um outro país durante toda a estadia. Um endereço com agente registrado, sem operação real, derruba a petição.",
+        base: "8 CFR §214.2(l)(1)(ii)(H)",
+      },
+      {
+        titulo: "Menos de 1 ano contínuo na empresa lá fora",
+        texto:
+          "O ano de trabalho na organização estrangeira precisa ser contínuo e dentro dos últimos 3 anos. Períodos somados, prestação de serviço avulsa ou vínculo recente não fecham o requisito.",
+        base: "8 CFR §214.2(l)(3)",
+      },
+      {
+        titulo: "New office que não decola não renova",
+        texto:
+          "A estadia inicial de escritório novo é de apenas 1 ano — e a renovação exige provar que a operação cresceu a ponto de sustentar um executivo: funcionários, receita, estrutura. Sem isso, o caminho termina na primeira renovação.",
+        base: "8 CFR §214.2(l)(3)(v) e (l)(14)(ii)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "Teto de 7 anos (L-1A) / 5 anos (L-1B)",
+        texto:
+          "Estadia inicial de 3 anos (1 ano no new office) e extensões de até 2 anos por vez, até o teto. Depois dele não há renovação — por isso a ponte para o Green Card começa cedo.",
+        tone: "amber",
+      },
+      {
+        titulo: "New office: 1 ano para provar que funciona",
+        texto:
+          "Quem abre operação nova tem 1 ano até a primeira renovação — na prática, o prazo para contratar, faturar e montar a estrutura que justifica um executivo à frente.",
+        tone: "clay",
+      },
+      {
+        titulo: "EB-1C: a saída natural, com folga",
+        texto:
+          "O L-1A é a antessala do EB-1C, o Green Card de executivo multinacional — sem certificação trabalhista (PERM). A petição deve começar bem antes do teto dos 7 anos.",
+        tone: "pine",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Relação corporativa Brasil–EUA",
+        texto:
+          "Constitua (ou comprove) a entidade americana ligada à empresa brasileira — subsidiária, filial ou afiliada — com a documentação societária dos dois lados.",
+      },
+      {
+        titulo: "1 ano contínuo comprovado",
+        texto:
+          "Organize a prova do seu ano contínuo como executivo/gerente ou especialista na operação fora dos EUA, dentro dos últimos 3 anos.",
+      },
+      {
+        titulo: "Petição I-129 pelo empregador",
+        texto:
+          "A entidade americana protocola o I-129 com o dossiê corporativo. No new office, entram também o contrato do espaço físico e o plano de negócio.",
+      },
+      {
+        titulo: "Visto no consulado (ou mudança de status)",
+        texto:
+          "Aprovada a petição, o visto sai no consulado — ou, para quem já está nos EUA em outro status, via mudança de status por dentro.",
+      },
+      {
+        titulo: "Família junto, cônjuge trabalhando",
+        texto:
+          "Cônjuge e filhos solteiros menores de 21 entram de L-2 pela mesma duração — e o cônjuge (L-2S) tem autorização de trabalho automática, sem precisar de EAD.",
+      },
+      {
+        titulo: "A ponte para o Green Card",
+        texto:
+          "Com a operação americana consolidada, o mesmo dossiê corporativo, reforçado, vira a petição EB-1C — o Green Card de executivo, sem PERM e sem sorteio.",
+      },
+    ],
+    pontes: [
+      { label: "Passo a passo: L-1A → EB-1C (o Green Card de executivo)", href: "/caminhos/l1-para-eb1c" },
+    ],
+    kit: { kitId: "l1", label: "Checklist completo do L-1" },
+    fontesOficiais: [
+      {
+        label: "USCIS — L-1A Intracompany Transferee Executive or Manager",
+        url: "https://www.uscis.gov/working-in-the-united-states/temporary-workers/l-1a-intracompany-transferee-executive-or-manager",
+      },
+      {
+        label: "USCIS — L-1B Intracompany Transferee Specialized Knowledge",
+        url: "https://www.uscis.gov/working-in-the-united-states/temporary-workers/l-1b-intracompany-transferee-specialized-knowledge",
+      },
+    ],
+    fonteLeis: ["vistos/l1.md", "vistos/eb1c.md"],
+    verificadoEm: "2026-07-16",
+  },
+
+  // ── EB-2 NIW — Green Card por Interesse Nacional ───────────────────────
+  eb2niw: {
+    id: "eb2niw",
+    tagline:
+      "O Green Card que você mesmo peticiona — sem empregador, sem sorteio, com o seu trabalho como argumento.",
+    oQueE: [
+      "O EB-2 NIW (National Interest Waiver) é um caminho direto para o Green Card: a exigência de oferta de emprego e certificação trabalhista é dispensada porque o seu trabalho interessa aos Estados Unidos. É auto-petição — você protocola o I-140 em seu próprio nome, sem depender de patrocinador.",
+      "Não é só para cientistas: engenheiros, profissionais de saúde, empreendedores e especialistas com histórico sólido qualificam, desde que o projeto (o \"endeavor\") tenha mérito substancial e importância nacional. Cônjuge e filhos solteiros menores de 21 entram juntos.",
+    ],
+    quemPode: [
+      "Quem tem mestrado ou acima (ou equivalente estrangeiro) — ou bacharelado + 5 anos de experiência progressiva na especialidade, depois do diploma e relacionada a ele.",
+      "Ou quem demonstra habilidade excepcional: pelo menos 3 de 6 critérios (diploma na área, 10+ anos de experiência, licença profissional, remuneração diferenciada, associações, reconhecimento por pares).",
+      "E, além da porta de entrada, quem sustenta os 3 fatores do waiver: endeavor com mérito e importância nacional, estar bem posicionado para avançá-lo, e valer a dispensa da oferta de emprego.",
+    ],
+    bloqueios: [
+      {
+        titulo: "A ocupação do projeto decide, não o diploma",
+        texto:
+          "Mestrado em área X com projeto em área que não exige diploma superior não qualifica como advanced degree — o exemplo oficial do USCIS é o engenheiro com mestrado abrindo uma padaria. O endeavor precisa se apoiar numa ocupação de nível superior relacionada à sua formação.",
+        base: "USCIS Policy Manual, Vol. 6, Part F, Ch. 5",
+      },
+      {
+        titulo: "Impacto local ou de um só empregador não basta",
+        texto:
+          "Beneficiar apenas a sua empresa — mesmo uma com presença nacional — não estabelece importância nacional. O endeavor precisa de impacto que transcenda o empregador: setor, região, tecnologia, saúde pública.",
+        base: "Matter of Dhanasar, 26 I&N Dec. 884 (AAO 2016)",
+      },
+      {
+        titulo: "Experiência que não conversa com o diploma",
+        texto:
+          "Os 5 anos de experiência progressiva precisam ser posteriores ao bacharelado e ligados à especialidade dele (ou ao endeavor). Bacharelado em química + 5 anos gerenciando restaurante não vira mestrado em química.",
+        base: "8 CFR §204.5(k)(2)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "A fila do Visa Bulletin manda no final",
+        texto:
+          "A aprovação do I-140 garante seu lugar na fila (priority date), mas o Green Card só vem quando a data ficar current na fila \"Rest of World\" do EB-2 — que tem retrogressão recorrente. O app acompanha o Visa Bulletin mensalmente por você.",
+        tone: "amber",
+      },
+      {
+        titulo: "Premium processing: resposta do I-140 em 45 dias úteis",
+        texto:
+          "O NIW aceita premium processing — a decisão do I-140 sai em até 45 dias úteis, contra muitos meses no processamento normal. A fila do Bulletin continua a mesma, mas a certeza chega antes.",
+        tone: "pine",
+      },
+      {
+        titulo: "Sem prazo para começar — e o status atual continua valendo",
+        texto:
+          "A petição pode ser protocolada de dentro (mantendo F-1, H-1B, O-1...) ou de fora dos EUA. O I-140 sozinho não dá status: até o I-485 ou o consulado, você precisa manter o status que já tem.",
+        tone: "clay",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Defina o endeavor",
+        texto:
+          "O projeto específico — mais concreto que a profissão. \"Engenheiro de software\" não é endeavor; \"desenvolver tecnologia de diagnóstico precoce para o sistema de saúde\" é.",
+      },
+      {
+        titulo: "Feche a porta de entrada do EB-2",
+        texto:
+          "Organize a prova do advanced degree (diploma + histórico, ou bacharelado + cartas dos 5 anos progressivos) ou dos 3+ critérios de habilidade excepcional.",
+      },
+      {
+        titulo: "Monte o dossiê dos 3 prongs",
+        texto:
+          "Evidência de mérito e importância nacional, do seu posicionamento (histórico, plano, interesse de terceiros) e do porquê de dispensar a oferta de emprego. O USCIS avalia a totalidade — não existe documento mágico.",
+      },
+      {
+        titulo: "Protocole o I-140 (auto-petição)",
+        texto:
+          "Com o ETA-9089 Appendix A e a Final Determination assinada. Premium processing opcional para resposta em 45 dias úteis.",
+      },
+      {
+        titulo: "Acompanhe a priority date",
+        texto:
+          "Aprovado o I-140, sua data entra na fila do Visa Bulletin (EB-2, Rest of World). O painel do Immigrei avisa quando ela ficar current.",
+      },
+      {
+        titulo: "I-485 ou consulado",
+        texto:
+          "Data current: ajuste de status por dentro (I-485, com autorização de trabalho no meio do caminho) ou processo consular via NVC para quem está fora.",
+      },
+    ],
+    pontes: [
+      { label: "O par natural: O-1, o visto que usa o mesmo dossiê", href: "/vistos/o1" },
+    ],
+    kit: { kitId: "eb2niw", label: "Checklist completo do EB-2 NIW" },
+    fontesOficiais: [
+      {
+        label: "USCIS — Employment-Based Immigration: Second Preference EB-2",
+        url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/employment-based-immigration-second-preference-eb-2",
+      },
+      {
+        label: "Dept. of State — Visa Bulletin",
+        url: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html",
+      },
+    ],
+    fonteLeis: ["vistos/eb2niw.md", "conceitos/priority-date.md"],
+    verificadoEm: "2026-07-16",
+  },
+
+  // ── E-2 — Investidor por Tratado ───────────────────────────────────────
+  e2: {
+    id: "e2",
+    tagline:
+      "O visto de investidor mais acessível dos EUA — para quem tem a nacionalidade certa. Brasileiros: o bloqueio é do passaporte, não do seu projeto.",
+    oQueE: [
+      "O E-2 permite a nacionais de países com tratado de comércio e navegação com os EUA investir um valor substancial num negócio americano e tocá-lo pessoalmente. Renovável sem limite enquanto a empresa operar de verdade.",
+      "A notícia dura primeiro: o Brasil não tem tratado com os EUA, então brasileiros não qualificam — por nacionalidade, não por mérito. A exceção que muda tudo: dupla cidadania. Passaporte de Portugal, Itália, Espanha, Alemanha, Japão ou outro país do tratado destrava o E-2 normalmente.",
+    ],
+    quemPode: [
+      "Nacionais de país com tratado (lista oficial em travel.state.gov) — incluindo brasileiros com dupla cidadania qualificante.",
+      "Quem investe (ou está investindo) valor substancial e em risco num negócio real e operante — sem mínimo legal, mas proporcional ao custo total do negócio.",
+      "Quem detém 50%+ da empresa ou controle operacional, e entra exclusivamente para desenvolvê-la e dirigi-la — investidor passivo não qualifica.",
+      "Funcionários da empresa com a mesma nacionalidade do tratado, em função executiva/supervisora ou com qualificação essencial.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Brasil sem tratado — bloqueio por nacionalidade",
+        texto:
+          "O E-2 exige nacionalidade de país com tratado de comércio e navegação com os EUA, e o Brasil não tem. Sem segunda cidadania qualificante, as rotas do investidor brasileiro são o L-1 new office e o EB-5.",
+        base: "INA §101(a)(15)(E); lista de tratados em 9 FAM 402.9",
+      },
+      {
+        titulo: "Negócio marginal não sustenta o visto",
+        texto:
+          "A empresa precisa gerar (ou provar capacidade de gerar em até 5 anos) mais do que o sustento mínimo do investidor e da família. Um negócio que só paga as contas da casa é considerado marginal e derruba o caso.",
+        base: "8 CFR §214.2(e)(15)",
+      },
+      {
+        titulo: "Dinheiro parado não é investimento",
+        texto:
+          "O capital precisa estar em risco real — comprometido no negócio, sujeito a perda, com origem lícita rastreável. Fundos numa conta esperando a aprovação não contam.",
+        base: "8 CFR §214.2(e)(12)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "2 anos por vez, sem limite de renovações",
+        texto:
+          "Estadia inicial de 2 anos e extensões de até 2 anos, quantas vezes o negócio justificar. Cada viagem internacional costuma renovar a admissão por mais 2 anos na reentrada.",
+        tone: "pine",
+      },
+      {
+        titulo: "Mudança substancial exige aviso prévio",
+        texto:
+          "Vender a empresa, fundir, mudar de ramo — alterações substanciais nos termos do E-2 precisam de aprovação do USCIS antes, não depois.",
+        tone: "amber",
+      },
+      {
+        titulo: "O E-2 não leva ao Green Card sozinho",
+        texto:
+          "É um visto de não-imigrante: exige intenção de partir ao fim do status. A ponte para o Green Card é outra petição — EB-5 com o investimento ampliado, EB-1C com estrutura multinacional, ou EB-2 NIW pelo fundador.",
+        tone: "clay",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Confirme a nacionalidade qualificante",
+        texto:
+          "Passo zero: seu passaporte (ou o segundo) está na lista de tratados? Sem isso, o caminho é outro — L-1 ou EB-5.",
+      },
+      {
+        titulo: "Estruture a empresa e o investimento",
+        texto:
+          "Constitua a empresa americana, transfira e comprometa os fundos com rastro documental completo — da origem lícita ao caixa do negócio.",
+      },
+      {
+        titulo: "Plano de negócios de 5 anos",
+        texto:
+          "Projeções, contratações e crescimento que afastem a marginalidade — um dos documentos mais pesados da aplicação.",
+      },
+      {
+        titulo: "Consulado (DS-160 + DS-156E) ou I-129 por dentro",
+        texto:
+          "De fora dos EUA, o E-2 sai no consulado, com formulário próprio de tratado. Quem já está dentro em outro status pode mudar via I-129.",
+      },
+      {
+        titulo: "Opere, renove, cresça",
+        texto:
+          "O E-2 vive da empresa real: renovações acompanham a operação, e o cônjuge (E-2S) trabalha automaticamente, sem EAD.",
+      },
+    ],
+    pontes: [
+      { label: "Sem tratado? O caminho do brasileiro: L-1 new office", href: "/vistos/l1" },
+      { label: "Passo a passo: L-1A → EB-1C (o Green Card de executivo)", href: "/caminhos/l1-para-eb1c" },
+    ],
+    kit: { kitId: "e2", label: "Checklist completo do E-2" },
+    fontesOficiais: [
+      {
+        label: "USCIS — E-2 Treaty Investors",
+        url: "https://www.uscis.gov/working-in-the-united-states/temporary-workers/e-2-treaty-investors",
+      },
+      {
+        label: "Dept. of State — Treaty Countries",
+        url: "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/treaty.html",
+      },
+    ],
+    fonteLeis: ["vistos/e1-e2.md", "vistos/l1.md"],
+    verificadoEm: "2026-07-16",
+  },
+
+  // ── E-1 — Comerciante por Tratado ──────────────────────────────────────
+  e1: {
+    id: "e1",
+    tagline:
+      "Para quem já comercializa com os EUA — se o passaporte permitir. Brasileiros: a alternativa é o B-1 para as viagens e o L-1 para a operação.",
+    oQueE: [
+      "O E-1 é o visto do comerciante por tratado: nacionais de países com tratado de comércio e navegação que mantêm um fluxo substancial e contínuo de comércio internacional com os EUA — bens, serviços, tecnologia, transporte, banking.",
+      "Assim como o E-2, ele não existe para brasileiros: o Brasil não tem tratado com os EUA. Quem tem dupla cidadania de país qualificante usa a segunda nacionalidade; quem não tem, faz as viagens de negócio com o B-1 e estrutura a operação americana via L-1.",
+    ],
+    quemPode: [
+      "Nacionais de país com tratado (lista em travel.state.gov) — ou brasileiros com dupla cidadania qualificante.",
+      "Quem mantém comércio substancial: fluxo contínuo de transações com os EUA, onde a frequência pesa mais que o valor de cada operação.",
+      "Quem tem 50%+ do seu comércio internacional concentrado entre os EUA e o país do tratado.",
+      "Funcionários com a mesma nacionalidade, em função executiva/supervisora ou com qualificação essencial ao negócio.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Brasil sem tratado — bloqueio por nacionalidade",
+        texto:
+          "Como no E-2, a exigência é de passaporte de país com tratado de comércio e navegação. Sem segunda cidadania qualificante, o E-1 simplesmente não está na mesa para brasileiros.",
+        base: "INA §101(a)(15)(E); lista de tratados em 9 FAM 402.9",
+      },
+      {
+        titulo: "Menos da metade do comércio com os EUA",
+        texto:
+          "O comércio principal precisa ser com os EUA: mais de 50% do volume internacional da empresa. Quem espalha as exportações por muitos países não fecha o requisito, por maior que seja a operação.",
+        base: "8 CFR §214.2(e)(11)",
+      },
+      {
+        titulo: "Transações esporádicas não são \"comércio substancial\"",
+        texto:
+          "Uma venda grande por ano não caracteriza o fluxo contínuo que a regra exige. O E-1 é para relações comerciais vivas — numerosas transações ao longo do tempo.",
+        base: "8 CFR §214.2(e)(10)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "2 anos por vez, sem limite de renovações",
+        texto:
+          "Estadia inicial de 2 anos e extensões de até 2 anos enquanto o comércio continuar substancial e principal. Reentradas após viagem renovam a admissão automaticamente.",
+        tone: "pine",
+      },
+      {
+        titulo: "O comércio precisa continuar — todo ano",
+        texto:
+          "O E-1 não é conquistado uma vez: cada renovação reavalia o fluxo. Se o volume com os EUA cair abaixo da metade, o status fica em risco na próxima extensão.",
+        tone: "amber",
+      },
+      {
+        titulo: "Sem ponte direta para o Green Card",
+        texto:
+          "Como todo visto E, exige intenção de partir. As pontes de residência passam por outra petição: EB-1C via estrutura multinacional, EB-2 NIW, ou EB-5.",
+        tone: "clay",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Confirme a nacionalidade qualificante",
+        texto:
+          "O passo zero de todo visto E: passaporte na lista de tratados. Brasileiros sem dupla cidadania seguem para o B-1 (viagens) ou L-1 (operação).",
+      },
+      {
+        titulo: "Documente o fluxo de comércio",
+        texto:
+          "Contratos, faturas, embarques e pagamentos internacionais — o histórico de transações com os EUA é o coração do caso.",
+      },
+      {
+        titulo: "Prove o comércio principal",
+        texto:
+          "Relatório contábil separando o comércio por país, mostrando os EUA com mais de 50% do volume internacional.",
+      },
+      {
+        titulo: "Consulado (DS-160 + DS-156E) ou I-129 por dentro",
+        texto:
+          "De fora, o E-1 sai no consulado com o formulário de tratado; quem já está nos EUA em status válido pode mudar via I-129.",
+      },
+    ],
+    pontes: [
+      { label: "Sem tratado? Viagens de negócio com o B-1/B-2", href: "/vistos/b1" },
+      { label: "Estruturar a operação nos EUA: L-1 new office", href: "/vistos/l1" },
+    ],
+    kit: { kitId: "e1", label: "Checklist completo do E-1" },
+    fontesOficiais: [
+      {
+        label: "USCIS — E-1 Treaty Traders",
+        url: "https://www.uscis.gov/working-in-the-united-states/temporary-workers/e-1-treaty-traders",
+      },
+      {
+        label: "Dept. of State — Treaty Countries",
+        url: "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/treaty.html",
+      },
+    ],
+    fonteLeis: ["vistos/e1-e2.md", "vistos/b1-b2.md"],
+    verificadoEm: "2026-07-16",
+  },
+
+  // ── ESTA / VWP — Isenção de Visto ──────────────────────────────────────
+  esta: {
+    id: "esta",
+    tagline:
+      "90 dias sem visto para cidadãos dos países do programa — rápido na ida, inegociável na volta.",
+    oQueE: [
+      "O ESTA é a autorização eletrônica do Visa Waiver Program: cidadãos de cerca de 40 países (Europa Ocidental, Japão, Coreia do Sul, Austrália, Chile e outros) visitam os EUA por até 90 dias, a turismo ou negócios, sem visto — só com a aplicação online do CBP e um passaporte eletrônico.",
+      "O Brasil não participa do programa: brasileiros fazem a mesma visita com o visto B-1/B-2. E mesmo para quem qualifica, o VWP é uma troca — entra mais rápido, mas abre mão da extensão, da mudança de status e do direito de contestar uma remoção.",
+    ],
+    quemPode: [
+      "Cidadãos dos países participantes (lista oficial em travel.state.gov), com passaporte eletrônico válido por 6+ meses além da viagem.",
+      "Quem tem propósito de visita — o mesmo escopo do visto B: turismo, reuniões, conferências.",
+      "Quem não esteve em países que removem a elegibilidade (Cuba desde 2021; Irã, Iraque, Coreia do Norte, Síria, Líbia, Somália, Sudão e Iêmen desde 2011) nem tem dupla nacionalidade de alguns deles.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Brasileiros não usam ESTA",
+        texto:
+          "O Brasil não integra o Visa Waiver Program. Para a mesma visita de até 6 meses, o caminho do brasileiro é o visto B-1/B-2 — que, ao contrário do VWP, permite extensão e mudança de status.",
+        base: "INA §217; lista de países em travel.state.gov",
+      },
+      {
+        titulo: "Sem extensão e sem mudança de status",
+        texto:
+          "Os 90 dias do VWP não se estendem e não viram outro status por dentro dos EUA (exceção estreita: ajuste por parente imediato de cidadão americano). Quem quer estudar, trabalhar ou ficar mais tempo precisa entrar com o visto certo.",
+        base: "INA §217; 8 CFR §217",
+      },
+      {
+        titulo: "Entrar pelo VWP renuncia ao contencioso",
+        texto:
+          "O ingresso pelo programa renuncia ao direito de contestar uma remoção diante de juiz (exceto pedido de asilo). É a troca invisível dos 90 dias sem visto — e o motivo de o VWP ser má ideia para qualquer plano além da visita.",
+        base: "INA §217(b)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "90 dias, contados na entrada, sem conversa",
+        texto:
+          "O prazo é fixo e não se estende. Passar dele remove a elegibilidade futura ao VWP, inicia presença irregular automaticamente e permite remoção sem audiência.",
+        tone: "clay",
+      },
+      {
+        titulo: "ESTA vale 2 anos (ou até o passaporte vencer)",
+        texto:
+          "A autorização cobre múltiplas entradas por até 2 anos. Passaporte novo exige ESTA novo — confira a validade antes de cada viagem.",
+        tone: "pine",
+      },
+      {
+        titulo: "Aplique antes de comprar a passagem",
+        texto:
+          "A aprovação costuma sair em minutos, mas pode levar até 72 horas — e o embarque é barrado sem ESTA válido. ESTA negado não impede nada além do programa: o visto B continua disponível no consulado.",
+        tone: "amber",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Confira a elegibilidade",
+        texto:
+          "Cidadania de país participante, passaporte eletrônico e nenhuma das viagens/nacionalidades que removem o benefício.",
+      },
+      {
+        titulo: "Aplique no site oficial do CBP",
+        texto:
+          "Somente em esta.cbp.dhs.gov — sites intermediários cobram taxas extras pelo mesmo formulário. Guarde o número da autorização.",
+      },
+      {
+        titulo: "Viaje dentro do escopo de visita",
+        texto:
+          "Turismo e negócios no escopo do visto B. O oficial do CBP decide a admissão na chegada — ESTA aprovado não é garantia de entrada.",
+      },
+      {
+        titulo: "Respeite os 90 dias",
+        texto:
+          "Sem extensão, sem mudança de status. Se os planos crescerem — estudo, trabalho, vida — a próxima entrada é com o visto da categoria certa.",
+      },
+    ],
+    pontes: [
+      { label: "Brasileiro? Sua visita é com o B-1/B-2", href: "/vistos/b1" },
+    ],
+    kit: { kitId: "esta", label: "Checklist do ESTA" },
+    fontesOficiais: [
+      {
+        label: "Dept. of State — Visa Waiver Program",
+        url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visa-waiver-program.html",
+      },
+      {
+        label: "CBP — Electronic System for Travel Authorization (ESTA)",
+        url: "https://www.cbp.gov/travel/international-visitors/esta",
+      },
+    ],
+    fonteLeis: ["vistos/esta-vwp.md", "vistos/b1-b2.md"],
+    verificadoEm: "2026-07-16",
+  },
 };
 
 export function getVistoPage(id: string): VistoPage | null {
