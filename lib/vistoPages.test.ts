@@ -91,11 +91,8 @@ describe("VISTO_PAGES integrity", () => {
   it("helpers respondem coerentemente", () => {
     expect(hasVistoPage("f1")).toBe(true);
     expect(getVistoPage("f1")?.id).toBe("f1");
-<<<<<<< Updated upstream
     expect(hasVistoPage("e2")).toBe(true);
-=======
     expect(hasVistoPage("eb1c")).toBe(false);
->>>>>>> Stashed changes
     expect(getVistoPage("nao-existe")).toBeNull();
   });
 });
