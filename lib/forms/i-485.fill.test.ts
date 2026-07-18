@@ -86,7 +86,33 @@ const ANSWERS: Answers = {
   weight: 128,
   eye_color: "brown",
   hair_color: "brown",
-  part9_ack: true,
+  // Part 9: Ana's real profile — overstayed a B-2, worked without
+  // authorization; everything else is "no".
+  ...Object.fromEntries(
+    [
+      "p9_orgs", "p9_10", "p9_11", "p9_14", "p9_15", "p9_16", "p9_17", "p9_18",
+      "p9_19", "p9_22", "p9_23", "p9_24", "p9_25", "p9_26", "p9_27", "p9_28",
+      "p9_30", "p9_31", "p9_32", "p9_33", "p9_34", "p9_35a", "p9_36", "p9_37",
+      "p9_38", "p9_39", "p9_41", "p9_42a", "p9_42b", "p9_42c", "p9_42d",
+      "p9_43a", "p9_43b", "p9_43c", "p9_43d", "p9_43e", "p9_43f", "p9_43g",
+      "p9_43h", "p9_43i", "p9_44", "p9_45", "p9_46", "p9_47", "p9_48", "p9_49",
+      "p9_50", "p9_51", "p9_52", "p9_53a", "p9_53b", "p9_53c", "p9_53d",
+      "p9_54", "p9_55", "p9_63", "p9_64", "p9_67", "p9_68", "p9_69", "p9_70",
+      "p9_71", "p9_72", "p9_73", "p9_74", "p9_75", "p9_77", "p9_78a", "p9_78b",
+      "p9_79", "p9_80", "p9_81", "p9_82", "p9_83", "p9_84a", "p9_84b",
+      "p9_84c", "p9_85",
+    ].map((id) => [id, "no"])
+  ),
+  p9_12: "yes", // worked without authorization
+  p9_13: "yes", // violated nonimmigrant status (overstay)
+  p9_76: "yes", // unlawfully present since Apr 1997
+  p9_56_exempt: "not_exempt",
+  p9_57_household: 2,
+  p9_58_income: "b1",
+  p9_59_assets: "a0",
+  p9_60_liabilities: "l0",
+  p9_61_education: "hs",
+  p9_62_certs: "None",
   daytime_phone: "3055551234",
   email: "ana@example.com",
 };
@@ -178,20 +204,75 @@ describe("I-485 fill", { timeout: 30_000 }, () => {
     expect(form.getCheckBox("form1[0].#subform[12].Pt7Line6_Haircolor[3]").isChecked()).toBe(true); // brown
   });
 
-  it("leaves ALL of Part 9's Yes/No fields untouched (manual completion)", async () => {
+  it("answers Part 9 immigration-history items, including the swapped-index ones", async () => {
     const form = await fillAndReload(ANSWERS);
-    // Spot-check across the Part 9 pages: organization membership, criminal,
-    // security, public charge and unlawful-presence items must stay blank.
-    for (const f of [
-      "form1[0].#subform[12].Pt8Line1_YesNo[0]",
-      "form1[0].#subform[12].Pt8Line1_YesNo[1]",
-      "form1[0].#subform[14].Pt9Line23_YesNo[0]",
-      "form1[0].#subform[15].Pt8Line44_YesNo[0]",
-      "form1[0].#subform[20].Pt9Line75_YesNo[0]",
-      "form1[0].#subform[21].Pt9Line77_YesNo[0]",
-    ]) {
-      expect(form.getCheckBox(f).isChecked()).toBe(false);
-    }
+    // Item 12 (worked without authorization) = YES → [0]; item 13 (violated
+    // status) = YES → [1] (this pair has inverted indexes on the PDF).
+    expect(form.getCheckBox("form1[0].#subform[13].Pt9Line12_YesNo[0]").isChecked()).toBe(true);
+    expect(form.getCheckBox("form1[0].#subform[13].Pt8Line13_YesNo[1]").isChecked()).toBe(true);
+    // Item 10 (denied admission) = NO → [0]; item 11 (denied visa) = NO → [1].
+    expect(form.getCheckBox("form1[0].#subform[13].Pt9Line10_YesNo[0]").isChecked()).toBe(true);
+    expect(form.getCheckBox("form1[0].#subform[13].Pt9Line11_YesNo[1]").isChecked()).toBe(true);
+    // Item 22 (ever arrested) = NO → [1].
+    expect(form.getCheckBox("form1[0].#subform[13].Pt8Line22_YesNo[1]").isChecked()).toBe(true);
+  });
+
+  it("answers Part 9 criminal and security items all-no on the correct sides", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getCheckBox("form1[0].#subform[14].Pt9Line23_YesNo[0]").isChecked()).toBe(true); // 23 no
+    expect(form.getCheckBox("form1[0].#subform[14].Pt8Line35a_YesNo[1]").isChecked()).toBe(true); // 35a no
+    // 42.a / 42.b — field names literally contain a dot before the letter.
+    expect(form.getCheckBox("form1[0].#subform[15].Pt8Line42\\.a_YesNo[1]").isChecked()).toBe(true); // 42a no
+    expect(form.getCheckBox("form1[0].#subform[15].Pt8Line42\\.b_YesNo[0]").isChecked()).toBe(true); // 42b no
+    expect(form.getCheckBox("form1[0].#subform[15].Pt8Line43fYesNo[1]").isChecked()).toBe(true); // 43f no
+    expect(form.getCheckBox("form1[0].#subform[16].Pt8Line52_YesNo[0]").isChecked()).toBe(true); // 52 no
+    expect(form.getCheckBox("form1[0].#subform[16].Pt8Line55_YesNo[1]").isChecked()).toBe(true); // 55 no
+    // Conditional 35.b stays blank when 35.a is "no".
+    expect(form.getCheckBox("form1[0].#subform[14].Pt8Line35b_YesNo[0]").isChecked()).toBe(false);
+    expect(form.getCheckBox("form1[0].#subform[14].Pt8Line35b_YesNo[1]").isChecked()).toBe(false);
+  });
+
+  it("fills the public-charge block (not exempt, brackets, education)", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getCheckBox("form1[0].#subform[18].Pt9Line56_CB[23]").isChecked()).toBe(true);
+    expect(form.getTextField("form1[0].#subform[18].Pt9Line57_HouseholdSize[0]").getText()).toBe("2");
+    expect(form.getCheckBox("form1[0].#subform[18].Pt9Line53_CB[1]").isChecked()).toBe(true); // income b1
+    expect(form.getCheckBox("form1[0].#subform[18].Pt9Line59_CB[0]").isChecked()).toBe(true); // assets a0
+    expect(form.getCheckBox("form1[0].#subform[18].Pt9Line60_CB[0]").isChecked()).toBe(true); // liabilities 0
+    expect(form.getCheckBox("form1[0].#subform[18].Pt9Line61_CB[2]").isChecked()).toBe(true); // high school
+    expect(form.getTextField("form1[0].#subform[18].Table1[0].Row1[0].TextField1[0]").getText()).toBe("None");
+    expect(form.getCheckBox("form1[0].#subform[18].Pt9Line63_YesNo[1]").isChecked()).toBe(true); // 63 no
+  });
+
+  it("answers the unlawful-presence block for the overstay profile", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getCheckBox("form1[0].#subform[21].Pt9Line76_YesNo[1]").isChecked()).toBe(true); // 76 yes
+    expect(form.getCheckBox("form1[0].#subform[21].Pt9Line77_YesNo[1]").isChecked()).toBe(true); // 77 no
+    expect(form.getCheckBox("form1[0].#subform[20].Pt9Line75_YesNo[1]").isChecked()).toBe(true); // 75 no
+    expect(form.getCheckBox("form1[0].#subform[20].Pt9Line69_YesNo[0]").isChecked()).toBe(true); // 69 no
+    expect(form.getCheckBox("form1[0].#subform[21].Pt9Line84c_YesNo[0]").isChecked()).toBe(true); // 84c no
+    // Item 86 (nationality before leaving) only applies when 85 = yes.
+    expect(form.getTextField("form1[0].#subform[21].Pt9Line86_Nationality[0]").getText()).toBeFalsy();
+  });
+
+  it("fills organization details when the applicant reports one", async () => {
+    const form = await fillAndReload({
+      ...ANSWERS,
+      p9_orgs: "yes",
+      org1_name: "Sindicato dos Padeiros",
+      org1_city: "Sao Paulo",
+      org1_country: "Brazil",
+      org1_nature: "Labor union",
+      org1_involvement: "Member",
+      org1_from: "2018-01-01",
+      org1_to: "2023-12-31",
+    });
+    expect(form.getCheckBox("form1[0].#subform[12].Pt8Line1_YesNo[1]").isChecked()).toBe(true); // yes
+    expect(form.getTextField("form1[0].#subform[12].Pt9Line2_Organization1[0]").getText()).toBe(
+      "Sindicato dos Padeiros"
+    );
+    expect(form.getTextField("form1[0].#subform[12].Pt9Line4_Involvement[0]").getText()).toBe("Member");
+    expect(form.getTextField("form1[0].#subform[12].Pt9Line5_DateFrom[0]").getText()).toBe("01/01/2018");
   });
 
   it("fills contact and leaves signature/interpreter/preparer blank", async () => {

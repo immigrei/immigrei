@@ -2346,7 +2346,7 @@ const checklists: Record<string, ChecklistVisto> = {
             id: "i485",
             nome: "Formulário I-485 — quem preenche é QUEM VAI RECEBER o green card (se já estiver nos EUA)",
             descricao:
-              "Rota alternativa ao DS-260: se o beneficiário está DENTRO dos EUA em situação elegível, pede o ajuste de status com o I-485 em vez do processo consular. A Parte 9 (elegibilidade) é respondida à mão na versão impressa.",
+              "Rota alternativa ao DS-260: se o beneficiário está DENTRO dos EUA em situação elegível, pede o ajuste de status com o I-485 em vez do processo consular. O wizard cobre as 14 partes, incluindo as 86 perguntas de elegibilidade da Parte 9.",
             agencia: "USCIS",
             formulario: "I-485",
             formId: "i-485",

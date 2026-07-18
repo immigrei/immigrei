@@ -17,21 +17,22 @@
  *   - Part 8 biographic fields use the `Pt7Line*` prefix.
  *   - The header A-Number repeats on every page as `AlienNumber[0..23]`.
  *
- * Scope (MVP): principal applicant adjusting through a FAMILY category
+ * Scope: principal applicant adjusting through a FAMILY category
  * (spouse/child/parent of a US citizen, or spouse/child of a green-card
- * holder) — Parts 1-8 and the Part 10 contact block. Part 9 (General
- * Eligibility and Inadmissibility Grounds, items 1-86) is DELIBERATELY NOT
- * auto-filled in this first iteration: its ~80 Yes/No PDF fields carry
- * internally scrambled names (Pt8/Pt9 mixed, shifted numbering), and a
- * mis-mapped answer there is the one error this engine must never make. The
- * wizard tells the user, in PT-BR, to complete Part 9 by hand on the printed
- * form. Mapping it item-by-item (with per-item position verification) is the
- * planned next iteration. The engine remains ministerial: it transcribes,
- * never decides eligibility. Signature, interpreter and preparer blocks stay
- * blank.
+ * holder) — Parts 1-10, INCLUDING the full Part 9 (General Eligibility and
+ * Inadmissibility Grounds, items 1-86). Part 9's Yes/No fields carry
+ * internally scrambled names (Pt8/Pt9 mixed, shifted numbering) and
+ * per-item swapped [0]/[1] indexes; every single item was mapped by widget
+ * position (items are strictly sequential top-to-bottom per page: page 14 =
+ * items 10-22, page 15 = 23-37, page 16 = 38-45, page 17 = 46-55, page 19 =
+ * 56-64, page 20 = 65-75, page 21 = 76-86) and Yes/No sides were resolved by
+ * x-coordinate (Yes ≈ x498, No ≈ x540). The item-65/66 detail tables stay
+ * manual (only relevant after a "Yes" on 63/64). The engine remains
+ * ministerial: it transcribes, never decides eligibility. Signature,
+ * interpreter and preparer blocks stay blank.
  */
 
-import type { FormSpec, PdfMapping } from "./types";
+import type { FormSpec, PdfMapping, Question } from "./types";
 
 // AcroForm subform prefixes (#subform[N] is page N+1; page 20 is skipped —
 // subform indexes jump from [18] (page 19) to [20] (page 20)).
@@ -47,6 +48,13 @@ const S9 = `${F}#subform[9].`;
 const S10 = `${F}#subform[10].`;
 const S11 = `${F}#subform[11].`;
 const S12 = `${F}#subform[12].`;
+const S13 = `${F}#subform[13].`;
+const S14 = `${F}#subform[14].`;
+const S15 = `${F}#subform[15].`;
+const S16 = `${F}#subform[16].`;
+const S18 = `${F}#subform[18].`;
+const S20 = `${F}#subform[20].`;
+const S21 = `${F}#subform[21].`;
 const S22 = `${F}#subform[22].`;
 
 // ISO yyyy-mm-dd (how we store dates) -> USCIS mm/dd/yyyy text.
@@ -64,6 +72,32 @@ const headerANumberMappings: PdfMapping[] = HEADER_SUBFORMS.map((sub, i) => ({
   field: `${F}#subform[${sub}].AlienNumber[${i}]`,
 }));
 
+// One Part 9 Yes/No item. `yes`/`no` are the exact checkbox fields — their
+// [0]/[1] indexes vary PER ITEM on this PDF (verified one by one against the
+// widget x-coordinates: Yes boxes sit at x≈498, No boxes at x≈540). Never
+// assume [0]=Yes. No defaults on purpose: the applicant must actively answer.
+function p9(
+  id: string,
+  labelPt: string,
+  yes: string,
+  no: string,
+  opts: { helpPt?: string; showWhen?: Question["showWhen"]; required?: boolean } = {}
+): Question {
+  return {
+    id,
+    labelPt,
+    helpPt: opts.helpPt,
+    type: "radio",
+    required: opts.required ?? true,
+    showWhen: opts.showWhen,
+    options: [
+      { value: "no", labelPt: "Não" },
+      { value: "yes", labelPt: "Sim" },
+    ],
+    pdf: { kind: "checkboxChoice", fieldByValue: { yes, no } },
+  };
+}
+
 export const I485: FormSpec = {
   id: "i-485",
   code: "I-485",
@@ -79,8 +113,8 @@ export const I485: FormSpec = {
     "Este formulário é preenchido e assinado por VOCÊ, o requerente — quem vai receber o green card " +
     "(nas petições de família, o beneficiário do I-130 que está dentro dos EUA). A Immigrei é uma " +
     "ferramenta de preenchimento — não presta serviços jurídicos e não revisa o mérito do seu caso. " +
-    "A Parte 9 (perguntas de elegibilidade) deve ser preenchida À MÃO na versão impressa. " +
-    "Confira cada campo e assine à mão antes de enviar ao USCIS.",
+    "Nas perguntas de elegibilidade (Parte 9), responda com total sinceridade; qualquer \"Sim\" merece " +
+    "orientação profissional antes do protocolo. Confira cada campo e assine à mão antes de enviar ao USCIS.",
 
   sections: [
     // ── 1. Quem preenche + identificação (Part 1, itens 1–9) ────────────────
@@ -1490,22 +1524,395 @@ export const I485: FormSpec = {
       ],
     },
 
-    // ── 11. Parte 9 — aviso de preenchimento manual ─────────────────────────
+    // ── 11. Parte 9 — organizações (itens 1–9) ──────────────────────────────
     {
-      id: "parte9-aviso",
-      titlePt: "Parte 9 — Elegibilidade (preenchimento à mão)",
+      id: "parte9-organizacoes",
+      titlePt: "Parte 9 — Organizações e grupos",
       descriptionPt:
-        "A Parte 9 do I-485 tem 86 perguntas de sim/não sobre histórico criminal, imigratório e de segurança. " +
-        "São perguntas sensíveis demais para um preenchimento automático: nesta versão, o Immigrei deixa a " +
-        "Parte 9 EM BRANCO e você responde à mão na versão impressa, com calma, uma a uma. " +
-        "Se QUALQUER resposta sua for \"Yes\" (prisão, processo, negativa anterior, permanência irregular), " +
-        "converse com um profissional antes de protocolar.",
+        "⚠️ Começam aqui as perguntas de elegibilidade do USCIS. Responda com total sinceridade — mentir aqui " +
+        "é pior que qualquer resposta \"Sim\". Se QUALQUER resposta sua for \"Sim\", explique na Parte 14 " +
+        "(à mão) e converse com um profissional antes de protocolar.",
+      questions: [
+        p9(
+          "p9_orgs",
+          "Você JÁ foi membro ou se envolveu com alguma organização, associação, fundação, partido, clube ou grupo (nos EUA ou em qualquer país)?",
+          `${S12}Pt8Line1_YesNo[1]`,
+          `${S12}Pt8Line1_YesNo[0]`,
+          { helpPt: "Vale para qualquer grupo: sindicato, partido político, ONG, igreja com cargo formal. Participação comum em igreja não costuma contar — na dúvida, liste." }
+        ),
+        {
+          id: "org1_name",
+          labelPt: "Organização 1 — nome",
+          type: "text",
+          passthroughEn: true,
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line2_Organization1[0]` },
+        },
+        {
+          id: "org1_city",
+          labelPt: "Cidade",
+          type: "text",
+          passthroughEn: true,
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line3_CityTownOfBirth[0]` },
+        },
+        {
+          id: "org1_state_province",
+          labelPt: "Estado/Província",
+          type: "text",
+          passthroughEn: true,
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line3_State[0]` },
+        },
+        {
+          id: "org1_country",
+          labelPt: "País (em inglês)",
+          type: "text",
+          passthroughEn: true,
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line3_Country[0]` },
+        },
+        {
+          id: "org1_nature",
+          labelPt: "Natureza da organização (em inglês, ex.: labor union, political party)",
+          type: "text",
+          passthroughEn: true,
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line4_FamilyName[0]` },
+        },
+        {
+          id: "org1_involvement",
+          labelPt: "Seu papel/envolvimento (em inglês, ex.: member, volunteer)",
+          type: "text",
+          passthroughEn: true,
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line4_Involvement[0]` },
+        },
+        {
+          id: "org1_from",
+          labelPt: "Membro de",
+          type: "date",
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line5_DateFrom[0]`, transform: isoToUsDate },
+        },
+        {
+          id: "org1_to",
+          labelPt: "até",
+          helpPt: "Mais de uma organização: a segunda vai nos campos da Organização 2 impressos, ou na Parte 14.",
+          type: "date",
+          showWhen: { questionId: "p9_orgs", equals: "yes" },
+          pdf: { kind: "text", field: `${S12}Pt9Line5_DateTo[0]`, transform: isoToUsDate },
+        },
+      ],
+    },
+
+    // ── 12. Parte 9 — histórico imigratório (itens 10–22) ───────────────────
+    {
+      id: "parte9-imigracao",
+      titlePt: "Parte 9 — Histórico imigratório",
+      descriptionPt:
+        "Estas perguntas cobrem negativas e violações de status. \"Sim\" aqui não significa negação automática " +
+        "— no caminho de cônjuge de cidadão, overstay e trabalho sem autorização costumam ser perdoados — mas " +
+        "TODO \"Sim\" precisa de explicação na Parte 14 e de orientação profissional.",
+      questions: [
+        p9("p9_10", "Você JÁ teve admissão negada nos EUA (barrado na entrada)?", `${S13}Pt9Line10_YesNo[1]`, `${S13}Pt9Line10_YesNo[0]`),
+        p9("p9_11", "Você JÁ teve um visto americano negado?", `${S13}Pt9Line11_YesNo[0]`, `${S13}Pt9Line11_YesNo[1]`),
+        p9("p9_12", "Você JÁ trabalhou nos EUA sem autorização?", `${S13}Pt9Line12_YesNo[0]`, `${S13}Pt9Line12_YesNo[1]`),
+        p9("p9_13", "Você JÁ violou os termos do seu status de não imigrante (ex.: ficou além do prazo)?", `${S13}Pt8Line13_YesNo[1]`, `${S13}Pt8Line13_YesNo[0]`),
+        p9("p9_14", "Você está ou JÁ esteve em processo de remoção, exclusão, rescisão ou deportação?", `${S13}Pt8Line18_YesNo[0]`, `${S13}Pt8Line18_YesNo[1]`),
+        p9("p9_15", "Você JÁ recebeu uma ordem final de exclusão, deportação ou remoção?", `${S13}Pt8Line19_YesNo[1]`, `${S13}Pt8Line19_YesNo[0]`),
+        p9("p9_16", "Você JÁ teve uma ordem final de remoção reativada (reinstated)?", `${S13}Pt8Line20_YesNo[0]`, `${S13}Pt8Line20_YesNo[1]`),
+        p9("p9_17", "Você JÁ recebeu saída voluntária e NÃO saiu no prazo?", `${S13}Pt8Line17_YesNo[0]`, `${S13}Pt8Line17_YesNo[1]`),
+        p9("p9_18", "Você JÁ pediu qualquer proteção contra remoção, exclusão ou deportação?", `${S13}Pt8Line23_YesNo[1]`, `${S13}Pt8Line23_YesNo[0]`),
+        p9("p9_19", "Você JÁ foi intercambista J-1/J-2 sujeito à regra dos 2 anos no país de origem?", `${S13}Pt8Line24a_YesNo[0]`, `${S13}Pt8Line24a_YesNo[1]`),
+        p9("p9_20", "Se sim ao item anterior: você cumpriu os 2 anos no país de origem?", `${S13}Pt8Line24b_YesNo[1]`, `${S13}Pt8Line24b_YesNo[0]`, { showWhen: { questionId: "p9_19", equals: "yes" }, required: false }),
+        p9("p9_21", "Se não cumpriu: recebeu waiver (ou carta favorável do Departamento de Estado)?", `${S13}Pt8Line24c_YesNo[0]`, `${S13}Pt8Line24c_YesNo[1]`, { showWhen: { questionId: "p9_19", equals: "yes" }, required: false }),
+        p9(
+          "p9_22",
+          "Você JÁ foi preso(a), detido(a), citado(a), acusado(a) ou entrou em programa de desvio penal por QUALQUER autoridade, em QUALQUER país?",
+          `${S13}Pt8Line22_YesNo[0]`,
+          `${S13}Pt8Line22_YesNo[1]`,
+          { helpPt: "Vale mesmo se o registro foi selado ou se disseram que você \"não tem ficha\". Inclui autoridades de imigração." }
+        ),
+      ],
+    },
+
+    // ── 13. Parte 9 — atos criminais (itens 23–37) ──────────────────────────
+    {
+      id: "parte9-criminal",
+      titlePt: "Parte 9 — Atos criminais",
+      descriptionPt:
+        "Responda \"Sim\" mesmo para registros apagados, selados ou perdoados — o USCIS tem acesso a tudo. " +
+        "Qualquer \"Sim\": explique na Parte 14 e procure um profissional.",
+      questions: [
+        p9("p9_23", "Você JÁ cometeu um crime de qualquer tipo (mesmo sem prisão ou condenação)?", `${S14}Pt9Line23_YesNo[1]`, `${S14}Pt9Line23_YesNo[0]`),
+        p9("p9_24", "Você JÁ se declarou culpado(a) ou foi condenado(a) por crime (mesmo com registro apagado ou perdão)?", `${S14}Pt9Line24_YesNo[0]`, `${S14}Pt9Line24_YesNo[1]`),
+        p9("p9_25", "Você JÁ recebeu punição judicial ou restrição de liberdade (prisão, condicional, serviço comunitário, tratamento obrigatório)?", `${S14}Pt8Line25_YesNo[1]`, `${S14}Pt8Line25_YesNo[0]`),
+        p9("p9_26", "Você JÁ violou (ou tentou/conspirou violar) qualquer lei de substâncias controladas (drogas)?", `${S14}Pt8Line26_YesNo[1]`, `${S14}Pt8Line26_YesNo[0]`),
+        p9("p9_27", "Você JÁ traficou drogas ou ajudou/conspirou no tráfico?", `${S14}Pt8Line27_YesNo[1]`, `${S14}Pt8Line27_YesNo[0]`),
+        p9("p9_28", "Você é cônjuge ou filho(a) de traficante e recebeu benefício financeiro dessa atividade nos últimos 5 anos?", `${S14}Pt8Line28_YesNo[1]`, `${S14}Pt8Line28_YesNo[0]`),
+        p9("p9_29", "Se sim: você sabia (ou tinha como saber) da origem do benefício?", `${S14}Pt8Line29_YesNo[1]`, `${S14}Pt8Line29_YesNo[0]`, { showWhen: { questionId: "p9_28", equals: "yes" }, required: false }),
+        p9("p9_30", "Você JÁ se envolveu em prostituição (ou vem aos EUA para isso)?", `${S14}Pt8Line30_YesNo[1]`, `${S14}Pt8Line30_YesNo[0]`),
+        p9("p9_31", "Você JÁ agenciou ou tentou agenciar pessoas para prostituição?", `${S14}Pt8Line31_YesNo[0]`, `${S14}Pt8Line31_YesNo[1]`),
+        p9("p9_32", "Você JÁ recebeu dinheiro de prostituição?", `${S14}Pt8Line32_YesNo[0]`, `${S14}Pt8Line32_YesNo[1]`),
+        p9("p9_33", "Você pretende praticar jogo ilegal ou outro vício comercializado nos EUA?", `${S14}Pt8Line33_YesNo[0]`, `${S14}Pt8Line33_YesNo[1]`),
+        p9("p9_34", "Você JÁ usou imunidade (diplomática ou outra) para escapar de processo criminal nos EUA?", `${S14}Pt8Line34_YesNo[1]`, `${S14}Pt8Line34_YesNo[0]`),
+        p9("p9_35a", "Você JÁ serviu como autoridade de governo estrangeiro?", `${S14}Pt8Line35a_YesNo[0]`, `${S14}Pt8Line35a_YesNo[1]`),
+        p9("p9_35b", "Se sim: você foi responsável por (ou executou) violações de liberdade religiosa?", `${S14}Pt8Line35b_YesNo[1]`, `${S14}Pt8Line35b_YesNo[0]`, { showWhen: { questionId: "p9_35a", equals: "yes" }, required: false }),
+        p9("p9_36", "Você JÁ induziu (por força, fraude ou coerção) tráfico sexual de qualquer pessoa?", `${S14}Pt8Line36_YesNo[1]`, `${S14}Pt8Line36_YesNo[0]`),
+        p9("p9_37", "Você JÁ traficou pessoa para servidão involuntária, escravidão ou trabalho forçado?", `${S14}Pt8Line37_YesNo[1]`, `${S14}Pt8Line37_YesNo[0]`),
+      ],
+    },
+
+    // ── 14. Parte 9 — segurança (itens 38–55) ───────────────────────────────
+    {
+      id: "parte9-seguranca",
+      titlePt: "Parte 9 — Segurança",
+      descriptionPt:
+        "Perguntas padrão de segurança nacional — para a imensa maioria, é \"Não\" em todas. Leia cada uma mesmo assim.",
+      questions: [
+        p9("p9_38", "Você JÁ ajudou/conspirou no tráfico de pessoas (sexual ou trabalho forçado)?", `${S15}Pt8Line38_YesNo[0]`, `${S15}Pt8Line38_YesNo[1]`),
+        p9("p9_39", "Você é cônjuge/filho(a) de traficante de pessoas e recebeu benefício disso nos últimos 5 anos?", `${S15}Pt9Line39_YesNo[1]`, `${S15}Pt9Line39_YesNo[0]`),
+        p9("p9_40", "Se sim: você sabia (ou tinha como saber) da origem do benefício?", `${S15}Pt8Line40_YesNo[1]`, `${S15}Pt8Line40_YesNo[0]`, { showWhen: { questionId: "p9_39", equals: "yes" }, required: false }),
+        p9("p9_41", "Você JÁ se envolveu em lavagem de dinheiro (ou vem aos EUA para isso)?", `${S15}Pt8Line41_YesNo[0]`, `${S15}Pt8Line41_YesNo[1]`),
+        p9("p9_42a", "Você pretende: praticar espionagem ou sabotagem nos EUA?", `${S15}Pt8Line42\\.a_YesNo[0]`, `${S15}Pt8Line42\\.a_YesNo[1]`),
+        p9("p9_42b", "Você pretende: violar leis de exportação de tecnologia ou informação sensível?", `${S15}Pt8Line42\\.b_YesNo[1]`, `${S15}Pt8Line42\\.b_YesNo[0]`),
+        p9("p9_42c", "Você pretende: se envolver em atividade para derrubar o governo americano à força?", `${S15}Pt8Line42c_YesNo[1]`, `${S15}Pt8Line42c_YesNo[0]`),
+        p9("p9_42d", "Você pretende: praticar qualquer outra atividade ilegal nos EUA?", `${S15}Pt8Line42d_YesNo[0]`, `${S15}Pt8Line42d_YesNo[1]`),
+        p9("p9_43a", "Você JÁ recebeu treinamento com armas, paramilitar ou de tipo militar?", `${S15}Pt8Line43a_YesNo[1]`, `${S15}Pt8Line43a_YesNo[0]`, { helpPt: "Serviço militar obrigatório também conta — responda Sim e explique na Parte 14." }),
+        p9("p9_43b", "Você JÁ cometeu sequestro, assassinato, pirataria ou sabotagem de veículo/aeronave?", `${S15}Pt8Line43b_YesNo[0]`, `${S15}Pt8Line43b_YesNo[1]`),
+        p9("p9_43c", "Você JÁ usou arma ou explosivo com intenção de ferir pessoas ou causar danos?", `${S15}Pt8Line43c_YesNo[0]`, `${S15}Pt8Line43c_YesNo[1]`),
+        p9("p9_43d", "Você JÁ ameaçou, tentou, conspirou ou planejou algo dos itens anteriores (43.b–43.c)?", `${S15}Pt8Line43d_YesNo[0]`, `${S15}Pt8Line43d_YesNo[1]`),
+        p9("p9_43e", "Você JÁ incitou (com intenção de causar morte/dano grave) os atos dos itens 43.b–43.c?", `${S15}Pt8Line43e_YesNo[0]`, `${S15}Pt8Line43e_YesNo[1]`),
+        p9("p9_43f", "Você JÁ participou ou foi membro de grupo/organização que fez algo dos itens 43.b–43.e?", `${S15}Pt8Line43fYesNo[0]`, `${S15}Pt8Line43fYesNo[1]`),
+        p9("p9_43g", "Você JÁ recrutou membros ou arrecadou dinheiro para grupo que fez algo dos itens 43.b–43.e?", `${S15}Pt8Line43g_YesNo[0]`, `${S15}Pt8Line43g_YesNo[1]`),
+        p9("p9_43h", "Você JÁ deu dinheiro, serviços ou apoio para ATIVIDADES dos itens 43.b–43.e?", `${S15}Pt8Line43h_YesNo[1]`, `${S15}Pt8Line43h_YesNo[0]`),
+        p9("p9_43i", "Você JÁ deu dinheiro, serviços ou apoio para PESSOA/GRUPO que fez algo dos itens 43.b–43.e?", `${S15}Pt8Line43i_YesNo[1]`, `${S15}Pt8Line43i_YesNo[0]`),
+        p9("p9_44", "Você pretende praticar qualquer atividade dos itens 43.b–43.e?", `${S15}Pt8Line44_YesNo[0]`, `${S15}Pt8Line44_YesNo[1]`),
+        p9("p9_45", "Você pretende praticar atividade que ameace o bem-estar ou a segurança dos EUA?", `${S15}Pt8Line45_YesNo[1]`, `${S15}Pt8Line45_YesNo[0]`),
+        p9("p9_46", "Você é cônjuge ou filho(a) de alguém que fez algo dos itens 43.b–43.i?", `${S16}Pt8Line46_YesNo[0]`, `${S16}Pt8Line46_YesNo[1]`),
+        p9("p9_47", "Você JÁ vendeu, forneceu ou transportou armas que sabia que seriam usadas contra alguém?", `${S16}Pt8Line47_YesNo[1]`, `${S16}Pt8Line47_YesNo[0]`),
+        p9("p9_48", "Você JÁ trabalhou/serviu em prisão, campo de detenção ou lugar onde pessoas eram detidas?", `${S16}Pt8Line48_YesNo[1]`, `${S16}Pt8Line48_YesNo[0]`),
+        p9("p9_49", "Você JÁ foi membro de grupo que usou armas contra pessoas ou ameaçou usá-las?", `${S16}Pt8Line49_YesNo[0]`, `${S16}Pt8Line49_YesNo[1]`),
+        p9("p9_50", "Você JÁ serviu, foi membro ou ajudou alguma unidade MILITAR ou POLICIAL?", `${S16}Pt8Line50_YesNo[1]`, `${S16}Pt8Line50_YesNo[0]`, { helpPt: "Serviço militar obrigatório no Brasil conta: responda Sim e detalhe país, unidade, patente e datas na Parte 14." }),
+        p9("p9_51", "Você JÁ serviu ou participou de grupo ARMADO (paramilitar, guerrilha, milícia, autodefesa)?", `${S16}Pt8Line51_YesNo[0]`, `${S16}Pt8Line51_YesNo[1]`),
+        p9("p9_52", "Você JÁ foi membro ou afiliado do Partido Comunista ou de partido totalitário (em qualquer país)?", `${S16}Pt8Line52_YesNo[1]`, `${S16}Pt8Line52_YesNo[0]`),
+        p9("p9_53a", "Você JÁ ordenou, incitou, ajudou ou participou de: tortura?", `${S16}Pt8Line53a_YesNo[0]`, `${S16}Pt8Line53a_YesNo[1]`),
+        p9("p9_53b", "…genocídio?", `${S16}Pt8Line53b_YesNo[0]`, `${S16}Pt8Line53b_YesNo[1]`),
+        p9("p9_53c", "…matar (ou tentar matar) alguém?", `${S16}Pt8Line53c_YesNo[0]`, `${S16}Pt8Line53c_YesNo[1]`),
+        p9("p9_53d", "…ferir gravemente (ou tentar ferir) alguém de propósito?", `${S16}Pt8Line53d_YesNo[1]`, `${S16}Pt8Line53d_YesNo[0]`),
+        p9("p9_54", "Você JÁ recrutou ou usou menores de 15 anos para servir em força armada ou grupo armado?", `${S16}Pt8Line54_YesNo[1]`, `${S16}Pt8Line54_YesNo[0]`),
+        p9("p9_55", "Você JÁ usou menores de 15 anos em hostilidades (combate ou apoio a combate)?", `${S16}Pt8Line55_YesNo[0]`, `${S16}Pt8Line55_YesNo[1]`),
+      ],
+    },
+
+    // ── 15. Parte 9 — public charge (itens 56–66) ───────────────────────────
+    {
+      id: "parte9-public-charge",
+      titlePt: "Parte 9 — Situação financeira (public charge)",
+      descriptionPt:
+        "O USCIS avalia se você tende a depender do governo. No caminho de família você NÃO é isento — " +
+        "responda os itens abaixo (o I-864 do seu patrocinador também cobre isso).",
       questions: [
         {
-          id: "part9_ack",
-          labelPt: "Entendi: vou responder a Parte 9 à mão no formulário impresso",
-          type: "checkbox",
+          id: "p9_56_exempt",
+          labelPt: "Categoria de public charge",
+          helpPt: "No ajuste por família, a resposta padrão é \"não sou isento\". As categorias isentas (asilo, VAWA, T/U) não passam por este wizard.",
+          type: "radio",
           required: true,
+          default: "not_exempt",
+          options: [{ value: "not_exempt", labelPt: "Não sou isento — vou responder os itens 57–66" }],
+          pdf: { kind: "checkboxChoice", fieldByValue: { not_exempt: `${S18}Pt9Line56_CB[23]` } },
+        },
+        {
+          id: "p9_57_household",
+          labelPt: "Tamanho da sua família/household (contando você)",
+          type: "number",
+          required: true,
+          pdf: { kind: "text", field: `${S18}Pt9Line57_HouseholdSize[0]` },
+        },
+        {
+          id: "p9_58_income",
+          labelPt: "Renda anual do household",
+          type: "radio",
+          required: true,
+          options: [
+            { value: "b0", labelPt: "US$0 – 27.000" },
+            { value: "b1", labelPt: "US$27.001 – 52.000" },
+            { value: "b2", labelPt: "US$52.001 – 85.000" },
+            { value: "b3", labelPt: "US$85.001 – 141.000" },
+            { value: "b4", labelPt: "Acima de US$141.000" },
+          ],
+          pdf: {
+            kind: "checkboxChoice",
+            fieldByValue: {
+              b0: `${S18}Pt9Line53_CB[0]`,
+              b1: `${S18}Pt9Line53_CB[1]`,
+              b2: `${S18}Pt9Line53_CB[2]`,
+              b3: `${S18}Pt9Line53_CB[3]`,
+              b4: `${S18}Pt9Line53_CB[4]`,
+            },
+          },
+        },
+        {
+          id: "p9_59_assets",
+          labelPt: "Valor total dos bens do household",
+          type: "radio",
+          required: true,
+          options: [
+            { value: "a0", labelPt: "US$0 – 18.400" },
+            { value: "a1", labelPt: "US$18.401 – 136.000" },
+            { value: "a2", labelPt: "US$136.001 – 321.400" },
+            { value: "a3", labelPt: "US$321.401 – 707.100" },
+            { value: "a4", labelPt: "Acima de US$707.100" },
+          ],
+          pdf: {
+            kind: "checkboxChoice",
+            fieldByValue: {
+              a0: `${S18}Pt9Line59_CB[0]`,
+              a1: `${S18}Pt9Line59_CB[1]`,
+              a2: `${S18}Pt9Line59_CB[2]`,
+              a3: `${S18}Pt9Line59_CB[3]`,
+              a4: `${S18}Pt9Line59_CB[4]`,
+            },
+          },
+        },
+        {
+          id: "p9_60_liabilities",
+          labelPt: "Valor total das dívidas do household",
+          type: "radio",
+          required: true,
+          options: [
+            { value: "l0", labelPt: "US$0" },
+            { value: "l1", labelPt: "US$1 – 10.100" },
+            { value: "l2", labelPt: "US$10.101 – 57.700" },
+            { value: "l3", labelPt: "US$57.701 – 186.800" },
+            { value: "l4", labelPt: "Acima de US$186.800" },
+          ],
+          pdf: {
+            kind: "checkboxChoice",
+            fieldByValue: {
+              l0: `${S18}Pt9Line60_CB[0]`,
+              l1: `${S18}Pt9Line60_CB[1]`,
+              l2: `${S18}Pt9Line60_CB[2]`,
+              l3: `${S18}Pt9Line60_CB[3]`,
+              l4: `${S18}Pt9Line60_CB[4]`,
+            },
+          },
+        },
+        {
+          id: "p9_61_education",
+          labelPt: "Sua maior escolaridade",
+          type: "radio",
+          required: true,
+          options: [
+            { value: "less_hs", labelPt: "Menos que ensino médio completo" },
+            { value: "hs", labelPt: "Ensino médio completo (ou GED)" },
+            { value: "some_college", labelPt: "Faculdade incompleta (1+ ano de créditos)" },
+            { value: "associate", labelPt: "Tecnólogo (Associate's)" },
+            { value: "bachelor", labelPt: "Graduação (Bachelor's)" },
+            { value: "master", labelPt: "Mestrado" },
+            { value: "professional", labelPt: "Grau profissional (JD, MD...)" },
+            { value: "doctorate", labelPt: "Doutorado" },
+          ],
+          pdf: {
+            kind: "checkboxChoice",
+            fieldByValue: {
+              less_hs: `${S18}Pt9Line61_CB[0]`,
+              hs: `${S18}Pt9Line61_CB[2]`,
+              some_college: `${S18}Pt9Line61_CB[1]`,
+              associate: `${S18}Pt9Line61_CB[3]`,
+              bachelor: `${S18}Pt9Line61_CB[7]`,
+              master: `${S18}Pt9Line61_CB[4]`,
+              professional: `${S18}Pt9Line61_CB[5]`,
+              doctorate: `${S18}Pt9Line61_CB[6]`,
+            },
+          },
+        },
+        {
+          id: "p9_61_grade",
+          labelPt: "Última série concluída",
+          type: "text",
+          showWhen: { questionId: "p9_61_education", equals: "less_hs" },
+          pdf: { kind: "text", field: `${S18}Pt9Line61_diploma[0]` },
+        },
+        {
+          id: "p9_62_certs",
+          labelPt: "Certificações, licenças e habilidades profissionais (em inglês; \"None\" se nenhuma)",
+          type: "text",
+          required: true,
+          passthroughEn: true,
+          default: "None",
+          pdf: { kind: "text", field: `${S18}Table1[0].Row1[0].TextField1[0]` },
+        },
+        p9(
+          "p9_63",
+          "Você JÁ recebeu SSI, TANF ou outro benefício governamental em dinheiro para sustento?",
+          `${S18}Pt9Line63_YesNo[0]`,
+          `${S18}Pt9Line63_YesNo[1]`,
+          { helpPt: "Se sim, liste os detalhes (benefício, datas, valores) à mão na tabela do item 65." }
+        ),
+        p9(
+          "p9_64",
+          "Você JÁ ficou internado(a) em instituição de longo prazo às custas do governo?",
+          `${S18}Pt9Line64_YesNo[0]`,
+          `${S18}Pt9Line64_YesNo[1]`,
+          { helpPt: "Se sim, preencha a tabela do item 66 à mão na versão impressa." }
+        ),
+      ],
+    },
+
+    // ── 16. Parte 9 — violações imigratórias (itens 67–78) ──────────────────
+    {
+      id: "parte9-violacoes",
+      titlePt: "Parte 9 — Entradas e permanência",
+      descriptionPt:
+        "Atenção redobrada aqui se o seu caminho envolve overstay: responda com precisão — para cônjuge de " +
+        "cidadão, permanência irregular costuma ser perdoada no ajuste, mas mentir sobre ela não é.",
+      questions: [
+        p9("p9_67", "Você JÁ faltou (ou se recusou a comparecer) a audiência de remoção depois de 1/abr/1997?", `${S20}Pt9Line67_YesNo[1]`, `${S20}Pt9Line67_YesNo[0]`),
+        p9("p9_68", "Você JÁ apresentou documento falso/adulterado a autoridade americana para obter benefício imigratório?", `${S20}Pt9Line68_YesNo[0]`, `${S20}Pt9Line68_YesNo[1]`),
+        p9("p9_69", "Você JÁ mentiu ou omitiu informação em pedido de visto, entrada ou benefício imigratório?", `${S20}Pt9Line69_YesNo[1]`, `${S20}Pt9Line69_YesNo[0]`),
+        p9("p9_70", "Você JÁ alegou falsamente ser cidadão americano (por escrito ou de qualquer forma)?", `${S20}Pt9Line70_YesNo[0]`, `${S20}Pt9Line70_YesNo[1]`),
+        p9("p9_71", "Você JÁ entrou como clandestino (stowaway) em navio ou avião?", `${S20}Pt9Line71_YesNo[1]`, `${S20}Pt9Line71_YesNo[0]`),
+        p9("p9_72", "Você JÁ ajudou alguém a entrar (ou tentar entrar) ilegalmente nos EUA?", `${S20}Pt9Line72_YesNo[0]`, `${S20}Pt9Line72_YesNo[1]`),
+        p9("p9_73", "Você está sob ordem final de multa civil por uso de documentos fraudulentos (INA 274C)?", `${S20}Pt9Line73_YesNo[1]`, `${S20}Pt9Line73_YesNo[0]`),
+        p9("p9_74", "Você JÁ foi excluído(a), deportado(a) ou removido(a) dos EUA (ou saiu por conta após ordem)?", `${S20}Pt9Line74_YesNo[1]`, `${S20}Pt9Line74_YesNo[0]`),
+        p9("p9_75", "Você JÁ entrou nos EUA sem ser inspecionado(a) e admitido(a)/parolado(a)?", `${S20}Pt9Line75_YesNo[0]`, `${S20}Pt9Line75_YesNo[1]`),
+        p9(
+          "p9_76",
+          "Desde 1/abr/1997, você esteve em permanência irregular nos EUA (além do prazo autorizado)?",
+          `${S21}Pt9Line76_YesNo[1]`,
+          `${S21}Pt9Line76_YesNo[0]`,
+          { helpPt: "Se sim, liste as datas de permanência irregular à mão na Parte 14." }
+        ),
+        p9("p9_77", "Se sim: o tráfico severo de pessoas foi uma razão central dessa permanência?", `${S21}Pt9Line77_YesNo[0]`, `${S21}Pt9Line77_YesNo[1]`, { showWhen: { questionId: "p9_76", equals: "yes" }, required: false }),
+        p9("p9_78a", "Desde 1/abr/1997, você reentrou (ou tentou reentrar) sem inspeção APÓS mais de 1 ano de permanência irregular acumulada?", `${S21}Pt9Line78a_YesNo[1]`, `${S21}Pt9Line78a_YesNo[0]`),
+        p9("p9_78b", "…ou APÓS ter sido deportado(a), excluído(a) ou removido(a)?", `${S21}Pt9Line78b_YesNo[0]`, `${S21}Pt9Line78b_YesNo[1]`),
+      ],
+    },
+
+    // ── 17. Parte 9 — condutas diversas (itens 79–86) ───────────────────────
+    {
+      id: "parte9-condutas",
+      titlePt: "Parte 9 — Condutas diversas",
+      questions: [
+        p9("p9_79", "Você planeja praticar poligamia nos EUA?", `${S21}Pt9Line79_YesNo[0]`, `${S21}Pt9Line79_YesNo[1]`),
+        p9("p9_80", "Você está acompanhando um estrangeiro inadmissível e incapaz (doença/deficiência/infância) que depende da sua guarda?", `${S21}Pt9Line80_YesNo[1]`, `${S21}Pt9Line80_YesNo[0]`),
+        p9("p9_81", "Você JÁ ajudou a reter fora dos EUA uma criança cidadã americana, contra quem tinha a guarda?", `${S21}Pt9Line81_YesNo[0]`, `${S21}Pt9Line81_YesNo[1]`),
+        p9("p9_82", "Você JÁ votou nos EUA em violação de qualquer lei ou regulamento?", `${S21}Pt9Line82_YesNo[1]`, `${S21}Pt9Line82_YesNo[0]`),
+        p9("p9_83", "Você JÁ renunciou à cidadania americana para evitar impostos?", `${S21}Pt9Line83_YesNo[0]`, `${S21}Pt9Line83_YesNo[1]`),
+        p9("p9_84a", "Você JÁ pediu isenção do serviço militar americano por ser estrangeiro?", `${S21}Pt9Line84a_YesNo[1]`, `${S21}Pt9Line84a_YesNo[0]`),
+        p9("p9_84b", "Você JÁ foi dispensado desse serviço por ser estrangeiro?", `${S21}Pt9Line84b_YesNo[1]`, `${S21}Pt9Line84b_YesNo[0]`),
+        p9("p9_84c", "Você JÁ foi condenado(a) por deserção das forças armadas americanas?", `${S21}Pt9Line84c_YesNo[1]`, `${S21}Pt9Line84c_YesNo[0]`),
+        p9("p9_85", "Você JÁ saiu (ou ficou fora) dos EUA para evitar servir nas forças armadas em tempo de guerra?", `${S21}Pt9Line85_YesNo[1]`, `${S21}Pt9Line85_YesNo[0]`),
+        {
+          id: "p9_86_nationality",
+          labelPt: "Se sim: qual era sua nacionalidade/status imigratório antes de sair? (em inglês)",
+          type: "text",
+          passthroughEn: true,
+          showWhen: { questionId: "p9_85", equals: "yes" },
+          pdf: { kind: "text", field: `${S21}Pt9Line86_Nationality[0]` },
         },
       ],
     },
