@@ -227,25 +227,40 @@ export default async function VistoPage({
         )}
 
         {/* Kit CTA */}
-        <div className="bg-pine rounded-2xl px-5 py-5 mb-8">
-          <p
-            className="text-xs font-bold uppercase tracking-widest text-pine-tint mb-1"
-            style={{ letterSpacing: "0.1em" }}
-          >
-            Pronto para os documentos?
-          </p>
-          <p className="text-sm font-semibold text-cream">{page.kit.label}</p>
-          <p className="text-xs text-pine-tint mt-1 leading-relaxed">
-            A lista completa do que preparar, agência por agência, com a ordem certa de cada
-            etapa — tudo em português.
-          </p>
-          <Link
-            href={`/documentos/${page.kit.kitId}`}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-bold text-ink hover:bg-amber-deep transition-colors"
-          >
-            Ver o checklist →
-          </Link>
-        </div>
+        {page.kit ? (
+          <div className="bg-pine rounded-2xl px-5 py-5 mb-8">
+            <p
+              className="text-xs font-bold uppercase tracking-widest text-pine-tint mb-1"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              Pronto para os documentos?
+            </p>
+            <p className="text-sm font-semibold text-cream">{page.kit.label}</p>
+            <p className="text-xs text-pine-tint mt-1 leading-relaxed">
+              A lista completa do que preparar, agência por agência, com a ordem certa de cada
+              etapa — tudo em português.
+            </p>
+            <Link
+              href={`/documentos/${page.kit.kitId}`}
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-bold text-ink hover:bg-amber-deep transition-colors"
+            >
+              Ver o checklist →
+            </Link>
+          </div>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-amber/40 bg-amber-tint px-5 py-5 mb-8">
+            <p
+              className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-1"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              Checklist em preparação
+            </p>
+            <p className="text-sm text-ink leading-relaxed mt-1">
+              Ainda estamos construindo o checklist de documentos específico para este visto.
+              Assim que estiver pronto, ele aparece aqui.
+            </p>
+          </div>
+        )}
 
         <FontesOficiaisSection
           fontesOficiais={page.fontesOficiais}

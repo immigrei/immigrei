@@ -44,7 +44,7 @@ export type VistoPage = {
   prazos: VistoPrazo[];
   passos: VistoPasso[]; // high-level — the operational detail lives in the kit
   pontes: { label: string; href: string }[]; // manuals & connected routes
-  kit: { kitId: string; label: string };
+  kit: { kitId: string; label: string } | null; // null = checklist not built yet
   fontesOficiais: { label: string; url: string }[];
   fonteLeis: string[]; // content/leis files backing this page
   verificadoEm: string;
