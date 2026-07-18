@@ -1029,7 +1029,7 @@ const checklists: Record<string, ChecklistVisto> = {
           {
             id: "i765",
             nome: "I-765 — Pedido de Autorização de Trabalho",
-            descricao: "O formulário do EAD para o OPT. Preencha aqui em português; o Immigrei exporta o PDF oficial preenchido em inglês para você conferir, assinar e enviar.",
+            descricao: "O formulário do EAD para o OPT. Preencha aqui em português; o immigrei exporta o PDF oficial preenchido em inglês para você conferir, assinar e enviar.",
             agencia: "USCIS",
             formulario: "I-765",
             formId: "i-765",

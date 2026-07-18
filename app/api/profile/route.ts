@@ -11,17 +11,22 @@ export async function POST(req: NextRequest) {
 
   const user = await currentUser();
   const body = await req.json().catch(() => ({}));
-  const { visa_type, arrival_date, main_goal, location, nationality, chosen_school, i94_expiry_date, family_ties } = body;
+  const { visa_type, arrival_date, main_goal, location, nationality, chosen_school, i94_expiry_date, family_ties, f1_program_start_date } = body;
 
   if (
     !visa_type && !arrival_date && !main_goal && !location && !nationality &&
-    chosen_school === undefined && i94_expiry_date === undefined && family_ties === undefined
+    chosen_school === undefined && i94_expiry_date === undefined && family_ties === undefined &&
+    f1_program_start_date === undefined
   ) {
     return NextResponse.json({ error: "No fields to save" }, { status: 400 });
   }
 
   if (i94_expiry_date !== undefined && i94_expiry_date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(i94_expiry_date)) {
     return NextResponse.json({ error: "Invalid i94_expiry_date" }, { status: 400 });
+  }
+
+  if (f1_program_start_date !== undefined && f1_program_start_date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(f1_program_start_date)) {
+    return NextResponse.json({ error: "Invalid f1_program_start_date" }, { status: 400 });
   }
 
   const VALID_FAMILY_TIES = ["spouse_citizen", "parent_child_citizen", "family_gc", "none"];
@@ -53,6 +58,7 @@ export async function POST(req: NextRequest) {
   if (nationality) row.nationality = nationality;
   if (i94_expiry_date !== undefined) row.i94_expiry_date = i94_expiry_date;
   if (family_ties !== undefined) row.family_ties = family_ties;
+  if (f1_program_start_date !== undefined) row.f1_program_start_date = f1_program_start_date;
   if (chosen_school !== undefined) {
     row.chosen_school = chosen_school === null ? null : {
       school_name: String(chosen_school.school_name),
@@ -96,6 +102,7 @@ export async function DELETE() {
       chosen_school: null,
       i94_expiry_date: null,
       family_ties: null,
+      f1_program_start_date: null,
       onboarding_completed: false,
       updated_at: new Date().toISOString(),
     })

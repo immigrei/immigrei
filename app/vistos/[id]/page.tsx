@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
+import CofreLink from "@/app/components/CofreLink";
 import { todosVistos } from "@/lib/vistosCatalog";
 import { getVistoPage, VISTO_PAGES, type VistoPrazo } from "@/lib/vistoPages";
 import ConfirmBar, { VoltarButton } from "./ConfirmBar";
@@ -91,9 +92,10 @@ export default async function VistoPage({
       style={{ fontFamily: "var(--font-body)" }}
     >
       <div className="max-w-2xl mx-auto">
-        {/* Back */}
-        <div className="mb-6">
+        {/* Back — o cofre fica sempre visível aqui, independente do visto escolhido */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
           <VoltarButton />
+          <CofreLink />
         </div>
 
         {/* Hero */}

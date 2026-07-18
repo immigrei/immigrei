@@ -376,7 +376,7 @@ function Composer({ onPublished }: { onPublished: (r: Report) => void }) {
       id: data.reportId,
       title: titulo.trim(),
       body: corpo.trim(),
-      author: anonimo ? "Membro Immigrei" : "Você",
+      author: anonimo ? "Membro immigrei" : "Você",
       isAnonymous: anonimo,
       authorState: estado,
       status: "pending",
@@ -473,7 +473,7 @@ function Composer({ onPublished }: { onPublished: (r: Report) => void }) {
         <label className="flex items-center justify-between gap-3 cursor-pointer">
           <span>
             <span className="block text-sm font-bold text-ink">Publicar como anônimo</span>
-            <span className="block text-xs text-ink-faint">Seu nome vira &quot;Membro Immigrei&quot;. O estado continua visível.</span>
+            <span className="block text-xs text-ink-faint">Seu nome vira &quot;Membro immigrei&quot;. O estado continua visível.</span>
           </span>
           <button
             type="button"

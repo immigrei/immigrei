@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Logo from "../components/Logo";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
-  title: "Política de Privacidade — Immigrei",
-  description: "Como a Immigrei coleta, usa e protege os seus dados.",
+  title: "Política de Privacidade — immigrei",
+  description: "Como a immigrei coleta, usa e protege os seus dados.",
   alternates: { canonical: "/privacidade" },
 };
 
@@ -31,7 +32,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "3. Com quem compartilhamos",
     body: [
-      "Somente com os processadores necessários para o serviço funcionar: Clerk (autenticação), Supabase (banco de dados), Vercel (hospedagem), Stripe (pagamentos — a Immigrei não vê nem armazena seu cartão) e Resend (envio de e-mails). Todos sob contrato e padrões de segurança de mercado.",
+      "Somente com os processadores necessários para o serviço funcionar: Clerk (autenticação), Supabase (banco de dados), Vercel (hospedagem), Stripe (pagamentos — a immigrei não vê nem armazena seu cartão) e Resend (envio de e-mails). Todos sob contrato e padrões de segurança de mercado.",
       "Não compartilhamos seus dados voluntariamente com nenhuma autoridade governamental. Somente uma ordem judicial válida e vinculante poderia nos obrigar — nesse caso, quando a lei permitir, notificaremos você antes de qualquer resposta.",
       "Se você optar por ser conectado a um profissional parceiro, compartilharemos com ele apenas o que você autorizar expressamente naquele momento.",
     ],
@@ -56,12 +57,12 @@ const sections: { title: string; body: string[] }[] = [
   },
   {
     title: "7. Crianças",
-    body: ["A Immigrei não é destinada a menores de 18 anos."],
+    body: ["A immigrei não é destinada a menores de 18 anos."],
   },
   {
     title: "8. Mudanças e contato",
     body: [
-      "Se esta política mudar de forma relevante, avisaremos por e-mail. Contato: visaemdia2026@gmail.com (e-mail oficial da Immigrei durante o período de lançamento).",
+      "Se esta política mudar de forma relevante, avisaremos por e-mail. Contato: visaemdia2026@gmail.com (e-mail oficial da immigrei durante o período de lançamento).",
     ],
   },
 ];
@@ -70,12 +71,8 @@ export default function PrivacidadePage() {
   return (
     <main className="min-h-screen bg-cream">
       <header className="flex items-center px-6 py-6 max-w-3xl mx-auto">
-        <Link
-          href="/"
-          className="text-2xl font-semibold text-pine"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Immigrei
+        <Link href="/" aria-label="immigrei — início">
+          <Logo variant="wordmark" className="text-2xl" />
         </Link>
       </header>
       <article className="max-w-2xl mx-auto px-6 pb-20">

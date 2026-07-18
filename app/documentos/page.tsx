@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
+import CofreLink from "@/app/components/CofreLink";
 
 interface Profile {
   visa_type: string | null;
@@ -229,9 +230,12 @@ export default function DocumentosPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
 
         <div className="mb-7">
-          <p className="text-xs font-bold uppercase tracking-widest text-pine mb-1" style={{ letterSpacing: "0.12em" }}>
-            Kits de protocolo
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <p className="text-xs font-bold uppercase tracking-widest text-pine" style={{ letterSpacing: "0.12em" }}>
+              Kits de protocolo
+            </p>
+            <CofreLink />
+          </div>
           <h1 className="text-3xl font-semibold text-ink mb-2" style={{ fontFamily: "var(--font-display)" }}>
             Documente e protocole
           </h1>
