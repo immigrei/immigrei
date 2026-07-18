@@ -774,6 +774,7 @@ export type Destination =
   | { kind: "i94" }
   | { kind: "dashboard"; visaType: "green_card" | "citizen" }
   | { kind: "profissionais" }
+  | { kind: "documentos"; vistoId: string }
   | { kind: "vistos"; query: string };
 
 export function deriveDestination(a: Answers, results: VisaResult[]): Destination {
@@ -788,8 +789,20 @@ export function deriveDestination(a: Answers, results: VisaResult[]): Destinatio
   if (currentStatus === "green_card") return { kind: "dashboard", visaType: "green_card" };
   if (currentStatus === "citizen") return { kind: "dashboard", visaType: "citizen" };
 
+  // Parente imediato de cidadão americano (cônjuge, filho, pai/mãe) SEM
+  // overstay: a jornada é a petição familiar consular — o kit IR-1/IR-2
+  // dentro do app (login-gated), não a vitrine de vistos nem só a lista de
+  // profissionais.
+  if (
+    currentStatus !== "overstay" &&
+    (a.q_family_ties === "spouse_citizen" || a.q_family_ties === "parent_child_citizen")
+  ) {
+    return { kind: "documentos", vistoId: "familia-ir" };
+  }
+
   // Overstay, ajuste por parente imediato (exceção do VWP) e beneficiários
-  // de petição familiar: as jornadas de visto padrão não se aplicam.
+  // de petição familiar com fila (F-2): casos sensíveis demais para um kit
+  // genérico — as jornadas de visto padrão não se aplicam.
   if (
     currentStatus === "overstay" ||
     a.q_esta_goal === "family_citizen" ||
@@ -1841,11 +1854,11 @@ export default function OnboardingPage() {
     }
   }
 
-  // Quem tem vínculo familiar (cônjuge/filho de cidadão, ou parente com Green
-  // Card) sai direto para /profissionais sem passar pela vitrine de vistos —
-  // mas a resposta do questionário precisa ser salva antes, senão o painel
+  // Perfis que saem da vitrine (vínculo familiar, casos sensíveis) precisam
+  // ter a resposta do questionário salva antes de navegar, senão o painel
   // nunca sabe desse vínculo e a pessoa não tem perfil algum ao voltar.
-  async function saveProfileAndGoToProfissionais() {
+  // `dest` é a rota final: /profissionais ou um kit em /documentos/[vistoId].
+  async function saveProfileAndGoTo(dest: string) {
     if (savingProfile) return;
     setSavingProfile(true);
     setSaveError(null);
@@ -1863,15 +1876,15 @@ export default function OnboardingPage() {
       });
       if (res.status === 401) {
         localStorage.setItem("immigrei_pending_profile", JSON.stringify(payload));
-        router.push("/sign-up");
+        router.push(`/sign-up?redirect_url=${encodeURIComponent(dest)}`);
         return;
       }
     } catch {
-      // Perfil não salvou — ainda assim levamos para /profissionais, que é
-      // o pedido explícito do usuário; a próxima visita tenta salvar de novo.
+      // Perfil não salvou — ainda assim levamos ao destino, que é o pedido
+      // explícito do usuário; a próxima visita tenta salvar de novo.
     } finally {
       setSavingProfile(false);
-      router.push("/profissionais");
+      router.push(dest);
     }
   }
 
@@ -2165,16 +2178,22 @@ export default function OnboardingPage() {
             <button
               onClick={() =>
                 destino.kind === "profissionais"
-                  ? saveProfileAndGoToProfissionais()
-                  : goToVistos(destino.query)
+                  ? saveProfileAndGoTo("/profissionais")
+                  : destino.kind === "documentos"
+                    ? saveProfileAndGoTo(`/documentos/${destino.vistoId}`)
+                    : goToVistos(destino.query)
               }
-              disabled={destino.kind === "profissionais" && savingProfile}
+              disabled={destino.kind !== "vistos" && savingProfile}
               className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              {destino.kind === "profissionais"
-                ? (savingProfile ? "Salvando sua jornada..." : "Encontrar ajuda profissional →")
-                : "Ver minha jornada em detalhe →"}
+              {savingProfile && destino.kind !== "vistos"
+                ? "Salvando sua jornada..."
+                : destino.kind === "profissionais"
+                  ? "Encontrar ajuda profissional →"
+                  : destino.kind === "documentos"
+                    ? "Começar meu processo →"
+                    : "Ver minha jornada em detalhe →"}
             </button>
           )}
 

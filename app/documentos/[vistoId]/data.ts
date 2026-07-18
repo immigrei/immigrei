@@ -2256,6 +2256,131 @@ const checklists: Record<string, ChecklistVisto> = {
       },
     ],
   },
+  "familia-ir": {
+    vistoId: "familia-ir",
+    codigo: "IR-1/IR-2",
+    nome: "Família de Cidadão Americano (via consular)",
+    intro:
+      "Cônjuges, filhos e pais de cidadãos americanos são parentes imediatos — não entram em fila de espera. O processo tem duas fases: a petição I-130 no USCIS (protocolada pelo cidadão) e depois o visto de imigrante no consulado (DS-260 via NVC).",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 247",
+      alertaCritico:
+        "Quem protocola a I-130 é o parente cidadão americano (o peticionário) — não o imigrante. E enquanto o processo consular corre, pedir visto de turista ou tentar entrar nos EUA pode ser negado por intenção imigratória declarada.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Petição I-130 no USCIS",
+        descricao: "Protocolada pelo parente cidadão americano; prova o vínculo familiar",
+        documentos: [
+          {
+            id: "i130",
+            nome: "Formulário I-130 — Petition for Alien Relative",
+            descricao:
+              "Preenchido e assinado pelo peticionário (o cidadão). Taxa atual: US$675 em papel ou US$625 online (my.uscis.gov). Cada beneficiário exige uma I-130 própria.",
+            agencia: "USCIS",
+            formulario: "I-130",
+            obrigatorio: true,
+          },
+          {
+            id: "i130a",
+            nome: "Formulário I-130A — Supplemental Information for Spouse Beneficiary",
+            descricao:
+              "Obrigatório somente quando o beneficiário é cônjuge — acompanha a I-130 no mesmo envelope. Filhos e pais não precisam.",
+            agencia: "USCIS",
+            formulario: "I-130A",
+            obrigatorio: false,
+          },
+          {
+            id: "prova-cidadania",
+            nome: "Prova de cidadania do peticionário",
+            descricao:
+              "Cópia do passaporte americano, certidão de nascimento nos EUA ou certificado de naturalização.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "certidoes-vinculo",
+            nome: "Certidões que provam o vínculo",
+            descricao:
+              "Certidão de casamento (cônjuge) ou de nascimento (filho/pai). Documentos brasileiros precisam de tradução certificada para o inglês.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "prova-relacionamento",
+            nome: "Prova de relacionamento genuíno (casos de cônjuge)",
+            descricao:
+              "Fotos juntos, contas conjuntas, contrato de aluguel, mensagens ao longo do tempo. O USCIS avalia se o casamento é de boa-fé — capriche nesta parte.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 2 — NVC e visto de imigrante (DS-260)",
+        descricao: "Depois da aprovação da I-130, o caso vai ao National Visa Center",
+        documentos: [
+          {
+            id: "ds260",
+            nome: "Formulário DS-260 — Immigrant Visa Application",
+            descricao:
+              "Preenchido online no portal CEAC (ceac.state.gov) pelo imigrante, após pagar as taxas do NVC (US$325 do visto + US$120 do Affidavit of Support).",
+            agencia: "DOS",
+            formulario: "DS-260",
+            obrigatorio: true,
+          },
+          {
+            id: "i864",
+            nome: "Formulário I-864 — Affidavit of Support",
+            descricao:
+              "O peticionário assume responsabilidade financeira pelo imigrante. Exige renda de pelo menos 125% da linha de pobreza — se não alcançar, um co-patrocinador (joint sponsor) pode assinar outro I-864.",
+            agencia: "USCIS",
+            formulario: "I-864",
+            obrigatorio: true,
+          },
+          {
+            id: "documentos-civis",
+            nome: "Documentos civis do imigrante",
+            descricao:
+              "Certidão de nascimento, antecedentes criminais (certidão da Polícia Federal), certidão de casamento e divórcios anteriores, passaporte válido — enviados ao NVC pelo CEAC.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 3 — Exame médico e entrevista",
+        descricao: "Marcados depois que o NVC declara o caso documentarily complete",
+        documentos: [
+          {
+            id: "exame-medico",
+            nome: "Exame médico com médico credenciado",
+            descricao:
+              "Somente com os médicos autorizados pelo consulado (lista no site da embaixada). No Brasil, feito no Rio de Janeiro ou São Paulo poucos dias antes da entrevista.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "entrevista-consular",
+            nome: "Entrevista consular de visto de imigrante",
+            descricao:
+              "No Brasil, entrevistas de visto de imigrante acontecem no Consulado do Rio de Janeiro. Leve todos os originais das certidões enviadas ao NVC.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "taxa-uscis-imigrante",
+            nome: "USCIS Immigrant Fee (US$235)",
+            descricao:
+              "Paga online após o visto aprovado e ANTES de viajar — é ela que gera o Green Card físico depois da entrada.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 export default checklists;
