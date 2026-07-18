@@ -2334,12 +2334,23 @@ const checklists: Record<string, ChecklistVisto> = {
           },
           {
             id: "i864",
-            nome: "Formulário I-864 — Affidavit of Support",
+            nome: "Formulário I-864 — quem preenche é o PARENTE cidadão/green card (patrocinador)",
             descricao:
               "O peticionário assume responsabilidade financeira pelo imigrante. Exige renda de pelo menos 125% da linha de pobreza — se não alcançar, um co-patrocinador (joint sponsor) pode assinar outro I-864.",
             agencia: "USCIS",
             formulario: "I-864",
+            formId: "i-864",
             obrigatorio: true,
+          },
+          {
+            id: "i485",
+            nome: "Formulário I-485 — quem preenche é QUEM VAI RECEBER o green card (se já estiver nos EUA)",
+            descricao:
+              "Rota alternativa ao DS-260: se o beneficiário está DENTRO dos EUA em situação elegível, pede o ajuste de status com o I-485 em vez do processo consular. A Parte 9 (elegibilidade) é respondida à mão na versão impressa.",
+            agencia: "USCIS",
+            formulario: "I-485",
+            formId: "i-485",
+            obrigatorio: false,
           },
           {
             id: "documentos-civis",

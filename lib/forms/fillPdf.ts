@@ -10,7 +10,7 @@
  * still fix anything in a PDF reader before signing and submitting.
  */
 
-import { PDFDocument, type PDFForm } from "pdf-lib";
+import { PDFDocument, PDFTextField, type PDFForm } from "pdf-lib";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
@@ -81,6 +81,15 @@ export async function fillPdf(form: FormSpec, answers: Answers): Promise<Uint8Ar
   const bytes = await readFile(assetPath);
   const pdf = await PDFDocument.load(bytes);
   const acro = pdf.getForm();
+
+  // Some USCIS PDFs (e.g. the I-485's Part 14 free-text areas) mark fields as
+  // rich text, which pdf-lib cannot re-render on save. The rich formatting is
+  // cosmetic here — drop it so the form stays fillable and saveable.
+  for (const field of acro.getFields()) {
+    if (field instanceof PDFTextField && field.isRichFormatted()) {
+      field.disableRichFormatting();
+    }
+  }
 
   for (const q of allQuestions(form)) {
     if (!q.pdf) continue;
