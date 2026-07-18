@@ -50,11 +50,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido no site do Departamento de Estado. Leva de 1 a 2 horas. Guarde o número de confirmação.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -153,11 +154,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido no site do Departamento de Estado antes de agendar entrevista.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -248,10 +250,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido online no site do Departamento de Estado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -377,11 +380,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido após receber o I-797 aprovado. Use a data de início da petição como data de atividade.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
         ],
@@ -537,10 +541,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido após receber o I-797 aprovado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -635,10 +640,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido após receber o I-797 aprovado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -991,6 +997,7 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao: "Preenchido no site do Departamento de Estado. Use os dados do I-20 atual e do programa em andamento.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -1204,10 +1211,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido no site do Departamento de Estado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
         ],
@@ -2009,11 +2017,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160-e2",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido no site do Departamento de Estado. Selecione a categoria E-2 no campo de tipo de visto.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -2059,6 +2068,7 @@ const checklists: Record<string, ChecklistVisto> = {
               "A renovação do E-2 é feita pelo consulado — não pelo USCIS. Você precisa agendar nova entrevista consular.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -2157,6 +2167,7 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao: "Aplicação online de visto não-imigrante, com foto e confirmação impressa.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -2228,6 +2239,16 @@ const checklists: Record<string, ChecklistVisto> = {
         titulo: "Aplicação e viagem",
         descricao: "O ESTA é 100% online, direto com o CBP",
         documentos: [
+          {
+            id: "colinha-esta",
+            nome: "Colinha — respostas prontas para colar no esta.cbp.dhs.gov",
+            descricao:
+              "Responda em português aqui, receba um resumo bilíngue com o que digitar em cada tela do ESTA — o preenchimento oficial continua sendo feito por você, direto no site do CBP.",
+            agencia: "CBP",
+            formulario: "ESTA",
+            formId: "esta",
+            obrigatorio: false,
+          },
           {
             id: "aplicacao-esta",
             nome: "Aplicação ESTA no site oficial do CBP",
@@ -2499,6 +2520,7 @@ const checklists: Record<string, ChecklistVisto> = {
               "Preenchido online pelo(a) noivo(a) no site do CEAC antes da entrevista consular.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
