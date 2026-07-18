@@ -2317,6 +2317,16 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             obrigatorio: false,
           },
+          {
+            id: "g1145",
+            nome: "Formulário G-1145 — aviso por e-mail/SMS quando o USCIS receber (opcional)",
+            descricao:
+              "Grampeie na frente do pacote da I-130 para saber por e-mail/SMS quando o USCIS aceitar — não substitui o recibo oficial I-797C, que chega pelo correio.",
+            agencia: "USCIS",
+            formulario: "G-1145",
+            formId: "g-1145",
+            obrigatorio: false,
+          },
         ],
       },
       {
@@ -2408,6 +2418,154 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao:
               "Paga online após o visto aprovado e ANTES de viajar — é ela que gera o Green Card físico depois da entrada.",
             agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "k1": {
+    vistoId: "k1",
+    codigo: "K-1",
+    nome: "Noivo(a) de Cidadão Americano",
+    intro:
+      "O visto K-1 é para quem vai se CASAR nos EUA em até 90 dias após a entrada — não é um visto de casamento em si, é um visto de noivado. O processo tem três fases: a petição I-129F no USCIS (protocolada pelo cidadão), o visto K-1 no consulado (DS-160), e depois o casamento + ajuste de status (I-485) dentro do prazo de 90 dias.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 247",
+      alertaCritico:
+        "O casamento precisa acontecer dentro de 90 dias da entrada nos EUA — sem prorrogação. Se não casar nesse prazo, o status K-1 vence e não pode ser trocado por outro visto; a pessoa precisa deixar os EUA. Depois de casar, o ajuste de status (I-485) é obrigatório e não é automático.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Petição I-129F no USCIS",
+        descricao: "Protocolada pelo cidadão americano; prova o noivado genuíno e o encontro pessoal recente",
+        documentos: [
+          {
+            id: "i129f",
+            nome: "Formulário I-129F — quem preenche é o CIDADÃO AMERICANO (peticionário)",
+            descricao:
+              "Preenchido e assinado pelo peticionário. Taxa atual: US$675. Exige prova de encontro pessoal com o(a) noivo(a) nos últimos 2 anos — reúna fotos, passagens e carimbos de passaporte antes de começar.",
+            agencia: "USCIS",
+            formulario: "I-129F",
+            formId: "i-129f",
+            obrigatorio: true,
+          },
+          {
+            id: "g1145",
+            nome: "Formulário G-1145 — aviso por e-mail/SMS quando o USCIS receber (opcional)",
+            descricao:
+              "Grampeie na frente do pacote da I-129F para saber por e-mail/SMS quando o USCIS aceitar.",
+            agencia: "USCIS",
+            formulario: "G-1145",
+            formId: "g-1145",
+            obrigatorio: false,
+          },
+          {
+            id: "prova-cidadania",
+            nome: "Prova de cidadania do peticionário",
+            descricao:
+              "Cópia do passaporte americano, certidão de nascimento nos EUA ou certificado de naturalização.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "prova-encontro",
+            nome: "Prova de encontro pessoal nos últimos 2 anos",
+            descricao:
+              "Passagens aéreas, carimbos de entrada/saída no passaporte, fotos juntos com data. Sem isso (ou uma exceção bem documentada), a petição é negada.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "declaracao-solteiro",
+            nome: "Declaração de que ambos estão livres para casar",
+            descricao:
+              "Certidões de divórcio ou óbito de casamentos anteriores, se houver — tanto do peticionário quanto do(a) noivo(a).",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 2 — Visto K-1 no consulado",
+        descricao: "Depois da aprovação da I-129F, o caso vai ao NVC e depois ao consulado no Brasil",
+        documentos: [
+          {
+            id: "ds160",
+            nome: "Formulário DS-160 — Online Nonimmigrant Visa Application",
+            descricao:
+              "Preenchido online pelo(a) noivo(a) no site do CEAC antes da entrevista consular.",
+            agencia: "DOS",
+            formulario: "DS-160",
+            obrigatorio: true,
+          },
+          {
+            id: "exame-medico-k1",
+            nome: "Exame médico com médico credenciado",
+            descricao:
+              "Somente com os médicos autorizados pelo consulado — no Brasil, feito no Rio de Janeiro ou São Paulo antes da entrevista.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "entrevista-k1",
+            nome: "Entrevista consular de visto K-1",
+            descricao:
+              "No Brasil, entrevistas de visto de não-imigrante acontecem no Consulado do Rio de Janeiro, São Paulo, Recife, Porto Alegre ou Brasília, conforme o distrito.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "documentos-civis-k1",
+            nome: "Documentos civis do(a) noivo(a)",
+            descricao:
+              "Certidão de nascimento, antecedentes criminais (certidão da Polícia Federal), passaporte válido, certidões de divórcio anteriores.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 3 — Casamento e ajuste de status (90 dias)",
+        descricao: "Depois da entrada nos EUA com o visto K-1 — o relógio dos 90 dias já está correndo",
+        documentos: [
+          {
+            id: "casamento-civil",
+            nome: "Casamento civil dentro de 90 dias",
+            descricao:
+              "O casamento precisa acontecer dentro dos 90 dias da entrada — sem exceção nem prorrogação. Guarde a certidão de casamento americana, ela é peça central do próximo passo.",
+            agencia: "CBP",
+            obrigatorio: true,
+          },
+          {
+            id: "i485-k1",
+            nome: "Formulário I-485 — ajuste de status depois de casar",
+            descricao:
+              "Preenchido pelo cônjuge (ex-noivo(a)) depois do casamento, para trocar o status K-1 por green card. Não é automático — sem esse pedido, o status K-1 vence e vira permanência irregular.",
+            agencia: "USCIS",
+            formulario: "I-485",
+            formId: "i-485",
+            obrigatorio: true,
+          },
+          {
+            id: "i765-k1",
+            nome: "Formulário I-765 (c)(9) — permissão de trabalho enquanto o I-485 corre",
+            descricao: "Protocolado junto com o I-485, sem taxa adicional.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            formId: "i-765-aos",
+            obrigatorio: false,
+          },
+          {
+            id: "i864-k1",
+            nome: "Formulário I-864 — quem preenche é o CIDADÃO (patrocinador)",
+            descricao:
+              "O cônjuge cidadão assume responsabilidade financeira. Exige renda de pelo menos 125% da linha de pobreza.",
+            agencia: "USCIS",
+            formulario: "I-864",
+            formId: "i-864",
             obrigatorio: true,
           },
         ],

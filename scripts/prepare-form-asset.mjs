@@ -25,6 +25,16 @@ import path from "node:path";
 
 // Official sources per form id.
 const SOURCES = {
+  "g-1145": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/g-1145.pdf",
+    page: "https://www.uscis.gov/g-1145",
+    out: "public/forms/g-1145.pdf",
+  },
+  "i-129f": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-129f.pdf",
+    page: "https://www.uscis.gov/i-129f",
+    out: "public/forms/i-129f.pdf",
+  },
   "i-765": {
     pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-765.pdf",
     page: "https://www.uscis.gov/i-765",
