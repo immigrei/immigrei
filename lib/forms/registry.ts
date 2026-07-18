@@ -5,9 +5,11 @@
 
 import type { FormSpec } from "./types";
 import { I765 } from "./i-765";
+import { I539 } from "./i-539";
 
 export const FORMS: Record<string, FormSpec> = {
   [I765.id]: I765,
+  [I539.id]: I539,
 };
 
 export function getForm(formId: string): FormSpec | undefined {

@@ -854,6 +854,7 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao: "Taxa atual: US$370. Enviado por correio (Vermont ou California Service Center conforme seu estado). Não há entrevista — o USCIS analisa o processo internamente.",
             agencia: "USCIS",
             formulario: "I-539",
+            formId: "i-539",
             obrigatorio: true,
           },
         ],
