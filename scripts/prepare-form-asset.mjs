@@ -30,6 +30,21 @@ const SOURCES = {
     page: "https://www.uscis.gov/i-765",
     out: "public/forms/i-765.pdf",
   },
+  "i-130": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-130.pdf",
+    page: "https://www.uscis.gov/i-130",
+    out: "public/forms/i-130.pdf",
+  },
+  "i-130a": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-130a.pdf",
+    page: "https://www.uscis.gov/i-130",
+    out: "public/forms/i-130a.pdf",
+  },
+  "i-539": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-539.pdf",
+    page: "https://www.uscis.gov/i-539",
+    out: "public/forms/i-539.pdf",
+  },
 };
 
 async function editionFromPage(pageUrl) {
