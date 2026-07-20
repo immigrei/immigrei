@@ -201,19 +201,25 @@ describe("getStrategy — B-1/B-2 usa o prazo real do I-94 quando cadastrado", (
 });
 
 describe("getFamilyTiesCard — porta de Green Card por vínculo familiar", () => {
-  it("spouse_citizen → card de cônjuge/noivo de cidadão", () => {
+  it("spouse_citizen → card de cônjuge/noivo de cidadão, com links para K-1 e familia-ir", () => {
     const card = getFamilyTiesCard("spouse_citizen");
     expect(card?.titulo).toContain("cônjuge ou noivo");
+    expect(card?.links).toEqual([
+      { label: "Somos noivos → ver o caminho K-1", href: "/documentos/k1" },
+      { label: "Já somos casados → ver o caminho I-130", href: "/documentos/familia-ir" },
+    ]);
   });
 
-  it("parent_child_citizen → card de filho/pai de cidadão", () => {
+  it("parent_child_citizen → card de filho/pai de cidadão, com link para familia-ir", () => {
     const card = getFamilyTiesCard("parent_child_citizen");
     expect(card?.titulo).toContain("filho ou pai/mãe");
+    expect(card?.links).toEqual([{ label: "Ver o caminho completo", href: "/documentos/familia-ir" }]);
   });
 
-  it("family_gc → card de familiar com Green Card", () => {
+  it("family_gc → card de familiar com Green Card, com link para familia-ir", () => {
     const card = getFamilyTiesCard("family_gc");
     expect(card?.titulo).toContain("Green Card");
+    expect(card?.links).toEqual([{ label: "Ver o caminho completo", href: "/documentos/familia-ir" }]);
   });
 
   it("none → sem card (sem vínculo)", () => {
