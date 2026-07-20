@@ -131,17 +131,20 @@ export default function PainelPage() {
         {/* Porta de Green Card por vínculo familiar — vale para qualquer
             jornada principal, não só quem está seguindo o caminho de família */}
         {familyCard && (
-          <Link
-            href="/profissionais"
-            className="block bg-amber-tint border border-amber/40 rounded-2xl px-5 py-4 mb-5 hover:border-amber transition-colors"
-          >
+          <div className="bg-amber-tint border border-amber/40 rounded-2xl px-5 py-4 mb-5">
             <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-1" style={{ letterSpacing: "0.1em" }}>
               Caminho em paralelo
             </p>
             <p className="text-sm font-semibold text-ink mb-1">{familyCard.titulo}</p>
-            <p className="text-xs text-ink-soft leading-relaxed mb-2">{familyCard.texto}</p>
-            <span className="text-xs font-bold text-pine">Falar com um profissional verificado →</span>
-          </Link>
+            <p className="text-xs text-ink-soft leading-relaxed mb-3">{familyCard.texto}</p>
+            <div className="flex flex-col gap-1.5">
+              {familyCard.links.map((link) => (
+                <Link key={link.href} href={link.href} className="text-xs font-bold text-pine hover:underline">
+                  {link.label} →
+                </Link>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Meu caso no USCIS — alimentado pela última busca feita no início */}

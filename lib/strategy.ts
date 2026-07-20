@@ -29,22 +29,38 @@ export interface Profile {
   chosen_school?:  ChosenSchool | null;
 }
 
+export interface FamilyTiesLink {
+  label: string;
+  href:  string;
+}
+
 // Vínculo familiar com cidadão/residente (q_family_ties no onboarding) abre
 // uma porta de Green Card que costuma ser mais rápida do que o caminho de
 // visto que a pessoa está seguindo — vale destacar isso no painel mesmo
-// quando a jornada principal do usuário não é sobre família.
-const FAMILY_TIES_CARD: Record<string, { titulo: string; texto: string }> = {
+// quando a jornada principal do usuário não é sobre família. Cada vínculo
+// aponta direto para o kit do cofre de documentos que já tem o wizard do
+// formulário certo, em vez de só mandar para /profissionais.
+const FAMILY_TIES_CARD: Record<string, { titulo: string; texto: string; links: FamilyTiesLink[] }> = {
+  // "spouse_citizen" junta noivo(a) e cônjuge já casado numa única resposta
+  // do onboarding — como são caminhos legais diferentes (K-1 vs I-130), o
+  // card oferece os dois links e deixa a pessoa se identificar.
   spouse_citizen: {
     titulo: "Você tem cônjuge ou noivo(a) cidadão americano",
     texto:  "Parente imediato de cidadão não entra em fila. Noivos usam o K-1 (casar nos EUA em até 90 dias); cônjuges já casados, o IR-1/CR-1 pelo consulado ou o I-130 + I-485 se já estiver nos EUA em status válido.",
+    links: [
+      { label: "Somos noivos → ver o caminho K-1", href: "/documentos/k1" },
+      { label: "Já somos casados → ver o caminho I-130", href: "/documentos/familia-ir" },
+    ],
   },
   parent_child_citizen: {
     titulo: "Você é filho ou pai/mãe de cidadão americano",
     texto:  "Categoria de parente imediato (IR): prioridade máxima, sem fila de espera. O cidadão americano protocola a petição I-130 por você.",
+    links: [{ label: "Ver o caminho completo", href: "/documentos/familia-ir" }],
   },
   family_gc: {
     titulo: "Você tem familiar próximo com Green Card",
     texto:  "Residentes permanentes peticionam cônjuge e filhos solteiros (categorias F2A/F2B). Há fila — acompanhe a data de prioridade no Boletim de Vistos.",
+    links: [{ label: "Ver o caminho completo", href: "/documentos/familia-ir" }],
   },
 };
 
