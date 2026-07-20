@@ -55,8 +55,14 @@ describe("blindagem UPL — copy dos formulários", () => {
 describe("cada FormSpec está bem formado", () => {
   for (const form of Object.values(FORMS)) {
     it(`${form.id} tem edição, asset e destino no cofre`, () => {
-      expect(form.edition).toMatch(/^\d{2}\/\d{2}\/\d{2}$/);
-      if (form.exportKind === "pdf") expect(form.pdfAssetPath).toBeTruthy();
+      if (form.exportKind === "pdf") {
+        // Printed USCIS forms pin a real edition date and asset; online-only
+        // forms (DS-160, ESTA) have neither — there's no PDF to go stale.
+        expect(form.edition).toMatch(/^\d{2}\/\d{2}\/\d{2}$/);
+        expect(form.pdfAssetPath).toBeTruthy();
+      } else {
+        expect(form.edition).toBeTruthy();
+      }
       expect(form.attachTo.vistoId).toBeTruthy();
       expect(form.attachTo.documentoId).toBeTruthy();
     });

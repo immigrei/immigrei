@@ -273,21 +273,27 @@ describe("saídas para quem entrou de ESTA/VWP", () => {
   });
 });
 
-// Beneficiários de petição familiar (K-1, IR/CR, F-2) não escolhem visto na
-// vitrine — a jornada deles é a petição que o parente protocola. O destino
-// certo é ajuda profissional. Regressão do caso real: perfil F-2 caía na
-// vitrine genérica sem nenhum destaque.
-describe("perfis familiares vão para ajuda profissional, não para a vitrine", () => {
-  const casos: Array<{ nome: string; answers: Answers }> = [
+// Beneficiários de petição familiar não escolhem visto na vitrine — a
+// jornada deles é a petição que o parente protocola. Parente imediato de
+// cidadão (IR-1/IR-2, sem fila) tem kit próprio dentro do app; F-2 (fila,
+// caso sensível) segue para ajuda profissional. Regressão do caso real:
+// perfil F-2 caía na vitrine genérica sem nenhum destaque.
+describe("perfis familiares saem da vitrine para o destino certo", () => {
+  const imediatos: Array<{ nome: string; answers: Answers }> = [
     { nome: "reunir com família + cônjuge cidadão (K-1/IR-1)",
       answers: { q_location: "outside", q_goal: "family", q_family_ties: "spouse_citizen" } },
     { nome: "reunir com família + pais/filhos cidadãos (IR-1/IR-2)",
       answers: { q_location: "outside", q_goal: "family", q_family_ties: "parent_child_citizen" } },
-    { nome: "morar permanentemente + parente com green card (F-2)",
-      answers: { q_location: "outside", q_goal: "live", q_family_ties: "family_gc" } },
   ];
 
-  it.each(casos)("$nome → /profissionais, com recomendações na tela", ({ answers }) => {
+  it.each(imediatos)("$nome → kit familia-ir em /documentos", ({ answers }) => {
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    expect(deriveDestination(answers, r)).toEqual({ kind: "documentos", vistoId: "familia-ir" });
+  });
+
+  it("morar permanentemente + parente com green card (F-2) → /profissionais", () => {
+    const answers: Answers = { q_location: "outside", q_goal: "live", q_family_ties: "family_gc" };
     const r = recs(answers);
     expect(r.length).toBeGreaterThan(0);
     expect(deriveDestination(answers, r)).toEqual({ kind: "profissionais" });
@@ -335,7 +341,7 @@ describe("todo perfil do onboarding tem um destino", () => {
         const focus = new URLSearchParams(destino.query).get("focus");
         expect(focus, "perfil chegou à vitrine sem nenhum card para destacar").toBeTruthy();
       } else {
-        expect(["i94", "dashboard", "profissionais"]).toContain(destino.kind);
+        expect(["i94", "dashboard", "profissionais", "documentos"]).toContain(destino.kind);
       }
     }
   );

@@ -50,11 +50,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido no site do Departamento de Estado. Leva de 1 a 2 horas. Guarde o número de confirmação.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -153,11 +154,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido no site do Departamento de Estado antes de agendar entrevista.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -248,10 +250,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido online no site do Departamento de Estado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -377,11 +380,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido após receber o I-797 aprovado. Use a data de início da petição como data de atividade.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
         ],
@@ -537,10 +541,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido após receber o I-797 aprovado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -635,10 +640,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido após receber o I-797 aprovado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -991,6 +997,7 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao: "Preenchido no site do Departamento de Estado. Use os dados do I-20 atual e do programa em andamento.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -1204,10 +1211,11 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao: "Preenchido no site do Departamento de Estado.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
         ],
@@ -2009,11 +2017,12 @@ const checklists: Record<string, ChecklistVisto> = {
         documentos: [
           {
             id: "ds160-e2",
-            nome: "DS-160 — Formulário de visto não-imigrante",
+            nome: "DS-160 — Formulário de visto não-imigrante (colinha disponível)",
             descricao:
               "Preenchido no site do Departamento de Estado. Selecione a categoria E-2 no campo de tipo de visto.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -2059,6 +2068,7 @@ const checklists: Record<string, ChecklistVisto> = {
               "A renovação do E-2 é feita pelo consulado — não pelo USCIS. Você precisa agendar nova entrevista consular.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -2157,6 +2167,7 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao: "Aplicação online de visto não-imigrante, com foto e confirmação impressa.",
             agencia: "DOS",
             formulario: "DS-160",
+            formId: "ds-160",
             obrigatorio: true,
           },
           {
@@ -2229,6 +2240,16 @@ const checklists: Record<string, ChecklistVisto> = {
         descricao: "O ESTA é 100% online, direto com o CBP",
         documentos: [
           {
+            id: "colinha-esta",
+            nome: "Colinha — respostas prontas para colar no esta.cbp.dhs.gov",
+            descricao:
+              "Responda em português aqui, receba um resumo bilíngue com o que digitar em cada tela do ESTA — o preenchimento oficial continua sendo feito por você, direto no site do CBP.",
+            agencia: "CBP",
+            formulario: "ESTA",
+            formId: "esta",
+            obrigatorio: false,
+          },
+          {
             id: "aplicacao-esta",
             nome: "Aplicação ESTA no site oficial do CBP",
             descricao:
@@ -2251,6 +2272,323 @@ const checklists: Record<string, ChecklistVisto> = {
               "A autorização vale para múltiplas entradas por até 2 anos (ou até o passaporte vencer, o que vier primeiro). Novo passaporte = novo ESTA.",
             agencia: "CBP",
             obrigatorio: false,
+          },
+        ],
+      },
+    ],
+  },
+  "familia-ir": {
+    vistoId: "familia-ir",
+    codigo: "IR-1/IR-2",
+    nome: "Família de Cidadão Americano (via consular)",
+    intro:
+      "Cônjuges, filhos e pais de cidadãos americanos são parentes imediatos — não entram em fila de espera. O processo tem duas fases: a petição I-130 no USCIS (protocolada pelo cidadão) e depois o visto de imigrante no consulado (DS-260 via NVC).",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 247",
+      alertaCritico:
+        "Quem protocola a I-130 é o parente cidadão americano (o peticionário) — não o imigrante. E enquanto o processo consular corre, pedir visto de turista ou tentar entrar nos EUA pode ser negado por intenção imigratória declarada.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Petição I-130 no USCIS",
+        descricao: "Protocolada pelo parente cidadão americano; prova o vínculo familiar",
+        documentos: [
+          {
+            id: "i130",
+            nome: "Formulário I-130 — quem preenche é o PARENTE cidadão/green card (peticionário)",
+            descricao:
+              "Preenchido e assinado pelo peticionário — o parente que É cidadão ou residente. Taxa atual: US$675 em papel ou US$625 online (my.uscis.gov). Cada beneficiário exige uma I-130 própria.",
+            agencia: "USCIS",
+            formulario: "I-130",
+            formId: "i-130",
+            obrigatorio: true,
+          },
+          {
+            id: "i130a",
+            nome: "Formulário I-130A — quem preenche é QUEM VAI RECEBER o green card (cônjuge beneficiário)",
+            descricao:
+              "Obrigatório somente quando o beneficiário é cônjuge — acompanha a I-130 no mesmo envelope. Filhos e pais não precisam. Se o beneficiário mora fora dos EUA, preenche mas não precisa assinar.",
+            agencia: "USCIS",
+            formulario: "I-130A",
+            formId: "i-130a",
+            obrigatorio: false,
+          },
+          {
+            id: "prova-cidadania",
+            nome: "Prova de cidadania do peticionário",
+            descricao:
+              "Cópia do passaporte americano, certidão de nascimento nos EUA ou certificado de naturalização.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "certidoes-vinculo",
+            nome: "Certidões que provam o vínculo",
+            descricao:
+              "Certidão de casamento (cônjuge) ou de nascimento (filho/pai). Documentos brasileiros precisam de tradução certificada para o inglês.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "prova-relacionamento",
+            nome: "Prova de relacionamento genuíno (casos de cônjuge)",
+            descricao:
+              "Fotos juntos, contas conjuntas, contrato de aluguel, mensagens ao longo do tempo. O USCIS avalia se o casamento é de boa-fé — capriche nesta parte.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "g1145",
+            nome: "Formulário G-1145 — aviso por e-mail/SMS quando o USCIS receber (opcional)",
+            descricao:
+              "Grampeie na frente do pacote da I-130 para saber por e-mail/SMS quando o USCIS aceitar — não substitui o recibo oficial I-797C, que chega pelo correio.",
+            agencia: "USCIS",
+            formulario: "G-1145",
+            formId: "g-1145",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 2 — NVC e visto de imigrante (DS-260)",
+        descricao: "Depois da aprovação da I-130, o caso vai ao National Visa Center",
+        documentos: [
+          {
+            id: "ds260",
+            nome: "Formulário DS-260 — Immigrant Visa Application",
+            descricao:
+              "Preenchido online no portal CEAC (ceac.state.gov) pelo imigrante, após pagar as taxas do NVC (US$325 do visto + US$120 do Affidavit of Support).",
+            agencia: "DOS",
+            formulario: "DS-260",
+            obrigatorio: true,
+          },
+          {
+            id: "i864",
+            nome: "Formulário I-864 — quem preenche é o PARENTE cidadão/green card (patrocinador)",
+            descricao:
+              "O peticionário assume responsabilidade financeira pelo imigrante. Exige renda de pelo menos 125% da linha de pobreza — se não alcançar, um co-patrocinador (joint sponsor) pode assinar outro I-864.",
+            agencia: "USCIS",
+            formulario: "I-864",
+            formId: "i-864",
+            obrigatorio: true,
+          },
+          {
+            id: "i485",
+            nome: "Formulário I-485 — quem preenche é QUEM VAI RECEBER o green card (se já estiver nos EUA)",
+            descricao:
+              "Rota alternativa ao DS-260: se o beneficiário está DENTRO dos EUA em situação elegível, pede o ajuste de status com o I-485 em vez do processo consular. O wizard cobre as 14 partes, incluindo as 86 perguntas de elegibilidade da Parte 9.",
+            agencia: "USCIS",
+            formulario: "I-485",
+            formId: "i-485",
+            obrigatorio: false,
+          },
+          {
+            id: "i765aos",
+            nome: "Formulário I-765 (c)(9) — permissão de TRABALHO enquanto o I-485 corre",
+            descricao:
+              "Só para quem escolheu a rota do I-485 (dentro dos EUA): o EAD categoria (c)(9) permite trabalhar legalmente enquanto o ajuste está pendente. Protocolado junto com o I-485, sem taxa adicional.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            formId: "i-765-aos",
+            obrigatorio: false,
+          },
+          {
+            id: "i131",
+            nome: "Formulário I-131 — permissão de VIAGEM enquanto o I-485 corre (advance parole)",
+            descricao:
+              "Opcional, só para a rota do I-485. A regra geral é: protocolou o ajuste, fica nos EUA até o fim. O advance parole existe para emergências (só viaje com ele aprovado e em mãos — sair sem ele = pedido abandonado). Quem tem tempo de permanência irregular não deve viajar de jeito nenhum, nem com o parole: a saída pode ativar as barras de 3/10 anos.",
+            agencia: "USCIS",
+            formulario: "I-131",
+            formId: "i-131",
+            obrigatorio: false,
+          },
+          {
+            id: "documentos-civis",
+            nome: "Documentos civis do imigrante",
+            descricao:
+              "Certidão de nascimento, antecedentes criminais (certidão da Polícia Federal), certidão de casamento e divórcios anteriores, passaporte válido — enviados ao NVC pelo CEAC.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 3 — Exame médico e entrevista",
+        descricao: "Marcados depois que o NVC declara o caso documentarily complete",
+        documentos: [
+          {
+            id: "exame-medico",
+            nome: "Exame médico com médico credenciado",
+            descricao:
+              "Somente com os médicos autorizados pelo consulado (lista no site da embaixada). No Brasil, feito no Rio de Janeiro ou São Paulo poucos dias antes da entrevista.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "entrevista-consular",
+            nome: "Entrevista consular de visto de imigrante",
+            descricao:
+              "No Brasil, entrevistas de visto de imigrante acontecem no Consulado do Rio de Janeiro. Leve todos os originais das certidões enviadas ao NVC.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "taxa-uscis-imigrante",
+            nome: "USCIS Immigrant Fee (US$235)",
+            descricao:
+              "Paga online após o visto aprovado e ANTES de viajar — é ela que gera o Green Card físico depois da entrada.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "k1": {
+    vistoId: "k1",
+    codigo: "K-1",
+    nome: "Noivo(a) de Cidadão Americano",
+    intro:
+      "O visto K-1 é para quem vai se CASAR nos EUA em até 90 dias após a entrada — não é um visto de casamento em si, é um visto de noivado. O processo tem três fases: a petição I-129F no USCIS (protocolada pelo cidadão), o visto K-1 no consulado (DS-160), e depois o casamento + ajuste de status (I-485) dentro do prazo de 90 dias.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 247",
+      alertaCritico:
+        "O casamento precisa acontecer dentro de 90 dias da entrada nos EUA — sem prorrogação. Se não casar nesse prazo, o status K-1 vence e não pode ser trocado por outro visto; a pessoa precisa deixar os EUA. Depois de casar, o ajuste de status (I-485) é obrigatório e não é automático.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Petição I-129F no USCIS",
+        descricao: "Protocolada pelo cidadão americano; prova o noivado genuíno e o encontro pessoal recente",
+        documentos: [
+          {
+            id: "i129f",
+            nome: "Formulário I-129F — quem preenche é o CIDADÃO AMERICANO (peticionário)",
+            descricao:
+              "Preenchido e assinado pelo peticionário. Taxa atual: US$675. Exige prova de encontro pessoal com o(a) noivo(a) nos últimos 2 anos — reúna fotos, passagens e carimbos de passaporte antes de começar.",
+            agencia: "USCIS",
+            formulario: "I-129F",
+            formId: "i-129f",
+            obrigatorio: true,
+          },
+          {
+            id: "g1145",
+            nome: "Formulário G-1145 — aviso por e-mail/SMS quando o USCIS receber (opcional)",
+            descricao:
+              "Grampeie na frente do pacote da I-129F para saber por e-mail/SMS quando o USCIS aceitar.",
+            agencia: "USCIS",
+            formulario: "G-1145",
+            formId: "g-1145",
+            obrigatorio: false,
+          },
+          {
+            id: "prova-cidadania",
+            nome: "Prova de cidadania do peticionário",
+            descricao:
+              "Cópia do passaporte americano, certidão de nascimento nos EUA ou certificado de naturalização.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "prova-encontro",
+            nome: "Prova de encontro pessoal nos últimos 2 anos",
+            descricao:
+              "Passagens aéreas, carimbos de entrada/saída no passaporte, fotos juntos com data. Sem isso (ou uma exceção bem documentada), a petição é negada.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "declaracao-solteiro",
+            nome: "Declaração de que ambos estão livres para casar",
+            descricao:
+              "Certidões de divórcio ou óbito de casamentos anteriores, se houver — tanto do peticionário quanto do(a) noivo(a).",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 2 — Visto K-1 no consulado",
+        descricao: "Depois da aprovação da I-129F, o caso vai ao NVC e depois ao consulado no Brasil",
+        documentos: [
+          {
+            id: "ds160",
+            nome: "Formulário DS-160 — Online Nonimmigrant Visa Application",
+            descricao:
+              "Preenchido online pelo(a) noivo(a) no site do CEAC antes da entrevista consular.",
+            agencia: "DOS",
+            formulario: "DS-160",
+            formId: "ds-160",
+            obrigatorio: true,
+          },
+          {
+            id: "exame-medico-k1",
+            nome: "Exame médico com médico credenciado",
+            descricao:
+              "Somente com os médicos autorizados pelo consulado — no Brasil, feito no Rio de Janeiro ou São Paulo antes da entrevista.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "entrevista-k1",
+            nome: "Entrevista consular de visto K-1",
+            descricao:
+              "No Brasil, entrevistas de visto de não-imigrante acontecem no Consulado do Rio de Janeiro, São Paulo, Recife, Porto Alegre ou Brasília, conforme o distrito.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "documentos-civis-k1",
+            nome: "Documentos civis do(a) noivo(a)",
+            descricao:
+              "Certidão de nascimento, antecedentes criminais (certidão da Polícia Federal), passaporte válido, certidões de divórcio anteriores.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 3 — Casamento e ajuste de status (90 dias)",
+        descricao: "Depois da entrada nos EUA com o visto K-1 — o relógio dos 90 dias já está correndo",
+        documentos: [
+          {
+            id: "casamento-civil",
+            nome: "Casamento civil dentro de 90 dias",
+            descricao:
+              "O casamento precisa acontecer dentro dos 90 dias da entrada — sem exceção nem prorrogação. Guarde a certidão de casamento americana, ela é peça central do próximo passo.",
+            agencia: "CBP",
+            obrigatorio: true,
+          },
+          {
+            id: "i485-k1",
+            nome: "Formulário I-485 — ajuste de status depois de casar",
+            descricao:
+              "Preenchido pelo cônjuge (ex-noivo(a)) depois do casamento, para trocar o status K-1 por green card. Não é automático — sem esse pedido, o status K-1 vence e vira permanência irregular.",
+            agencia: "USCIS",
+            formulario: "I-485",
+            formId: "i-485",
+            obrigatorio: true,
+          },
+          {
+            id: "i765-k1",
+            nome: "Formulário I-765 (c)(9) — permissão de trabalho enquanto o I-485 corre",
+            descricao: "Protocolado junto com o I-485, sem taxa adicional.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            formId: "i-765-aos",
+            obrigatorio: false,
+          },
+          {
+            id: "i864-k1",
+            nome: "Formulário I-864 — quem preenche é o CIDADÃO (patrocinador)",
+            descricao:
+              "O cônjuge cidadão assume responsabilidade financeira. Exige renda de pelo menos 125% da linha de pobreza.",
+            agencia: "USCIS",
+            formulario: "I-864",
+            formId: "i-864",
+            obrigatorio: true,
           },
         ],
       },

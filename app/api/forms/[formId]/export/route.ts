@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getForm } from "@/lib/forms/registry";
 import { fillPdf } from "@/lib/forms/fillPdf";
+import { fillWorksheet } from "@/lib/forms/fillWorksheet";
 import { allQuestions, isVisible, type Answers } from "@/lib/forms/types";
 
 export const runtime = "nodejs";
@@ -53,10 +54,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ formId: st
     );
   }
 
-  // Fill the official PDF.
+  // Fill the official PDF, or — for online-only forms like the DS-160/ESTA —
+  // generate the bilingual cheat-sheet PDF instead.
   let pdfBytes: Uint8Array;
   try {
-    pdfBytes = await fillPdf(form, answers);
+    pdfBytes = form.exportKind === "pdf" ? await fillPdf(form, answers) : await fillWorksheet(form, answers);
   } catch (err) {
     console.error("fillPdf error:", err);
     return NextResponse.json({ error: "Falha ao gerar o formulário." }, { status: 500 });

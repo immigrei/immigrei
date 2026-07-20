@@ -197,8 +197,17 @@ export default function FormularioPage() {
           {form.namePt}
         </h1>
         <p className="text-ink-soft text-sm leading-relaxed mb-5">
-          Responda em português. No final, você exporta o formulário oficial <strong>{form.code}</strong>{" "}
-          preenchido em inglês, pronto para conferir, assinar e anexar no cofre de documentos.
+          {form.exportKind === "pdf" ? (
+            <>
+              Responda em português. No final, você exporta o formulário oficial <strong>{form.code}</strong>{" "}
+              preenchido em inglês, pronto para conferir, assinar e anexar no cofre de documentos.
+            </>
+          ) : (
+            <>
+              Responda em português. No final, você exporta uma <strong>colinha bilíngue</strong> com o que digitar
+              em cada tela do {form.code} — preenchido diretamente por você em <strong>{form.officialUrl}</strong>.
+            </>
+          )}
         </p>
 
         {/* Progress + autosave */}
@@ -249,7 +258,7 @@ export default function FormularioPage() {
         {/* Export panel */}
         <div id="export-panel" className="bg-cream-2 rounded-2xl border border-amber/40 p-5 sm:p-6 mt-6">
           <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-2">
-            Exportar formulário oficial
+            {form.exportKind === "pdf" ? "Exportar formulário oficial" : "Exportar colinha"}
           </p>
           <p className="text-ink-soft text-sm leading-relaxed mb-4">{form.disclaimerPt}</p>
 
@@ -277,11 +286,20 @@ export default function FormularioPage() {
           {exported ? (
             <div className="rounded-xl bg-pine-tint border border-pine/20 p-4">
               <p className="text-pine-deep font-semibold text-sm mb-1">
-                Formulário gerado e anexado no cofre ✓
+                {form.exportKind === "pdf" ? "Formulário gerado e anexado no cofre ✓" : "Colinha gerada e anexada no cofre ✓"}
               </p>
               <p className="text-ink-soft text-sm mb-3">
-                O {form.code} preenchido foi baixado e também aparece anexado no seu kit.
-                Confira, assine à mão e envie ao USCIS.
+                {form.exportKind === "pdf" ? (
+                  <>
+                    O {form.code} preenchido foi baixado e também aparece anexado no seu kit.
+                    Confira, assine à mão e envie ao USCIS.
+                  </>
+                ) : (
+                  <>
+                    A colinha do {form.code} foi baixada e também aparece anexada no seu kit.
+                    Abra {form.officialUrl} numa aba e a colinha na outra para preencher.
+                  </>
+                )}
               </p>
               <button
                 onClick={() => router.push(`/documentos/${vistoId}`)}
@@ -296,7 +314,11 @@ export default function FormularioPage() {
               disabled={exporting}
               className="w-full rounded-xl bg-amber px-5 py-3 text-sm font-bold text-ink hover:bg-amber-deep disabled:opacity-60 transition-colors"
             >
-              {exporting ? "Gerando…" : `Exportar ${form.code} preenchido (PDF)`}
+              {exporting
+                ? "Gerando…"
+                : form.exportKind === "pdf"
+                  ? `Exportar ${form.code} preenchido (PDF)`
+                  : `Exportar colinha do ${form.code} (PDF)`}
             </button>
           )}
         </div>
