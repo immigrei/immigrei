@@ -423,7 +423,7 @@ export default function CosB2F1Page() {
           Mudança de status B1/B2 → F-1
         </h1>
         <p className="text-ink-soft text-base mb-4">
-          Preencha os fatos do seu caso. O Immigrei valida regras técnicas objetivas — nunca sugere qual caminho seguir.
+          Preencha os fatos do seu caso. O immigrei valida regras técnicas objetivas — nunca sugere qual caminho seguir.
         </p>
 
         {caseStatus && (

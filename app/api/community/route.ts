@@ -42,7 +42,7 @@ function toPublicReport(row: ReportRow, viewerId: string, myReactions: Set<strin
     id: row.id,
     title: row.title,
     body: row.body,
-    author: row.is_anonymous ? "Membro Immigrei" : row.author_name ?? "Membro Immigrei",
+    author: row.is_anonymous ? "Membro immigrei" : row.author_name ?? "Membro immigrei",
     isAnonymous: row.is_anonymous,
     authorState: row.author_state,
     status: row.status,

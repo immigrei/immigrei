@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Logo from "../components/Logo";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
-  title: "Termos de Uso — Immigrei",
-  description: "Termos de uso da plataforma Immigrei.",
+  title: "Termos de Uso — immigrei",
+  description: "Termos de uso da plataforma immigrei.",
   alternates: { canonical: "/termos" },
 };
 
@@ -13,24 +14,24 @@ const LAST_UPDATED = "7 de julho de 2026";
 
 const sections: { title: string; body: string[] }[] = [
   {
-    title: "1. O que a Immigrei é — e o que não é",
+    title: "1. O que a immigrei é — e o que não é",
     body: [
-      "A Immigrei é uma plataforma de tecnologia que organiza informação pública sobre processos de imigração nos EUA: mostra etapas, requisitos objetivos, prazos e documentos, e permite acompanhar o andamento do seu caso junto a fontes oficiais (USCIS, Departamento de Estado, consulados).",
-      "A Immigrei NÃO é um escritório de advocacia, não presta aconselhamento jurídico e não substitui a orientação de um advogado licenciado. A plataforma nunca recomenda qual caminho migratório você deve seguir, não avalia o mérito do seu caso e não prevê resultados. Validações exibidas no app verificam apenas requisitos técnicos objetivos publicados pelas agências federais americanas, sempre com citação da fonte oficial.",
-      "Quando o app indicar que algo \"requer análise individual\", isso significa que a questão depende de julgamento jurídico — procure um profissional licenciado. A Immigrei pode conectar você a profissionais independentes verificados; eles não são empregados nem representantes da Immigrei, e a relação profissional é estabelecida diretamente entre você e eles.",
+      "A immigrei é uma plataforma de tecnologia que organiza informação pública sobre processos de imigração nos EUA: mostra etapas, requisitos objetivos, prazos e documentos, e permite acompanhar o andamento do seu caso junto a fontes oficiais (USCIS, Departamento de Estado, consulados).",
+      "A immigrei NÃO é um escritório de advocacia, não presta aconselhamento jurídico e não substitui a orientação de um advogado licenciado. A plataforma nunca recomenda qual caminho migratório você deve seguir, não avalia o mérito do seu caso e não prevê resultados. Validações exibidas no app verificam apenas requisitos técnicos objetivos publicados pelas agências federais americanas, sempre com citação da fonte oficial.",
+      "Quando o app indicar que algo \"requer análise individual\", isso significa que a questão depende de julgamento jurídico — procure um profissional licenciado. A immigrei pode conectar você a profissionais independentes verificados; eles não são empregados nem representantes da immigrei, e a relação profissional é estabelecida diretamente entre você e eles.",
     ],
   },
   {
     title: "2. Sua conta",
     body: [
-      "Você é responsável pela veracidade das informações que insere e por manter o acesso à sua conta seguro. A Immigrei processa os fatos que VOCÊ declara; resultados baseados em dados incorretos serão incorretos.",
+      "Você é responsável pela veracidade das informações que insere e por manter o acesso à sua conta seguro. A immigrei processa os fatos que VOCÊ declara; resultados baseados em dados incorretos serão incorretos.",
       "Você deve ter pelo menos 18 anos para criar uma conta.",
     ],
   },
   {
     title: "3. Planos e pagamento",
     body: [
-      "A Immigrei oferece um plano gratuito e planos pagos por assinatura, processados pela Stripe. Você pode cancelar a qualquer momento; o acesso pago permanece até o fim do período já pago. Valores e benefícios de cada plano são os exibidos na página de planos no momento da contratação.",
+      "A immigrei oferece um plano gratuito e planos pagos por assinatura, processados pela Stripe. Você pode cancelar a qualquer momento; o acesso pago permanece até o fim do período já pago. Valores e benefícios de cada plano são os exibidos na página de planos no momento da contratação.",
     ],
   },
   {
@@ -42,8 +43,8 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "5. Conteúdo informativo e limitação de responsabilidade",
     body: [
-      "O conteúdo da Immigrei é baseado em fontes oficiais e revisado com cuidado, mas regras de imigração mudam com frequência e cada caso tem particularidades. O serviço é fornecido \"como está\", sem garantia de completude, atualidade ou adequação ao seu caso específico.",
-      "Na máxima extensão permitida em lei, a Immigrei não se responsabiliza por decisões tomadas com base no conteúdo da plataforma, por decisões de agências governamentais sobre o seu caso, nem por danos indiretos. Nada nestes termos limita responsabilidades que não possam ser limitadas por lei.",
+      "O conteúdo da immigrei é baseado em fontes oficiais e revisado com cuidado, mas regras de imigração mudam com frequência e cada caso tem particularidades. O serviço é fornecido \"como está\", sem garantia de completude, atualidade ou adequação ao seu caso específico.",
+      "Na máxima extensão permitida em lei, a immigrei não se responsabiliza por decisões tomadas com base no conteúdo da plataforma, por decisões de agências governamentais sobre o seu caso, nem por danos indiretos. Nada nestes termos limita responsabilidades que não possam ser limitadas por lei.",
     ],
   },
   {
@@ -55,7 +56,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "7. Contato",
     body: [
-      "Dúvidas sobre estes termos: visaemdia2026@gmail.com (e-mail oficial da Immigrei durante o período de lançamento).",
+      "Dúvidas sobre estes termos: visaemdia2026@gmail.com (e-mail oficial da immigrei durante o período de lançamento).",
     ],
   },
 ];
@@ -64,12 +65,8 @@ export default function TermosPage() {
   return (
     <main className="min-h-screen bg-cream">
       <header className="flex items-center px-6 py-6 max-w-3xl mx-auto">
-        <Link
-          href="/"
-          className="text-2xl font-semibold text-pine"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Immigrei
+        <Link href="/" aria-label="immigrei — início">
+          <Logo variant="wordmark" className="text-2xl" />
         </Link>
       </header>
       <article className="max-w-2xl mx-auto px-6 pb-20">

@@ -3,7 +3,7 @@ import Link from "next/link";
 import PlanButton from "./PlanButton";
 
 export const metadata: Metadata = {
-  title: "Planos — Immigrei",
+  title: "Planos — immigrei",
   description: "Escolha o plano certo para a sua jornada migratória nos EUA.",
 };
 

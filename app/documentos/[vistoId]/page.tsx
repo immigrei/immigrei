@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AppShell from "@/app/components/AppShell";
 import checklists, { type Agencia } from "./data";
+import OptEligibilityCard from "./OptEligibilityCard";
 
 const agenciaBadge: Record<Agencia, { label: string; color: string }> = {
   USCIS: { label: "USCIS", color: "bg-pine-tint text-pine" },
@@ -52,6 +53,7 @@ export default function DocumentosVistoPage() {
   const [anexos, setAnexos] = useState<Record<string, Anexo[]>>({});
   const [enviando, setEnviando] = useState<Set<string>>(new Set());
   const [erroUpload, setErroUpload] = useState<string | null>(null);
+  const [f1ProgramStart, setF1ProgramStart] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingDocId = useRef<string | null>(null);
 
@@ -71,6 +73,12 @@ export default function DocumentosVistoPage() {
         setAnexos(byDoc);
       })
       .catch(() => {});
+    if (vistoId === "f1-opt") {
+      fetch("/api/profile")
+        .then((r) => (r.ok ? r.json() : { profile: null }))
+        .then((d) => setF1ProgramStart(d.profile?.f1_program_start_date ?? null))
+        .catch(() => {});
+    }
   }, [vistoId]);
 
   if (!checklist) {
@@ -217,6 +225,8 @@ export default function DocumentosVistoPage() {
           </h1>
           <p className="text-ink-soft text-sm leading-relaxed">{checklist.intro}</p>
         </div>
+
+        {vistoId === "f1-opt" && <OptEligibilityCard initialValue={f1ProgramStart} />}
 
         {/* Progresso */}
         <div className="bg-cream-2 rounded-2xl border border-pine-tint p-5 mb-8">

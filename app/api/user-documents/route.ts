@@ -49,15 +49,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ url: data.signedUrl });
   }
 
+  // No vistoId → the full vault across every visto (aggregated view).
   const vistoId = req.nextUrl.searchParams.get("vistoId");
-  if (!vistoId) return NextResponse.json({ error: "vistoId required" }, { status: 400 });
-
-  const { data, error } = await supabaseAdmin
+  let query = supabaseAdmin
     .from("user_documents")
-    .select("id, documento_id, file_name, size_bytes, created_at")
-    .eq("user_id", userId)
-    .eq("visto_id", vistoId)
-    .order("created_at", { ascending: true });
+    .select("id, documento_id, visto_id, file_name, mime_type, size_bytes, created_at")
+    .eq("user_id", userId);
+  if (vistoId) query = query.eq("visto_id", vistoId);
+
+  const { data, error } = await query.order("created_at", { ascending: vistoId ? true : false });
 
   if (error) {
     console.error("List documents error:", error);

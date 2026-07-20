@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Logo from "./components/Logo";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -9,12 +10,7 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-cream flex flex-col">
       <header className="flex items-center justify-between px-6 py-5">
-        <span
-          className="text-2xl font-semibold text-pine"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Immigrei
-        </span>
+        <Logo variant="wordmark" className="text-2xl" />
         <Link
           href="/sign-in"
           className="text-sm font-medium text-pine hover:text-pine-deep transition-colors"
@@ -40,7 +36,7 @@ export default async function HomePage() {
         </p>
         <Link
           href="/onboarding"
-          className="bg-amber hover:bg-amber-deep text-white font-semibold text-base px-8 py-4 rounded-xl transition-colors"
+          className="bg-amber hover:bg-amber-deep text-ink font-semibold text-base px-8 py-4 rounded-xl transition-colors"
         >
           Começar agora — é gratuito
         </Link>

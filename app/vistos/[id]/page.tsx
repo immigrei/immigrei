@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
+import CofreLink from "@/app/components/CofreLink";
 import { todosVistos } from "@/lib/vistosCatalog";
 import { getVistoPage, VISTO_PAGES, type VistoPrazo } from "@/lib/vistoPages";
 import ConfirmBar, { VoltarButton } from "./ConfirmBar";
@@ -91,9 +92,10 @@ export default async function VistoPage({
       style={{ fontFamily: "var(--font-body)" }}
     >
       <div className="max-w-2xl mx-auto">
-        {/* Back */}
-        <div className="mb-6">
+        {/* Back — o cofre fica sempre visível aqui, independente do visto escolhido */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
           <VoltarButton />
+          <CofreLink />
         </div>
 
         {/* Hero */}
@@ -227,25 +229,40 @@ export default async function VistoPage({
         )}
 
         {/* Kit CTA */}
-        <div className="bg-pine rounded-2xl px-5 py-5 mb-8">
-          <p
-            className="text-xs font-bold uppercase tracking-widest text-pine-tint mb-1"
-            style={{ letterSpacing: "0.1em" }}
-          >
-            Pronto para os documentos?
-          </p>
-          <p className="text-sm font-semibold text-cream">{page.kit.label}</p>
-          <p className="text-xs text-pine-tint mt-1 leading-relaxed">
-            A lista completa do que preparar, agência por agência, com a ordem certa de cada
-            etapa — tudo em português.
-          </p>
-          <Link
-            href={`/documentos/${page.kit.kitId}`}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-bold text-ink hover:bg-amber-deep transition-colors"
-          >
-            Ver o checklist →
-          </Link>
-        </div>
+        {page.kit ? (
+          <div className="bg-pine rounded-2xl px-5 py-5 mb-8">
+            <p
+              className="text-xs font-bold uppercase tracking-widest text-pine-tint mb-1"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              Pronto para os documentos?
+            </p>
+            <p className="text-sm font-semibold text-cream">{page.kit.label}</p>
+            <p className="text-xs text-pine-tint mt-1 leading-relaxed">
+              A lista completa do que preparar, agência por agência, com a ordem certa de cada
+              etapa — tudo em português.
+            </p>
+            <Link
+              href={`/documentos/${page.kit.kitId}`}
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-bold text-ink hover:bg-amber-deep transition-colors"
+            >
+              Ver o checklist →
+            </Link>
+          </div>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-amber/40 bg-amber-tint px-5 py-5 mb-8">
+            <p
+              className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-1"
+              style={{ letterSpacing: "0.1em" }}
+            >
+              Checklist em preparação
+            </p>
+            <p className="text-sm text-ink leading-relaxed mt-1">
+              Ainda estamos construindo o checklist de documentos específico para este visto.
+              Assim que estiver pronto, ele aparece aqui.
+            </p>
+          </div>
+        )}
 
         <FontesOficiaisSection
           fontesOficiais={page.fontesOficiais}

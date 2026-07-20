@@ -16,7 +16,7 @@ const hankenGrotesk = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Immigrei — Sua jornada migratória nos EUA, com clareza",
+  title: "immigrei — Sua jornada migratória nos EUA, com clareza",
   description:
     "O companheiro completo para sua jornada de imigração nos EUA. Construído por imigrantes, para imigrantes.",
 };

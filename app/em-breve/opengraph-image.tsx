@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Immigrei — Sua jornada migratória nos EUA, com clareza.";
+export const alt = "immigrei — Sua jornada migratória nos EUA, com clareza.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -27,34 +27,34 @@ export default async function OgImage() {
           fontFamily: "Fraunces",
         }}
       >
-        {/* Sprout symbol — growth, new roots */}
+        {/* Brand icon — 6-step trajectory + amber next-step arrow (manual §01).
+            Cream dots for contrast on the pine background; arrow always amber. */}
         <svg
-          width="120"
-          height="120"
+          width="132"
+          height="132"
           viewBox="0 0 24 24"
           fill="none"
           style={{ marginBottom: 28 }}
         >
-          <circle cx="12" cy="12" r="12" fill="#E4EFE9" fillOpacity="0.16" />
-          <path
-            d="M12 19v-6"
-            stroke="#FBF7EF"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-          />
-          <path
-            d="M12 13c0-3 1.8-4.8 4.8-4.8 0 3-1.8 4.8-4.8 4.8Z"
-            fill="#E8A33D"
-          />
-          <path
-            d="M12 13c0-3-1.8-4.8-4.8-4.8 0 3 1.8 4.8 4.8 4.8Z"
-            fill="#FBF7EF"
-          />
+          <g transform="translate(1.549 1.423) rotate(12 12 12)">
+            <circle cx="4.2" cy="20.2" r="1.7" fill="#F4EEE2" fillOpacity="0.15" />
+            <circle cx="7.4" cy="17.6" r="1.7" fill="#F4EEE2" fillOpacity="0.3" />
+            <circle cx="6" cy="13.6" r="1.7" fill="#F4EEE2" fillOpacity="0.45" />
+            <circle cx="9.8" cy="11.6" r="1.7" fill="#F4EEE2" fillOpacity="0.62" />
+            <circle cx="8.6" cy="7.8" r="1.7" fill="#F4EEE2" fillOpacity="0.82" />
+            <circle cx="12.4" cy="6.4" r="1.85" fill="#F4EEE2" />
+            <path
+              d="M12.2 2.2 H16.6 V6.6"
+              fill="none"
+              stroke="#E8A33D"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </g>
         </svg>
 
-        <div style={{ fontSize: 96, color: "#FBF7EF", letterSpacing: -2 }}>
-          Immigrei
-        </div>
+        <div style={{ fontSize: 96, color: "#FBF7EF" }}>immigrei</div>
 
         <div
           style={{

@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import WaitlistForm from "./WaitlistForm";
+import Logo from "../components/Logo";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
-  title: "Immigrei — Sua jornada migratória nos EUA, com clareza.",
+  title: "immigrei — Sua jornada migratória nos EUA, com clareza.",
   description:
     "O companheiro completo da sua jornada de imigração nos EUA. Em português, construído por imigrantes, para imigrantes. Em breve.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Immigrei — Sua jornada migratória nos EUA, com clareza.",
+    title: "immigrei — Sua jornada migratória nos EUA, com clareza.",
     description:
       "Não só onde seu caso está — mas para onde você vai. Em português, feito por quem já viveu isso. Entre na lista de espera.",
     url: "https://immigrei.com",
-    siteName: "Immigrei",
+    siteName: "immigrei",
     locale: "pt_BR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Immigrei — Sua jornada migratória nos EUA, com clareza.",
+    title: "immigrei — Sua jornada migratória nos EUA, com clareza.",
     description:
       "Não só onde seu caso está — mas para onde você vai. Em português, feito por quem já viveu isso.",
   },
@@ -27,16 +28,16 @@ export const metadata: Metadata = {
 
 const faq = [
   {
-    q: "A Immigrei é um escritório de advocacia?",
-    a: "Não — e isso é proposital. A Immigrei organiza a informação da sua jornada: onde seu caso está, o que vem a seguir e o que é preciso em cada etapa, tudo em português. Não damos aconselhamento jurídico. Quando o seu caso pedir um profissional, conectamos você a advogados e consultores verificados — na hora certa, nos seus termos.",
+    q: "A immigrei é um escritório de advocacia?",
+    a: "Não — e isso é proposital. A immigrei organiza a informação da sua jornada: onde seu caso está, o que vem a seguir e o que é preciso em cada etapa, tudo em português. Não damos aconselhamento jurídico. Quando o seu caso pedir um profissional, conectamos você a advogados e consultores verificados — na hora certa, nos seus termos.",
   },
   {
     q: "Meus dados estão seguros? Vocês compartilham com alguém?",
-    a: "Seus dados são criptografados e nunca são vendidos ou compartilhados com terceiros — nem com o governo. Sabemos que confiança é tudo em um momento como o atual. Sem sigilo não existe Immigrei; esse é o nosso compromisso número um.",
+    a: "Seus dados são criptografados e nunca são vendidos ou compartilhados com terceiros — nem com o governo. Sabemos que confiança é tudo em um momento como o atual. Sem sigilo não existe immigrei; esse é o nosso compromisso número um.",
   },
   {
     q: "Quanto vai custar?",
-    a: "A Immigrei terá um plano gratuito — você poderá começar a organizar a sua jornada sem pagar nada. Os detalhes dos planos completos serão anunciados no lançamento, e quem estiver na lista de espera fica sabendo primeiro (com condições especiais).",
+    a: "A immigrei terá um plano gratuito — você poderá começar a organizar a sua jornada sem pagar nada. Os detalhes dos planos completos serão anunciados no lançamento, e quem estiver na lista de espera fica sabendo primeiro (com condições especiais).",
   },
   {
     q: "Quando lança?",
@@ -48,15 +49,15 @@ const faq = [
   },
   {
     q: "Já uso um app de tracking. Qual a diferença?",
-    a: "Os apps que existem mostram um status — em inglês — e param aí. A Immigrei mostra a jornada completa: onde você está, para onde vai, o que precisa em cada etapa e quem pode ajudar. Em português, feito por quem já viveu isso.",
+    a: "Os apps que existem mostram um status — em inglês — e param aí. A immigrei mostra a jornada completa: onde você está, para onde vai, o que precisa em cada etapa e quem pode ajudar. Em português, feito por quem já viveu isso.",
   },
   {
-    q: "Meu status está vencendo (ou vencido). A Immigrei é para mim?",
-    a: "Sim — e sem julgamento. Acreditamos que informação clara é ainda mais importante para quem está em um momento delicado. A Immigrei ajuda você a entender sua situação e as opções que existem, com sigilo total, e a encontrar ajuda profissional de confiança quando você decidir.",
+    q: "Meu status está vencendo (ou vencido). A immigrei é para mim?",
+    a: "Sim — e sem julgamento. Acreditamos que informação clara é ainda mais importante para quem está em um momento delicado. A immigrei ajuda você a entender sua situação e as opções que existem, com sigilo total, e a encontrar ajuda profissional de confiança quando você decidir.",
   },
   {
     q: "Ainda estou no Brasil. Posso usar?",
-    a: "Pode — e planejar antes de partir é o melhor momento. A Immigrei vai mostrar os caminhos possíveis e o que preparar desde já.",
+    a: "Pode — e planejar antes de partir é o melhor momento. A immigrei vai mostrar os caminhos possíveis e o que preparar desde já.",
   },
 ];
 
@@ -93,12 +94,7 @@ export default function EmBrevePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <header className="flex items-center justify-center px-6 py-6">
-        <span
-          className="text-2xl font-semibold text-pine"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Immigrei
-        </span>
+        <Logo variant="wordmark" className="text-2xl" />
       </header>
 
       <section className="flex-1 flex flex-col items-center justify-center px-6 text-center py-16">
@@ -152,7 +148,7 @@ export default function EmBrevePage() {
             ))}
           </div>
           <p className="text-ink text-lg mt-6 font-medium">
-            A Immigrei existe para responder as três — em português, sem
+            A immigrei existe para responder as três — em português, sem
             juridiquês.
           </p>
         </div>
@@ -163,7 +159,7 @@ export default function EmBrevePage() {
             Quem está construindo
           </p>
           <p className="text-ink-soft text-base leading-relaxed mb-4">
-            A Immigrei nasceu de dois brasileiros — <strong className="text-ink">Cesar</strong>,
+            A immigrei nasceu de dois brasileiros — <strong className="text-ink">Cesar</strong>,
             que imigrou para a Austrália, e <strong className="text-ink">Felipe</strong>,
             para os EUA — que viveram na pele a falta de um mapa. Construímos a
             ferramenta que procuramos e não encontramos.
@@ -218,7 +214,7 @@ export default function EmBrevePage() {
 
       <footer className="text-center px-6 py-8 text-ink-faint text-xs leading-relaxed">
         <p>Imigrando com clareza. Em breve.</p>
-        <p className="mt-1">© {new Date().getFullYear()} Immigrei. Não somos um escritório de advocacia.</p>
+        <p className="mt-1">© {new Date().getFullYear()} immigrei. Não somos um escritório de advocacia.</p>
         <p className="mt-1">
           <Link href="/termos" className="underline underline-offset-2">Termos de Uso</Link>
           {" · "}

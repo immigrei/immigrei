@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import WaitlistForm from "../em-breve/WaitlistForm";
+import Logo from "../components/Logo";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
-  title: "Nossa história — Immigrei",
+  title: "Nossa história — immigrei",
   description:
-    "Dois brasileiros, dois países, a mesma pergunta: qual é o meu próximo passo? A história de por que a Immigrei existe.",
+    "Dois brasileiros, dois países, a mesma pergunta: qual é o meu próximo passo? A história de por que a immigrei existe.",
   alternates: { canonical: "/nossa-historia" },
   openGraph: {
-    title: "Nossa história — Immigrei",
+    title: "Nossa história — immigrei",
     description:
       "Dois brasileiros, dois países, a mesma pergunta: qual é o meu próximo passo?",
     url: "https://immigrei.com/nossa-historia",
-    siteName: "Immigrei",
+    siteName: "immigrei",
     locale: "pt_BR",
     type: "article",
   },
@@ -42,12 +43,8 @@ export default function NossaHistoriaPage() {
   return (
     <main className="min-h-screen bg-cream">
       <header className="flex items-center justify-between px-6 py-6 max-w-3xl mx-auto">
-        <Link
-          href="/"
-          className="text-2xl font-semibold text-pine"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Immigrei
+        <Link href="/" aria-label="immigrei — início">
+          <Logo variant="wordmark" className="text-2xl" />
         </Link>
       </header>
 
@@ -98,7 +95,7 @@ export default function NossaHistoriaPage() {
             caso e mostra o caminho inteiro.
           </p>
           <p>
-            A Immigrei não foi construída de fora para dentro. Foi construída
+            A immigrei não foi construída de fora para dentro. Foi construída
             de dentro da jornada.
           </p>
         </div>
@@ -129,14 +126,14 @@ export default function NossaHistoriaPage() {
             Sua jornada merece um mapa.
           </h2>
           <p className="text-pine-tint text-base mb-6 max-w-md">
-            Estamos construindo a Immigrei agora. Entre na lista e seja avisado
+            Estamos construindo a immigrei agora. Entre na lista e seja avisado
             em primeira mão.
           </p>
           <WaitlistForm />
         </div>
 
         <p className="text-center text-ink-faint text-xs mt-10 leading-relaxed">
-          © {new Date().getFullYear()} Immigrei. Não somos um escritório de
+          © {new Date().getFullYear()} immigrei. Não somos um escritório de
           advocacia.
         </p>
       </article>

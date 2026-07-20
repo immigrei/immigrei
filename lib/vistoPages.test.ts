@@ -53,8 +53,9 @@ describe("VISTO_PAGES integrity", () => {
     }
   });
 
-  it("o kit de cada página existe nos checklists de /documentos", () => {
+  it("o kit de cada página, quando existe, está nos checklists de /documentos", () => {
     for (const page of pages) {
+      if (page.kit === null) continue; // checklist ainda não construído — estado válido
       expect(checklists[page.kit.kitId], `${page.id}: kit ${page.kit.kitId}`).toBeDefined();
     }
   });
@@ -91,6 +92,7 @@ describe("VISTO_PAGES integrity", () => {
     expect(hasVistoPage("f1")).toBe(true);
     expect(getVistoPage("f1")?.id).toBe("f1");
     expect(hasVistoPage("e2")).toBe(true);
+    expect(hasVistoPage("eb1c")).toBe(false);
     expect(getVistoPage("nao-existe")).toBeNull();
   });
 });

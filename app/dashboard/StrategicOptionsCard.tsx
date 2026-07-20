@@ -34,7 +34,7 @@ export default function StrategicOptionsCard({
 
       <div className="px-6 py-3 border-t border-pine-tint bg-cream">
         <p className="text-[11px] text-ink-faint leading-relaxed">
-          O Immigrei não é um escritório de advocacia e este conteúdo não substitui orientação
+          O immigrei não é um escritório de advocacia e este conteúdo não substitui orientação
           jurídica. Antes de qualquer decisão, converse com um advogado de imigração.
         </p>
       </div>

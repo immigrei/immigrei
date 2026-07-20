@@ -897,7 +897,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
         visa: "🤝 Análise individual com profissional verificado",
         forms: "Consulta com advogado de imigração licenciado",
         description:
-          "Essa exceção é real, mas cheia de detalhes de timing e prova de intenção. O Immigrei conecta você a profissionais verificados antes de qualquer decisão — evite protocolos por conta própria.",
+          "Essa exceção é real, mas cheia de detalhes de timing e prova de intenção. O immigrei conecta você a profissionais verificados antes de qualquer decisão — evite protocolos por conta própria.",
         priority: "high",
         professionalReferral: true,
       });
@@ -973,7 +973,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       visa: "📡 Acompanhe seu pedido automaticamente",
       forms: "Número de recibo do USCIS (ex.: IOE0123456789)",
       description:
-        "Crie sua conta e conecte o número de recibo: o Immigrei consulta o USCIS por você e avisa por e-mail a cada mudança no caso. Os caminhos abaixo consideram o pedido em andamento.",
+        "Crie sua conta e conecte o número de recibo: o immigrei consulta o USCIS por você e avisa por e-mail a cada mudança no caso. Os caminhos abaixo consideram o pedido em andamento.",
       priority: "high",
     });
   }
@@ -1026,7 +1026,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       visa: "🤝 Análise individual com profissional verificado",
       forms: "Consulta com advogado de imigração licenciado",
       description:
-        "Overstay tem saídas — mas quais valem para você depende de fatos do seu caso (data de entrada, forma de entrada, vínculos familiares). O Immigrei conecta você a profissionais verificados; até lá, evite viagens e novos protocolos por conta própria.",
+        "Overstay tem saídas — mas quais valem para você depende de fatos do seu caso (data de entrada, forma de entrada, vínculos familiares). O immigrei conecta você a profissionais verificados; até lá, evite viagens e novos protocolos por conta própria.",
       priority: "high",
       urgent: true,
       professionalReferral: true,
@@ -1081,7 +1081,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
         visa: "Petição de familiar — F2A / F2B",
         forms: "I-130",
         description:
-          "Residentes permanentes peticionam cônjuge e filhos solteiros: menores de 21 na categoria F2A (fila frequentemente curta ou zerada — confira no visa bulletin, que o Immigrei acompanha) e 21+ na F2B (fila mais longa).",
+          "Residentes permanentes peticionam cônjuge e filhos solteiros: menores de 21 na categoria F2A (fila frequentemente curta ou zerada — confira no visa bulletin, que o immigrei acompanha) e 21+ na F2B (fila mais longa).",
         priority: "medium",
       });
     }
@@ -1614,7 +1614,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       visa: "📋 Processo em andamento detectado",
       forms: "USCIS Case Status: egov.uscis.gov/casestatus",
       description:
-        "Com um número de recibo (Receipt Number) do USCIS, você pode acompanhar seu caso em tempo real. O Immigrei vai conectar isso ao seu perfil.",
+        "Com um número de recibo (Receipt Number) do USCIS, você pode acompanhar seu caso em tempo real. O immigrei vai conectar isso ao seu perfil.",
       priority: "medium",
     });
   }
@@ -1925,7 +1925,7 @@ export default function OnboardingPage() {
             className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-4"
             style={{ fontFamily: "var(--font-body)", letterSpacing: "0.15em" }}
           >
-            Bem-vindo à Immigrei
+            Bem-vindo à immigrei
           </p>
           <h1
             className="text-4xl md:text-5xl font-semibold text-ink mb-6 leading-tight"
