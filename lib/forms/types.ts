@@ -111,8 +111,8 @@ export type Question = {
   /** Prefill from the profile row (identity we already hold). */
   prefillFrom?: ProfilePrefillKey;
   validate?: ValidationRule;
-  /** Conditional display: only shown when a prior answer matches. */
-  showWhen?: { questionId: string; equals: FieldValue };
+  /** Conditional display: only shown when a prior answer matches (one value, or any of several). */
+  showWhen?: { questionId: string; equals: FieldValue | FieldValue[] };
   /** How this answer is written onto the official PDF. */
   pdf?: PdfMapping | PdfMapping[];
   /**
@@ -179,5 +179,7 @@ export function englishValue(question: Question, value: FieldValue): string {
  */
 export function isVisible(question: Question, answers: Answers): boolean {
   if (!question.showWhen) return true;
-  return answers[question.showWhen.questionId] === question.showWhen.equals;
+  const { questionId, equals } = question.showWhen;
+  const actual = answers[questionId];
+  return Array.isArray(equals) ? equals.includes(actual) : actual === equals;
 }

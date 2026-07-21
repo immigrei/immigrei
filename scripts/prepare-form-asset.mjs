@@ -70,6 +70,16 @@ const SOURCES = {
     page: "https://www.uscis.gov/i-539",
     out: "public/forms/i-539.pdf",
   },
+  "n-400": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/n-400.pdf",
+    page: "https://www.uscis.gov/n-400",
+    out: "public/forms/n-400.pdf",
+  },
+  "i-90": {
+    pdf: "https://www.uscis.gov/sites/default/files/document/forms/i-90.pdf",
+    page: "https://www.uscis.gov/i-90",
+    out: "public/forms/i-90.pdf",
+  },
 };
 
 async function editionFromPage(pageUrl) {

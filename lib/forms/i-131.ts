@@ -1,11 +1,13 @@
 /**
- * I-131 — Application for Travel Documents (Advance Parole).
+ * I-131 — Application for Travel Documents, Parole Documents, and
+ * Arrival/Departure Records.
  *
- * Data-driven spec for the travel permission requested WHILE the I-485 is
- * pending. WHO FILLS THIS FORM: the APPLICANT — the same person adjusting
- * status (who will receive the green card). Leaving the US during a pending
- * I-485 WITHOUT advance parole abandons the application — that warning leads
- * the wizard.
+ * Data-driven spec covering the two application types Immigrei routes users
+ * into: Advance Parole while an I-485 is pending (familia-ir/k1 adjustment
+ * flow — WHO FILLS THIS: the applicant themselves, who will receive the
+ * green card) and the Reentry Permit for existing green card holders (the
+ * "i131" maintenance kit). Leaving the US during a pending I-485 without
+ * advance parole abandons the application; that warning leads the wizard.
  *
  * Field names extracted from the official edition 01/20/25 asset at
  * public/forms/i-131.pdf (14 pages), disambiguated by widget position. This
@@ -13,11 +15,17 @@
  * `#subform[7..13]` — both prefixes appear below. The Part 1 application-type
  * checkboxes reuse the name `CB_AppType[n]` per page.
  *
- * Scope (MVP): Advance Parole based on a pending I-485 (Part 1, Item 5.A) —
- * the familia-ir adjustment flow. Reentry permits, refugee travel documents,
- * TPS and the many parole programs (Parts 5, 6, 8, 9) are out of scope.
- * The engine is ministerial: it transcribes; it never decides eligibility.
- * Signature, interpreter and preparer blocks stay blank.
+ * Part 7 ("Information About Your Proposed Travel") is explicitly Advance
+ * Parole-only per the PDF's own field tooltips — gated with `showWhen` so it
+ * neither shows nor writes for Reentry Permit applicants. Part 5 ("Complete
+ * Only If Applying for a Reentry Permit") is the mirror: gated the other way.
+ *
+ * Scope (MVP): Advance Parole (Part 1, Item 5.A) and Reentry Permit (Part 1,
+ * Item 1). Refugee travel documents, TPS travel authorization and the
+ * mail-to-an-address-abroad option (Part 4, items 8-9) are out of scope —
+ * print and complete those by hand. The engine is ministerial: it
+ * transcribes; it never decides eligibility. Signature, interpreter and
+ * preparer blocks stay blank.
  */
 
 import type { FormSpec } from "./types";
@@ -27,6 +35,7 @@ const F = "form1[0].";
 const P1 = `${F}P1[0].`;
 const P5 = `${F}P5[0].`;
 const P7 = `${F}P7[0].`;
+const S8 = `${F}#subform[8].`; // page 9 (reentry permit — time outside US)
 const S9 = `${F}#subform[9].`; // page 10 (travel info)
 const S10 = `${F}#subform[10].`; // page 11 (contact)
 const S13 = `${F}#subform[13].`; // page 14 (Part 13 header)
@@ -42,7 +51,7 @@ export const I131: FormSpec = {
   id: "i-131",
   code: "I-131",
   officialName: "Application for Travel Documents, Parole Documents, and Arrival/Departure Records",
-  namePt: "Permissão de Viagem / Advance Parole (para quem espera o green card)",
+  namePt: "Permissão de Viagem — Advance Parole ou Reentry Permit",
   agency: "USCIS",
   officialUrl: "https://www.uscis.gov/i-131",
   edition: "01/20/25",
@@ -50,21 +59,23 @@ export const I131: FormSpec = {
   pdfAssetPath: "forms/i-131.pdf",
   attachTo: { vistoId: "familia-ir", documentoId: "i131" },
   disclaimerPt:
-    "Este formulário é preenchido por VOCÊ, o requerente do ajuste de status (quem vai receber o green card). " +
-    "⚠️ Sair dos EUA com o I-485 pendente SEM o advance parole aprovado faz o USCIS considerar seu pedido " +
-    "ABANDONADO. A Immigrei é uma ferramenta de preenchimento — não presta serviços jurídicos e não revisa " +
-    "o mérito do seu caso. Confira cada campo e assine à mão antes de enviar.",
+    "Este formulário é preenchido por VOCÊ — quem vai receber o documento de viagem. " +
+    "⚠️ Com I-485 pendente: sair dos EUA SEM o advance parole aprovado faz o USCIS considerar seu pedido " +
+    "ABANDONADO. Com Green Card: o Reentry Permit precisa ser protocolado ANTES de você sair do país — não dá " +
+    "para pedir já estando fora. A Immigrei é uma ferramenta de preenchimento — não presta serviços jurídicos " +
+    "e não revisa o mérito do seu caso. Confira cada campo e assine à mão antes de enviar.",
 
   sections: [
-    // ── 1. Tipo de pedido (Part 1, item 5.A) ────────────────────────────────
+    // ── 1. Tipo de pedido (Part 1, itens 1 e 5.A) ───────────────────────────
     {
       id: "tipo",
       titlePt: "O que você está pedindo",
       descriptionPt:
-        "⚠️ O ADVANCE PAROLE é opcional: a regra geral do ajuste é protocolar o I-485 e FICAR nos EUA até " +
-        "o green card chegar. Este documento existe para quem precisa poder viajar (emergências) — e só com " +
-        "ele APROVADO e em mãos; sair sem ele = pedido abandonado. Quem tem tempo de permanência irregular " +
-        "não deve viajar de jeito nenhum, nem com o parole: a saída pode ativar as barras de 3/10 anos.",
+        "Dois pedidos diferentes usam o mesmo formulário. ⚠️ REENTRY PERMIT: precisa ser protocolado ANTES de " +
+        "sair dos EUA — não dá para pedir já estando fora. ⚠️ ADVANCE PAROLE é opcional: a regra geral do " +
+        "ajuste é protocolar o I-485 e FICAR nos EUA até o green card chegar; sair sem ele APROVADO e em mãos " +
+        "= pedido abandonado. Quem tem tempo de permanência irregular não deve viajar de jeito nenhum, nem " +
+        "com o parole: a saída pode ativar as barras de 3/10 anos.",
       questions: [
         {
           id: "app_type",
@@ -74,13 +85,17 @@ export const I131: FormSpec = {
           default: "pending_i485",
           options: [
             {
+              value: "reentry_permit",
+              labelPt: "Tenho Green Card (ou residência condicional) e quero o Reentry Permit",
+            },
+            {
               value: "pending_i485",
               labelPt: "Tenho um I-485 pendente e quero o advance parole para viajar",
             },
           ],
           pdf: {
             kind: "checkboxChoice",
-            fieldByValue: { pending_i485: `${P1}CB_AppType[4]` },
+            fieldByValue: { reentry_permit: `${P1}CB_AppType[0]`, pending_i485: `${P1}CB_AppType[4]` },
           },
         },
         {
@@ -88,6 +103,7 @@ export const I131: FormSpec = {
           labelPt: "Número de recibo do seu I-485 (se estiver protocolando este I-131 separado)",
           helpPt: "Ex.: IOE0123456789. Se o I-131 vai no mesmo envelope do I-485, deixe em branco.",
           type: "text",
+          showWhen: { questionId: "app_type", equals: "pending_i485" },
           pdf: { kind: "text", field: `${P1}P1_Line5A[0]` },
         },
       ],
@@ -589,16 +605,55 @@ export const I131: FormSpec = {
       ],
     },
 
-    // ── 5. Viagem pretendida (Part 7) ───────────────────────────────────────
+    // ── 5. Tempo fora dos EUA (Part 5) — só Reentry Permit ──────────────────
+    {
+      id: "tempo_fora",
+      titlePt: "Tempo fora dos EUA",
+      descriptionPt: "Só quem está pedindo o Reentry Permit preenche esta parte (Part 5 do formulário).",
+      questions: [
+        {
+          id: "time_outside_us",
+          labelPt:
+            "Desde que virou residente permanente (ou nos últimos 5 anos, o que for mais curto), " +
+            "quanto tempo no total você já passou fora dos EUA?",
+          type: "radio",
+          required: true,
+          showWhen: { questionId: "app_type", equals: "reentry_permit" },
+          options: [
+            { value: "lt6", labelPt: "Menos de 6 meses" },
+            { value: "6to12", labelPt: "De 6 meses a 1 ano" },
+            { value: "1to2", labelPt: "De 1 a 2 anos" },
+            { value: "2to3", labelPt: "De 2 a 3 anos" },
+            { value: "3to4", labelPt: "De 3 a 4 anos" },
+            { value: "gt4", labelPt: "Mais de 4 anos" },
+          ],
+          pdf: {
+            kind: "checkboxChoice",
+            fieldByValue: {
+              lt6: `${S8}P5_Line1_Lessthan6[0]`,
+              "6to12": `${S8}P5_Line1_6months[0]`,
+              "1to2": `${S8}P5_Line1_1to2[0]`,
+              "2to3": `${S8}P5_Line1_2to3[0]`,
+              "3to4": `${S8}P5_Line1_3to4[0]`,
+              gt4: `${S8}P5_Line1_morethan[0]`,
+            },
+          },
+        },
+      ],
+    },
+
+    // ── 6. Viagem pretendida (Part 7) — só Advance Parole ───────────────────
     {
       id: "viagem",
       titlePt: "Sua viagem pretendida",
+      descriptionPt: "Só quem está pedindo o Advance Parole preenche esta parte (Part 7 do formulário).",
       questions: [
         {
           id: "departure_date",
           labelPt: "Data pretendida de saída dos EUA",
           type: "date",
           required: true,
+          showWhen: { questionId: "app_type", equals: "pending_i485" },
           pdf: { kind: "text", field: `${S9}P7_Line1_DateOfDeparture[0]`, transform: isoToUsDate },
         },
         {
@@ -608,6 +663,7 @@ export const I131: FormSpec = {
           type: "text",
           required: true,
           passthroughEn: true,
+          showWhen: { questionId: "app_type", equals: "pending_i485" },
           pdf: { kind: "text", field: `${S9}P7_Line2_Purpose[0]` },
         },
         {
@@ -617,6 +673,7 @@ export const I131: FormSpec = {
           required: true,
           passthroughEn: true,
           default: "Brazil",
+          showWhen: { questionId: "app_type", equals: "pending_i485" },
           pdf: { kind: "text", field: `${S9}P7_Line3_ListCountries[0]` },
         },
         {
@@ -625,6 +682,7 @@ export const I131: FormSpec = {
           type: "radio",
           required: true,
           default: "multiple",
+          showWhen: { questionId: "app_type", equals: "pending_i485" },
           options: [
             { value: "one", labelPt: "Uma viagem" },
             { value: "multiple", labelPt: "Mais de uma viagem" },
@@ -639,6 +697,7 @@ export const I131: FormSpec = {
           labelPt: "Duração esperada da viagem (em dias)",
           type: "number",
           required: true,
+          showWhen: { questionId: "app_type", equals: "pending_i485" },
           pdf: { kind: "text", field: `${S9}P7_Line5_ExpectedLengthTrip[0]` },
         },
       ],
