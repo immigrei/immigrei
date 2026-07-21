@@ -12,6 +12,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
 import { getForm } from "@/lib/forms/registry";
@@ -19,6 +20,12 @@ import { mergeAnswers, type ProfileForPrefill } from "@/lib/forms/prefill";
 import type { Answers } from "@/lib/forms/types";
 
 export const runtime = "nodejs";
+
+// Only validates the envelope — the shape of `answers` is dynamic per form
+// (lib/forms/registry), so field-level requirements stay in missingRequired().
+const AnswersEnvelopeSchema = z.object({
+  answers: z.record(z.string(), z.union([z.string(), z.boolean(), z.number(), z.null()])),
+});
 
 async function loadProfile(userId: string): Promise<ProfileForPrefill> {
   const { data } = await supabaseAdmin
@@ -64,10 +71,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ formId: st
   if (!userId) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  const answers = (body?.answers ?? null) as Answers | null;
-  if (!answers || typeof answers !== "object") {
+  const parsedBody = AnswersEnvelopeSchema.safeParse(body);
+  if (!parsedBody.success) {
     return NextResponse.json({ error: "Respostas ausentes." }, { status: 400 });
   }
+  const answers: Answers = parsedBody.data.answers;
 
   const { data: existing } = await supabaseAdmin
     .from("form_submissions")

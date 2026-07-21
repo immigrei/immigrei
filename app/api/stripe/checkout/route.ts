@@ -1,18 +1,26 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getStripe, PLANS, type PlanId } from "@/lib/stripe";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const PlanSchema = z.enum(["base", "core"]);
 
 // Creates a Stripe Checkout session for a subscription plan.
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const allowed = await checkRateLimit(`stripe-checkout:${userId}`, { max: 5, windowMs: 10 * 60_000 });
+  if (!allowed) return NextResponse.json({ error: "too many requests" }, { status: 429 });
+
   const { plan } = await req.json().catch(() => ({}));
-  if (plan !== "base" && plan !== "core") {
+  const parsedPlan = PlanSchema.safeParse(plan);
+  if (!parsedPlan.success) {
     return NextResponse.json({ error: "invalid plan" }, { status: 400 });
   }
-  const planId = plan as PlanId;
+  const planId: PlanId = parsedPlan.data;
 
   const user = await currentUser();
   const email = user?.emailAddresses[0]?.emailAddress;

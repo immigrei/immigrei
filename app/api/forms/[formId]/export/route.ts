@@ -11,15 +11,23 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getForm } from "@/lib/forms/registry";
 import { fillPdf } from "@/lib/forms/fillPdf";
 import { fillWorksheet } from "@/lib/forms/fillWorksheet";
 import { allQuestions, isVisible, type Answers } from "@/lib/forms/types";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 const BUCKET = "user-documents";
+
+// Only validates the envelope — the shape of `answers` is dynamic per form,
+// field-level requirements stay in missingRequired() below.
+const AnswersEnvelopeSchema = z.object({
+  answers: z.record(z.string(), z.union([z.string(), z.boolean(), z.number(), z.null()])),
+});
 
 function missingRequired(formId: string, answers: Answers): string[] {
   const form = getForm(formId)!;
@@ -40,11 +48,17 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ formId: st
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
 
+  const allowed = await checkRateLimit(`forms-export:${userId}`, { max: 10, windowMs: 10 * 60_000 });
+  if (!allowed) {
+    return NextResponse.json({ error: "Muitas exportações seguidas. Tente novamente em instantes." }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => ({}));
-  const answers = (body?.answers ?? null) as Answers | null;
-  if (!answers || typeof answers !== "object") {
+  const parsedBody = AnswersEnvelopeSchema.safeParse(body);
+  if (!parsedBody.success) {
     return NextResponse.json({ error: "Respostas ausentes." }, { status: 400 });
   }
+  const answers: Answers = parsedBody.data.answers;
 
   const missing = missingRequired(formId, answers);
   if (missing.length > 0) {

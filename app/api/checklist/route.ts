@@ -1,7 +1,14 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import checklists from "@/app/documentos/[vistoId]/data";
+
+const ChecklistBodySchema = z.object({
+  vistoId: z.string(),
+  documentoId: z.string(),
+  checked: z.boolean(),
+});
 
 // Persisted checklist checkmarks. Each row = one item the user marked as
 // done in a kit. Read by the kit page (survive reload) and by /painel
@@ -40,13 +47,12 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  const { vistoId, documentoId, checked } = body as {
-    vistoId?: unknown; documentoId?: unknown; checked?: unknown;
-  };
-
-  if (typeof vistoId !== "string" || typeof documentoId !== "string" || typeof checked !== "boolean") {
+  const parsed = ChecklistBodySchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json({ error: "vistoId, documentoId and checked required" }, { status: 400 });
   }
+  const { vistoId, documentoId, checked } = parsed.data;
+
   if (!isValidTarget(vistoId, documentoId)) {
     return NextResponse.json({ error: "Unknown checklist item" }, { status: 400 });
   }

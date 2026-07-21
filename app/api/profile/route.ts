@@ -1,6 +1,16 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
+
+const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const FamilyTiesSchema = z.enum(["spouse_citizen", "parent_child_citizen", "family_gc", "none"]);
+const ChosenSchoolSchema = z.object({
+  school_name: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().min(1),
+  campus_code: z.string().min(1),
+}).passthrough();
 
 // Partial upsert: the onboarding flow saves in stages (questionnaire →
 // visa selection), so any subset of fields may arrive. visa_type marks
@@ -21,25 +31,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No fields to save" }, { status: 400 });
   }
 
-  if (i94_expiry_date !== undefined && i94_expiry_date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(i94_expiry_date)) {
+  if (i94_expiry_date !== undefined && i94_expiry_date !== null && !DateStringSchema.safeParse(i94_expiry_date).success) {
     return NextResponse.json({ error: "Invalid i94_expiry_date" }, { status: 400 });
   }
 
-  if (f1_program_start_date !== undefined && f1_program_start_date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(f1_program_start_date)) {
+  if (f1_program_start_date !== undefined && f1_program_start_date !== null && !DateStringSchema.safeParse(f1_program_start_date).success) {
     return NextResponse.json({ error: "Invalid f1_program_start_date" }, { status: 400 });
   }
 
-  const VALID_FAMILY_TIES = ["spouse_citizen", "parent_child_citizen", "family_gc", "none"];
-  if (family_ties !== undefined && family_ties !== null && !VALID_FAMILY_TIES.includes(family_ties)) {
+  if (family_ties !== undefined && family_ties !== null && !FamilyTiesSchema.safeParse(family_ties).success) {
     return NextResponse.json({ error: "Invalid family_ties" }, { status: 400 });
   }
 
   // chosen_school: campus snapshot from /escolas, or null to clear it.
-  if (chosen_school !== undefined && chosen_school !== null) {
-    const s = chosen_school;
-    if (typeof s !== "object" || !s.school_name || !s.city || !s.state || !s.campus_code) {
-      return NextResponse.json({ error: "Invalid chosen_school" }, { status: 400 });
-    }
+  if (chosen_school !== undefined && chosen_school !== null && !ChosenSchoolSchema.safeParse(chosen_school).success) {
+    return NextResponse.json({ error: "Invalid chosen_school" }, { status: 400 });
   }
 
   const row: Record<string, unknown> = {

@@ -13,6 +13,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
 
@@ -25,6 +26,20 @@ const UPSERTABLE_FIELDS = [
   "enrolled_before_approval",
   "worked_without_authorization",
 ] as const;
+
+// Mirrors the CHECK constraints on cos_b2_f1_cases (migration 010) — catches
+// bad format before the round-trip to Postgres, same error message as the
+// existing 23514 handling below.
+const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const UpsertableFieldsSchema = z.object({
+  i94_number: z.string().regex(/^[0-9A-Za-z]{11}$/).nullable(),
+  i94_admit_until: dateString.nullable(),
+  last_entry_date: dateString.nullable(),
+  sevis_id: z.string().regex(/^N[0-9]{10}$/).nullable(),
+  i901_fee_paid: z.boolean(),
+  enrolled_before_approval: z.boolean().nullable(),
+  worked_without_authorization: z.boolean().nullable(),
+}).partial();
 
 export async function GET() {
   const { userId } = await auth();
@@ -55,14 +70,20 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}));
 
-  const fields: Record<string, unknown> = {};
+  const candidate: Record<string, unknown> = {};
   for (const key of UPSERTABLE_FIELDS) {
-    if (body[key] !== undefined) fields[key] = body[key];
+    if (body[key] !== undefined) candidate[key] = body[key];
   }
 
-  if (Object.keys(fields).length === 0) {
+  if (Object.keys(candidate).length === 0) {
     return NextResponse.json({ error: "Nenhum campo para salvar." }, { status: 400 });
   }
+
+  const parsed = UpsertableFieldsSchema.safeParse(candidate);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Um dos campos está em formato inválido." }, { status: 400 });
+  }
+  const fields: Record<string, unknown> = { ...parsed.data };
 
   fields.updated_at = new Date().toISOString();
 

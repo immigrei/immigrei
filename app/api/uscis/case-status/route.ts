@@ -11,9 +11,17 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { fetchCaseStatus, isValidReceiptNumber, normalizeReceiptNumber } from "@/lib/uscis";
 import { supabaseAdmin } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const CaseStatusBodySchema = z.object({
+  receiptNumber: z.string(),
+  visaType: z.string().nullable().optional(),
+  label: z.string().nullable().optional(),
+});
 
 export async function POST(req: NextRequest) {
   // Auth check
@@ -22,16 +30,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => ({}));
-  const raw  = body?.receiptNumber ?? "";
+  const allowed = await checkRateLimit(`uscis-case-status:${userId}`, { max: 10, windowMs: 5 * 60_000 });
+  if (!allowed) {
+    return NextResponse.json({ error: "Muitas consultas seguidas. Tente novamente em instantes." }, { status: 429 });
+  }
 
-  if (!raw || !isValidReceiptNumber(raw)) {
+  const rawBody = await req.json().catch(() => ({}));
+  const parsedBody = CaseStatusBodySchema.safeParse(rawBody);
+
+  if (!parsedBody.success || !isValidReceiptNumber(parsedBody.data.receiptNumber)) {
     return NextResponse.json(
       { error: "Número de recibo inválido. Use o formato: IOE0123456789" },
       { status: 400 },
     );
   }
 
+  const { receiptNumber: raw, visaType, label } = parsedBody.data;
   const receiptNumber = normalizeReceiptNumber(raw);
 
   // Fetch from USCIS
@@ -45,8 +59,8 @@ export async function POST(req: NextRequest) {
         {
           user_id:          userId,
           receipt_number:   receiptNumber,
-          visa_type:        body?.visaType ?? null,
-          label:            body?.label ?? null,
+          visa_type:        visaType ?? null,
+          label:            label ?? null,
           last_status:      result.status,
           last_status_date: result.statusDate,
           last_checked_at:  result.fetchedAt,

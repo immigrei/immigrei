@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendWaitlistWelcome } from "@/lib/notifications";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
+
+const EmailSchema = z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
 
 export async function POST(req: Request) {
+  const allowed = await checkRateLimit(`waitlist:${clientIp(req)}`, { max: 5, windowMs: 10 * 60_000 });
+  if (!allowed) {
+    return NextResponse.json({ error: "too many requests" }, { status: 429 });
+  }
+
   let email: unknown;
   let momento: unknown;
   try {
@@ -11,7 +20,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid body" }, { status: 400 });
   }
 
-  if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  const parsedEmail = EmailSchema.safeParse(email);
+  if (!parsedEmail.success) {
     return NextResponse.json({ error: "invalid email" }, { status: 400 });
   }
 
@@ -19,7 +29,7 @@ export async function POST(req: Request) {
   const momentoValue =
     typeof momento === "string" && MOMENTOS.includes(momento) ? momento : null;
 
-  const normalized = email.toLowerCase().trim();
+  const normalized = parsedEmail.data.toLowerCase().trim();
 
   const { data: existing } = await supabaseAdmin
     .from("waitlist")

@@ -6,8 +6,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  const allowed = await checkRateLimit(`consulados-events:${clientIp(req)}`, { max: 30, windowMs: 60_000 });
+  if (!allowed) return NextResponse.json({ error: "too many requests" }, { status: 429 });
+
   const { searchParams } = new URL(req.url);
   const consulado = searchParams.get("consulado");
   const tipo      = searchParams.get("tipo");

@@ -1,7 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getUserPlan } from "@/lib/plan";
+
+const ReportIdSchema = z.string();
 
 // "Me ajudou" toggle. Reacting, like publishing, is a subscriber action.
 
@@ -18,10 +21,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { reportId } = await req.json().catch(() => ({}));
-  if (typeof reportId !== "string") {
+  const body = await req.json().catch(() => ({}));
+  const parsedReportId = ReportIdSchema.safeParse(body?.reportId);
+  if (!parsedReportId.success) {
     return NextResponse.json({ error: "reportId required" }, { status: 400 });
   }
+  const reportId = parsedReportId.data;
 
   const { data: report } = await supabaseAdmin
     .from("community_reports")

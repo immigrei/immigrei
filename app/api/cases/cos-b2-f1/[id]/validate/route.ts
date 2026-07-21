@@ -11,6 +11,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
   runCosB2F1Rules,
@@ -24,13 +25,13 @@ function toDateOrNull(value: string | null): Date | null {
 }
 
 const DAY_MS = 86_400_000;
+const ClientTodaySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 function resolveToday(clientToday: unknown): Date {
   const serverToday = new Date();
-  if (typeof clientToday !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(clientToday)) {
-    return serverToday;
-  }
-  const parsed = new Date(clientToday);
+  const parsedClientToday = ClientTodaySchema.safeParse(clientToday);
+  if (!parsedClientToday.success) return serverToday;
+  const parsed = new Date(parsedClientToday.data);
   if (Number.isNaN(parsed.getTime())) return serverToday;
   if (Math.abs(parsed.getTime() - serverToday.getTime()) > 2 * DAY_MS) return serverToday;
   return parsed;

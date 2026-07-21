@@ -1,7 +1,17 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import checklists from "@/app/documentos/[vistoId]/data";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+// File itself keeps its own manual checks below (size/MIME) — Zod only
+// covers the text fields FormData hands us alongside it.
+const UploadTargetSchema = z.object({
+  vistoId: z.string(),
+  documentoId: z.string(),
+});
+const DeleteBodySchema = z.object({ id: z.string() });
 
 // Document vault: users attach files (passport scans, bank statements…) to
 // checklist items. The bucket is private — every download goes through a
@@ -71,14 +81,22 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const allowed = await checkRateLimit(`user-documents-upload:${userId}`, { max: 20, windowMs: 10 * 60_000 });
+  if (!allowed) {
+    return NextResponse.json({ error: "Muitos envios seguidos. Tente novamente em instantes." }, { status: 429 });
+  }
+
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");
-  const vistoId = form?.get("vistoId");
-  const documentoId = form?.get("documentoId");
+  const parsedTarget = UploadTargetSchema.safeParse({
+    vistoId: form?.get("vistoId"),
+    documentoId: form?.get("documentoId"),
+  });
 
-  if (!(file instanceof File) || typeof vistoId !== "string" || typeof documentoId !== "string") {
+  if (!(file instanceof File) || !parsedTarget.success) {
     return NextResponse.json({ error: "file, vistoId and documentoId required" }, { status: 400 });
   }
+  const { vistoId, documentoId } = parsedTarget.data;
   if (!isValidTarget(vistoId, documentoId)) {
     return NextResponse.json({ error: "Unknown checklist item" }, { status: 400 });
   }
@@ -149,10 +167,12 @@ export async function DELETE(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = await req.json().catch(() => ({}));
-  if (typeof id !== "string") {
+  const body = await req.json().catch(() => ({}));
+  const parsedId = DeleteBodySchema.safeParse(body);
+  if (!parsedId.success) {
     return NextResponse.json({ error: "id required" }, { status: 400 });
   }
+  const { id } = parsedId.data;
 
   const { data: row } = await supabaseAdmin
     .from("user_documents")

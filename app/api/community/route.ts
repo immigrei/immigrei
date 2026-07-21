@@ -1,5 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getUserPlan } from "@/lib/plan";
 import { vistosEstudo, vistosNegocios } from "@/lib/vistosCatalog";
@@ -21,7 +22,13 @@ import {
 const VALID_VISAS = new Set(
   [...vistosEstudo, ...vistosNegocios].map((v) => v.id)
 );
-const VALID_STATES = new Set<string>(AUTHOR_STATES);
+
+const TitleSchema = z.string().trim().min(1).max(TITLE_MAX);
+const BodySchema = z.string().trim().min(BODY_MIN).max(BODY_MAX);
+const VisasSchema = z.array(z.string())
+  .min(1).max(MAX_VISAS_PER_REPORT)
+  .refine((arr) => arr.every((v) => VALID_VISAS.has(v)));
+const AuthorStateSchema = z.enum(AUTHOR_STATES);
 
 interface ReportRow {
   id: string;
@@ -114,38 +121,40 @@ export async function POST(req: NextRequest) {
   }
 
   const payload = await req.json().catch(() => null);
-  const title = typeof payload?.title === "string" ? payload.title.trim() : "";
-  const body = typeof payload?.body === "string" ? payload.body.trim() : "";
-  const visas: unknown = payload?.visas;
   const isAnonymous = payload?.isAnonymous !== false; // default true
-  const authorState = typeof payload?.authorState === "string" ? payload.authorState : "";
 
-  if (!title || title.length > TITLE_MAX) {
+  const parsedTitle = TitleSchema.safeParse(payload?.title);
+  if (!parsedTitle.success) {
     return NextResponse.json(
       { error: `O título precisa ter entre 1 e ${TITLE_MAX} caracteres.` },
       { status: 400 }
     );
   }
-  if (body.length < BODY_MIN || body.length > BODY_MAX) {
+  const title = parsedTitle.data;
+
+  const parsedBody = BodySchema.safeParse(payload?.body);
+  if (!parsedBody.success) {
     return NextResponse.json(
       { error: `O relato precisa ter entre ${BODY_MIN} e ${BODY_MAX} caracteres.` },
       { status: 400 }
     );
   }
-  if (
-    !Array.isArray(visas) ||
-    visas.length === 0 ||
-    visas.length > MAX_VISAS_PER_REPORT ||
-    !visas.every((v) => typeof v === "string" && VALID_VISAS.has(v))
-  ) {
+  const body = parsedBody.data;
+
+  const parsedVisas = VisasSchema.safeParse(payload?.visas);
+  if (!parsedVisas.success) {
     return NextResponse.json(
       { error: `Marque de 1 a ${MAX_VISAS_PER_REPORT} vistos relacionados.` },
       { status: 400 }
     );
   }
-  if (!VALID_STATES.has(authorState)) {
+  const visas = parsedVisas.data;
+
+  const parsedAuthorState = AuthorStateSchema.safeParse(payload?.authorState);
+  if (!parsedAuthorState.success) {
     return NextResponse.json({ error: "Selecione seu estado." }, { status: 400 });
   }
+  const authorState = parsedAuthorState.data;
 
   const violation = findContactInfo(`${title}\n${body}`);
   if (violation) {

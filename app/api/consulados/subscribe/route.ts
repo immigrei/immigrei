@@ -6,16 +6,21 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
+
+const ConsuladosSchema = z.array(z.enum(["miami", "nyc"]));
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { consulados } = await req.json();
-  if (!Array.isArray(consulados)) {
-    return NextResponse.json({ error: "consulados must be an array" }, { status: 400 });
+  const body = await req.json();
+  const parsed = ConsuladosSchema.safeParse(body.consulados);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "consulados must be an array of \"miami\"|\"nyc\"" }, { status: 400 });
   }
+  const consulados = parsed.data;
 
   const { error } = await supabaseAdmin
     .from("consulate_subscriptions")
