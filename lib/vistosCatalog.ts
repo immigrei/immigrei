@@ -302,11 +302,121 @@ export const vistosNegocios: Visto[] = [
     ],
     availability: "all",
   },
+  {
+    id: "eb5",
+    codigo: "EB-5",
+    nome: "Green Card por Investimento",
+    badge: "Green Card",
+    badgeColor: "pine",
+    descricao:
+      "Residência permanente direta via investimento de capital próprio em negócio americano que crie empregos — sem patrocinador, sem oferta de emprego.",
+    chave:
+      "Investimento no valor mínimo exigido (padrão ou área de investimento-alvo) num projeto que crie pelo menos 10 empregos americanos, com a origem do capital bem documentada.",
+    degrau:
+      "O degrau costuma ser a origem do capital: documentar de onde veio o dinheiro (herança, venda de empresa, poupança de anos) é o que mais atrasa o I-526E.",
+    destaque: {
+      tipo: "star",
+      texto: "Autopetição: você mesmo protocola — sem sorteio, sem patrocinador, disponível para brasileiros.",
+    },
+    stats: [
+      { label: "Trabalho", valor: "Livre (é residência)", ok: true },
+      { label: "Duração", valor: "Permanente (condicional por 2 anos)", ok: true },
+      { label: "Rumo ao Green Card", valor: "É o próprio green card", ok: true },
+      { label: "Família", valor: "Cônjuge e filhos <21 incluídos", ok: true },
+    ],
+    availability: "all",
+  },
+];
+
+// ─── Família e proteção humanitária ────────────────────────────────────────
+// Diferente dos vistos acima, estes não passam pela vitrine de comparação —
+// o onboarding manda direto para o kit (não faz sentido "comparar" quando só
+// existe um caminho). Entram no catálogo mesmo assim para o card de
+// recomendação virar rico (findCatalogVisto) e para a página /vistos/[id]
+// existir. Ver app/onboarding/page.tsx (deriveDestination).
+
+export const vistosFamiliaEProtecao: Visto[] = [
+  {
+    id: "k1",
+    codigo: "K-1",
+    nome: "Noivo(a) de Cidadão Americano",
+    badge: "Família",
+    badgeColor: "amber",
+    descricao:
+      "Para quem vai se casar nos EUA em até 90 dias com um cidadão americano — não é visto de casamento, é visto de noivado.",
+    chave:
+      "Encontro pessoal com o(a) noivo(a) nos últimos 2 anos + ambos livres para casar — o cidadão americano protocola o I-129F.",
+    degrau:
+      "Já casados, não noivos? O caminho é outro: IR-1/CR-1 pelo I-130, direto — sem I-129F.",
+    destaque: {
+      tipo: "warning",
+      texto: "O casamento precisa acontecer dentro de 90 dias da entrada — sem prorrogação. Perder o prazo fecha a porta do K-1.",
+    },
+    stats: [
+      { label: "Trabalho", valor: "Não (só depois do ajuste de status)", ok: false },
+      { label: "Duração", valor: "90 dias para casar, sem prorrogação", ok: false },
+      { label: "Rumo ao Green Card", valor: "Sim — via I-485 depois do casamento", ok: true },
+      { label: "Família", valor: "Filhos <21 entram como K-2", ok: true },
+    ],
+    availability: "all",
+  },
+  {
+    id: "family-gc",
+    codigo: "F-2",
+    nome: "Familiar de Residente Permanente",
+    badge: "Família",
+    badgeColor: "amber",
+    descricao:
+      "Para cônjuge e filhos solteiros de quem já tem Green Card — categoria com fila (diferente da família de cidadão, que não espera).",
+    chave:
+      "O titular do Green Card protocola o I-130 — depois é acompanhar a data de prioridade no Boletim de Vistos até virar current.",
+    degrau:
+      "A fila é o degrau: enquanto espera, vale avaliar se algum outro caminho (estudo, trabalho, mérito) abre uma porta em paralelo.",
+    destaque: {
+      tipo: "warning",
+      texto: "Diferente de família de cidadão, aqui há fila real — F2A costuma ser mais curta, F2B pode levar anos.",
+    },
+    stats: [
+      { label: "Trabalho", valor: "Não enquanto espera (sem status próprio)", ok: false },
+      { label: "Duração", valor: "Depende da fila — meses a anos", ok: false },
+      { label: "Rumo ao Green Card", valor: "Sim — é o próprio caminho", ok: true },
+      { label: "Família", valor: "Cônjuge e filhos solteiros (F2A <21 / F2B 21+)", ok: true },
+    ],
+    availability: "all",
+  },
+  {
+    id: "asylee",
+    codigo: "Asilo",
+    nome: "Proteção Humanitária",
+    badge: "Proteção",
+    badgeColor: "clay",
+    descricao:
+      "Para quem tem fundado temor de perseguição no país de origem — só pode ser pedido dentro dos EUA ou na fronteira, nunca pelo consulado.",
+    chave:
+      "Protocolar o I-589 até 1 ano da última entrada nos EUA (com exceções documentadas) — caso sensível, acompanhamento de advogado é fortemente recomendado.",
+    degrau:
+      "Já passou de 1 ano? Documentar agora as circunstâncias do atraso é o que sustenta a exceção depois.",
+    destaque: {
+      tipo: "warning",
+      texto: "O prazo de 1 ano é rígido — perder sem exceção documentada pode fechar a porta do asilo afirmativo.",
+    },
+    stats: [
+      { label: "Trabalho", valor: "Só depois de 150 dias do protocolo", ok: false },
+      { label: "Duração", valor: "Enquanto o caso tramita, sem prazo fixo", ok: true },
+      { label: "Rumo ao Green Card", valor: "Sim — 1 ano após a concessão", ok: true },
+      { label: "Família", valor: "Cônjuge e filhos podem ser incluídos", ok: true },
+    ],
+    availability: "all",
+  },
 ];
 
 // ─── Lookup by recommendation title ─────────────────────────────────────────
 
-export const todosVistos: Visto[] = [...vistosEstudo, ...vistosNegocios];
+export const todosVistos: Visto[] = [
+  ...vistosEstudo,
+  ...vistosNegocios,
+  ...vistosFamiliaEProtecao,
+];
 
 // Onboarding titles follow "CÓDIGO (Nome) [— sufixo]" for pure visa cards.
 // Process cards never put "(" right after the code — "F-1 → H-1B (guia
@@ -326,6 +436,10 @@ const CODE_TO_ID: Record<string, string> = {
   "E-1": "e1",
   "E-2": "e2",
   "EB-2 NIW": "eb2niw",
+  "EB-5": "eb5",
+  "K-1": "k1",
+  "F-2": "family-gc",
+  "Asilo": "asylee",
 };
 
 export function findCatalogVisto(title: string): Visto | null {

@@ -127,6 +127,104 @@ const KITS: Kit[] = [
     titulo:   "B-1/B-2 — Turismo e negócios via consulado",
     descricao:"DS-160 + entrevista consular. Inclui orientações sobre prova de vínculo com o Brasil e documentação financeira.",
   },
+  // ── E-1 ──────────────────────────────────────────────────────────────
+  {
+    id: "e1", codigo: "E-1", caminho: "consulado",
+    titulo:   "E-1 — Visto de Comerciante (países com tratado)",
+    descricao:"Para nacionais de países com tratado de comércio com os EUA, com volume bilateral substancial de comércio.",
+    alerta:   "NÃO disponível para brasileiros. Verifique se seu país tem tratado E-1 com os EUA.",
+    restrito: true,
+  },
+  // ── ESTA ─────────────────────────────────────────────────────────────
+  {
+    id: "esta", codigo: "ESTA", caminho: "consulado",
+    titulo:   "ESTA — Autorização Eletrônica de Viagem",
+    descricao:"Para nacionais de países do Visa Waiver Program. Visitas de até 90 dias, sem trabalho.",
+  },
+  // ── Família de cidadão americano ───────────────────────────────────────
+  {
+    id: "familia-ir", codigo: "IR-1/IR-2", caminho: "consulado",
+    titulo:   "Família de Cidadão Americano — via consular",
+    descricao:"Petição I-130 pelo parente cidadão + visto de imigrante (DS-260) ou ajuste de status (I-485). Sem fila de espera.",
+  },
+  {
+    id: "k1", codigo: "K-1", caminho: "consulado",
+    titulo:   "K-1 — Noivo(a) de Cidadão Americano",
+    descricao:"Petição I-129F pelo cidadão + visto K-1 + casamento em até 90 dias + ajuste de status (I-485).",
+  },
+  // ── Família de titular de Green Card ────────────────────────────────────
+  {
+    id: "family-gc", codigo: "F2A/F2B", caminho: "consulado",
+    titulo:   "Cônjuge ou Filho de Residente Permanente",
+    descricao:"Petição I-130 pelo titular do Green Card. Categoria com fila — acompanhe a data de prioridade no Boletim de Vistos.",
+  },
+  // ── EB-5 ─────────────────────────────────────────────────────────────
+  {
+    id: "eb5", codigo: "EB-5", caminho: "consulado",
+    titulo:   "EB-5 — Green Card por Investimento",
+    descricao:"Investimento de capital próprio em negócio que crie empregos americanos. Autopetição, sem patrocinador.",
+  },
+  // ── Asilo ────────────────────────────────────────────────────────────
+  {
+    id: "asylee", codigo: "Asilo", caminho: "manutencao",
+    titulo:   "Asilo — Proteção Humanitária",
+    descricao:"I-589 dentro do prazo de 1 ano da entrada. Caso sensível — acompanhamento de advogado fortemente recomendado.",
+  },
+  // ── Portas estreitas (overstay sem vínculo) ─────────────────────────────
+  {
+    id: "overstay-sem-vinculo", codigo: "Portas estreitas", caminho: "manutencao",
+    titulo:   "Passou do prazo, sem vínculo familiar",
+    descricao:"Waiver, cancelamento de remoção, VAWA, U-visa ou T-visa — depende de fatos do seu caso. Acompanhamento de advogado necessário.",
+    alerta:   "Não existe processo único aqui — mapeamos as portas reais antes de você falar com um profissional.",
+  },
+  {
+    id: "family-gc-overstay", codigo: "F2A + Overstay", caminho: "manutencao",
+    titulo:   "Familiar com Green Card, você em overstay",
+    descricao:"Protocole a petição agora para garantir a fila — o próximo passo depende de naturalização do familiar ou de waiver consular.",
+  },
+  // ── Green Card holder ───────────────────────────────────────────────────
+  {
+    id: "n400", codigo: "N-400", caminho: "manutencao",
+    titulo:   "Naturalização — Cidadania Americana",
+    descricao:"5 anos como residente (ou 3, com cônjuge cidadão). Protocolo, biometria, entrevista e juramento.",
+  },
+  {
+    id: "i90", codigo: "I-90", caminho: "manutencao",
+    titulo:   "Renovação do Green Card",
+    descricao:"Cartão de 10 anos vencido ou a vencer em 6 meses. Direto com o USCIS, sem entrevista consular.",
+  },
+  {
+    id: "i131", codigo: "I-131", caminho: "manutencao",
+    titulo:   "Reentry Permit — Permissão de Reentrada",
+    descricao:"Protege o Green Card em ausências de até 2 anos. Precisa ser protocolado ANTES de sair dos EUA.",
+  },
+  // ── Mudança de status / extensão dentro dos EUA ─────────────────────────
+  {
+    id: "b1-cos", codigo: "B-1/B-2", caminho: "cos",
+    titulo:   "Extensão ou mudança de status — B-1/B-2",
+    descricao:"I-539 antes do I-94 vencer. Extensão de permanência ou troca para outro visto.",
+  },
+  {
+    id: "e2-cos", codigo: "E-2", caminho: "cos",
+    titulo:   "E-2 — Mudança de status dentro dos EUA",
+    descricao:"I-129 direto com o USCIS, sem consulado. Mesmos 4 requisitos do E-2 consular.",
+  },
+  {
+    id: "e1-cos", codigo: "E-1", caminho: "cos",
+    titulo:   "E-1 — Mudança de status dentro dos EUA",
+    descricao:"I-129 direto com o USCIS, sem consulado. Mesmo volume de comércio bilateral exigido.",
+  },
+  {
+    id: "dependente-cos", codigo: "F-2/H-4/L-2/J-2", caminho: "cos",
+    titulo:   "Extensão de status de dependente",
+    descricao:"I-539 atrelado à extensão do titular principal. Autorização de trabalho varia por categoria.",
+  },
+  // ── DV Lottery ───────────────────────────────────────────────────────────
+  {
+    id: "dv-lottery", codigo: "DV Lottery", caminho: "consulado",
+    titulo:   "Diversity Visa Program — Loteria de Vistos",
+    descricao:"Inscrição eletrônica gratuita. Brasil foi excluído dos últimos ciclos — confirme a elegibilidade do seu país.",
+  },
 ];
 
 function inferirKitRecomendado(profile: Profile | null): string | null {
@@ -162,12 +260,20 @@ function inferirKitRecomendado(profile: Profile | null): string | null {
     if (location === "eua")    return "eb2niw";
     return "eb2niw-brasil";
   }
-  // Residentes e cidadãos não têm kit de visto — jornada deles é I-130,
-  // N-400, I-90 (painel). Mostra o catálogo completo, sem destaque.
-  if (visa_type === "green_card" || visa_type === "citizen") return null;
-  if (visa_type === "b1" || visa_type === "b1b2") return "b1";
-  if (visa_type === "e2")      return "e2";
-  if (visa_type === "e1")      return null; // sem kit E-1 ainda — mostra o catálogo completo
+  if (visa_type === "green_card") {
+    if (main_goal === "cidadania")      return "n400";
+    if (main_goal === "renovar_visto")  return "i90";
+    if (main_goal === "reentry_permit") return "i131";
+    return null; // trazer_familia e demais: painel mostra o card certo
+  }
+  if (visa_type === "citizen") return null;
+  if (visa_type === "b1" || visa_type === "b1b2") {
+    return location === "eua" ? "b1-cos" : "b1";
+  }
+  if (visa_type === "e2")      return location === "eua" ? "e2-cos" : "e2";
+  if (visa_type === "e1")      return location === "eua" ? "e1-cos" : "e1";
+  if (visa_type === "eb5")     return "eb5";
+  if (visa_type === "asylee")  return "asylee";
   if (location === "brasil")   return "f1";
   if (location === "eua" && main_goal === "renovar_visto") return "f1-renovacao";
   if (location === "eua")      return "f1-cos";

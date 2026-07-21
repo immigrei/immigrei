@@ -20,6 +20,10 @@ describe("findCatalogVisto", () => {
       ["E-1 (Comércio por Tratado)", "e1"],
       ["E-2 (Investidor por Tratado)", "e2"],
       ["EB-2 NIW (Green Card por Interesse Nacional)", "eb2niw"],
+      ["EB-5 (Green Card por Investimento)", "eb5"],
+      ["K-1 (Noivo/a) ou IR-1/CR-1 (Cônjuge Casado)", "k1"],
+      ["F-2 (Familiar de Residente Permanente)", "family-gc"],
+      ["Asilo (Proteção Humanitária)", "asylee"],
     ];
     for (const [title, id] of cases) {
       expect(findCatalogVisto(title)?.id, title).toBe(id);
@@ -37,10 +41,7 @@ describe("findCatalogVisto", () => {
       "Transferência de H-1B (novo empregador)",
       "Transferência de H-1B (guia passo a passo)",
       "H-1B via Mudança de Status",
-      "F-2 (Familiar de Residente Permanente)",
-      "K-1 (Noivo/a) ou IR-1/CR-1 (Cônjuge Casado)",
       "IR-1 / IR-2 (Parente Imediato de Cidadão)",
-      "EB-5 (Green Card por Investimento)",
       "EB-1 (Green Card por Habilidade Extraordinária)",
       "Green Card por Patrocínio (EB-2 / EB-3)",
       "⚠️ Entrada por ESTA/VWP: sem extensão ou mudança de status",

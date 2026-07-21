@@ -36,15 +36,26 @@ describe("getStrategy — residente permanente (visa_type green_card)", () => {
     expect(JSON.stringify(s)).not.toContain("NIW");
   });
 
-  it("cidadania → N-400", () => {
+  it("cidadania → N-400, kit n400", () => {
     const s = getStrategy(profile({ visa_type: "green_card", main_goal: "cidadania" }));
     expect(s.subtitulo).toContain("N-400");
+    expect(s.kitId).toBe("n400");
+    expect(s.ctaHref).toBeUndefined();
   });
 
-  it("renovar_visto → I-90 com alerta do condicional I-751", () => {
+  it("renovar_visto → I-90 com alerta do condicional I-751, kit i90", () => {
     const s = getStrategy(profile({ visa_type: "green_card", main_goal: "renovar_visto" }));
     expect(s.subtitulo).toContain("I-90");
     expect(s.destaque?.texto).toContain("I-751");
+    expect(s.kitId).toBe("i90");
+    expect(s.ctaHref).toBeUndefined();
+  });
+
+  it("reentry_permit → I-131, kit i131 (bug do deriveMainGoal corrigido)", () => {
+    const s = getStrategy(profile({ visa_type: "green_card", main_goal: "reentry_permit" }));
+    expect(s.subtitulo).toContain("I-131");
+    expect(s.kitId).toBe("i131");
+    expect(s.ctaHref).toBeUndefined();
   });
 
   it("objetivo genérico → visão geral do residente, sem NIW", () => {
@@ -55,10 +66,22 @@ describe("getStrategy — residente permanente (visa_type green_card)", () => {
 });
 
 describe("getStrategy — cidadão americano (visa_type citizen)", () => {
-  it("trazer_familia → petição de familiar", () => {
+  it("trazer_familia sem family_ties → CTA genérico (não dá pra saber K-1 vs I-130)", () => {
     const s = getStrategy(profile({ visa_type: "citizen", main_goal: "trazer_familia" }));
     expect(s.subtitulo).toContain("Petição de familiar");
     expect(JSON.stringify(s.etapas)).toContain("I-130");
+    expect(s.ctaHref).toBe("/profissionais");
+  });
+
+  it("trazer_familia + family_ties=spouse_citizen → getFamilyTiesCard resolve o kit certo", () => {
+    const s = getStrategy(profile({ visa_type: "citizen", main_goal: "trazer_familia", family_ties: "spouse_citizen" }));
+    expect(s.ctaHref).toBe("/documentos/k1");
+    expect(s.ctaHref).not.toBe("/profissionais");
+  });
+
+  it("trazer_familia + family_ties=parent_child_citizen → aponta pro kit familia-ir", () => {
+    const s = getStrategy(profile({ visa_type: "citizen", main_goal: "trazer_familia", family_ties: "parent_child_citizen" }));
+    expect(s.ctaHref).toBe("/documentos/familia-ir");
   });
 
   it("entender_direitos → direitos básicos", () => {
@@ -86,10 +109,12 @@ describe("getStrategy — CTA", () => {
 // Regressão: nenhum visa_type salvo pelo onboarding pode cair no fallback
 // genérico "Complete seu perfil" — cada um precisa de uma jornada própria.
 describe("getStrategy — visa_types sem branch dedicado caíam no fallback genérico", () => {
-  it("b1/b1b2 nos EUA → jornada de prazo do I-94, não o fallback", () => {
+  it("b1/b1b2 nos EUA → jornada de prazo do I-94, kit b1-cos", () => {
     const s = getStrategy(profile({ visa_type: "b1", location: "eua", main_goal: "renovar_visto" }));
     expect(s.situacao).not.toContain("Complete seu perfil");
     expect(s.situacao).toContain("I-94");
+    expect(s.kitId).toBe("b1-cos");
+    expect(s.ctaHref).toBeUndefined();
   });
 
   it("b1/b1b2 no Brasil → kit consular b1", () => {
@@ -132,28 +157,31 @@ describe("getStrategy — visa_types sem branch dedicado caíam no fallback gen�
     expect(s.kitId).toBe("e2");
   });
 
-  it("e2 nos EUA → mudança de status por I-129, sem DS-160 e sem kit ainda", () => {
+  it("e2 nos EUA → mudança de status por I-129, sem DS-160, kit e2-cos", () => {
     const s = getStrategy(profile({ visa_type: "e2", location: "eua" }));
-    expect(s.kitId).toBe("");
-    expect(s.ctaHref).toBe("/profissionais");
+    expect(s.kitId).toBe("e2-cos");
+    expect(s.ctaHref).toBeUndefined();
     expect(JSON.stringify(s.etapas)).not.toContain("DS-160 + DS-156E");
   });
 
-  it("e1 fora dos EUA → jornada consular dedicada, sem kit", () => {
+  it("e1 fora dos EUA → jornada consular dedicada, com kit e1", () => {
     const s = getStrategy(profile({ visa_type: "e1", location: "brasil" }));
     expect(s.situacao).not.toContain("Complete seu perfil");
-    expect(s.ctaHref).toBe("/profissionais");
+    expect(s.kitId).toBe("e1");
+    expect(s.ctaHref).toBeUndefined();
   });
 
-  it("e1 nos EUA → mudança de status por I-129, sem DS-160", () => {
+  it("e1 nos EUA → mudança de status por I-129, sem DS-160, kit e1-cos", () => {
     const s = getStrategy(profile({ visa_type: "e1", location: "eua" }));
-    expect(s.ctaHref).toBe("/profissionais");
+    expect(s.kitId).toBe("e1-cos");
+    expect(s.ctaHref).toBeUndefined();
     expect(JSON.stringify(s.etapas)).not.toContain("DS-160 + DS-156E");
   });
 
-  it("asylee → jornada de asilo com alerta de prazo", () => {
+  it("asylee → jornada de asilo com alerta de prazo e kit próprio", () => {
     const s = getStrategy(profile({ visa_type: "asylee" }));
     expect(s.destaque?.texto).toContain("I-589");
+    expect(s.kitId).toBe("asylee");
   });
 
   it("outro → jornada de situação em definição, não o fallback genérico", () => {
@@ -216,10 +244,10 @@ describe("getFamilyTiesCard — porta de Green Card por vínculo familiar", () =
     expect(card?.links).toEqual([{ label: "Ver o caminho completo", href: "/documentos/familia-ir" }]);
   });
 
-  it("family_gc → card de familiar com Green Card, com link para familia-ir", () => {
+  it("family_gc → card de familiar com Green Card, com link para o kit próprio (não familia-ir)", () => {
     const card = getFamilyTiesCard("family_gc");
     expect(card?.titulo).toContain("Green Card");
-    expect(card?.links).toEqual([{ label: "Ver o caminho completo", href: "/documentos/familia-ir" }]);
+    expect(card?.links).toEqual([{ label: "Ver o caminho completo", href: "/documentos/family-gc" }]);
   });
 
   it("none → sem card (sem vínculo)", () => {

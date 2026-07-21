@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
 import { findCatalogVisto } from "@/lib/vistosCatalog";
+import { getFamilyTiesCard } from "@/lib/strategy";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -725,7 +726,7 @@ function getRecommendations(answers: Answers): VisaResult[] {
 // ("Baseado no seu perfil") e rebaixa os demais — nunca os esconde: todo
 // perfil mantém as rotas paralelas visíveis.
 const CATALOG_IDS = new Set([
-  "f1", "m1", "j1", "h1b", "o1", "l1", "b1", "esta", "e2", "e1", "eb2niw",
+  "f1", "m1", "j1", "h1b", "o1", "l1", "b1", "esta", "e2", "e1", "eb2niw", "eb5",
 ]);
 
 export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
@@ -759,6 +760,11 @@ export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
     add("e1");
   }
   if (a.q_business_type === "trade" && a.q_nationality === "treaty") add("e1");
+  // EB-5 é comparado lado a lado com E-2/L-1 nesse ramo — faz sentido entrar
+  // na vitrine em vez de ir direto pro kit (diferente de K-1/asilo/family_gc,
+  // que não têm "opções pra comparar").
+  if (a.q_business_type === "invest_permanent") add("eb5");
+  if (a.q_permanent_path === "invest") add("eb5");
 
   return [...ids];
 }
@@ -766,16 +772,19 @@ export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
 // ─── Destination derivation ───────────────────────────────────────────────────
 
 // Para onde os resultados do onboarding levam. Regra: a vitrine de vistos só
-// recebe quem tem algo para destacar nela (focus); beneficiários de petição
-// familiar (K-1, IR/CR, F-2), overstay e perfis sem card no catálogo vão
-// direto para ajuda profissional — "Qual é o seu visto?" é a pergunta errada
-// para eles.
+// recebe quem tem algo para destacar nela (focus) — casos de petição
+// familiar (K-1, IR/CR, F2A/F2B) e asilo não têm "opções pra comparar", então
+// vão direto para o kit de documentos certo. Só overstay e perfis sem nenhum
+// card no catálogo (dependente sem foco, DV lottery, mudança de status sem
+// destino) vão para ajuda profissional — "Qual é o seu visto?" é a pergunta
+// errada para eles, e ainda não temos kit pronto.
 export type Destination =
   | { kind: "i94" }
   | { kind: "dashboard"; visaType: "green_card" | "citizen" }
   | { kind: "profissionais" }
   | { kind: "documentos"; vistoId: string }
-  | { kind: "vistos"; query: string };
+  | { kind: "vistos"; query: string }
+  | { kind: "family-choice" };
 
 export function deriveDestination(a: Answers, results: VisaResult[]): Destination {
   const currentStatus = resolveCurrentStatus(a);
@@ -789,26 +798,62 @@ export function deriveDestination(a: Answers, results: VisaResult[]): Destinatio
   if (currentStatus === "green_card") return { kind: "dashboard", visaType: "green_card" };
   if (currentStatus === "citizen") return { kind: "dashboard", visaType: "citizen" };
 
-  // Parente imediato de cidadão americano (cônjuge, filho, pai/mãe) SEM
-  // overstay: a jornada é a petição familiar consular — o kit IR-1/IR-2
-  // dentro do app (login-gated), não a vitrine de vistos nem só a lista de
-  // profissionais.
-  if (
-    currentStatus !== "overstay" &&
-    (a.q_family_ties === "spouse_citizen" || a.q_family_ties === "parent_child_citizen")
-  ) {
+  // Vínculo familiar com cidadão americano — cada categoria tem caminho
+  // próprio, com ou sem overstay (os kits já trazem o guardrail certo pra
+  // cada situação de entrada: a exceção de parente imediato do INA §245(a)
+  // cobre overstay, e a regra dos 90 dias cobre quem entrou pelo ESTA/VWP).
+  //
+  // "spouse_citizen" junta noivo(a) e cônjuge já casado numa única resposta
+  // do onboarding — como são caminhos legais diferentes (K-1 vs I-130),
+  // deixamos a pessoa se identificar em vez de escolher por ela (mesmo card
+  // que lib/strategy.ts já usa no painel — getFamilyTiesCard).
+  if (a.q_family_ties === "spouse_citizen") return { kind: "family-choice" };
+  // Parente imediato de cidadão (filho/pai/mãe): petição familiar direta,
+  // sem fila — kit IR-1/IR-2 dentro do app (login-gated).
+  if (a.q_family_ties === "parent_child_citizen") {
+    return { kind: "documentos", vistoId: "familia-ir" };
+  }
+  // Familiar com Green Card (F2A/F2B): categoria de preferência com fila.
+  // Com overstay, o ajuste por dentro nessa categoria em regra não é
+  // permitido — kit bifurcado explica os dois cenários possíveis em vez do
+  // kit padrão (que assume status válido).
+  if (a.q_family_ties === "family_gc") {
+    return {
+      kind: "documentos",
+      vistoId: currentStatus === "overstay" ? "family-gc-overstay" : "family-gc",
+    };
+  }
+  // ESTA/VWP + "sou cônjuge ou parente imediato de cidadão": pergunta não
+  // distingue noivo(a) (K-1 não se aplica a quem já está nos EUA), então vai
+  // direto pro kit familiar — o guardrail de regra dos 90 dias já está lá.
+  if (a.q_esta_goal === "family_citizen") {
     return { kind: "documentos", vistoId: "familia-ir" };
   }
 
-  // Overstay, ajuste por parente imediato (exceção do VWP) e beneficiários
-  // de petição familiar com fila (F-2): casos sensíveis demais para um kit
-  // genérico — as jornadas de visto padrão não se aplicam.
-  if (
-    currentStatus === "overstay" ||
-    a.q_esta_goal === "family_citizen" ||
-    (a.q_family_ties && a.q_family_ties !== "none")
-  ) {
-    return { kind: "profissionais" };
+  // Asilo: caso sensível demais para implicar "compare as opções" — vai
+  // direto pro kit, igual petição familiar acima.
+  if (a.q_permanent_path === "asylum") {
+    return { kind: "documentos", vistoId: "asylee" };
+  }
+
+  // Overstay SEM vínculo familiar: não tem processo único (diferente de
+  // K-1/EB-5/asilo/F2A-F2B), mas também não é só "fale com um profissional"
+  // — mapeamos as portas estreitas reais (waiver, cancelamento de remoção,
+  // VAWA, U-visa, T-visa) antes de mandar pra lá.
+  if (currentStatus === "overstay") {
+    return { kind: "documentos", vistoId: "overstay-sem-vinculo" };
+  }
+
+  // DV Lottery: processo único (inscrição eletrônica em dvprogram.state.gov),
+  // não precisa comparar opções na vitrine.
+  if (a.q_permanent_path === "lottery") {
+    return { kind: "documentos", vistoId: "dv-lottery" };
+  }
+
+  // Extensão de dependente (F-2/H-4/L-2/J-2): sempre I-539 atrelado ao
+  // titular principal — direto pro kit em vez da vitrine.
+  if (a.q_change_goal === "extend" && a.q_current_visa === "dependent") {
+    return { kind: "documentos", vistoId: "dependente-cos" };
   }
 
   const params = new URLSearchParams();
@@ -819,10 +864,18 @@ export function deriveDestination(a: Answers, results: VisaResult[]): Destinatio
   if (a.q_location) params.set("location", a.q_location === "in_us" ? "eua" : "brasil");
   params.set("goal", deriveMainGoal(a));
 
+  // Mudança de status sem destino escolhido: o próprio card de resultado já
+  // promete "compare os vistos disponíveis na próxima tela" — manda pra
+  // vitrine completa (sem filtro de foco) em vez do catch-all de
+  // /profissionais, que contradizia esse texto.
+  if (a.q_change_goal === "change_status" && a.q_target_visa === "other") {
+    return { kind: "vistos", query: params.toString() };
+  }
+
   const focus = deriveFocusIds(a, results);
   // Vitrine sem nada para destacar = perfil sem caminho de visto mapeado
-  // (asilo, EB-5, dependentes…) — melhor um profissional que um catálogo
-  // genérico.
+  // (visto atual "outro" pedindo extensão, por exemplo) — melhor um
+  // profissional que um catálogo genérico.
   if (focus.length === 0) return { kind: "profissionais" };
   params.set("focus", focus.join(","));
 
@@ -1588,7 +1641,7 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
       // Não existe "asilo consular": o I-589 só é protocolado dentro dos EUA
       // ou na fronteira (INA §208). De fora, a via é o programa de refugiados.
       results.push({
-        visa: "Asilo / Refúgio",
+        visa: "Asilo (Proteção Humanitária)",
         forms: "I-589 (somente dentro dos EUA) ou USRAP via ACNUR (de fora)",
         description:
           "Proteção para quem tem fundado temor de perseguição por raça, religião, nacionalidade, opinião política ou grupo social. Importante: o pedido de asilo só pode ser feito dentro dos EUA ou na fronteira — de fora, o caminho é o programa de refugiados (USRAP), por indicação do ACNUR. Caso sensível: procure um advogado de imigração licenciado.",
@@ -1647,6 +1700,7 @@ export function deriveMainGoal(a: Answers): string {
   if (a.q_change_goal === "change_status" || a.q_change_goal === "work_change") return "regularizar_status";
   if (a.q_gc_goal === "naturalization") return "cidadania";
   if (a.q_gc_goal === "renew") return "renovar_visto";
+  if (a.q_gc_goal === "reentry") return "reentry_permit";
   // Overstay vem antes dos vínculos familiares: quem passou do prazo está
   // regularizando o próprio status, mesmo quando a saída é via família.
   if (resolveCurrentStatus(a) === "overstay") return "regularizar_status";
@@ -1858,7 +1912,7 @@ export default function OnboardingPage() {
   // ter a resposta do questionário salva antes de navegar, senão o painel
   // nunca sabe desse vínculo e a pessoa não tem perfil algum ao voltar.
   // `dest` é a rota final: /profissionais ou um kit em /documentos/[vistoId].
-  async function saveProfileAndGoTo(dest: string) {
+  async function saveProfileAndGoTo(dest: string, extra?: Record<string, unknown>) {
     if (savingProfile) return;
     setSavingProfile(true);
     setSaveError(null);
@@ -1867,6 +1921,7 @@ export default function OnboardingPage() {
       location: answers.q_location === "in_us" ? "eua" : "brasil",
       ...(answers.q_nationality ? { nationality: answers.q_nationality } : {}),
       ...(answers.q_family_ties ? { family_ties: answers.q_family_ties } : {}),
+      ...extra,
     };
     try {
       const res = await fetch("/api/profile", {
@@ -2174,13 +2229,36 @@ export default function OnboardingPage() {
             >
               {savingProfile ? "Salvando sua jornada..." : "Ir para o meu painel →"}
             </button>
+          ) : destino.kind === "family-choice" ? (
+            <div className="w-full flex flex-col gap-3">
+              <p
+                className="text-ink-soft text-sm text-center leading-relaxed"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                {getFamilyTiesCard("spouse_citizen")?.texto}
+              </p>
+              {getFamilyTiesCard("spouse_citizen")?.links.map((link) => (
+                <button
+                  key={link.href}
+                  onClick={() => saveProfileAndGoTo(link.href)}
+                  disabled={savingProfile}
+                  className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  {savingProfile ? "Salvando sua jornada..." : `${link.label} →`}
+                </button>
+              ))}
+            </div>
           ) : (
             <button
               onClick={() =>
                 destino.kind === "profissionais"
                   ? saveProfileAndGoTo("/profissionais")
                   : destino.kind === "documentos"
-                    ? saveProfileAndGoTo(`/documentos/${destino.vistoId}`)
+                    ? saveProfileAndGoTo(
+                        `/documentos/${destino.vistoId}`,
+                        destino.vistoId === "asylee" ? { visa_type: "asylee" } : undefined
+                      )
                     : goToVistos(destino.query)
               }
               disabled={destino.kind !== "vistos" && savingProfile}

@@ -1131,6 +1131,234 @@ export const VISTO_PAGES: Record<string, VistoPage> = {
     fonteLeis: ["vistos/esta-vwp.md", "vistos/b1-b2.md"],
     verificadoEm: "2026-07-16",
   },
+
+  // ── K-1 — Noivo(a) de Cidadão Americano ────────────────────────────────
+  k1: {
+    id: "k1",
+    tagline:
+      "Para casar nos EUA em até 90 dias com um cidadão americano — não é visto de casamento, é visto de noivado.",
+    oQueE: [
+      "O K-1 é uma classificação de não-imigrante para o(a) noivo(a) estrangeiro(a) de um cidadão americano vir aos EUA se casar. Só o cidadão pode peticionar — titular de Green Card não tem esse caminho. O processo começa com o I-129F no USCIS, depois vai ao consulado (DS-160 + entrevista) para o visto K-1 em si.",
+      "Diferente de outros vistos, o K-1 tem um relógio embutido: o casamento precisa acontecer dentro de 90 dias da entrada nos EUA, sem exceção nem prorrogação. Depois de casar, o ajuste de status (I-485) troca o K-1 pelo Green Card — mas isso não é automático, precisa ser pedido.",
+    ],
+    quemPode: [
+      "Casais noivos onde um lado é cidadão americano (não Green Card) e o outro mora fora dos EUA.",
+      "Quem teve um encontro pessoal com o(a) noivo(a) nos últimos 2 anos — ou tem uma exceção bem documentada (costume cultural/religioso ou dificuldade extraordinária).",
+      "Casais onde ambos estão legalmente livres para casar — sem casamento anterior pendente de divórcio.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Só cidadão pode peticionar — Green Card holder, não",
+        texto:
+          "Se o parceiro nos EUA só tem Green Card (não é cidadão), o K-1 não se aplica. O caminho nesse caso é casar e entrar na fila F2A, ou esperar a naturalização do titular do Green Card.",
+        base: "INA §101(a)(15)(K)",
+      },
+      {
+        titulo: "Perder os 90 dias sem casar fecha a porta do K-1",
+        texto:
+          "Não existe prorrogação nem conversão para outro status dentro do prazo. Quem não casar em 90 dias fica sem status válido e deve deixar os EUA.",
+        base: "8 CFR §214.2(k)(6)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "90 dias para casar, contados da entrada",
+        texto: "O relógio começa na entrada com o visto K-1 — não na aprovação do I-129F nem na chegada planejada.",
+        tone: "clay",
+      },
+      {
+        titulo: "Ajuste de status (I-485) não é automático",
+        texto: "Depois de casar, o pedido de Green Card precisa ser protocolado — o casamento sozinho não confere status.",
+        tone: "amber",
+      },
+    ],
+    passos: [
+      { titulo: "Reunir prova do encontro pessoal", texto: "Passagens, carimbos de passaporte e fotos com data dos últimos 2 anos — a base da petição." },
+      { titulo: "I-129F protocolado pelo cidadão", texto: "O peticionário (cidadão americano) protocola no USCIS a favor do(a) noivo(a)." },
+      { titulo: "Aprovação e envio ao consulado", texto: "Depois de aprovado, o caso vai ao NVC e ao consulado no país do(a) noivo(a)." },
+      { titulo: "DS-160 e entrevista consular", texto: "O(a) noivo(a) preenche o DS-160 e passa pela entrevista de visto K-1." },
+      { titulo: "Entrada e casamento dentro de 90 dias", texto: "O casamento precisa acontecer nesse prazo — sem exceção." },
+      { titulo: "Ajuste de status (I-485)", texto: "Depois de casar, o pedido de Green Card troca o K-1 pela residência permanente." },
+    ],
+    pontes: [
+      { label: "Já casados, não noivos? Veja o caminho IR-1/CR-1", href: "/documentos/familia-ir" },
+    ],
+    kit: { kitId: "k1", label: "Checklist completo do K-1" },
+    fontesOficiais: [
+      { label: "USCIS — I-129F, Petition for Alien Fiancé(e)", url: "https://www.uscis.gov/i-129f" },
+    ],
+    fonteLeis: ["vistos/k1.md"],
+    verificadoEm: "2026-07-20",
+  },
+
+  // ── F2A/F2B — Família de Titular de Green Card ─────────────────────────
+  "family-gc": {
+    id: "family-gc",
+    tagline:
+      "Cônjuge ou filho solteiro de quem já tem Green Card — com fila real, diferente da família de cidadão.",
+    oQueE: [
+      "Cônjuge e filho solteiro de titular de Green Card entram nas categorias de preferência F2A (cônjuge e filhos <21) ou F2B (filhos solteiros 21+) — diferente de família de cidadão americano, que é parente imediato e não espera fila nenhuma.",
+      "O titular do Green Card protocola o I-130 no USCIS. Depois disso, o processo tem uma fase que família de cidadão não tem: esperar a data de prioridade da petição ficar 'current' na categoria certa do Boletim de Vistos, antes de qualquer próximo passo.",
+    ],
+    quemPode: [
+      "Cônjuge de titular de Green Card, casado e com o vínculo comprovado (categoria F2A).",
+      "Filho solteiro, menor de 21 (F2A) ou 21 anos ou mais (F2B), de titular de Green Card.",
+      "Casos onde o peticionário mantém o status de residente permanente durante toda a espera.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Antes da data de prioridade current, não há o que protocolar",
+        texto:
+          "Diferente de família de cidadão, aqui existe fila numérica de verdade — a Fase 3 (DS-260 ou I-485) só começa quando a categoria F2A/F2B do país de nascimento do beneficiário está current.",
+        base: "INA §203(a)(2)",
+      },
+      {
+        titulo: "Filho que se casa sai da categoria",
+        texto: "Filho solteiro que se casa antes do Green Card perde a elegibilidade em F2A/F2B — precisa continuar solteiro até o ajuste de status.",
+        base: "INA §203(a)(2)(A)-(B)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "A fila muda todo mês — nunca uma data fixa",
+        texto: "Consulte sempre a categoria F2A ou F2B atual no Boletim de Vistos para o país de nascimento do beneficiário antes de agir.",
+        tone: "amber",
+      },
+      {
+        titulo: "F2A costuma andar mais rápido que F2B",
+        texto: "Em vários meses, F2A chega perto de 'current'; F2B tende a ter espera de vários anos.",
+        tone: "pine",
+      },
+    ],
+    passos: [
+      { titulo: "I-130 protocolado pelo titular do Green Card", texto: "Prova o vínculo (casamento ou nascimento) e o status de residente permanente do peticionário." },
+      { titulo: "Aguardar a aprovação e o registro no NVC", texto: "Depois de aprovado, o caso fica registrado aguardando a data de prioridade." },
+      { titulo: "Acompanhar o Boletim de Vistos", texto: "A categoria F2A/F2B precisa ficar current para o país de nascimento do beneficiário." },
+      { titulo: "DS-260 (fora dos EUA) ou I-485 (dentro, em status válido)", texto: "Só começa quando a data está current." },
+      { titulo: "Entrevista ou decisão do ajuste", texto: "Consular: entrevista no consulado. Doméstico: decisão do USCIS sobre o I-485." },
+    ],
+    pontes: [
+      { label: "Titular do Green Card virou cidadão? Veja o caminho de parente imediato", href: "/documentos/familia-ir" },
+    ],
+    kit: { kitId: "family-gc", label: "Checklist completo do F2A/F2B" },
+    fontesOficiais: [
+      {
+        label: "USCIS — Family of Green Card Holders (Permanent Residents)",
+        url: "https://www.uscis.gov/family/family-of-green-card-holders-permanent-residents",
+      },
+      {
+        label: "Dept. of State — Visa Bulletin",
+        url: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html",
+      },
+    ],
+    fonteLeis: ["vistos/family-gc.md"],
+    verificadoEm: "2026-07-20",
+  },
+
+  // ── EB-5 — Green Card por Investimento ─────────────────────────────────
+  eb5: {
+    id: "eb5",
+    tagline: "Green Card direto via investimento — sem patrocinador, sem oferta de emprego, disponível para brasileiros.",
+    oQueE: [
+      "O EB-5 dá residência permanente direta a quem investe capital próprio em um negócio americano que crie empregos — sem depender de patrocinador ou oferta de emprego. É autopetição: o próprio investidor protocola.",
+      "A maioria dos casos hoje passa por um Regional Center (projeto de terceiros), usando o formulário I-526E, criado pela EB-5 Reform and Integrity Act de 2022. Quem estrutura o próprio negócio, sem Regional Center, usa o I-526 original.",
+    ],
+    quemPode: [
+      "Quem tem capital próprio para investir no valor mínimo exigido (padrão ou reduzido em área de investimento-alvo — TEA).",
+      "Quem consegue documentar a origem lícita de todo o capital investido.",
+      "Quem investe em projeto (ou negócio próprio) capaz de criar pelo menos 10 empregos em tempo integral para trabalhadores americanos.",
+    ],
+    bloqueios: [
+      {
+        titulo: "Origem do capital não comprovada mata o caso",
+        texto:
+          "O USCIS exige rastrear de onde veio cada parte do valor investido — herança, venda de bens, poupança. Sem essa trilha documental completa, o I-526/I-526E é negado.",
+        base: "8 CFR §204.6(j)",
+      },
+      {
+        titulo: "Menos de 10 empregos criados reprova o I-829",
+        texto: "O Green Card condicional só vira permanente se o investimento realmente gerou (ou preservou) os empregos prometidos.",
+        base: "INA §203(b)(5)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "I-526/I-526E tramitando — meses a anos",
+        texto: "O tempo de processamento varia bastante por tipo de petição; categorias reservadas (rural, alto desemprego) costumam andar mais rápido.",
+        tone: "amber",
+      },
+      {
+        titulo: "I-829 nos 90 dias antes do vencimento condicional",
+        texto: "O Green Card condicional dura 2 anos — o I-829 precisa ser protocolado na janela certa, não depois.",
+        tone: "clay",
+      },
+    ],
+    passos: [
+      { titulo: "Escolher o projeto ou estruturar o negócio próprio", texto: "Regional Center (I-526E) ou investimento direto (I-526)." },
+      { titulo: "Documentar a origem do capital", texto: "A parte que mais atrasa o caso — comece cedo." },
+      { titulo: "Protocolar o I-526 ou I-526E", texto: "Com o plano de negócio e a prova de criação de empregos." },
+      { titulo: "Green Card condicional (2 anos)", texto: "Via ajuste de status (I-485) ou processo consular (DS-260)." },
+      { titulo: "I-829 — remoção das condições", texto: "Prova que o investimento e os empregos se concretizaram. Aprovado, vira Green Card permanente." },
+    ],
+    pontes: [
+      { label: "EB-2 NIW — alternativa por mérito, sem capital", href: "/vistos/eb2niw" },
+      { label: "L-1 — alternativa para quem já tem empresa no Brasil", href: "/vistos/l1" },
+    ],
+    kit: { kitId: "eb5", label: "Checklist completo do EB-5" },
+    fontesOficiais: [
+      {
+        label: "USCIS — EB-5 Immigrant Investor Program",
+        url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/eb-5-immigrant-investor-program",
+      },
+    ],
+    fonteLeis: ["vistos/eb5.md"],
+    verificadoEm: "2026-07-20",
+  },
+
+  // ── Asilo — Proteção Humanitária ────────────────────────────────────────
+  asylee: {
+    id: "asylee",
+    tagline: "Proteção para quem tem fundado temor de perseguição — só dentro dos EUA, caso sensível.",
+    oQueE: [
+      "O asilo protege quem tem fundado temor de perseguição no país de origem por raça, religião, nacionalidade, opinião política ou pertencimento a um grupo social específico. Só pode ser pedido dentro dos EUA ou na fronteira — não existe 'asilo consular' a partir do Brasil.",
+      "É um caso sensível, com prazos rígidos e consequências sérias se mal documentado. Este guia ajuda a se organizar, mas o acompanhamento de um advogado de imigração licenciado é fortemente recomendado — mesmo usando o checklist.",
+    ],
+    quemPode: [
+      "Quem já está nos EUA (ou chega à fronteira) e tem fundado temor de perseguição documentável.",
+      "Quem consegue protocolar o I-589 dentro de 1 ano da última entrada — ou comprovar uma exceção (mudança de circunstâncias ou circunstância extraordinária).",
+    ],
+    bloqueios: [
+      {
+        titulo: "Fora dos EUA, o I-589 não se aplica",
+        texto: "De fora dos EUA, a via correspondente é o programa de refugiados (USRAP), por indicação do ACNUR — processo totalmente diferente do asilo.",
+        base: "INA §208(a)",
+      },
+      {
+        titulo: "Prazo de 1 ano sem exceção documentada fecha a porta afirmativa",
+        texto: "Perder o prazo sem provar mudança de circunstâncias ou circunstância extraordinária compromete seriamente o asilo afirmativo (direto no USCIS).",
+        base: "INA §208(a)(2)(B)",
+      },
+    ],
+    prazos: [
+      { titulo: "1 ano da última entrada para protocolar o I-589", texto: "Regra geral, com exceções que precisam ser provadas — não são automáticas.", tone: "clay" },
+      { titulo: "150/180 dias para o I-765 (autorização de trabalho)", texto: "Só pode ser pedido 150 dias após o I-589 pendente; o EAD não sai antes de 180.", tone: "amber" },
+      { titulo: "1 ano após a concessão para pedir o Green Card", texto: "O asilo concedido não vira Green Card sozinho — o I-485 precisa ser protocolado.", tone: "pine" },
+    ],
+    passos: [
+      { titulo: "Reunir evidências do fundado temor", texto: "Documentos, laudos, notícias — a base do caso, antes de protocolar." },
+      { titulo: "Protocolar o I-589", texto: "Dentro de 1 ano da última entrada, sem taxa." },
+      { titulo: "Pedir o I-765 após 150 dias", texto: "Autorização de trabalho enquanto o caso tramita." },
+      { titulo: "Entrevista (afirmativo) ou audiência (defensivo)", texto: "Asylum Office do USCIS ou corte de imigração (EOIR), conforme o tipo de caso." },
+      { titulo: "Concessão e, 1 ano depois, o I-485", texto: "O Green Card por asilo precisa ser pedido — não é automático." },
+    ],
+    pontes: [],
+    kit: { kitId: "asylee", label: "Checklist completo do Asilo" },
+    fontesOficiais: [
+      { label: "USCIS — I-589, Application for Asylum and for Withholding of Removal", url: "https://www.uscis.gov/i-589" },
+    ],
+    fonteLeis: ["vistos/asylee.md"],
+    verificadoEm: "2026-07-20",
+  },
 };
 
 export function getVistoPage(id: string): VistoPage | null {

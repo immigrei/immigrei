@@ -109,12 +109,19 @@ describe("cobertura do onboarding sobre o catálogo do produto", () => {
       expect(card).toBeDefined();
       expect(card!.visa).not.toContain("se aplicável");
       expect(card!.description).toContain("245(a)");
-      expect(deriveDestination(overstay("spouse_citizen"), r)).toEqual({ kind: "profissionais" });
+      // Mesmo com overstay, cônjuge/noivo(a) de cidadão se identifica entre
+      // K-1 e IR-1 (mesmo chooser de quem não overstayou) — os dois kits já
+      // trazem o guardrail de overstay/245(a).
+      expect(deriveDestination(overstay("spouse_citizen"), r)).toEqual({ kind: "family-choice" });
     });
 
     it("pais/filhos de cidadão → mesmo caminho por dentro", () => {
       const r = recs(overstay("parent_child_citizen"));
       expect(r.some((x) => x.forms.includes("I-130 + I-485") && !x.visa.includes("se aplicável"))).toBe(true);
+      expect(deriveDestination(overstay("parent_child_citizen"), r)).toEqual({
+        kind: "documentos",
+        vistoId: "familia-ir",
+      });
     });
 
     it("parente com green card → F2A com fila e alerta de saída", () => {
@@ -122,12 +129,25 @@ describe("cobertura do onboarding sobre o catálogo do produto", () => {
       const card = r.find((x) => x.forms.includes("F2A"));
       expect(card).toBeDefined();
       expect(card!.description).toContain("Não saia dos EUA");
+      // Kit bifurcado (não o kit padrão de family-gc, que assume status
+      // válido) — explica os dois cenários possíveis com overstay.
+      expect(deriveDestination(overstay("family_gc"), r)).toEqual({
+        kind: "documentos",
+        vistoId: "family-gc-overstay",
+      });
     });
 
     it("sem vínculos → mantém orientação genérica com saídas", () => {
       const r = recs(overstay("none"));
       expect(r.length).toBeGreaterThan(0);
       expect(r.some((x) => x.visa.includes("se aplicável"))).toBe(true);
+      // Sem vínculo qualificado, o destino é o mapa de portas estreitas
+      // (waiver/cancelamento/VAWA/U-visa/T-visa), não mais o "Em breve"
+      // genérico de /profissionais.
+      expect(deriveDestination(overstay("none"), r)).toEqual({
+        kind: "documentos",
+        vistoId: "overstay-sem-vinculo",
+      });
     });
 
     it("overstay + vínculo familiar → main_goal regularizar_status, não trazer_familia", () => {
@@ -149,6 +169,9 @@ describe("objetivo derivado para quem já tem residência ou cidadania", () => {
   });
   it("green card buscando naturalização → cidadania", () => {
     expect(deriveMainGoal(gc("naturalization"))).toBe("cidadania");
+  });
+  it("green card pedindo Reentry Permit → reentry_permit (antes caía em 'outro')", () => {
+    expect(deriveMainGoal(gc("reentry"))).toBe("reentry_permit");
   });
   it("green card peticionando família → trazer_familia", () => {
     expect(
@@ -261,10 +284,14 @@ describe("saídas para quem entrou de ESTA/VWP", () => {
     );
   });
 
-  it("parente imediato de cidadão → exceção I-130+I-485, sem kit de visto", () => {
+  it("parente imediato de cidadão → exceção I-130+I-485, kit familia-ir (guardrail de 90 dias já embutido)", () => {
     const r = recs(esta("family_citizen"));
     expect(r.some((x) => x.forms.includes("I-130") && x.forms.includes("I-485"))).toBe(true);
     for (const x of r) expect(x.href ?? "").not.toMatch(/^\/documentos/);
+    expect(deriveDestination(esta("family_citizen"), r)).toEqual({
+      kind: "documentos",
+      vistoId: "familia-ir",
+    });
   });
 
   it("só visitando → orientação de uso do ESTA, sem jornada de visto", () => {
@@ -275,28 +302,79 @@ describe("saídas para quem entrou de ESTA/VWP", () => {
 
 // Beneficiários de petição familiar não escolhem visto na vitrine — a
 // jornada deles é a petição que o parente protocola. Parente imediato de
-// cidadão (IR-1/IR-2, sem fila) tem kit próprio dentro do app; F-2 (fila,
-// caso sensível) segue para ajuda profissional. Regressão do caso real:
-// perfil F-2 caía na vitrine genérica sem nenhum destaque.
+// cidadão (IR-1/IR-2, sem fila) tem kit próprio dentro do app; cônjuge/
+// noivo(a) escolhe entre K-1 e IR-1 (mesmo card do painel); parente com
+// Green Card (F2A/F2B, com fila) tem kit próprio também — nenhum dos três
+// passa mais pela ajuda profissional genérica.
 describe("perfis familiares saem da vitrine para o destino certo", () => {
-  const imediatos: Array<{ nome: string; answers: Answers }> = [
-    { nome: "reunir com família + cônjuge cidadão (K-1/IR-1)",
-      answers: { q_location: "outside", q_goal: "family", q_family_ties: "spouse_citizen" } },
-    { nome: "reunir com família + pais/filhos cidadãos (IR-1/IR-2)",
-      answers: { q_location: "outside", q_goal: "family", q_family_ties: "parent_child_citizen" } },
-  ];
-
-  it.each(imediatos)("$nome → kit familia-ir em /documentos", ({ answers }) => {
+  it("reunir com família + pais/filhos cidadãos (IR-1/IR-2) → kit familia-ir", () => {
+    const answers: Answers = { q_location: "outside", q_goal: "family", q_family_ties: "parent_child_citizen" };
     const r = recs(answers);
     expect(r.length).toBeGreaterThan(0);
     expect(deriveDestination(answers, r)).toEqual({ kind: "documentos", vistoId: "familia-ir" });
   });
 
-  it("morar permanentemente + parente com green card (F-2) → /profissionais", () => {
+  it("reunir com família + cônjuge/noivo(a) cidadão → escolha K-1 vs IR-1", () => {
+    const answers: Answers = { q_location: "outside", q_goal: "family", q_family_ties: "spouse_citizen" };
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    expect(deriveDestination(answers, r)).toEqual({ kind: "family-choice" });
+  });
+
+  it("morar permanentemente + parente com green card (F2A/F2B) → kit family-gc", () => {
     const answers: Answers = { q_location: "outside", q_goal: "live", q_family_ties: "family_gc" };
     const r = recs(answers);
     expect(r.length).toBeGreaterThan(0);
-    expect(deriveDestination(answers, r)).toEqual({ kind: "profissionais" });
+    expect(deriveDestination(answers, r)).toEqual({ kind: "documentos", vistoId: "family-gc" });
+  });
+
+  it("permanente via asilo → kit asylee, sem vitrine", () => {
+    const answers: Answers = { q_location: "outside", q_goal: "live", q_family_ties: "none", q_permanent_path: "asylum" };
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    expect(deriveDestination(answers, r)).toEqual({ kind: "documentos", vistoId: "asylee" });
+  });
+
+  it("permanente via investimento (EB-5) → vitrine com foco em eb5", () => {
+    const answers: Answers = { q_location: "outside", q_goal: "live", q_family_ties: "none", q_permanent_path: "invest" };
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    const destino = deriveDestination(answers, r);
+    expect(destino.kind).toBe("vistos");
+    if (destino.kind === "vistos") {
+      expect(new URLSearchParams(destino.query).get("focus")).toContain("eb5");
+    }
+  });
+
+  it("permanente via DV Lottery → kit dv-lottery, sem vitrine", () => {
+    const answers: Answers = { q_location: "outside", q_goal: "live", q_family_ties: "none", q_permanent_path: "lottery" };
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    expect(deriveDestination(answers, r)).toEqual({ kind: "documentos", vistoId: "dv-lottery" });
+  });
+
+  it("extensão de dependente (F-2/H-4/L-2/J-2) → kit dependente-cos", () => {
+    const answers: Answers = {
+      q_location: "in_us", q_current_status: "in_status",
+      q_current_visa: "dependent", q_change_goal: "extend",
+    };
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    expect(deriveDestination(answers, r)).toEqual({ kind: "documentos", vistoId: "dependente-cos" });
+  });
+
+  it("mudança de status sem destino escolhido → vitrine completa (sem filtro), não /profissionais", () => {
+    const answers: Answers = {
+      q_location: "in_us", q_current_status: "in_status",
+      q_current_visa: "b1b2", q_change_goal: "change_status", q_target_visa: "other",
+    };
+    const r = recs(answers);
+    expect(r.length).toBeGreaterThan(0);
+    const destino = deriveDestination(answers, r);
+    expect(destino.kind).toBe("vistos");
+    if (destino.kind === "vistos") {
+      expect(new URLSearchParams(destino.query).get("focus")).toBeNull();
+    }
   });
 });
 
@@ -337,11 +415,20 @@ describe("todo perfil do onboarding tem um destino", () => {
 
       const destino = deriveDestination(answers, r);
       if (destino.kind === "vistos") {
-        // Chegou à vitrine → precisa ter pelo menos um card em destaque.
-        const focus = new URLSearchParams(destino.query).get("focus");
-        expect(focus, "perfil chegou à vitrine sem nenhum card para destacar").toBeTruthy();
+        // Mudança de status sem destino escolhido é a única exceção: o
+        // próprio card de resultado promete "compare os vistos disponíveis"
+        // — vitrine completa, sem filtro de foco, de propósito.
+        const isChangeStatusSemDestino =
+          answers.q_change_goal === "change_status" && answers.q_target_visa === "other";
+        if (isChangeStatusSemDestino) {
+          expect(new URLSearchParams(destino.query).get("focus")).toBeNull();
+        } else {
+          // Chegou à vitrine → precisa ter pelo menos um card em destaque.
+          const focus = new URLSearchParams(destino.query).get("focus");
+          expect(focus, "perfil chegou à vitrine sem nenhum card para destacar").toBeTruthy();
+        }
       } else {
-        expect(["i94", "dashboard", "profissionais", "documentos"]).toContain(destino.kind);
+        expect(["i94", "dashboard", "profissionais", "documentos", "family-choice"]).toContain(destino.kind);
       }
     }
   );

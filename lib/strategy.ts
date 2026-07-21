@@ -60,7 +60,7 @@ const FAMILY_TIES_CARD: Record<string, { titulo: string; texto: string; links: F
   family_gc: {
     titulo: "Você tem familiar próximo com Green Card",
     texto:  "Residentes permanentes peticionam cônjuge e filhos solteiros (categorias F2A/F2B). Há fila — acompanhe a data de prioridade no Boletim de Vistos.",
-    links: [{ label: "Ver o caminho completo", href: "/documentos/familia-ir" }],
+    links: [{ label: "Ver o caminho completo", href: "/documentos/family-gc" }],
   },
 };
 
@@ -335,10 +335,8 @@ export function getStrategy(profile: Profile): Strategy {
           { tipo: "atencao",  texto: "Viagens de 6 meses ou mais podem quebrar a residência contínua — some as ausências antes de protocolar." },
           { tipo: "proibido", texto: "Não protocole com pendências criminais ou de impostos sem análise profissional — o N-400 reabre todo o seu histórico de imigração." },
         ],
-        kitId:    "",
-        kitLabel: "Preparação com profissional verificado",
-        ctaHref:  "/profissionais",
-        ctaDesc:  "Revisão do histórico e preparação para a entrevista",
+        kitId:    "n400",
+        kitLabel: "Kit N-400 — naturalização",
       };
     }
 
@@ -358,10 +356,28 @@ export function getStrategy(profile: Profile): Strategy {
         guardrails: [
           { tipo: "atencao", texto: "Não viaje com o cartão vencido sem o recibo I-797 — a reentrada pode complicar." },
         ],
-        kitId:    "",
-        kitLabel: "Falar com um profissional verificado",
-        ctaHref:  "/profissionais",
-        ctaDesc:  "Dúvidas sobre condicional, ausências longas ou cartão perdido",
+        kitId:    "i90",
+        kitLabel: "Kit I-90 — renovação do Green Card",
+      };
+    }
+
+    if (main_goal === "reentry_permit") {
+      return {
+        titulo:    `Jornada de ${nome}`,
+        subtitulo: "Reentry Permit · I-131",
+        situacao:  `Você quer proteger seu Green Card em uma ausência mais longa dos EUA. O Reentry Permit (I-131) cobre até 2 anos fora — mas precisa ser protocolado ANTES de você sair do país.`,
+        destaque: { tipo: "alerta", texto: "Se você já saiu dos EUA sem protocolar o I-131 antes, esse caminho não se aplica mais ao seu caso — fale com um profissional para avaliar as alternativas." },
+        etapas: [
+          { num: "1", estado: "agora",   titulo: "Confirmar que ainda está nos EUA", desc: "Requisito inegociável — o I-131 precisa ser protocolado antes da saída." },
+          { num: "2", estado: "proximo", titulo: "Protocolar o I-131",               desc: "Categoria Reentry Permit, específica para titulares de Green Card.", linkExterno: { label: "Formulário em uscis.gov/i-131", url: "https://www.uscis.gov/i-131" } },
+          { num: "3", estado: "proximo", titulo: "Biometria antes de viajar",         desc: "Feita nos EUA — o USCIS agenda a coleta de digitais e foto antes da sua viagem." },
+          { num: "✓", estado: "futuro",  titulo: "Levar o comprovante na viagem",    desc: "Recibo (e depois o documento final) junto do Green Card e do passaporte na reentrada." },
+        ],
+        guardrails: [
+          { tipo: "atencao", texto: "Ausências de 6 meses ou mais sem o Reentry Permit podem ser lidas como abandono da residência." },
+        ],
+        kitId:    "i131",
+        kitLabel: "Kit I-131 — Reentry Permit",
       };
     }
 
@@ -389,6 +405,13 @@ export function getStrategy(profile: Profile): Strategy {
   // ── Cidadão americano ────────────────────────────────────────────────
   if (visa_type === "citizen") {
     if (main_goal === "trazer_familia") {
+      // Quando o cidadão respondeu de quem se trata (q_family_ties, mesmo
+      // vocabulário do onboarding), getFamilyTiesCard já resolve pro kit
+      // certo — mesma fonte que o painel usa pro card separado de vínculo
+      // familiar. Sem essa resposta, não dá pra saber se é K-1 (noivo(a) no
+      // exterior) ou I-130 (parente já qualificado) — mantém o CTA genérico.
+      const familyCard = getFamilyTiesCard(profile.family_ties);
+      const primaryLink = familyCard?.links[0];
       return {
         titulo:    `Jornada de ${nome}`,
         subtitulo: "Petição de familiar · cidadão americano",
@@ -405,9 +428,9 @@ export function getStrategy(profile: Profile): Strategy {
           { tipo: "atencao",  texto: "Irmãos (F4) enfrentam fila de décadas — vale checar rotas paralelas para quem não pode esperar." },
         ],
         kitId:    "",
-        kitLabel: "Falar com um profissional verificado",
-        ctaHref:  "/profissionais",
-        ctaDesc:  "Categoria certa e timing — antes de protocolar",
+        kitLabel: primaryLink ? "Ver o caminho completo" : "Falar com um profissional verificado",
+        ctaHref:  primaryLink?.href ?? "/profissionais",
+        ctaDesc:  primaryLink ? familyCard!.titulo : "Categoria certa e timing — antes de protocolar",
       };
     }
 
@@ -482,10 +505,8 @@ export function getStrategy(profile: Profile): Strategy {
         { tipo: "proibido", texto: "B-1/B-2 não autoriza trabalho remunerado nos EUA, nem para empresa brasileira remota — só reuniões, negociações e turismo." },
         { tipo: "atencao",  texto: "Passar do prazo do I-94 sem pedido de extensão ou mudança de status protocolado começa a contar presença irregular." },
       ],
-      kitId:    "",
-      kitLabel: "Falar com um profissional verificado",
-      ctaHref:  "/profissionais",
-      ctaDesc:  "Extensão, mudança de status ou dúvida sobre o prazo do I-94",
+      kitId:    "b1-cos",
+      kitLabel: "Kit B-1/B-2 — extensão ou mudança de status",
     };
   }
 
@@ -586,8 +607,6 @@ export function getStrategy(profile: Profile): Strategy {
   }
 
   // ── E-2 — mudança de status dentro dos EUA ────────────────────────────
-  // Ainda não existe kit de documentos para essa rota (só a consular, "e2"),
-  // então o CTA vai para /profissionais em vez de um checklist inexistente.
   if (visa_type === "e2" && location === "eua") {
     return {
       titulo:    `Jornada de ${nome}`,
@@ -602,10 +621,8 @@ export function getStrategy(profile: Profile): Strategy {
       guardrails: [
         { tipo: "atencao", texto: "O E-2 não leva direto ao Green Card — as pontes comuns são EB-5, EB-1C (executivo) ou EB-2 NIW." },
       ],
-      kitId:    "",
-      kitLabel: "Falar com um profissional verificado",
-      ctaHref:  "/profissionais",
-      ctaDesc:  "Ainda não temos kit de documentos pronto para essa rota — comece com uma conversa",
+      kitId:    "e2-cos",
+      kitLabel: "Kit E-2 — mudança de status",
     };
   }
 
@@ -645,10 +662,8 @@ export function getStrategy(profile: Profile): Strategy {
       guardrails: [
         { tipo: "atencao", texto: "O E-1 não leva direto ao Green Card — executivos podem olhar o EB-1C; perfis qualificados, o EB-2 NIW." },
       ],
-      kitId:    "",
-      kitLabel: "Falar com um profissional verificado",
-      ctaHref:  "/profissionais",
-      ctaDesc:  "Ainda não temos kit de documentos pronto para essa rota — comece com uma conversa",
+      kitId:    "e1-cos",
+      kitLabel: "Kit E-1 — mudança de status",
     };
   }
 
@@ -667,10 +682,8 @@ export function getStrategy(profile: Profile): Strategy {
       guardrails: [
         { tipo: "atencao", texto: "O E-1 não leva direto ao Green Card — executivos podem olhar o EB-1C; perfis qualificados, o EB-2 NIW." },
       ],
-      kitId:    "",
-      kitLabel: "Falar com um profissional verificado",
-      ctaHref:  "/profissionais",
-      ctaDesc:  "Montar o dossiê de comércio substancial com quem já fez",
+      kitId:    "e1",
+      kitLabel: "Kit E-1 — visto de comerciante",
     };
   }
 
@@ -691,10 +704,8 @@ export function getStrategy(profile: Profile): Strategy {
       guardrails: [
         { tipo: "proibido", texto: "Perder o prazo de 1 ano sem exceção documentada pode fechar a porta do asilo afirmativo — não deixe para depois." },
       ],
-      kitId:    "",
-      kitLabel: "Falar com um profissional verificado",
-      ctaHref:  "/profissionais",
-      ctaDesc:  "Casos de asilo exigem acompanhamento próximo — comece com uma conversa",
+      kitId:    "asylee",
+      kitLabel: "Kit de Asilo — organize o caso",
     };
   }
 

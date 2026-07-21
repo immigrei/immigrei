@@ -2291,6 +2291,28 @@ const checklists: Record<string, ChecklistVisto> = {
     },
     grupos: [
       {
+        titulo: "Se você está fora de status hoje",
+        descricao: "Overstay ou entrada pelo ESTA/VWP mudam o processo — mas parente imediato de cidadão tem uma exceção real",
+        documentos: [
+          {
+            id: "familiair-overstay",
+            nome: "Overstay: a exceção do parente imediato (INA §245(a))",
+            descricao:
+              "Cônjuge, pai/mãe ou filho(a) solteiro(a) menor de 21 de cidadão americano que entrou nos EUA com inspeção pode ajustar o status por dentro (I-130 + I-485 concorrentes), mesmo com overstay. Como você não sai do país, as barras de 3/10 anos (INA §212(a)(9)(B)) nunca disparam. A forma de entrada e as provas do vínculo genuíno decidem o caso — vale reunir isso com um profissional antes de protocolar.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "familiair-esta",
+            nome: "Entrou pelo ESTA/VWP: regra dos 90 dias e prova de intenção",
+            descricao:
+              "Quem entra com ESTA/Visa Waiver Program e decide ajustar o status por casamento com cidadão precisa cuidar da aparência de intenção imigratória na entrada — ajustar rápido demais (nos primeiros 90 dias) pode levantar suspeita de má-fé na entrada. Documentar quando o relacionamento e a decisão de casar realmente começaram é essencial.",
+            agencia: "CBP",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
         titulo: "Fase 1 — Petição I-130 no USCIS",
         descricao: "Protocolada pelo parente cidadão americano; prova o vínculo familiar",
         documentos: [
@@ -2460,6 +2482,20 @@ const checklists: Record<string, ChecklistVisto> = {
     },
     grupos: [
       {
+        titulo: "Se você já está nos EUA hoje (overstay ou ESTA/VWP)",
+        descricao: "O K-1 é para quem vai entrar de FORA dos EUA — se você já está aqui, pode não ser a rota certa",
+        documentos: [
+          {
+            id: "k1-ja-nos-eua",
+            nome: "Já está nos EUA com o prazo vencido ou entrou pelo ESTA/VWP?",
+            descricao:
+              "O K-1 pressupõe entrada consular vindo de fora — não é possível 'trocar' pra K-1 estando já nos EUA. Se você já está aqui e é noivo(a) de cidadão americano, casar agora e ajustar o status por dentro (I-130 + I-485 concorrentes) costuma ser o caminho mais realista — mesma exceção de parente imediato do INA §245(a) que já vale para cônjuges. Veja o kit Família de Cidadão Americano (IR-1/IR-2) e avalie com um profissional qual dos dois se aplica ao seu caso.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
         titulo: "Fase 1 — Petição I-129F no USCIS",
         descricao: "Protocolada pelo cidadão americano; prova o noivado genuíno e o encontro pessoal recente",
         documentos: [
@@ -2588,6 +2624,1045 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-864",
             formId: "i-864",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "family-gc": {
+    vistoId: "family-gc",
+    codigo: "F2A/F2B",
+    nome: "Cônjuge ou Filho de Residente Permanente",
+    intro:
+      "Diferente de família de cidadão americano, cônjuge e filho solteiro de quem já tem Green Card entram numa categoria de preferência (F2A ou F2B) — com fila numérica de verdade. O processo tem três fases: a petição I-130 no USCIS (protocolada pelo titular do Green Card), a espera até a data de prioridade ficar current, e só então o visto de imigrante (consulado) ou o ajuste de status (dentro dos EUA).",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 247",
+      alertaCritico:
+        "Quem protocola a I-130 é o TITULAR do Green Card (o peticionário) — não o beneficiário. E, ao contrário de família de cidadão, aqui existe fila real: nada acontece na Fase 3 antes da data de prioridade da I-130 ficar current no Boletim de Vistos, categoria F2A ou F2B, para o país de nascimento do beneficiário.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Petição I-130 no USCIS",
+        descricao: "Protocolada pelo titular do Green Card; prova o vínculo familiar e o próprio status de residente",
+        documentos: [
+          {
+            id: "i130-fgc",
+            nome: "Formulário I-130 — quem preenche é o TITULAR do Green Card (peticionário)",
+            descricao:
+              "Preenchido e assinado pelo peticionário — o parente que já tem Green Card. Cada beneficiário exige uma I-130 própria. Confira a taxa atual em uscis.gov/i-130.",
+            agencia: "USCIS",
+            formulario: "I-130",
+            formId: "i-130",
+            obrigatorio: true,
+          },
+          {
+            id: "i130a-fgc",
+            nome: "Formulário I-130A — quem preenche é O CÔNJUGE beneficiário",
+            descricao:
+              "Obrigatório somente na categoria F2A (cônjuge) — acompanha a I-130 no mesmo envelope. Filhos (F2A ou F2B) não precisam.",
+            agencia: "USCIS",
+            formulario: "I-130A",
+            formId: "i-130a",
+            obrigatorio: false,
+          },
+          {
+            id: "prova-green-card",
+            nome: "Prova do Green Card do peticionário",
+            descricao: "Cópia da frente e verso do cartão de residente permanente válido.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "certidoes-vinculo-fgc",
+            nome: "Certidões que provam o vínculo",
+            descricao:
+              "Certidão de casamento (F2A cônjuge) ou de nascimento (F2A/F2B filho), com tradução certificada se em português. Filho F2B precisa provar que continua solteiro.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "g1145-fgc",
+            nome: "Formulário G-1145 — aviso por e-mail/SMS quando o USCIS receber (opcional)",
+            descricao: "Grampeie na frente do pacote da I-130 para saber por e-mail/SMS quando o USCIS aceitar.",
+            agencia: "USCIS",
+            formulario: "G-1145",
+            formId: "g-1145",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 2 — Aguardar a data de prioridade",
+        descricao: "Não há o que protocolar aqui — é acompanhar o Boletim de Vistos até a categoria F2A/F2B ficar current",
+        documentos: [
+          {
+            id: "acompanhar-bulletin",
+            nome: "Acompanhar a categoria F2A ou F2B no Boletim de Vistos",
+            descricao:
+              "A data de prioridade é a data em que a I-130 foi protocolada. Quando ela fica \"current\" na categoria certa (para o país de nascimento do beneficiário), a Fase 3 pode começar. F2A costuma andar mais rápido que F2B.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "manter-endereco-atualizado",
+            nome: "Manter endereço e contato atualizados no NVC",
+            descricao:
+              "Depois da aprovação da I-130, o caso já fica registrado no National Visa Center — atualize endereço se mudar, para não perder a notificação quando a data virar current.",
+            agencia: "DOS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 3 — Visto de imigrante (DS-260) ou ajuste de status (I-485)",
+        descricao: "Só começa depois que a data de prioridade está current",
+        documentos: [
+          {
+            id: "ds260-fgc",
+            nome: "Formulário DS-260 — Immigrant Visa Application",
+            descricao: "Preenchido online no portal CEAC pelo beneficiário, se estiver fora dos EUA.",
+            agencia: "DOS",
+            formulario: "DS-260",
+            obrigatorio: false,
+          },
+          {
+            id: "i485-fgc",
+            nome: "Formulário I-485 — se o beneficiário já estiver nos EUA em status válido",
+            descricao:
+              "Rota alternativa ao DS-260: ajuste de status dentro dos EUA, só possível quando a data de prioridade já está current E o beneficiário está em situação elegível.",
+            agencia: "USCIS",
+            formulario: "I-485",
+            formId: "i-485",
+            obrigatorio: false,
+          },
+          {
+            id: "i864-fgc",
+            nome: "Formulário I-864 — quem preenche é o TITULAR do Green Card (patrocinador)",
+            descricao: "Exige renda de pelo menos 125% da linha de pobreza — se não alcançar, um co-patrocinador pode assinar outro I-864.",
+            agencia: "USCIS",
+            formulario: "I-864",
+            formId: "i-864",
+            obrigatorio: true,
+          },
+          {
+            id: "documentos-civis-fgc",
+            nome: "Documentos civis do beneficiário",
+            descricao: "Certidão de nascimento, antecedentes criminais, passaporte válido — para o consulado ou para o I-485.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "eb5": {
+    vistoId: "eb5",
+    codigo: "EB-5",
+    nome: "Green Card por Investimento",
+    intro:
+      "O EB-5 dá Green Card direto a quem investe capital próprio em negócio americano que crie empregos — sem patrocinador, sem oferta de emprego. O processo tem três fases: a petição inicial (I-526E, para investimento via Regional Center, ou I-526 para negócio próprio direto), o Green Card condicional de 2 anos, e a remoção das condições (I-829) provando que o investimento e os empregos se concretizaram de verdade.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 297",
+      alertaCritico:
+        "A parte que mais atrasa o caso é a origem lícita do capital — documentar de onde veio o dinheiro (herança, venda de empresa, poupança) exige tempo. Comece a organizar essa documentação antes de escolher o projeto.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Petição inicial (I-526E ou I-526)",
+        descricao: "Prova a origem do capital e o plano de negócio que vai gerar os empregos",
+        documentos: [
+          {
+            id: "i526e",
+            nome: "Formulário I-526E — investimento via Regional Center",
+            descricao:
+              "Para quem investe num projeto de terceiros (Regional Center) — o formato mais comum hoje. Não existe preenchimento automático ainda; monte o dossiê com o time do projeto e um advogado de imigração.",
+            agencia: "USCIS",
+            formulario: "I-526E",
+            obrigatorio: false,
+          },
+          {
+            id: "i526",
+            nome: "Formulário I-526 — investimento direto (negócio próprio)",
+            descricao: "Para quem estrutura e opera o próprio negócio nos EUA, sem Regional Center.",
+            agencia: "USCIS",
+            formulario: "I-526",
+            obrigatorio: false,
+          },
+          {
+            id: "prova-origem-capital",
+            nome: "Prova da origem lícita do capital",
+            descricao:
+              "Documentação completa de onde veio o dinheiro investido — declarações de imposto de renda, contratos de venda, escrituras, extratos bancários com o histórico da movimentação.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "plano-negocio-eb5",
+            nome: "Plano de negócio e prova de criação de empregos",
+            descricao: "Projeção de pelo menos 10 empregos em tempo integral para trabalhadores americanos, documentada conforme o tipo de projeto.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 2 — Green Card condicional (2 anos)",
+        descricao: "Via ajuste de status (se já nos EUA em status válido) ou processo consular pelo NVC",
+        documentos: [
+          {
+            id: "i485-eb5",
+            nome: "Formulário I-485 — se já estiver nos EUA em status válido",
+            descricao: "Ajuste de status depois da aprovação do I-526E/I-526.",
+            agencia: "USCIS",
+            formulario: "I-485",
+            formId: "i-485",
+            obrigatorio: false,
+          },
+          {
+            id: "ds260-eb5",
+            nome: "Formulário DS-260 — se estiver fora dos EUA",
+            descricao: "Processo consular via NVC, alternativo ao ajuste de status.",
+            agencia: "DOS",
+            formulario: "DS-260",
+            obrigatorio: false,
+          },
+          {
+            id: "i131-eb5",
+            nome: "Formulário I-131 — permissão de viagem enquanto o I-485 corre (opcional)",
+            descricao: "Só para quem escolheu o ajuste de status dentro dos EUA.",
+            agencia: "USCIS",
+            formulario: "I-131",
+            formId: "i-131",
+            obrigatorio: false,
+          },
+          {
+            id: "i765-eb5",
+            nome: "Formulário I-765 (c)(9) — permissão de trabalho enquanto o I-485 corre (opcional)",
+            descricao: "Só para quem escolheu o ajuste de status dentro dos EUA, sem taxa adicional.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            formId: "i-765-aos",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 3 — Remoção das condições (I-829)",
+        descricao: "Protocolado nos 90 dias antes do vencimento do Green Card condicional",
+        documentos: [
+          {
+            id: "i829",
+            nome: "Formulário I-829 — remoção das condições",
+            descricao:
+              "Prova que o investimento continuou e que os empregos foram criados ou preservados de verdade. Aprovado, vira Green Card permanente, sem condição.",
+            agencia: "USCIS",
+            formulario: "I-829",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "asylee": {
+    vistoId: "asylee",
+    codigo: "Asilo",
+    nome: "Proteção Humanitária (Asilo)",
+    intro:
+      "O asilo protege quem tem fundado temor de perseguição no país de origem por raça, religião, nacionalidade, opinião política ou grupo social. Só pode ser pedido dentro dos EUA ou na fronteira — nunca pelo consulado no Brasil. É um caso sensível: use este guia para se organizar, mas o acompanhamento de um advogado de imigração licenciado é fortemente recomendado.",
+    kit: {
+      caminho: "manutencao",
+      preco: "R$ 297",
+      alertaCritico:
+        "O I-589 precisa, em regra, ser protocolado até 1 ano da sua última entrada nos EUA. Perder esse prazo sem uma exceção bem documentada (mudança de circunstâncias ou circunstâncias extraordinárias) pode fechar a porta do asilo afirmativo — não deixe para depois.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Pedido de asilo (I-589)",
+        descricao: "Dentro do prazo de 1 ano da última entrada — sem taxa de protocolo",
+        documentos: [
+          {
+            id: "i589",
+            nome: "Formulário I-589 — Application for Asylum and for Withholding of Removal",
+            descricao:
+              "Sem taxa de protocolo. Reúna evidências do fundado temor de perseguição antes de preencher — declaração pessoal detalhada, documentos, notícias, laudos, o que sustentar o caso.",
+            agencia: "USCIS",
+            formulario: "I-589",
+            obrigatorio: true,
+          },
+          {
+            id: "evidencias-perseguicao",
+            nome: "Evidências do fundado temor de perseguição",
+            descricao:
+              "Boletins de ocorrência, laudos médicos ou psicológicos, notícias, declarações de testemunhas — o que documentar o motivo do pedido.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 2 — Autorização de trabalho enquanto o caso tramita",
+        descricao: "Só pode ser pedida 150 dias depois do protocolo do I-589 ainda pendente",
+        documentos: [
+          {
+            id: "i765-asylee",
+            nome: "Formulário I-765 (c)(8) — autorização de trabalho",
+            descricao:
+              "Protocolado só depois de 150 dias do I-589 pendente. O EAD em si não sai antes de 180 dias — o relógio pode pausar se o atraso for causado pelo próprio requerente.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            formId: "i-765",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 3 — Entrevista ou audiência",
+        descricao: "Caso afirmativo: entrevista no USCIS. Caso defensivo (já em processo de remoção): audiência na corte de imigração",
+        documentos: [
+          {
+            id: "entrevista-asilo",
+            nome: "Entrevista de asilo (afirmativo) ou audiência (defensivo)",
+            descricao:
+              "Afirmativo: entrevista no Asylum Office do USCIS. Defensivo: decidido por um juiz de imigração na corte (EOIR), não pelo USCIS.",
+            agencia: "EOIR",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 4 — Depois da concessão: Green Card",
+        descricao: "1 ano após o asilo concedido, é possível pedir a residência permanente",
+        documentos: [
+          {
+            id: "i485-asylee",
+            nome: "Formulário I-485 — ajuste de status por asilo",
+            descricao: "Protocolado 1 ano ou mais após a concessão do asilo. Não é automático — precisa ser pedido.",
+            agencia: "USCIS",
+            formulario: "I-485",
+            formId: "i-485",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "overstay-sem-vinculo": {
+    vistoId: "overstay-sem-vinculo",
+    codigo: "Portas estreitas",
+    nome: "Passou do prazo, sem vínculo familiar qualificado",
+    intro:
+      "Diferente de F-1, EB-5, asilo ou família de green card, esse perfil não tem um processo único a seguir — as portas que existem dependem de fatos específicos do seu caso, não de um formulário padrão. Uma delas NÃO é o asilo: pedir sem um temor fundado de perseguição real (raça, religião, opinião política, nacionalidade, grupo social) não passa de uma avaliação séria, e um pedido considerado frívolo fecha permanentemente qualquer benefício futuro de imigração (INA §208(d)(6)) — nunca é uma tática para 'ganhar tempo'. O Brasil também não está na lista de países com TPS hoje. Por isso este mapa serve para você entender as portas reais antes de falar com um profissional — não para preencher sozinho.",
+    grupos: [
+      {
+        titulo: "Waiver de presença ilegal (I-601 / I-601A)",
+        descricao: "Só existe se você já tem base para um visto de imigrante — o waiver perdoa a presença ilegal, não cria elegibilidade",
+        documentos: [
+          {
+            id: "i601a-base",
+            nome: "Já existe uma petição de imigrante em andamento ou aprovada?",
+            descricao:
+              "Familiar (I-130), trabalhista (I-140) ou seleção na loteria DV. Sem uma dessas bases, o I-601A não tem onde se apoiar.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "i601a-hardship",
+            nome: "Hardship extremo a cônjuge ou pai/mãe cidadão(ã) americano(a) ou residente permanente",
+            descricao:
+              "O waiver exige provar sofrimento extremo dessa pessoa qualificada caso você não consiga voltar — não basta o seu próprio hardship.",
+            agencia: "USCIS",
+            formulario: "I-601A",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Cancelamento de remoção (non-LPR)",
+        descricao: "Só é possível dentro de um processo de remoção perante um juiz de imigração — não é um pedido espontâneo ao USCIS",
+        documentos: [
+          {
+            id: "cancelacao-10anos",
+            nome: "10 anos de presença física contínua nos EUA",
+            descricao: "Contados até a data de início do processo de remoção (Notice to Appear).",
+            agencia: "EOIR",
+            obrigatorio: true,
+          },
+          {
+            id: "cancelacao-moral",
+            nome: "Bons antecedentes morais nesse período",
+            descricao: "Sem condenações das listadas em INA §212(a)(2), §237(a)(2) ou §237(a)(3).",
+            agencia: "EOIR",
+            obrigatorio: true,
+          },
+          {
+            id: "cancelacao-hardship",
+            nome: "Hardship 'excepcional e extraordinariamente incomum' a parente qualificado",
+            descricao: "Cônjuge, pai/mãe ou filho(a) cidadão(ã) americano(a) ou residente permanente.",
+            agencia: "EOIR",
+            formulario: "EOIR-42B",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "VAWA — auto-petição (I-360)",
+        descricao: "Para quem sofreu abuso de cônjuge ou pai/mãe cidadão(ã)/residente — exige ter tido esse vínculo",
+        documentos: [
+          {
+            id: "vawa-vinculo",
+            nome: "Vínculo qualificado com o(a) agressor(a)",
+            descricao: "Cônjuge ou filho(a) de cidadão(ã)/residente abusivo, ou pai/mãe de filho(a) cidadão(ã) 21+ que sofreu abuso.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "vawa-abuso",
+            nome: "Prova de violência ou crueldade extrema",
+            descricao: "Pode ser protocolado sem o conhecimento ou consentimento do(a) agressor(a).",
+            agencia: "USCIS",
+            formulario: "I-360",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "U-visa — vítima de crime",
+        descricao: "Para quem foi vítima de um crime qualificado nos EUA e colaborou com a investigação",
+        documentos: [
+          {
+            id: "u-visa-vitima",
+            nome: "Vítima de crime qualificado com abuso físico ou mental substancial",
+            descricao: "O crime precisa ter ocorrido nos EUA ou violado lei americana.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "u-visa-certificacao",
+            nome: "Certificação de utilidade (I-918B) da polícia ou promotoria",
+            descricao: "Sem a certificação de que você ajudou (ou vai ajudar) a investigação, a petição não avança.",
+            agencia: "USCIS",
+            formulario: "I-918",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "T-visa — vítima de tráfico humano",
+        descricao: "Estrutura parecida com o U-visa, mas para vítimas de tráfico de pessoas (trabalho ou sexual)",
+        documentos: [
+          {
+            id: "t-visa-vitima",
+            nome: "Vítima de tráfico humano, presente nos EUA por causa do tráfico",
+            descricao: "Trabalho forçado ou tráfico sexual — a presença nos EUA precisa decorrer diretamente disso.",
+            agencia: "USCIS",
+            formulario: "I-914",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  n400: {
+    vistoId: "n400",
+    codigo: "N-400",
+    nome: "Naturalização — Cidadania Americana",
+    intro:
+      "Você já tem o Green Card — a naturalização é a última etapa da jornada. Regra geral: 5 anos como residente, ou 3 se casado(a) e vivendo com cidadão americano. Dá para protocolar até 90 dias antes de completar o prazo.",
+    kit: { caminho: "manutencao", preco: "R$ 197" },
+    grupos: [
+      {
+        titulo: "Confirmar elegibilidade",
+        descricao: "O relógio de residência e presença física precisam bater antes de protocolar",
+        documentos: [
+          {
+            id: "n400-tempo-residencia",
+            nome: "5 anos como residente (ou 3, se casado(a) e vivendo com cidadão)",
+            descricao: "Contados desde a data em que o Green Card foi aprovado.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "n400-presenca-fisica",
+            nome: "Residência contínua e presença física em pelo menos metade do período",
+            descricao: "Viagens de 6 meses ou mais podem quebrar a residência contínua — some suas ausências antes de protocolar.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Levantar o histórico",
+        descricao: "O N-400 pergunta tudo — viagens, endereços, empregos e impostos dos últimos 5 anos",
+        documentos: [
+          {
+            id: "n400-viagens",
+            nome: "Lista de viagens internacionais dos últimos 5 anos",
+            descricao: "Datas de saída e retorno de cada viagem fora dos EUA.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "n400-enderecos-empregos",
+            nome: "Endereços e empregadores dos últimos 5 anos",
+            descricao: "Histórico completo, sem lacunas.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "n400-impostos",
+            nome: "Declaração de imposto em dia",
+            descricao: "Pendências criminais ou de impostos merecem análise profissional antes de protocolar — o N-400 reabre todo o seu histórico de imigração.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Protocolar o N-400",
+        descricao: "US$710 online ou US$760 em papel — renda entre 150–400% da linha da pobreza paga US$380",
+        documentos: [
+          {
+            id: "n400-formulario",
+            nome: "Formulário N-400 — Application for Naturalization",
+            descricao: "Pode ser protocolado até 90 dias antes de completar o prazo de residência.",
+            agencia: "USCIS",
+            formulario: "N-400",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Biometria, entrevista e juramento",
+        descricao: "Últimas etapas antes de se tornar cidadão americano",
+        documentos: [
+          {
+            id: "n400-biometria",
+            nome: "Biometria",
+            descricao: "Coleta de digitais e foto.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "n400-entrevista",
+            nome: "Entrevista, teste de inglês e cívica",
+            descricao: "As perguntas do teste cívico são públicas, disponíveis no site do USCIS.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+          {
+            id: "n400-juramento",
+            nome: "Cerimônia de juramento",
+            descricao: "Você se torna cidadão americano.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  i90: {
+    vistoId: "i90",
+    codigo: "I-90",
+    nome: "Renovação do Green Card",
+    intro:
+      "O cartão de 10 anos se renova com o I-90 — processo direto com o USCIS, sem entrevista consular. Renove se já venceu ou vence nos próximos 6 meses. Green Card CONDICIONAL de 2 anos (por casamento) é outro processo — I-751, protocolado nos 90 dias antes do vencimento, nunca o I-90.",
+    kit: { caminho: "manutencao", preco: "R$ 97" },
+    grupos: [
+      {
+        titulo: "Conferir o cartão",
+        descricao: "Confirme qual processo se aplica ao seu caso antes de protocolar",
+        documentos: [
+          {
+            id: "i90-tipo-cartao",
+            nome: "Confirmar se o cartão é de 10 anos (I-90) ou condicional de 2 anos (I-751)",
+            descricao: "São formulários diferentes — protocolar o errado atrasa o processo inteiro.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Protocolar o I-90",
+        descricao: "US$415 online ou US$465 em papel, direto na conta USCIS",
+        documentos: [
+          {
+            id: "i90-formulario",
+            nome: "Formulário I-90 — Application to Replace Permanent Resident Card",
+            descricao: "Vencido ou a vencer em 6 meses: hora de renovar.",
+            agencia: "USCIS",
+            formulario: "I-90",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Recibo, biometria e novo cartão",
+        descricao: "O I-797 de recebimento já estende a validade do cartão vencido",
+        documentos: [
+          {
+            id: "i90-recibo",
+            nome: "Guardar o recibo I-797",
+            descricao: "Estende a validade do cartão vencido — guarde junto do cartão antigo para trabalho e viagens. Não viaje com o cartão vencido sem o recibo.",
+            agencia: "USCIS",
+            formulario: "I-797",
+            obrigatorio: true,
+          },
+          {
+            id: "i90-biometria",
+            nome: "Biometria, se convocada",
+            descricao: "Reuso de biometria é comum — muitos casos nem têm apontamento.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+    ],
+  },
+
+  i131: {
+    vistoId: "i131",
+    codigo: "I-131",
+    nome: "Reentry Permit — Permissão de Reentrada",
+    intro:
+      "Protege seu Green Card em ausências de até 2 anos fora dos EUA. Precisa ser protocolado ANTES de sair do país — não dá para pedir já estando fora. A biometria também é feita nos EUA, antes da viagem.",
+    kit: {
+      caminho: "manutencao",
+      preco: "R$ 147",
+      alertaCritico: "Se você já saiu dos EUA sem protocolar o I-131 antes, esse caminho não se aplica mais ao seu caso — fale com um profissional para avaliar as alternativas.",
+    },
+    grupos: [
+      {
+        titulo: "Confirmar que você ainda está nos EUA",
+        descricao: "Requisito inegociável — o I-131 precisa ser protocolado antes da saída",
+        documentos: [
+          {
+            id: "i131-ainda-nos-eua",
+            nome: "Você ainda não saiu dos EUA para a viagem que motivou o pedido",
+            descricao: "Ausências de 6 meses ou mais sem o Reentry Permit podem ser lidas como abandono da residência.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Protocolar o I-131",
+        descricao: "Formulário para residentes permanentes que vão ficar fora por até 2 anos",
+        documentos: [
+          {
+            id: "i131-formulario",
+            nome: "Formulário I-131 — Application for Travel Document",
+            descricao: "Categoria Reentry Permit, especificamente para titulares de Green Card.",
+            agencia: "USCIS",
+            formulario: "I-131",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Biometria antes de viajar",
+        descricao: "Feita nos EUA — não é possível completar de fora do país",
+        documentos: [
+          {
+            id: "i131-biometria",
+            nome: "Comparecer à biometria após protocolar",
+            descricao: "O USCIS agenda a coleta de digitais e foto antes de você viajar.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Levar o comprovante na viagem",
+        descricao: "O recibo já serve de prova até o documento final ficar pronto",
+        documentos: [
+          {
+            id: "i131-recibo-viagem",
+            nome: "Recibo do I-131 (e o documento final, quando sair)",
+            descricao: "Leve junto do Green Card e do passaporte na reentrada.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "b1-cos": {
+    vistoId: "b1-cos",
+    codigo: "B-1/B-2",
+    nome: "Extensão ou mudança de status — dentro dos EUA",
+    intro:
+      "Você está nos EUA em status B-1/B-2. O prazo que vale é o do seu I-94, não o carimbo do visto no passaporte — ele define até quando você pode ficar. Extensão ou mudança de status precisam ser protocoladas antes do I-94 vencer, nunca depois.",
+    kit: { caminho: "manutencao", preco: "R$ 97" },
+    grupos: [
+      {
+        titulo: "Conferir o prazo do I-94",
+        descricao: "i94.cbp.dhs.gov mostra a data exata de saída obrigatória",
+        documentos: [
+          {
+            id: "b1cos-i94",
+            nome: "Confirmar a data de vencimento do I-94",
+            descricao: "Passar do prazo sem pedido protocolado começa a contar presença irregular.",
+            agencia: "CBP",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Extensão de permanência (I-539)",
+        descricao: "US$370 — pedida antes do I-94 vencer, com justificativa",
+        documentos: [
+          {
+            id: "b1cos-i539",
+            nome: "Formulário I-539 — Application to Extend/Change Nonimmigrant Status",
+            descricao: "Justificativa comum: negócio ou tratamento médico ainda em andamento.",
+            agencia: "USCIS",
+            formulario: "I-539",
+            formId: "i-539",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Mudança de status, se for o caso",
+        descricao: "Quer estudar (F-1), trabalhar ou seguir outro caminho? Muda-se antes do prazo vencer",
+        documentos: [
+          {
+            id: "b1cos-mudanca-status",
+            nome: "Definir o visto de destino antes de protocolar",
+            descricao: "B-1/B-2 não autoriza trabalho remunerado nos EUA, nem para empresa brasileira remota — só reuniões, negociações e turismo.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+    ],
+  },
+
+  "e2-cos": {
+    vistoId: "e2-cos",
+    codigo: "E-2",
+    nome: "E-2 — Mudança de status dentro dos EUA",
+    intro:
+      "Você está nos EUA e quer o E-2 sem passar pelo consulado. A mudança de status usa o I-129 direto com o USCIS — sem DS-160, sem entrevista — mas os requisitos de nacionalidade, investimento e gestão ativa são os mesmos do processo consular.",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 197",
+      alertaCritico: "O E-2 não leva direto ao Green Card — as pontes comuns são EB-5, EB-1C (executivo) ou EB-2 NIW.",
+    },
+    grupos: [
+      {
+        titulo: "Confirmar os 4 requisitos",
+        descricao: "Nacionalidade de país com tratado, investimento substancial, controle de pelo menos 50% e papel ativo na gestão",
+        documentos: [
+          {
+            id: "e2cos-requisitos",
+            nome: "Nacionalidade, investimento, controle e papel ativo",
+            descricao: "Os mesmos 4 requisitos do E-2 consular — só muda o formulário e o órgão que analisa.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Montar o plano de negócios",
+        descricao: "Prova de origem e aplicação dos fundos, mais o plano do negócio nos EUA",
+        documentos: [
+          {
+            id: "e2cos-plano-negocio",
+            nome: "Plano de negócios e prova de origem dos fundos",
+            descricao: "Documentação completa de como o capital chegou e será usado no negócio americano.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "I-129 com classificação E-2 e COS",
+        descricao: "Submetido ao USCIS — sem consulado, sem DS-160",
+        documentos: [
+          {
+            id: "e2cos-i129",
+            nome: "Formulário I-129 — Petition for a Nonimmigrant Worker (E-2)",
+            descricao: "Renovável sem limite enquanto o negócio operar de verdade.",
+            agencia: "USCIS",
+            formulario: "I-129",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "e1-cos": {
+    vistoId: "e1-cos",
+    codigo: "E-1",
+    nome: "E-1 — Mudança de status dentro dos EUA",
+    intro:
+      "Você está nos EUA e quer o E-1 sem passar pelo consulado. A mudança de status usa o I-129 direto com o USCIS — sem DS-160, sem entrevista — mas o volume de comércio bilateral exigido é o mesmo do processo consular.",
+    kit: {
+      caminho: "cos",
+      preco: "R$ 197",
+      alertaCritico: "O E-1 não leva direto ao Green Card — executivos podem olhar o EB-1C; perfis qualificados, o EB-2 NIW.",
+    },
+    grupos: [
+      {
+        titulo: "Confirmar o comércio substancial",
+        descricao: "Histórico documentado: contratos e faturas mostrando o volume bilateral entre os dois países",
+        documentos: [
+          {
+            id: "e1cos-comercio",
+            nome: "Mais de 50% do volume de comércio da empresa entre os dois países",
+            descricao: "Mesmo requisito do E-1 consular.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Montar o dossiê comercial",
+        descricao: "Documentação da empresa e do comércio, sem os formulários consulares",
+        documentos: [
+          {
+            id: "e1cos-dossie",
+            nome: "Dossiê comercial completo",
+            descricao: "Contratos, faturas e documentação societária da empresa.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "I-129 com classificação E-1 e COS",
+        descricao: "Submetido ao USCIS — sem consulado, sem DS-160",
+        documentos: [
+          {
+            id: "e1cos-i129",
+            nome: "Formulário I-129 — Petition for a Nonimmigrant Worker (E-1)",
+            descricao: "Renovável sem limite enquanto o comércio substancial continuar.",
+            agencia: "USCIS",
+            formulario: "I-129",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "dependente-cos": {
+    vistoId: "dependente-cos",
+    codigo: "F-2/H-4/L-2/J-2",
+    nome: "Extensão de status de dependente",
+    intro:
+      "A extensão do dependente está sempre atrelada à extensão do titular principal (F-1, H-1B, L-1 ou J-1) — é o mesmo formulário I-539, mas o que cada categoria pode ou não fazer enquanto espera varia bastante.",
+    kit: { caminho: "manutencao", preco: "R$ 97" },
+    grupos: [
+      {
+        titulo: "Confirmar a extensão do titular principal",
+        descricao: "O dependente não pode estender sozinho — depende do status do titular estar em dia",
+        documentos: [
+          {
+            id: "dep-titular-status",
+            nome: "Titular principal com extensão protocolada ou aprovada",
+            descricao: "F-2 depende do F-1, H-4 do H-1B, L-2 do L-1, J-2 do J-1.",
+            agencia: "USCIS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Protocolar o I-539 do dependente",
+        descricao: "Pode ser protocolado junto com o do titular ou logo em seguida",
+        documentos: [
+          {
+            id: "dep-i539",
+            nome: "Formulário I-539 — Application to Extend/Change Nonimmigrant Status",
+            descricao: "Um I-539 por dependente (ou um coletivo para a família, conforme o caso).",
+            agencia: "USCIS",
+            formulario: "I-539",
+            formId: "i-539",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Autorização de trabalho, se a categoria permitir",
+        descricao: "Varia por tipo de dependente — confirme antes de trabalhar",
+        documentos: [
+          {
+            id: "dep-h4-trabalho",
+            nome: "H-4: autorização de trabalho só em casos específicos",
+            descricao: "Depende do titular H-1B já ter petição de green card em estágio avançado (I-140 aprovado ou PERM/I-140 pendente há tempo suficiente).",
+            agencia: "USCIS",
+            formulario: "I-765",
+            obrigatorio: false,
+          },
+          {
+            id: "dep-l2-trabalho",
+            nome: "L-2: autorização de trabalho automática com o status aprovado",
+            descricao: "Cônjuge L-2 pode trabalhar sem pedido separado de autorização, uma vez com o status L-2 aprovado.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+          {
+            id: "dep-j2-trabalho",
+            nome: "J-2: pode pedir autorização de trabalho (I-765)",
+            descricao: "Precisa de aprovação separada do USCIS antes de começar a trabalhar.",
+            agencia: "USCIS",
+            formulario: "I-765",
+            obrigatorio: false,
+          },
+          {
+            id: "dep-f2-trabalho",
+            nome: "F-2: sem autorização de trabalho",
+            descricao: "Dependente de F-1 não pode trabalhar nos EUA em nenhuma circunstância.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+    ],
+  },
+
+  "dv-lottery": {
+    vistoId: "dv-lottery",
+    codigo: "DV Lottery",
+    nome: "Diversity Visa Program — Loteria de Vistos",
+    intro:
+      "Programa anual do governo americano para países com baixa imigração para os EUA — até 55.000 vistos de imigrante por ano, sorteados entre quem se inscreveu. A inscrição é eletrônica e gratuita. Atenção: o Brasil foi excluído do programa nos últimos ciclos por ter enviado muitos imigrantes — confirme a elegibilidade do seu país de nascimento no ciclo atual antes de se inscrever.",
+    kit: {
+      caminho: "consulado",
+      preco: "R$ 47",
+      alertaCritico: "As datas de inscrição mudam a cada ciclo (o período do DV-2027, por exemplo, ainda não tinha sido anunciado na última verificação) — confira sempre a data atual em dvprogram.state.gov antes de qualquer prazo.",
+    },
+    grupos: [
+      {
+        titulo: "Confirmar elegibilidade",
+        descricao: "País de nascimento elegível + educação ou experiência profissional",
+        documentos: [
+          {
+            id: "dv-pais-elegivel",
+            nome: "País de nascimento elegível no ciclo atual",
+            descricao: "A lista de países excluídos muda a cada ano — confira em dvprogram.state.gov antes de se inscrever.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+          {
+            id: "dv-educacao-experiencia",
+            nome: "Ensino médio completo OU 2 anos de experiência em ocupação que exija ao menos 2 anos de treinamento",
+            descricao: "Nos últimos 5 anos, na data da inscrição.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Inscrição eletrônica gratuita",
+        descricao: "Só em dvprogram.state.gov, durante o período de inscrição do ciclo — sem custo, sem papel",
+        documentos: [
+          {
+            id: "dv-inscricao",
+            nome: "Formulário eletrônico E-DV",
+            descricao: "Nenhuma inscrição em papel ou fora do site oficial é válida — desconfie de terceiros cobrando pela inscrição em si.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Verificar o resultado",
+        descricao: "Não existe carta física — o resultado sai só no site oficial",
+        documentos: [
+          {
+            id: "dv-resultado",
+            nome: "Entry Status Check no site oficial",
+            descricao: "Consulte com o número de confirmação recebido na inscrição.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Se selecionado",
+        descricao: "Selecionado não é aprovado — ainda falta o processo do visto de imigrante",
+        documentos: [
+          {
+            id: "dv-ds260",
+            nome: "Formulário DS-260 — Immigrant Visa Application",
+            descricao: "Protocolado depois da seleção, dentro do ano fiscal do programa (nunca depois de 30 de setembro do ano do ciclo).",
+            agencia: "DOS",
+            formulario: "DS-260",
+            obrigatorio: true,
+          },
+          {
+            id: "dv-entrevista",
+            nome: "Entrevista consular",
+            descricao: "Última etapa antes da emissão do visto de imigrante.",
+            agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  "family-gc-overstay": {
+    vistoId: "family-gc-overstay",
+    codigo: "F2A + Overstay",
+    nome: "Familiar com Green Card, você em overstay",
+    intro:
+      "Seu familiar residente permanente já pode peticionar você agora — o protocolo garante seu lugar na fila F2A. Mas com overstay, o ajuste de status por dentro nessa categoria, em regra, não é permitido. O que acontece depois depende de qual dos dois cenários chega primeiro: seu familiar se naturalizar, ou sua vez na fila chegar. Não saia dos EUA sem análise individual — as barras de 3/10 anos disparam na saída (INA §212(a)(9)(B)).",
+    kit: {
+      caminho: "manutencao",
+      preco: "R$ 147",
+      alertaCritico: "Protocolar o I-130 agora sempre vale a pena — garante a data de prioridade — mesmo que o próximo passo ainda dependa de qual cenário se confirmar.",
+    },
+    grupos: [
+      {
+        titulo: "Fase 1 — Protocolar a petição agora",
+        descricao: "Vale a pena independente de qual cenário abaixo vai se confirmar — a data de protocolo é sua posição na fila",
+        documentos: [
+          {
+            id: "fgcov-i130",
+            nome: "Formulário I-130 — protocolado pelo familiar residente permanente",
+            descricao: "A data de recebimento pelo USCIS vira sua priority date na categoria F2A.",
+            agencia: "USCIS",
+            formulario: "I-130",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Cenário A — Seu familiar se naturaliza antes da sua vez",
+        descricao: "Você vira parente imediato de cidadão — sem fila, ajuste por dentro possível",
+        documentos: [
+          {
+            id: "fgcov-naturalizacao-familiar",
+            nome: "Familiar se naturaliza (N-400) antes da sua data ficar current",
+            descricao: "Nesse caso, você deixa a categoria F2A e vira parente imediato — o ajuste por dentro (I-485) abre, e as barras de 3/10 anos nunca disparam porque você não sai do país.",
+            agencia: "USCIS",
+            obrigatorio: false,
+          },
+        ],
+      },
+      {
+        titulo: "Cenário B — Sua vez chega antes da naturalização",
+        descricao: "O ajuste por dentro nessa categoria com overstay, em regra, não é permitido — decisão exige análise individual",
+        documentos: [
+          {
+            id: "fgcov-analise-profissional",
+            nome: "Avaliação com um profissional antes de qualquer decisão",
+            descricao: "As opções nesse cenário (aguardar mais, processo consular com waiver I-601/I-601A, ou outra rota) dependem de fatos do seu caso — histórico de entrada, tempo de overstay e mais.",
+            agencia: "USCIS",
             obrigatorio: true,
           },
         ],
