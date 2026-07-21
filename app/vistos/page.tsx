@@ -175,8 +175,11 @@ export default function VistosPage() {
   const [focusIds, setFocusIds] = useState<string[]>([]);
 
   useEffect(() => {
+    // Reading window.location requires deferring to an effect (SSR has no
+    // window); the values below can only ever be set once, on mount.
     const params = new URLSearchParams(window.location.search);
     const nat = params.get("nationality");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (nat === "brazilian" || nat === "other") setNationality("brazilian");
     else if (nat === "treaty") setNationality("treaty");
     if (nat === "brazilian" || nat === "treaty" || nat === "other") {

@@ -1773,10 +1773,13 @@ export default function OnboardingPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Reading sessionStorage requires deferring to an effect (SSR has none);
+    // this restore can only ever happen once, on mount.
     try {
       const raw = sessionStorage.getItem(ONBOARDING_STATE_KEY);
       if (!raw) return;
       const saved = JSON.parse(raw);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved.phase === "questions" || saved.phase === "results") setPhase(saved.phase);
       if (saved.answers && typeof saved.answers === "object") setAnswers(saved.answers);
       if (Array.isArray(saved.history) && saved.history.length > 0) setHistory(saved.history);
@@ -1802,6 +1805,7 @@ export default function OnboardingPage() {
     const pending = localStorage.getItem("immigrei_pending_profile");
     if (!pending) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- flips the loading UI on before the fetch below starts
     setResuming(true);
     (async () => {
       try {

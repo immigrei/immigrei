@@ -45,9 +45,12 @@ export default function ConfirmBar({
   const [mainGoal, setMainGoal] = useState<string | null>(null);
 
   useEffect(() => {
+    // Reading window.location requires deferring to an effect (SSR has no
+    // window); the values below can only ever be set once, on mount.
     const params = new URLSearchParams(window.location.search);
     const nat = params.get("nationality");
     if (nat === "brazilian" || nat === "treaty" || nat === "other") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRawNationality(nat);
     }
     const loc = params.get("location");

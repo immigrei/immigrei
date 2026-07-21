@@ -47,13 +47,7 @@ export default function ConsuladosPage() {
   const [subs, setSubs]       = useState<string[]>([]);
   const [saving, setSaving]   = useState(false);
 
-  useEffect(() => {
-    loadEvents();
-    loadSubs();
-  }, []);
-
   async function loadEvents() {
-    setLoading(true);
     const res  = await fetch("/api/consulados/events");
     const data = await res.json();
     setEvents(data.events ?? []);
@@ -65,6 +59,14 @@ export default function ConsuladosPage() {
     const data = await res.json();
     setSubs(data.consulados ?? []);
   }
+
+  useEffect(() => {
+    // Fetch-on-mount: state updates land after the request resolves, not
+    // synchronously in this tick — the rule can't see past the awaits.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadEvents();
+    loadSubs();
+  }, []);
 
   async function toggleSub(consulado: string) {
     setSaving(true);

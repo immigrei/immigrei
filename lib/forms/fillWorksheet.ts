@@ -14,7 +14,7 @@
  */
 
 import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
-import { allQuestions, englishValue, isVisible, type Answers, type FormSpec, type Question } from "./types";
+import { englishValue, isVisible, type Answers, type FormSpec, type Question } from "./types";
 
 const PAGE_WIDTH = 612; // US Letter
 const PAGE_HEIGHT = 792;

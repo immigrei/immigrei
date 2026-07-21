@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { fetchCaseStatus, isValidReceiptNumber, normalizeReceiptNumber } from "@/lib/uscis";
 import { supabaseAdmin } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";

@@ -77,7 +77,7 @@ export default function OptEligibilityCard({ initialValue }: { initialValue: str
         </div>
         {error && <p className="text-xs text-clay mt-2">{error}</p>}
         <p className="text-xs text-ink-faint leading-relaxed mt-3">
-          A data de início está no seu Formulário I-20 ("Program Start Date").
+          A data de início está no seu Formulário I-20 (&quot;Program Start Date&quot;).
         </p>
       </div>
     );
@@ -135,7 +135,7 @@ export default function OptEligibilityCard({ initialValue }: { initialValue: str
 
       <p className="text-xs text-ink-faint leading-relaxed mt-3">
         Estimativa de 2 semestres (~9 meses) a partir do início do seu programa em{" "}
-        {formatDate(value)}. "1 ano acadêmico" é definido pela sua escola — confirme a data exata
+        {formatDate(value)}. &quot;1 ano acadêmico&quot; é definido pela sua escola — confirme a data exata
         com seu DSO antes de protocolar.
       </p>
 

@@ -98,7 +98,8 @@ export default function DocumentosVistoPage() {
     const checked = !marcados.has(id);
     setMarcados((prev) => {
       const next = new Set(prev);
-      checked ? next.add(id) : next.delete(id);
+      if (checked) next.add(id);
+      else next.delete(id);
       return next;
     });
     // Persiste sem bloquear a UI; deslogado (401) segue funcionando localmente.
