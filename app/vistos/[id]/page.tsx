@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
@@ -16,6 +17,20 @@ import ConfirmBar, { VoltarButton } from "./ConfirmBar";
 
 export function generateStaticParams() {
   return Object.keys(VISTO_PAGES).map((id) => ({ id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const visto = todosVistos.find((v) => v.id === id);
+  if (!visto) return {};
+  return {
+    title: `${visto.codigo} — ${visto.nome} | immigrei`,
+    description: visto.descricao,
+  };
 }
 
 const badgeStyles: Record<string, string> = {
