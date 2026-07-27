@@ -3,11 +3,17 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 // Clerk's own JS bundle, XHR calls and (for social login / bot-check) iframes
 // all come from the account's Frontend API domain — a per-project
-// *.clerk.accounts.dev subdomain in dev, and *.clerk.com for the account
-// portal in prod. Stripe checkout is a full-page redirect (window.location,
-// see app/planos/PlanButton.tsx) so no Stripe domain needs script/frame
-// access. next/font self-hosts Fraunces/Hanken Grotesk at build time, so no
-// Google Fonts domain is needed either.
+// *.clerk.accounts.dev subdomain in dev. Production immigrei.com uses a
+// Clerk custom domain (clerk.immigrei.com) instead of *.clerk.com — this
+// was missed on the first pass and broke sign-in in prod (script-src
+// silently blocked https://clerk.immigrei.com/npm/@clerk/clerk-js@6/...;
+// confirmed live on immigrei.com, no network request even attempted, same
+// signature as the original dev-CSP bug below). Keep *.clerk.com too: it's
+// still Clerk's own default domain if the custom-domain config ever
+// changes. Stripe checkout is a full-page redirect (window.location, see
+// app/planos/PlanButton.tsx) so no Stripe domain needs script/frame access.
+// next/font self-hosts Fraunces/Hanken Grotesk at build time, so no Google
+// Fonts domain is needed either.
 //
 // 'unsafe-inline' on script-src is required in both dev and prod (verified
 // against a real `next build && next start` run) — Clerk's bootstrap needs
@@ -19,12 +25,12 @@ import { withSentryConfig } from "@sentry/nextjs";
 const isDev = process.env.NODE_ENV !== "production";
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://us-assets.i.posthog.com`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://*.clerk.com https://clerk.immigrei.com https://challenges.cloudflare.com https://us-assets.i.posthog.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://img.clerk.com https://images.clerk.dev",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://o4511804398043136.ingest.us.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com",
-  "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
+  "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.immigrei.com https://clerk-telemetry.com https://o4511804398043136.ingest.us.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com",
+  "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.immigrei.com https://challenges.cloudflare.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
