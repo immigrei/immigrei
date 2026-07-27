@@ -247,7 +247,7 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Reunir documentos para o empregador", desc: "Diploma, histórico, currículo, documentos de identidade — veja o kit completo.", doneWhen: { itens: cos ? ["diploma-h1b-cos", "curriculo-h1b-cos"] : ["diploma", "curriculo"] } },
         { num: "2", estado: "proximo", titulo: "Empregador submete o registro (março)", desc: "Período de registro: 1–18 de março. O empregador faz online.", tag: "Março" },
-        { num: "3", estado: "proximo", titulo: "Sorteio + notificação",                desc: "USCIS seleciona aleatoriamente. Resultados em abril." },
+        { num: "3", estado: "proximo", titulo: "Sorteio + notificação",                desc: "Desde fev/2026, a seleção é ponderada pelo nível salarial da vaga (OEWS I–IV) — não é mais puramente aleatória. Resultados em abril." },
         { num: "4", estado: "futuro",  titulo: "LCA aprovada pelo DOL",               desc: "Labor Condition Application — o empregador submete em ~7 dias.", tag: "LCA", linkExterno: { label: "Consultar em flag.dol.gov", url: "https://flag.dol.gov/programs/LCA" }, doneWhen: { itens: cos ? ["lca-cos"] : ["lca"] } },
         { num: "5", estado: "futuro",  titulo: "I-129 submetido ao USCIS",            desc: "Petição completa após a LCA. Prazo padrão ou Premium Processing.", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" }, doneWhen: { itens: cos ? ["i129-cos"] : ["i129"] } },
         { num: "6", estado: "futuro",  titulo: "I-797 aprovado + entrevista/COS",     desc: "Entrevista consular se fora dos EUA, ou COS se já está aqui.", tag: "I-797", linkExterno: cos ? undefined : { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" }, doneWhen: { itens: cos ? ["i797-cos"] : ["i797"] } },
@@ -529,6 +529,33 @@ export function getStrategy(profile: Profile): Strategy {
       ],
       kitId:    "b1",
       kitLabel: "Kit B-1/B-2 via consulado",
+    };
+  }
+
+  // ── ESTA / Visa Waiver Program ──────────────────────────────────────────
+  // Perfil salvo com visa_type "esta" (id do catálogo, ver
+  // lib/vistosCatalog.ts) quando a pessoa confirma esse caminho em
+  // /vistos/esta. Sem este branch, cairia no fallback genérico de baixo —
+  // perdendo os guardrails que o onboarding já mostra (bloqueio de COS,
+  // regra dos 90 dias) assim que a pessoa loga e vai pro /painel.
+  if (visa_type === "esta") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "ESTA · Visa Waiver Program",
+      situacao:  `Você está nos EUA com o ESTA — até 90 dias, sem extensão e, na prática, sem mudança de status por dentro do país (8 CFR §248).`,
+      destaque: { tipo: "alerta", texto: "ESTA não estende nem muda de status dentro dos EUA — o caminho padrão é sair e aplicar o visto certo no consulado." },
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar o prazo do I-94",                desc: "Até 90 dias, sem prorrogação — confira a data exata.", linkExterno: { label: "Consultar em i94.cbp.dhs.gov", url: "https://i94.cbp.dhs.gov/" } },
+        { num: "2", estado: "proximo", titulo: "Planejar o próximo visto pelo consulado",  desc: "F-1, H-1B, O-1, L-1 ou outro: o processo começa do lado de fora, com DS-160 e entrevista." },
+        { num: "3", estado: "futuro",  titulo: "Exceção: parente imediato de cidadão",     desc: "Cônjuge, pais ou filhos solteiros menores de 21 de cidadão americano podem, em muitos casos, ajustar por dentro mesmo com entrada por ESTA (INA §245(a)) — análise individual." },
+        { num: "✓", estado: "futuro",  titulo: "Novo visto aprovado",                      desc: "Pronto para entrar nos EUA no status certo." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "ESTA não autoriza estender a estadia nem mudar de status dentro dos EUA — só a exceção de parente imediato de cidadão." },
+        { tipo: "atencao",  texto: "Regra dos 90 dias: matricular-se, trabalhar ou casar e ajustar logo após a entrada levanta presunção de má-fé na declaração original do ESTA." },
+      ],
+      kitId:    "esta",
+      kitLabel: "Kit ESTA/VWP",
     };
   }
 

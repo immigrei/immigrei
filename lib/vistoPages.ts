@@ -356,10 +356,10 @@ export const VISTO_PAGES: Record<string, VistoPage> = {
         base: "INA §101(a)(15)(H)(i)(b)",
       },
       {
-        titulo: "O sorteio limita as vagas",
+        titulo: "O sorteio limita as vagas — e não é mais por sorte igual pra todos",
         texto:
-          "65.000 vistos por ano + 20.000 para mestres/doutores formados nos EUA. Registro em março, início em 1º de outubro — a chance histórica gira em torno de 1 em 3 por ano.",
-        base: "INA §214(g)",
+          "65.000 vistos por ano + 20.000 para mestres/doutores formados nos EUA. Registro em março, início em 1º de outubro. Desde fev/2026, a seleção é ponderada pelo nível salarial da vaga (OEWS I–IV): salário nível IV entra 4x na urna, nível III entra 3x, nível II entra 2x, nível I entra 1x — vagas mais bem pagas têm mais chance de serem sorteadas.",
+        base: "INA §214(g); regra final DHS de seleção ponderada, efetiva 27/fev/2026",
       },
       {
         titulo: "Teto de 6 anos — a menos que o Green Card já esteja andando",

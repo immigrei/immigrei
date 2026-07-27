@@ -1174,6 +1174,26 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
     return results;
   }
 
+  // ── J-1 sujeito à regra dos 2 anos → L-1, mudança de emprego ou Green Card ──
+  // Mesmo bloqueio do 212(e) do ramo H-1B acima, mas para os outros alvos que
+  // a regra também veda (L-1, K, virar residente). Não duplica o caso
+  // targetVisa === "h1b", que já tem o card específico mais adiante.
+  if (
+    inUs &&
+    currentVisa === "j1" &&
+    targetVisa !== "h1b" &&
+    (targetVisa === "l1" || changeGoal === "work_change" || changeGoal === "green_card" || goal === "live")
+  ) {
+    results.push({
+      visa: "J-1 → confira a regra dos 2 anos antes de tudo",
+      forms: "DS-2019 (campo de remarks)",
+      description:
+        "Se você está sujeito à regra dos 2 anos (212(e)) — financiamento governamental, Skills List do seu país no DS-2019, ou treinamento médico ECFMG —, a lei te impede de receber L-1 ou K-1, ou de virar residente permanente, até cumprir os 2 anos no país de origem ou conseguir um waiver. Confirme no DS-2019 antes de seguir com qualquer um desses caminhos.",
+      priority: "high",
+      urgent: true,
+    });
+  }
+
   // ── Estudos ──────────────────────────────────────────────────────────────
   if (goal === "study" || studyType || targetVisa === "f1" || targetVisa === "m1" || targetVisa === "j1") {
     const isChangeOfStatus =
@@ -1361,7 +1381,53 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
     }
     // COS para H-1B dentro dos EUA — este ramo não pergunta escolaridade,
     // então o requisito de graduação vai explícito na descrição.
-    if (inUs && targetVisa === "h1b") {
+    if (inUs && targetVisa === "h1b" && currentVisa === "j1") {
+      // INA §212(e): quem está sujeito à regra dos 2 anos (financiamento
+      // governamental, Skills List do país ou treinamento médico ECFMG)
+      // está LEGALMENTE IMPEDIDO de receber H-1B (também L e K, e de virar
+      // residente) até cumprir os 2 anos no país de origem ou conseguir
+      // waiver — 8 CFR §248.2(a)(4). O onboarding não pergunta se a pessoa
+      // está sujeita (isso está só no DS-2019), então o texto tem que
+      // avisar ANTES de tratar H-1B como opção disponível — nunca assumir
+      // que não se aplica. Ver content/leis/vistos/j1.md.
+      results.push({
+        visa: "J-1 → H-1B: confira a regra dos 2 anos antes de tudo",
+        forms: "DS-2019 (campo de remarks) + I-129 (H) com COS, se elegível",
+        description:
+          "Se você está sujeito à regra dos 2 anos (212(e)) — financiamento governamental, Skills List do seu país no DS-2019, ou treinamento médico ECFMG —, a lei te impede de receber H-1B (e também L-1, K-1, ou virar residente) até cumprir os 2 anos no país de origem ou conseguir um waiver. Confirme no seu DS-2019 antes de seguir. Se não está sujeito, o caminho segue normal: empregador patrocinador, graduação completa na área e o sorteio anual (março).",
+        priority: "high",
+        urgent: true,
+      });
+    } else if (inUs && targetVisa === "h1b" && currentVisa === "m1") {
+      // 8 CFR §248.1: se o curso vocacional do M-1 foi a própria
+      // qualificação para a vaga (ex.: escola de aviação → vaga de
+      // piloto), a mudança para H é vedada. Se a qualificação vem de
+      // outra fonte (diploma/experiência anterior), a rota existe. Ver
+      // lib/strategies.ts (condicional M-1→H) e lib/vistoPages.ts (m1).
+      results.push({
+        visa: "M-1 → H-1B: depende de onde veio sua qualificação",
+        forms: "I-129 (H) com pedido de COS — protocolado pelo empregador",
+        description:
+          "Aqui a lei tem uma pegadinha: se foi o SEU CURSO no M-1 que te qualificou para a vaga (ex.: escola de aviação → vaga de piloto), a mudança para H-1B é vedada (8 CFR §248.1). Se a qualificação veio de antes — diploma ou experiência do Brasil —, a porta existe, com os requisitos normais: empregador patrocinador, graduação completa na área e sorteio anual (março). Confirme esse detalhe com um profissional antes de investir tempo no processo.",
+        priority: "high",
+        urgent: true,
+      });
+    } else if (inUs && targetVisa === "h1b" && currentVisa === "b1b2") {
+      // B-1/B-2 → H-1B é permitido (diferente do M-1 → F-1, que é vedado),
+      // mas carrega um risco que os outros COS documentados aqui não têm:
+      // regra dos 90 dias (9 FAM 302.9-4(B)(3)(g); ver content/leis/vistos/
+      // b1-b2.md) — buscar emprego/assinar contrato logo após a entrada
+      // pode ser lido como intenção pré-concebida, contradizendo a
+      // declaração feita no visto B. Nunca tratar como um COS "de rotina".
+      results.push({
+        visa: "B-1/B-2 → H-1B via Mudança de Status",
+        forms: "I-129 (H) com pedido de COS — protocolado pelo empregador",
+        description:
+          "É permitido, mas exige atenção: você precisa estar em status B válido (I-94 não vencido) no protocolo, sem ter trabalhado nesse meio-tempo. A regra dos 90 dias pesa — buscar emprego e assinar contrato logo após a entrada pode ser interpretado como intenção pré-concebida de imigrar, contradizendo a declaração feita no visto de visitante. Some a isso a graduação completa na área e o sorteio anual (março) do H-1B.",
+        priority: "high",
+        urgent: true,
+      });
+    } else if (inUs && targetVisa === "h1b") {
       results.push({
         visa: "H-1B via Mudança de Status",
         forms: "I-129 (H) com pedido de COS — protocolado pelo empregador",
@@ -1540,6 +1606,18 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
           "O H-1B é portátil: o novo empregador protocola a petição e você pode começar assim que o USCIS receber o caso, sem novo sorteio.",
         priority: "high",
       });
+    } else if (currentVisa === "b1b2") {
+      // B-1/B-2 não autoriza trabalho — quem está aqui não tem "empregador
+      // atual" para trocar, é mudança de status (COS), com o mesmo risco da
+      // regra dos 90 dias do ramo change_status → h1b acima.
+      results.push({
+        visa: "B-1/B-2 → H-1B via Mudança de Status",
+        forms: "I-129 (H) com pedido de COS — protocolado pelo empregador",
+        description:
+          "Seu visto B não autoriza trabalho — não existe 'troca de empregador' aqui, é uma mudança de status. Precisa de graduação completa na área, empregador disposto a patrocinar e sorteio anual (março). Atenção à regra dos 90 dias: buscar emprego logo após a entrada pode ser interpretado como intenção pré-concebida de imigrar, contradizendo a declaração do visto de visitante — e você precisa estar em status B válido (I-94 não vencido) no protocolo.",
+        priority: "high",
+        urgent: true,
+      });
     } else {
       results.push({
         visa: "H-1B (Trabalho Especializado)",
@@ -1571,6 +1649,22 @@ export function computeRecommendations(answers: Answers): VisaResult[] {
 
   // ── Green Card paths ──────────────────────────────────────────────────────
   if (goal === "live" || permanentPath || gcPath) {
+    // Quem já está em H-1B carrega um relógio que os outros perfis não têm:
+    // o teto de 6 anos. Sem processo de Green Card em andamento a tempo, o
+    // status simplesmente acaba — diferente de "só mais uma opção entre
+    // várias", é a variável que decide se dá tempo de terminar o processo
+    // no H-1B ou se vai precisar de outra saída. Ver AC21 §§104(c)/106 em
+    // content/leis/vistos/h1b.md e lib/strategy.ts (getStrategy h1b).
+    if (inUs && currentVisa === "h1b") {
+      results.push({
+        visa: "Seu relógio do H-1B: o teto de 6 anos",
+        forms: "PERM/I-140 (o que já tiver protocolado conta)",
+        description:
+          "O H-1B tem teto padrão de 6 anos. Passar disso só é possível com processo de Green Card já em andamento: PERM ou I-140 pendente há mais de 365 dias dá extensões de 1 ano; I-140 aprovado com fila ainda não current dá extensões de 3 anos (AC21 §§104(c)/106). Quanto mais perto do teto, mais urgente é começar o PERM/I-140 — o timing decide se o processo termina a tempo.",
+        priority: "high",
+        urgent: true,
+      });
+    }
     if (gcPath === "employer" || permanentPath === "work_gc") {
       results.push({
         visa: "Green Card por Patrocínio (EB-2 / EB-3)",

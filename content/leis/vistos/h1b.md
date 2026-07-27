@@ -1,7 +1,7 @@
 ---
 fonte: https://www.uscis.gov/working-in-the-united-states/temporary-workers/h-1b-specialty-occupations / https://www.ecfr.gov/current/title-8/chapter-I/subchapter-B/part-214/section-214.2
-secao_lei: INA §101(a)(15)(H)(i)(b), INA §214(n), 8 CFR §214.2(h), 8 CFR §214.1(l)(2), AC21 §§104(c)/106 (8 CFR §214.2(h)(13)(iii)(D)-(E))
-verificado_em: 2026-07-07
+secao_lei: INA §101(a)(15)(H)(i)(b), INA §214(n), 8 CFR §214.2(h), 8 CFR §214.1(l)(2), AC21 §§104(c)/106 (8 CFR §214.2(h)(13)(iii)(D)-(E)); regra final DHS de seleção ponderada por salário, efetiva 27/fev/2026
+verificado_em: 2026-07-25
 ---
 
 # H-1B — Trabalhador em Ocupação Especializada
@@ -9,8 +9,12 @@ verificado_em: 2026-07-07
 ## O básico
 - Petição feita **pelo empregador americano** (I-129 + LCA aprovada pelo
   DOL) — o trabalhador nunca aplica sozinho.
-- **Cap anual com loteria:** 65.000 vagas + 20.000 para mestrado/doutorado
-  nos EUA. Registro em março, início em 1º de outubro.
+- **Cap anual com loteria PONDERADA (desde fev/2026):** 65.000 vagas +
+  20.000 para mestrado/doutorado nos EUA. Registro em março, início em 1º
+  de outubro. A seleção não é mais puramente aleatória — é ponderada pelo
+  nível salarial da vaga na tabela OEWS do DOL: nível IV entra 4x na urna,
+  nível III entra 3x, nível II entra 2x, nível I entra 1x. Vagas mais bem
+  pagas têm mais chance de serem sorteadas.
 - **Cap-exempt** (sem loteria, ano inteiro): universidades, non-profits
   afiliadas a universidades e organizações de pesquisa (INA §214(g)(5)).
 - Admissão por **data fixa no I-94** — como o M-1, a presença irregular conta

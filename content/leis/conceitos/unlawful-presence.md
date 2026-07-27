@@ -12,9 +12,14 @@ verificado_em: 2026-07-07
   automaticamente; depende de decisão formal (AFM 40.9.2, regra restaurada
   após a liminar de 2020 contra a policy de 2018 — confirmada na página do
   USCIS em 07/2026).
-- **⚠️ Mudança em curso:** regra final na OMB (mai/2026) pode acabar com o
-  D/S para F/J — admissão com data fixa e relógio automático, possivelmente
-  a partir de set/2026. Ver alerta em [vistos/f1.md](../vistos/f1.md).
+- **Fim do D/S confirmado, efetivo 15/set/2026:** regra final do DHS acaba
+  com o D/S para F, J e I — admissão passa a ter data fixa no I-94 e o
+  relógio da presença irregular passa a contar automaticamente do
+  vencimento, como já acontece hoje no M-1/B-1/B-2. Quem já está em D/S
+  antes de 15/set/2026 mantém proteção até o fim do programa ou 4 anos da
+  vigência (o que vier primeiro) — mas qualquer viagem internacional após
+  15/set/2026 converte para data fixa na reentrada. Detalhes completos em
+  [vistos/f1.md](../vistos/f1.md).
 - **Barra de 3 anos:** mais de 180 dias de unlawful presence + saída dos EUA.
 - **Barra de 10 anos:** 1 ano ou mais de unlawful presence + saída dos EUA.
 - As barras só disparam **na saída** — quem ajusta status dentro dos EUA

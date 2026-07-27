@@ -21,7 +21,10 @@ Conceito mais mal-entendido por imigrantes — e base de muitos erros graves.
   sem novo visto).
 - Visto válido + status vencido = situação irregular (o visto não protege).
 - A data que manda é a do **I-94** (consultar em https://i94.cbp.dhs.gov), não a
-  do visto. Para F-1, o I-94 costuma dizer "D/S" (duration of status).
+  do visto. Para F-1/J-1, o I-94 costuma dizer "D/S" (duration of status) —
+  **só até 14/set/2026**: regra final do DHS acaba com o D/S nessa data,
+  passando a exigir data fixa também para F-1/J-1 (ver
+  [vistos/f1.md](../vistos/f1.md)).
 
 ## Para a UI
 

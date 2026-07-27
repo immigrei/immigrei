@@ -42,7 +42,7 @@ export const vistosEstudo: Visto[] = [
     },
     stats: [
       { label: "Trabalho", valor: "Limitado (on-campus, OPT/CPT)", ok: true },
-      { label: "Duração", valor: "Enquanto durar o curso (D/S)", ok: true },
+      { label: "Duração", valor: "D/S até 14/set/2026 — depois, máx. 4 anos por vez", ok: true },
       { label: "Rumo ao Green Card", valor: "Indireto — via OPT → H-1B", ok: true },
       { label: "Família", valor: "F-2 (cônjuge não trabalha)", ok: false },
     ],
@@ -116,7 +116,7 @@ export const vistosEstudo: Visto[] = [
     destaque: {
       tipo: "warning",
       texto:
-        "Tem sorteio: registro em março pelo empregador, com ~1 chance em 3 por ano. Quem planeja a escada F-1/OPT ganha múltiplas tentativas.",
+        "Tem sorteio, mas desde fev/2026 ele é ponderado por salário: vagas em nível salarial mais alto (OEWS III/IV) entram mais vezes na urna que vagas em nível I/II. Quem planeja a escada F-1/OPT ganha múltiplas tentativas.",
     },
     stats: [
       { label: "Trabalho", valor: "Sim (no patrocinador)", ok: true },
