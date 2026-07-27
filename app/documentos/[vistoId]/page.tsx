@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import AppShell from "@/app/components/AppShell";
 import checklists, { type Agencia } from "./data";
 import OptEligibilityCard from "./OptEligibilityCard";
+import { getFormGlossary } from "@/lib/formGlossary";
 
 const agenciaBadge: Record<Agencia, { label: string; color: string }> = {
   USCIS: { label: "USCIS", color: "bg-pine-tint text-pine" },
@@ -28,6 +29,20 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function InfoIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="11" height="11" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+      className={className}
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="11" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  );
+}
+
 function PaperclipIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -48,6 +63,14 @@ export default function DocumentosVistoPage() {
 
   const allDocIds = checklist?.grupos.flatMap((g) => g.documentos.map((d) => d.id)) ?? [];
   const [marcados, setMarcados] = useState<Set<string>>(new Set());
+  const [infoAberto, setInfoAberto] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!infoAberto) return;
+    const fechar = () => setInfoAberto(null);
+    document.addEventListener("click", fechar);
+    return () => document.removeEventListener("click", fechar);
+  }, [infoAberto]);
 
   // ── Anexos (cofre de documentos) ────────────────────────────────────────
   const [anexos, setAnexos] = useState<Record<string, Anexo[]>>({});
@@ -320,11 +343,44 @@ export default function DocumentosVistoPage() {
                           <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${badge.color}`}>
                             {badge.label}
                           </span>
-                          {doc.formulario && (
-                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-ink/10 text-ink-soft">
-                              {doc.formulario}
-                            </span>
-                          )}
+                          {doc.formulario && (() => {
+                            const glossario = getFormGlossary(doc.formulario);
+                            return (
+                              <span className="relative inline-flex items-center gap-1">
+                                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-ink/10 text-ink-soft">
+                                  {doc.formulario}
+                                </span>
+                                {glossario && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      aria-label={`O que é o ${doc.formulario}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setInfoAberto((cur) => (cur === doc.id ? null : doc.id));
+                                      }}
+                                      className="flex-shrink-0 w-4 h-4 rounded-full border border-ink-faint text-ink-faint hover:border-pine hover:text-pine flex items-center justify-center transition-colors"
+                                    >
+                                      <InfoIcon />
+                                    </button>
+                                    {infoAberto === doc.id && (
+                                      <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="absolute z-10 top-full left-0 mt-1.5 w-64 rounded-xl border border-pine-tint bg-cream-2 p-3 shadow-lg"
+                                      >
+                                        <p className="text-[11px] font-bold uppercase tracking-wide text-pine mb-1">
+                                          {doc.formulario} — {glossario.nome}
+                                        </p>
+                                        <p className="text-xs text-ink-soft leading-relaxed">
+                                          {glossario.resumo}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
+                              </span>
+                            );
+                          })()}
                           {!doc.obrigatorio && (
                             <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-tint text-amber-deep">
                               Recomendado

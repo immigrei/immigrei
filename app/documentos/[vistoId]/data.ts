@@ -2628,6 +2628,22 @@ const checklists: Record<string, ChecklistVisto> = {
           },
         ],
       },
+      {
+        titulo: "Fase 4 — Remoção de condições (se o green card veio condicional)",
+        descricao:
+          "O green card do casamento recente sai como condicional, válido por só 2 anos — sem esta fase, o status vence sozinho",
+        documentos: [
+          {
+            id: "i751-k1",
+            nome: "Formulário I-751 — Petição para Remover as Condições",
+            descricao:
+              "Protocolar nos 90 dias antes do vencimento do green card condicional de 2 anos. Se o casal ainda está junto, é assinatura conjunta com provas de vida em comum. Se houve divórcio, morte do cônjuge ou abuso, existe pedido de waiver (dispensa da assinatura conjunta) — pode ser protocolado a qualquer momento.",
+            agencia: "USCIS",
+            formulario: "I-751",
+            obrigatorio: true,
+          },
+        ],
+      },
     ],
   },
 
@@ -2752,6 +2768,22 @@ const checklists: Record<string, ChecklistVisto> = {
             nome: "Documentos civis do beneficiário",
             descricao: "Certidão de nascimento, antecedentes criminais, passaporte válido — para o consulado ou para o I-485.",
             agencia: "DOS",
+            obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Fase 4 — Remoção de condições (só categoria F2A com casamento recente)",
+        descricao:
+          "Se você é cônjuge (F2A) e o casamento tinha menos de 2 anos quando o green card saiu, ele vem condicional por 2 anos — filho (F2B) não passa por esta fase",
+        documentos: [
+          {
+            id: "i751-fgc",
+            nome: "Formulário I-751 — Petição para Remover as Condições",
+            descricao:
+              "Protocolar nos 90 dias antes do vencimento do green card condicional. Assinatura conjunta do casal com provas de vida em comum, ou waiver (dispensa) em caso de divórcio, morte do cônjuge titular ou abuso.",
+            agencia: "USCIS",
+            formulario: "I-751",
             obrigatorio: true,
           },
         ],
