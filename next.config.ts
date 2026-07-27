@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 // Clerk's own JS bundle, XHR calls and (for social login / bot-check) iframes
 // all come from the account's Frontend API domain — a per-project
@@ -22,7 +23,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://img.clerk.com https://images.clerk.dev",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com",
+  "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://o4511804398043136.ingest.us.sentry.io",
   "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
@@ -60,4 +61,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "hash-vantage-group-llc",
+  project: "javascript-nextjs",
+  // No SENTRY_AUTH_TOKEN yet, so source maps aren't uploaded — stack traces
+  // work, just without the original (unminified) source. Add the token to
+  // .env.local and Vercel to turn this on; nothing else needs to change.
+  silent: true,
+  disableLogger: true,
+});
