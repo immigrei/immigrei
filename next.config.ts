@@ -18,11 +18,11 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com https://us-assets.i.posthog.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://img.clerk.com https://images.clerk.dev",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com",
+  "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://us.i.posthog.com https://us-assets.i.posthog.com",
   "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
