@@ -392,6 +392,394 @@ export function getVisaSpecificPaths(visaType?: string | null): StrategyOption[]
     ];
   }
 
+  if (visaType === "familia-ir" || visaType === "family-gc") {
+    return [
+      {
+        id: "familia_204c_blocked",
+        icon: "🚫",
+        badge: "BLOQUEIO PERMANENTE",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Nova petição de casamento depois de um achado de fraude",
+        description:
+          "Se o USCIS já concluiu, com evidência substancial, que houve casamento simulado para burlar a lei de imigração, a lei fecha esta porta para sempre: nenhuma petição futura baseada em casamento — com qualquer cônjuge, a qualquer tempo — pode ser aprovada para essa pessoa. Não é 'tentar de novo com mais prova'.",
+        blockedReason:
+          "Bloqueio permanente previsto em lei federal (INA §204(c), 8 CFR §204.2(a)(1)(ii)). O padrão de prova exigido do USCIS para concluir fraude é alto, mas uma vez concluído não há prazo de validade nem reset.",
+        alternative: {
+          label: "I-485 negado com NTA? O juiz de imigração ainda julga o pedido",
+          manualSlug: "i485-negado-juiz-imigracao",
+        },
+      },
+      {
+        id: "familia_i485_juiz",
+        icon: "⚖️",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "I-485 negado e NTA na mão? Não é o fim da linha",
+        description:
+          "É fácil confundir 'o USCIS negou' com 'não tem mais saída'. Não é bem assim: se o USCIS negar o ajuste de status e abrir processo de remoção, o pedido pode ser renovado perante o juiz de imigração — que julga o caso do zero, com toda a prova que você já reuniu. A intimação (NTA) não pode ser ignorada, mas também não é sentença.",
+        manualSlug: "i485-negado-juiz-imigracao",
+        kits: [{ label: "Kit I-485 — preparar para a audiência", status: "em_breve" }],
+      },
+      {
+        id: "familia_i130_apelacao",
+        icon: "📋",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "I-130 negado: apelar exige o formulário certo",
+        description:
+          "A pegadinha mais comum de quem tenta apelar sozinho: apelação de I-130 não usa o I-290B (o formulário dos vistos de trabalho) — vai para o Board of Immigration Appeals com o formulário EOIR-29. Usar o formulário errado pode fazer a apelação ser rejeitada de cara. Prazo: 30 dias da decisão, 33 se chegou pelo correio.",
+        doesNot: [
+          "O I-290B não serve para apelar I-130 — só EOIR-29, ao BIA",
+          "Sem achado de fraude (§204(c)), refazer um novo I-130 também é opção — mas reinicia a data de prioridade",
+        ],
+      },
+    ];
+  }
+
+  if (visaType === "b1") {
+    return [
+      {
+        id: "b1_apelacao_bloqueada",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Pedir reconsideração de visto negado no consulado",
+        description:
+          "Depois de uma negativa de visto no consulado — seja por §214(b) (não convenceu o oficial dos seus vínculos com o Brasil) ou outro motivo de mérito — não existe recurso, revisão ou reconsideração. Nenhum tribunal, nenhum órgão revê essa decisão.",
+        blockedReason:
+          "Protegido pela doutrina da não-revisão consular (consular nonreviewability) — decisão de visto é ato discricionário do oficial consular, fora do alcance de recurso administrativo ou judicial.",
+        alternative: {
+          label: "Reaplicar com evidência de mudança real de circunstância",
+          manualSlug: "b1-negado-reaplicar",
+        },
+      },
+      {
+        id: "b1_221g_completar",
+        icon: "📄",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "Negativa por documento faltante (§221(g))? Você tem 1 ano",
+        description:
+          "Se a negativa foi por §221(g) — faltou documento ou informação, não foi recusa de mérito —, você tem até 1 ano para completar o que foi pedido, sem pagar a taxa consular de novo. É bem diferente de uma negativa por §214(b), que exige aplicação nova.",
+        manualSlug: "b1-negado-reaplicar",
+      },
+      {
+        id: "b1_misrepresentation_waiver",
+        icon: "🔓",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Mentiu sobre a intenção na entrada? Existe waiver, mas não pra você mesmo",
+        description:
+          "Entrar de turista já decidido a estudar, trabalhar ou imigrar é misrepresentation (INA §212(a)(6)(C)(i)) — inadmissibilidade séria, mas com waiver (I-601, INA §212(i)). A condição: provar extreme hardship a cônjuge ou pai/mãe cidadão ou residente. Não existe para a própria pessoa, exceto autopeticionária VAWA.",
+        doesNot: [
+          "Não cobre a fraude de casamento (INA §204(c)) — essa não tem waiver, é bloqueio permanente",
+          "Não funciona sem um familiar qualificado (cidadão ou residente) que sofreria o hardship",
+        ],
+      },
+    ];
+  }
+
+  if (visaType === "k1") {
+    return [
+      {
+        id: "k1_prazo_90_bloqueado",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Casar depois do dia 90, ou com outra pessoa",
+        description:
+          "Dois erros que parecem 'quase certo' e não salvam o caso: casar depois dos 90 dias do K-1, ou casar com qualquer pessoa que não seja quem peticionou o I-129F — mesmo sendo cidadão americano. Nenhum dos dois permite ajuste de status pela via K-1.",
+        blockedReason:
+          "O ajuste de status K-1 exige casamento com o(a) peticionário(a) específico(a), dentro do prazo de 90 dias (8 CFR §214.2(k)). Não existe mudança de status do K-1 para outra categoria depois do prazo.",
+        alternative: {
+          label: "Já casados fora dos EUA? O caminho é o I-130 direto",
+          manualSlug: "k1-negado-i129f-apelacao",
+        },
+      },
+      {
+        id: "k1_i129f_apelacao",
+        icon: "📋",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "I-129F negado: apelar com o formulário certo (I-290B, não EOIR-29)",
+        description:
+          "Diferente do I-130 (que vai para o BIA com o EOIR-29), a petição de noivo(a) é jurisdição da AAO — apela-se com I-290B, prazo de 30 dias (33 se por correio), apontando o erro de fato ou de direito na decisão.",
+        manualSlug: "k1-negado-i129f-apelacao",
+        kits: [{ label: "Kit K-1 — reapresentação", status: "em_breve" }],
+      },
+      {
+        id: "k1_ja_casados",
+        icon: "💍",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Já casaram? O K-1 nem é o caminho certo",
+        description:
+          "Se o casal já casou fora dos EUA, o I-129F (petição de noivo) não se aplica — o caminho correto é o I-130 direto, como parente imediato de cidadão, sem fila.",
+        kits: [{ label: "Kit I-130/I-485 — cônjuge de cidadão", kitId: "familia-ir", status: "disponivel" }],
+      },
+    ];
+  }
+
+  if (visaType === "l1") {
+    return [
+      {
+        id: "l1_trabalho_pos_negativa",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Continuar trabalhando depois da negativa da extensão",
+        description:
+          "Mesma regra do H-1B: enquanto a extensão pende, você pode trabalhar (regra dos 240 dias). Negada, a autorização morre no mesmo dia. Continuar 'só até resolver' é trabalho não autorizado e contamina as rotas seguintes.",
+        blockedReason:
+          "A autorização da regra dos 240 dias (8 CFR §274a.12(b)(20)) termina na negativa — o L-1 está entre as categorias cobertas por essa regra.",
+        alternative: {
+          label: "Apelar com o formulário certo (I-290B, não EOIR-29)",
+          manualSlug: "l1-para-eb1c",
+        },
+      },
+      {
+        id: "l1_conhecimento_especializado",
+        icon: "🎯",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "L-1B negado por conhecimento especializado? O problema é a prova, não o perfil",
+        description:
+          "É o motivo de negativa mais comum do L-1 — e o mais subjetivo. Não basta afirmar que o conhecimento é diferente ou muito desenvolvido: a nova petição precisa mostrar, com documento concreto, que ele não é comum no mercado e não é fácil de transferir a outra pessoa sem custo relevante.",
+        kits: [{ label: "Kit L-1 — reapresentação (conhecimento especializado)", kitId: "l1", status: "disponivel" }],
+      },
+      {
+        id: "l1_teto_eb1c",
+        icon: "⏳",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Perto do teto de 7 (L-1A) ou 5 anos (L-1B)?",
+        description:
+          "O teto não tem exceção nem renovação além dele — mas para L-1A a ponte natural é o EB-1C, sem PERM e sem sorteio. Quem começa esse processo com folga não é pego de surpresa quando o relógio acaba.",
+        manualSlug: "l1-para-eb1c",
+        doesNot: [
+          "L-1B não tem ponte direta equivalente ao EB-1C — avaliar EB-2 NIW ou O-1 conforme o perfil",
+        ],
+      },
+    ];
+  }
+
+  if (visaType === "esta") {
+    return [
+      {
+        id: "esta_contestar_remocao_bloqueado",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Contestar recusa de entrada ou remoção no VWP",
+        description:
+          "Quem entra pelo Visa Waiver Program renuncia, por lei, ao direito de contestar a decisão do oficial na chegada ou uma ação de remoção — não existe juiz, não existe apelação. A única exceção é pedido de asilo.",
+        blockedReason:
+          "Renúncia expressa em lei federal (INA §217(b)) — condição de entrada pelo VWP, aceita no momento da viagem.",
+        alternative: {
+          label: "ESTA negado antes de viajar? Aplique o visto B no consulado",
+          manualSlug: "b1-negado-reaplicar",
+        },
+      },
+      {
+        id: "esta_visto_b_consulado",
+        icon: "📄",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "ESTA negado antes da viagem? Não é inadmissibilidade",
+        description:
+          "Diferente de uma recusa de entrada na chegada, o ESTA negado antes de viajar não deixa marca nenhuma. É só a autorização eletrônica que falhou — a pessoa pode aplicar normalmente para o visto B no consulado, do zero.",
+        manualSlug: "b1-negado-reaplicar",
+      },
+      {
+        id: "esta_ajuste_parente_imediato",
+        icon: "💍",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Cônjuge de cidadão americano? A janela é os 90 dias",
+        description:
+          "Existe ajuste de status por parente imediato dentro do VWP — mas precisa ser resolvido dentro do período de 90 dias autorizado. Diferente de quem entrou com visto, um I-485 pendente não protege contra ação de remoção já iniciada de quem está no VWP.",
+        doesNot: [
+          "Um I-485 pendente não impede nem contesta remoção de quem entrou pelo VWP",
+          "Depois dos 90 dias ou com remoção já iniciada, esta via deixa de funcionar",
+        ],
+        kits: [{ label: "Kit I-130/I-485 — cônjuge de cidadão", kitId: "familia-ir", status: "disponivel" }],
+      },
+    ];
+  }
+
+  if (visaType === "e1" || visaType === "e2") {
+    return [
+      {
+        id: "e1e2_consular_sem_recurso",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Apelar negativa de processo consular (fora dos EUA)",
+        description:
+          "Diferente da mudança de status dentro dos EUA (I-129, que tem apelação), o processo consular de E-1/E-2 — DS-160 + DS-156E — não tem recurso nenhum. É a mesma doutrina de não-revisão consular que vale para o B-1/B-2.",
+        blockedReason:
+          "Decisão de oficial consular é protegida pela doutrina da não-revisão consular — sem revisão administrativa ou judicial.",
+        alternative: {
+          label: "O investimento já feito abre a porta do EB-5",
+          manualSlug: "l1-para-eb1c",
+        },
+      },
+      {
+        id: "e1e2_investimento_reaproveitado",
+        icon: "💰",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "E-2 esgotado ou negado? O investimento não se perde",
+        description:
+          "Negativa de E-1/E-2 não descarta o que já foi construído: o investimento pode ser aproveitado no EB-5, a estrutura multinacional (se houver) abre o L-1A → EB-1C, e o próprio fundador pode olhar o EB-2 NIW. Nenhuma dessas pontes exige recomeçar do zero.",
+        kits: [
+          { label: "Kit EB-5", kitId: "eb5", status: "disponivel" },
+          { label: "Kit EB-2 NIW", kitId: "eb2niw", status: "disponivel" },
+        ],
+      },
+      {
+        id: "e1e2_marginalidade",
+        icon: "📊",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Negativa por negócio 'marginal'? O problema é a prova de crescimento",
+        description:
+          "É o motivo de negativa mais comum: a lei exige que a empresa gere (ou tenha capacidade de gerar em até 5 anos) mais que o sustento mínimo do investidor. Não basta o negócio existir e dar lucro — a nova petição precisa documentar capacidade real de crescimento e geração de emprego além do próprio investidor.",
+        doesNot: [
+          "Não basta reapresentar o mesmo plano de negócio sem prova de crescimento real (8 CFR §214.2(e)(15))",
+        ],
+      },
+    ];
+  }
+
+  if (visaType === "eb2niw") {
+    return [
+      {
+        id: "eb2niw_prova_especifica",
+        icon: "🎯",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "NIW negado? A negativa aponta exatamente qual dos 3 prongs faltou",
+        description:
+          "Como você mesmo é quem peticiona (auto-petição), pode apelar diretamente (I-290B à AAO, 30/33 dias) ou reprotocolar atacando o ponto fraco apontado — mérito substancial, posicionamento vantajoso, ou dispensa do PERM. Raramente é 'perfil não serve', é 'faltou prova num dos três'.",
+        kits: [{ label: "Kit EB-2 NIW — reapresentação", kitId: "eb2niw", status: "disponivel" }],
+      },
+      {
+        id: "eb2niw_classico_perm",
+        icon: "🏢",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Sem oferta de emprego para o EB-2 clássico com PERM",
+        description:
+          "Se o NIW não convencer mesmo depois de reforçado, o EB-2 clássico (com patrocínio de empregador e PERM) continua aberto — mas exige oferta de emprego real e certificação de trabalho, processo mais longo que a auto-petição.",
+        doesNot: ["Não dispensa PERM nem patrocínio de empregador — é o que o NIW evita"],
+      },
+    ];
+  }
+
+  if (visaType === "eb5") {
+    return [
+      {
+        id: "eb5_i829_sem_apelacao",
+        icon: "🚫",
+        badge: "INDISPONÍVEL",
+        tone: "clay",
+        availability: "bloqueado",
+        title: "Apelar a negativa do I-829 (remoção de condição, 2 anos depois)",
+        description:
+          "Diferente do I-526/I-526E inicial, a negativa do I-829 não vai para a AAO. Não protocolar a tempo também encerra o status condicional automaticamente — e não é a mesma coisa que uma negativa de mérito.",
+        blockedReason:
+          "O I-829 não tem via de apelação administrativa (8 CFR §216.6) — a revisão, quando existe, acontece perante o juiz de imigração.",
+        alternative: {
+          label: "Revisão do I-829 perante o juiz de imigração",
+          manualSlug: "i485-negado-juiz-imigracao",
+        },
+      },
+      {
+        id: "eb5_i526_apelacao",
+        icon: "💰",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "I-526/I-526E negado? Você é o peticionário — pode apelar direto",
+        description:
+          "Diferente do EB-1C (onde a empresa peticiona), no EB-5 você mesmo é o peticionário — pode apelar (I-290B à AAO, 30/33 dias) ou reforçar a origem do capital e o plano de negócio antes de reprotocolar.",
+        kits: [{ label: "Kit EB-5", kitId: "eb5", status: "disponivel" }],
+      },
+      {
+        id: "eb5_i829_juiz",
+        icon: "⚖️",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "I-829 negado: a revisão existe, mas é no tribunal, não na AAO",
+        description:
+          "O status condicional termina automaticamente na negativa — mas o investidor pode pedir revisão da decisão perante o juiz de imigração, em processo de remoção. Não é uma segunda chance automática: exige levar de volta a prova de que os empregos e o investimento se concretizaram.",
+      },
+    ];
+  }
+
+  if (visaType === "asylee") {
+    return [
+      {
+        id: "asylee_afirmativo_nao_e_fim",
+        icon: "⚖️",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "Pedido afirmativo não concedido? Normalmente não é o fim",
+        description:
+          "Se o oficial de asilo não concede o pedido afirmativo e você não tem outro status válido, o caso costuma virar um processo defensivo perante o juiz de imigração — que julga o pedido do zero, com a NTA que chega junto. Confundir isso com 'negativa final' é o erro mais caro e mais comum nessa jornada.",
+        doesNot: [
+          "Ignorar a NTA não é opção — faltar à audiência gera ordem de remoção automática",
+        ],
+      },
+      {
+        id: "asylee_bia_formulario_certo",
+        icon: "📋",
+        badge: "DEPENDE",
+        tone: "amber",
+        availability: "condicional",
+        title: "Negado pelo juiz? O formulário é o EOIR-26 — e depois, a corte federal",
+        description:
+          "Apelação de decisão de juiz de imigração usa o EOIR-26 (não I-290B, não EOIR-29) — o Board precisa RECEBER o formulário em até 30 dias, não vale só ter postado. Negado pelo BIA, ainda existe a corte federal de apelações (petition for review), também em 30 dias — revisão judicial de verdade, fora do sistema de imigração.",
+        doesNot: [
+          "O BIA não segue a regra do carimbo do correio — o prazo conta pela chegada, não pelo envio",
+        ],
+      },
+      {
+        id: "asylee_withholding_cat",
+        icon: "🛡️",
+        badge: "CAMINHO ABERTO",
+        tone: "pine",
+        availability: "disponivel",
+        title: "Asilo negado ou fora do prazo? Withholding e CAT continuam de pé",
+        description:
+          "São avaliados junto com o próprio I-589, automaticamente. O padrão é mais alto que o asilo, não dão green card nem permitem viagem internacional — mas impedem a deportação para o país de risco, mesmo com o asilo negado no mérito ou fora do prazo de 1 ano.",
+      },
+    ];
+  }
+
   return [];
 }
 

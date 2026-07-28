@@ -698,6 +698,264 @@ export const MANUAIS: Record<string, Manual> = {
     fonteLeis: ["vistos/eb1c.md", "conceitos/priority-date.md"],
     verificadoEm: "pendente",
   },
+  "i485-negado-juiz-imigracao": {
+    slug: "i485-negado-juiz-imigracao",
+    badge: "I-485 NEGADO",
+    titulo: "I-485 negado com NTA: o juiz de imigração ainda julga seu caso",
+    subtitulo:
+      "Por que uma negativa do USCIS com Notificação de Comparecimento não é o fim da linha — e o que muda quando o pedido vai para o tribunal.",
+    oQueE: [
+      "É a confusão mais comum e mais cara depois de uma negativa de ajuste de status (I-485) em processo de família: achar que 'o USCIS negou' quer dizer 'acabou'. Na maioria dos casos não é isso. Diferente do que muita gente pensa, o I-485 quase nunca tem apelação direta — mas quando o USCIS nega o pedido e abre processo de remoção com uma Notificação de Comparecimento (NTA), o mesmo pedido de ajuste pode ser renovado perante o juiz de imigração, que julga o caso do zero, com toda a prova que você já reuniu.",
+      "Isso não é uma segunda instância do USCIS revendo a própria decisão — é um juiz diferente, num tribunal diferente (Executive Office for Immigration Review, o EOIR), decidindo o mérito do seu caso de novo. A base legal e a evidência são as mesmas; o que muda é quem julga. Para muita gente, é justamente no tribunal que o caso é finalmente aprovado — sobretudo quando a negativa original veio de um mal-entendido documental, não de uma inelegibilidade real.",
+    ],
+    quemPode: [
+      "Quem teve o I-130 aprovado e o I-485 negado, com NTA emitida na sequência",
+      "Quem ainda tem prova de vínculo genuíno com o peticionário (cidadão ou residente) e consegue reunir de novo — ou complementar — o dossiê",
+      "Quem não tem achado de fraude de casamento (INA §204(c)) contra si — esse bloqueio não se resolve no tribunal, é permanente",
+    ],
+    quemNaoPode: [
+      {
+        titulo: "Ignorar a intimação (NTA)",
+        texto:
+          "Faltar à primeira audiência sem justificativa gera ordem de remoção automática (in absentia) — o pior desfecho possível, mesmo tendo um caso forte. Compareça sempre, com ou sem advogado confirmado ainda.",
+        base: "INA §240(b)(5)",
+      },
+      {
+        titulo: "Achado de fraude de casamento (§204(c))",
+        texto:
+          "Se o USCIS já concluiu fraude com evidência substancial, o juiz de imigração não reabre essa porta — o bloqueio é da lei, não da instância. Nenhum novo I-130 baseado em casamento é aprovado depois disso, em nenhum tribunal.",
+        base: "INA §204(c)",
+      },
+      {
+        titulo: "Certas categorias de 'arriving alien'",
+        texto:
+          "Quem entrou com parole ou certas admissões específicas pode ter regras diferentes sobre onde o ajuste é julgado — este manual cobre o cenário comum de quem entrou com visto e ajustou depois. Confirme sua situação com um profissional se sua entrada foi por parole.",
+        base: "8 CFR §245.2(a)(5)(ii)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "Não existe prazo fixo para a 1ª audiência",
+        texto:
+          "O tribunal de imigração agenda a audiência inicial (master calendar) — pode levar meses. Use esse tempo para reforçar o dossiê, não para relaxar.",
+        tone: "amber",
+      },
+      {
+        titulo: "Compareça a toda audiência marcada",
+        texto:
+          "Mudança de endereço? Atualize no tribunal (Form EOIR-33/IC) — intimação não entregue por endereço desatualizado ainda gera ordem de remoção in absentia.",
+        tone: "clay",
+      },
+      {
+        titulo: "Trabalho e permanência durante o processo",
+        texto:
+          "Enquanto o caso tramita no tribunal, avalie com um profissional se cabe pedido de autorização de trabalho (I-765) vinculado ao processo em aberto.",
+        tone: "pine",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Leia a negativa do USCIS com atenção",
+        texto:
+          "O motivo apontado é o roteiro do que precisa ser reforçado ou corrigido diante do juiz — guarde a carta inteira, não só o resumo.",
+      },
+      {
+        titulo: "Reorganize o dossiê do I-130/I-485",
+        texto:
+          "Prova de vínculo genuíno, formulários de suporte financeiro (I-864) e evidência de admissibilidade — o mesmo material do kit original, mais qualquer coisa nova desde a negativa.",
+      },
+      {
+        titulo: "Compareça à audiência inicial (master calendar)",
+        texto:
+          "É rápida e processual — geralmente só marca a próxima etapa e confirma que você contestará a remoção pedindo o ajuste de status.",
+      },
+      {
+        titulo: "Audiência de mérito (individual hearing)",
+        texto:
+          "Aqui o juiz analisa o caso a fundo — é o momento de apresentar a prova reforçada, com representação de um profissional de imigração.",
+      },
+    ],
+    kit: { kitId: "familia-ir", label: "Kit I-130/I-485 — reorganizar o dossiê" },
+    fontesOficiais: [
+      {
+        label: "8 CFR §245.2(a)(5)(ii) — ajuste de status em processo de remoção",
+        url: "https://www.ecfr.gov/current/title-8/chapter-I/subchapter-B/part-245/section-245.2",
+      },
+      {
+        label: "USCIS — Chapter 7, Denials, Appeals, and Motions",
+        url: "https://www.uscis.gov/policy-manual/volume-9-part-a-chapter-7",
+      },
+      {
+        label: "EOIR (DOJ) — tribunais de imigração",
+        url: "https://www.justice.gov/eoir",
+      },
+      {
+        label: "INA §204(c) — bloqueio permanente por fraude de casamento",
+        url: "https://uscode.house.gov/browse/prelim@title8",
+      },
+    ],
+    fonteLeis: ["negativas/familia-negado.md"],
+    verificadoEm: "pendente",
+  },
+  "b1-negado-reaplicar": {
+    slug: "b1-negado-reaplicar",
+    badge: "B-1/B-2 NEGADO",
+    titulo: "Visto B negado: por que não existe recurso — e como reaplicar direito",
+    subtitulo:
+      "A negativa de visto no consulado não se apela nunca. Mas reaplicar do jeito certo, entendendo qual foi o motivo, muda o resultado.",
+    oQueE: [
+      "Levar uma negativa de visto de turista dói — e a primeira pergunta de quase todo mundo é 'como eu recorro?'. A resposta curta: não recorre. Decisão de oficial consular sobre visto é protegida pela doutrina da não-revisão consular — nem tribunal americano, nem o USCIS, nem qualquer outro órgão revê o mérito dessa decisão. Não existe carta, ligação ou advogado que reverta uma negativa já dada.",
+      "O que existe — e funciona — é reaplicar direito. E aqui o motivo da negativa muda tudo: se foi §221(g) (faltou documento), você tem até 1 ano pra completar, sem pagar taxa de novo. Se foi §214(b) (não convenceu o oficial dos seus vínculos com o Brasil — a negativa mais comum), reaplicar com os mesmos documentos tende a repetir o resultado. O que muda o jogo é levar evidência de mudança real: novo emprego estável, imóvel adquirido, vínculo familiar mais forte, história de viagens internacionais com retorno sempre cumprido.",
+    ],
+    quemPode: [
+      "Quem recebeu negativa §221(g) e ainda está dentro do prazo de 1 ano para completar a documentação pedida",
+      "Quem recebeu negativa §214(b) e teve mudança real e documentável de circunstância desde a última tentativa",
+      "Quem nunca teve overstay anterior ou violação de status que compliquem ainda mais o histórico",
+    ],
+    quemNaoPode: [
+      {
+        titulo: "Recorrer ou pedir reconsideração da negativa",
+        texto:
+          "Não existe esse caminho para negativa de visto no consulado — em nenhuma hipótese. Qualquer serviço que prometa 'recurso' ou 'reconsideração' de negativa consular está vendendo algo que a lei não permite.",
+        base: "Doutrina da não-revisão consular",
+      },
+      {
+        titulo: "Overstay anterior anulou um visto já aprovado",
+        texto:
+          "Se você já teve um visto B válido e ficou além do I-94, esse visto foi anulado automaticamente (INA §222(g)) — mesmo sendo de 10 anos. Isso pesa contra a reaplicação e precisa ser endereçado de frente, não escondido.",
+        base: "INA §222(g)",
+      },
+      {
+        titulo: "Mentir sobre a intenção na entrevista",
+        texto:
+          "Declarar intenção de turismo enquanto já se planeja estudar, trabalhar ou imigrar é misrepresentation — pode gerar inadmissibilidade permanente (INA §212(a)(6)(C)(i)), com waiver limitado (I-601) apenas para quem tem cônjuge ou pai/mãe cidadão ou residente disposto a provar extreme hardship.",
+        base: "INA §212(a)(6)(C)(i)",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "§221(g): 1 ano para completar",
+        texto:
+          "Documentação ou informação pedida pelo consulado tem até 1 ano para ser enviada, sem taxa nova. Passado o prazo, é aplicação do zero, com taxa nova.",
+        tone: "amber",
+      },
+      {
+        titulo: "§214(b): sem prazo, mas sem atalho",
+        texto:
+          "Não há janela — você pode reaplicar quando quiser. Mas reaplicar cedo demais, sem mudança real de circunstância, tende a repetir o resultado e criar um histórico de negativas repetidas.",
+        tone: "clay",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Identifique o motivo exato da negativa",
+        texto:
+          "A carta/carimbo do consulado indica §214(b), §221(g) ou outro motivo — isso decide todo o caminho seguinte.",
+      },
+      {
+        titulo: "Reúna evidência de mudança real (para §214(b))",
+        texto:
+          "Emprego estável, imóvel, vínculo familiar, histórico de viagens internacionais com retorno cumprido — o que prova, de forma concreta, vínculo com o Brasil mais forte que na última tentativa.",
+      },
+      {
+        titulo: "Complete a documentação pedida (para §221(g))",
+        texto: "Envie exatamente o que foi solicitado, dentro do prazo de 1 ano, sem taxa nova.",
+      },
+      {
+        titulo: "Novo DS-160 e nova entrevista",
+        texto:
+          "Reaplicação é um processo novo: novo formulário, nova taxa (exceto §221(g) dentro do prazo), nova entrevista.",
+      },
+    ],
+    kit: { kitId: "b1", label: "Kit B-1/B-2 — reaplicação" },
+    fontesOficiais: [
+      {
+        label: "Dept. of State — Visa Denials",
+        url: "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/visa-denials.html",
+      },
+      {
+        label: "Dept. of State — Ineligibilities and Waivers",
+        url: "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/waivers.html",
+      },
+      {
+        label: "USCIS — Chapter 2, Fraud and Willful Misrepresentation Waivers",
+        url: "https://www.uscis.gov/policy-manual/volume-9-part-f-chapter-2",
+      },
+    ],
+    fonteLeis: ["negativas/b1-b2-negado.md", "vistos/b1-b2.md"],
+    verificadoEm: "pendente",
+  },
+  "k1-negado-i129f-apelacao": {
+    slug: "k1-negado-i129f-apelacao",
+    badge: "K-1 NEGADO",
+    titulo: "I-129F negado: o formulário certo é o I-290B, não o EOIR-29",
+    subtitulo:
+      "Petição de noivo(a) é jurisdição da AAO, não do BIA — usar o formulário errado pode custar a apelação inteira.",
+    oQueE: [
+      "É a confusão mais cara de quem já pesquisou sobre negativa de I-130 e assume que o I-129F (petição de noivo) segue o mesmo caminho: não segue. Enquanto negativa de I-130 vai para o Board of Immigration Appeals com o formulário EOIR-29, negativa de I-129F é jurisdição da Administrative Appeals Office (AAO) — e o formulário certo é o I-290B. São tribunais diferentes, formulários diferentes, e usar o errado pode fazer a apelação ser rejeitada sem nem chegar a discutir o mérito do caso.",
+      "A apelação também exige mais do que preencher o formulário: você precisa apontar, por escrito, o erro específico de fato ou de direito na decisão — não basta discordar do resultado. É possível anexar um memorial (brief) depois, mas a declaração do erro precisa vir junto do I-290B desde o início.",
+    ],
+    quemPode: [
+      "Cidadão americano cuja petição I-129F foi negada e que identifica um erro concreto de fato ou de aplicação da lei na decisão",
+      "Quem está dentro do prazo de 30 dias da decisão (33 se recebida por correio)",
+    ],
+    quemNaoPode: [
+      {
+        titulo: "Usar o EOIR-29 para apelar o I-129F",
+        texto:
+          "Esse formulário é para I-130 e I-360 (viúvo/a), não para petição de noivo(a). Apelação de I-129F é sempre I-290B, dirigida à AAO.",
+        base: "8 CFR §103.5",
+      },
+      {
+        titulo: "Apelar sem apontar o erro específico",
+        texto:
+          "Discordar do resultado não basta — a apelação precisa identificar por escrito o erro de fato ou de direito na decisão, junto com o formulário.",
+        base: "8 CFR §103.3",
+      },
+    ],
+    prazos: [
+      {
+        titulo: "30 dias da decisão (33 se por correio)",
+        texto: "Prazo fixo para protocolar o I-290B — perder a janela encerra essa via de apelação.",
+        tone: "clay",
+      },
+    ],
+    passos: [
+      {
+        titulo: "Leia a decisão com atenção",
+        texto: "Identifique exatamente qual exigência (encontro pessoal, intenção genuína, elegibilidade) o oficial considerou não cumprida.",
+      },
+      {
+        titulo: "Monte a declaração do erro",
+        texto: "Aponte, com base na lei e nos fatos do processo, onde a decisão errou — este texto acompanha o I-290B.",
+      },
+      {
+        titulo: "Protocole o I-290B dentro do prazo",
+        texto: "No endereço correto indicado pelo USCIS para o escritório que emitiu a negativa — não direto à AAO.",
+      },
+      {
+        titulo: "Considere reapresentar em paralelo",
+        texto: "Se a negativa expôs um problema de documentação sanável, um novo I-129F pode ser mais rápido que esperar a apelação.",
+      },
+    ],
+    kit: { kitId: "k1", label: "Kit K-1 — reapresentação do I-129F" },
+    fontesOficiais: [
+      {
+        label: "USCIS — I-129F, Petition for Alien Fiancé(e)",
+        url: "https://www.uscis.gov/i-129f",
+      },
+      {
+        label: "USCIS — When to Use Form I-290B",
+        url: "https://www.uscis.gov/i-290b/eligibility",
+      },
+      {
+        label: "USCIS — Appeals of Denied Petitions Under AAO Jurisdiction by Form Number",
+        url: "https://www.uscis.gov/administrative-appeals/appeals-of-denied-petitions-under-the-jurisdiction-of-the-administrative-appeals-office-aao-by-form",
+      },
+    ],
+    fonteLeis: ["negativas/k1-negado.md", "vistos/k1.md"],
+    verificadoEm: "pendente",
+  },
 };
 
 export function getManual(slug: string): Manual | undefined {
