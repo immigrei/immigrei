@@ -393,6 +393,7 @@ export function getVisaSpecificPaths(visaType?: string | null): StrategyOption[]
   }
 
   if (visaType === "familia-ir" || visaType === "family-gc") {
+    const kitId = visaType; // same checklist page holds the EOIR-29 item for either category
     return [
       {
         id: "familia_204c_blocked",
@@ -435,6 +436,7 @@ export function getVisaSpecificPaths(visaType?: string | null): StrategyOption[]
           "O I-290B não serve para apelar I-130 — só EOIR-29, ao BIA",
           "Sem achado de fraude (§204(c)), refazer um novo I-130 também é opção — mas reinicia a data de prioridade",
         ],
+        link: { href: `/documentos/${kitId}/formulario/eoir-29`, label: "Preencher o EOIR-29 →" },
       },
     ];
   }
