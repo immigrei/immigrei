@@ -152,6 +152,9 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 /app              → Next.js App Router pages
 /lib              → Shared logic (visa journeys, strategies, cron helpers)
 /content/leis     → Curated legal knowledge base (see rule below)
+/content/marketing → Marketing pipeline: topic queue, unpublished drafts, agent outputs
+/.claude/skills   → Marketing agent roster (content, seo-geo, distribution, email, paid)
+/.claude/agents   → compliance-fact-check subagent (YMYL/UPL gate)
 /public           → Static assets
 CLAUDE.md         → This file
 .env.local        → API keys (local only, never commit)
@@ -226,6 +229,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - [x] Stripe payment flow — checkout + webhook (app/api/stripe, app/api/webhooks/stripe)
 - [x] Legal knowledge base — content/leis; all 11 catalog visas have dedicated /vistos/[id] pages (Jul 16, 2026)
 - [x] Document vault, community tab, SEVP school directory (/escolas), I-94 cron
+- [x] Marketing agent roster — 5 skills + compliance subagent, pipeline docs + 4 unpublished sample drafts in content/marketing (Jul 28, 2026)
 
 **Known gaps / next up:**
 
