@@ -138,7 +138,7 @@ export type FormSpec = {
   code: string;
   officialName: string;
   namePt: string;
-  agency: "USCIS" | "DOS" | "DOL" | "CBP";
+  agency: "USCIS" | "DOS" | "DOL" | "CBP" | "EOIR";
   officialUrl: string;
   /**
    * Edition date printed on the official form ("mm/dd/yy"). USCIS rejects

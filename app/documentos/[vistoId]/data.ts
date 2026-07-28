@@ -2465,6 +2465,23 @@ const checklists: Record<string, ChecklistVisto> = {
           },
         ],
       },
+      {
+        titulo: "Se a I-130 foi negada — apelação (EOIR-29)",
+        descricao:
+          "Só o peticionário (o parente cidadão) assina e protocola — não o beneficiário. Prazo de 30 dias da decisão (33 se recebida por correio).",
+        documentos: [
+          {
+            id: "eoir-29",
+            nome: "Formulário EOIR-29 — Apelação ao Board of Immigration Appeals",
+            descricao:
+              "Diferente da apelação de vistos de trabalho (I-290B), a negativa de I-130 apela com o EOIR-29, dirigido ao BIA — não à AAO. Preenchido e assinado pelo peticionário.",
+            agencia: "USCIS",
+            formulario: "EOIR-29",
+            formId: "eoir-29",
+            obrigatorio: false,
+          },
+        ],
+      },
     ],
   },
 
@@ -2785,6 +2802,23 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-751",
             obrigatorio: true,
+          },
+        ],
+      },
+      {
+        titulo: "Se a I-130 foi negada — apelação (EOIR-29)",
+        descricao:
+          "Só o peticionário (o titular do Green Card) assina e protocola — não o beneficiário. Prazo de 30 dias da decisão (33 se recebida por correio).",
+        documentos: [
+          {
+            id: "eoir-29-fgc",
+            nome: "Formulário EOIR-29 — Apelação ao Board of Immigration Appeals",
+            descricao:
+              "Diferente da apelação de vistos de trabalho (I-290B), a negativa de I-130 apela com o EOIR-29, dirigido ao BIA — não à AAO. Preenchido e assinado pelo peticionário residente.",
+            agencia: "USCIS",
+            formulario: "EOIR-29",
+            formId: "eoir-29",
+            obrigatorio: false,
           },
         ],
       },

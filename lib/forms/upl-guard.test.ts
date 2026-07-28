@@ -56,9 +56,11 @@ describe("cada FormSpec está bem formado", () => {
   for (const form of Object.values(FORMS)) {
     it(`${form.id} tem edição, asset e destino no cofre`, () => {
       if (form.exportKind === "pdf") {
-        // Printed USCIS forms pin a real edition date and asset; online-only
-        // forms (DS-160, ESTA) have neither — there's no PDF to go stale.
-        expect(form.edition).toMatch(/^\d{2}\/\d{2}\/\d{2}$/);
+        // Printed USCIS forms pin a real edition date (mm/dd/yy) and asset;
+        // DOJ/EOIR forms print revision dates as mm/yyyy instead (no day —
+        // see the real "Rev. 02/2026" on eoir-29.pdf); online-only forms
+        // (DS-160, ESTA) have neither — there's no PDF to go stale.
+        expect(form.edition).toMatch(/^\d{2}\/\d{2}\/\d{2}$|^\d{2}\/\d{4}$/);
         expect(form.pdfAssetPath).toBeTruthy();
       } else {
         expect(form.edition).toBeTruthy();

@@ -18,6 +18,7 @@ import { G1145 } from "./g-1145";
 import { I129F } from "./i-129f";
 import { DS160 } from "./ds-160";
 import { ESTA } from "./esta";
+import { EOIR29 } from "./eoir-29";
 
 export const FORMS: Record<string, FormSpec> = {
   [I765.id]: I765,
@@ -34,6 +35,7 @@ export const FORMS: Record<string, FormSpec> = {
   [I129F.id]: I129F,
   [DS160.id]: DS160,
   [ESTA.id]: ESTA,
+  [EOIR29.id]: EOIR29,
 };
 
 export function getForm(formId: string): FormSpec | undefined {
