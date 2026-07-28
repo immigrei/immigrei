@@ -8,7 +8,7 @@ export default function PlanButton({
   plan,
   highlight,
 }: {
-  plan: "base" | "core";
+  plan: "monthly" | "annual";
   highlight?: boolean;
 }) {
   const { isSignedIn } = useAuth();

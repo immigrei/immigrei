@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { getStripe, PLANS, type PlanId } from "@/lib/stripe";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-const PlanSchema = z.enum(["base", "core"]);
+const PlanSchema = z.enum(["monthly", "annual"]);
 
 // Creates a Stripe Checkout session for a subscription plan.
 export async function POST(req: NextRequest) {

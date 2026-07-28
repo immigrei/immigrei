@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import checklists from "@/app/documentos/[vistoId]/data";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getUserPlan } from "@/lib/plan";
 
 // File itself keeps its own manual checks below (size/MIME) — Zod only
 // covers the text fields FormData hands us alongside it.
@@ -80,6 +81,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Guardar documentos é recurso de assinante — a UI já mostra o cofre
+  // bloqueado no plano grátis, mas o limite precisa valer na API também.
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json(
+      { error: "O cofre de documentos é exclusivo para assinantes." },
+      { status: 403 },
+    );
+  }
 
   const allowed = await checkRateLimit(`user-documents-upload:${userId}`, { max: 20, windowMs: 10 * 60_000 });
   if (!allowed) {

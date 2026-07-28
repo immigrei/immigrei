@@ -6,18 +6,18 @@ export function getStripe() {
   return _stripe;
 }
 
-// Test-mode price ids created 2026-07-02; override via env when the
-// account goes live and new prices are created.
+// Live price ids created 2026-07-28 — single subscription tier, billed
+// monthly or annually. Override via env if prices are ever recreated.
 export const PLANS = {
-  base: {
-    name: "Immigrei Base",
-    priceId: process.env.STRIPE_PRICE_BASE ?? "price_1TobIA37xtqeymVrF4h4a4FC",
-    amount: 9,
+  monthly: {
+    name: "Immigrei",
+    priceId: process.env.STRIPE_PRICE_MONTHLY ?? "price_1Ty5wp4BxAIRzYfOnpJku6Xb",
+    amount: 29.9,
   },
-  core: {
-    name: "Immigrei Core",
-    priceId: process.env.STRIPE_PRICE_CORE ?? "price_1TobIB37xtqeymVrmdCwr9jH",
-    amount: 29,
+  annual: {
+    name: "Immigrei",
+    priceId: process.env.STRIPE_PRICE_ANNUAL ?? "price_1Ty5wp4BxAIRzYfOtgyBbThC",
+    amount: 269.0,
   },
 } as const;
 
