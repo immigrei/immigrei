@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase";
-import { getStripe, planFromPriceId } from "@/lib/stripe";
+import { getStripe, planFromPriceId, PLANS } from "@/lib/stripe";
 
 /**
  * Stripe webhook — keeps the subscriptions table in sync.
@@ -54,10 +54,16 @@ export async function POST(req: NextRequest) {
 
 async function upsertSubscription(userId: string, sub: Stripe.Subscription) {
   const item = sub.items.data[0];
-  const plan = planFromPriceId(item?.price.id ?? "");
+  const priceId = item?.price.id ?? "";
+  const plan = planFromPriceId(priceId);
   if (!plan) {
-    console.error("stripe webhook: unknown price", item?.price.id);
-    return;
+    // Throw instead of returning: swallowing this would answer 200, Stripe
+    // would mark the event delivered, and the customer would have paid for
+    // access they never get — with no signal anywhere. Failing loudly puts it
+    // in Stripe's failed-webhook list. Usual cause is a STRIPE_PRICE_* env var
+    // drifting away from the price that is actually live.
+    const known = Object.values(PLANS).map((p) => p.priceId).join(", ");
+    throw new Error(`unknown price ${priceId} — expected one of: ${known}`);
   }
   const periodEnd = item?.current_period_end;
   const { error } = await supabaseAdmin.from("subscriptions").upsert(
