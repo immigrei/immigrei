@@ -4,14 +4,14 @@ slug: case-was-approved
 type: status
 query_target: "Case Was Approved"
 status: draft
-compliance_check: PASS_WITH_FLAGS
+compliance_check: PASS
 reviewed_by: pending
 byline: Equipe Immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions
   - https://www.uscis.gov/i-130
-verificado_em: pendente
+verificado_em: 2026-07-29
 ---
 
 **"Case Was Approved"** significa que o USCIS aprovou a petição daquele número
@@ -23,10 +23,10 @@ existem etapas até o benefício estar de fato na sua mão.
 ## O que exatamente foi aprovado?
 
 O status se refere ao **formulário daquele recibo específico** — não
-necessariamente ao processo inteiro. O USCIS descreve o I-797 como o documento
-emitido *"when an application or petition is approved"*
-([uscis.gov, Form I-797: Types and Functions](https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions)).
-<!-- VERIFY: confirmar citação verbatim na página atual -->
+necessariamente ao processo inteiro. O USCIS descreve o Formulário I-797 como
+*"issued to communicate receipt or approval of an application or petition"*
+([uscis.gov, Form I-797: Types and Functions](https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions),
+verificado em 29/07/2026).
 
 Exemplos de como a aprovação se encaixa na jornada:
 
@@ -82,9 +82,15 @@ foi, o que falta e qual é o próximo passo.
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*
 
-<!-- COMPLIANCE (inline pass, 2026-07-28 — full subagent run pending):
-FLAGS:
-- [FACT] I-797 quote — confirm verbatim wording on current uscis.gov page
-VERIFIED CLAIMS: "aprovação do I-130 ≠ green card" traced to content/leis/formularios/i-130.md; status names consistent with lib/uscis-status-pt.ts
+<!-- COMPLIANCE (updated 2026-07-29):
+FLAGS: none open.
+FIXED: I-797 quote was a paraphrase presented as verbatim — corrected against
+live fetch of uscis.gov/forms/filing-guidance/form-i-797-types-and-functions
+(29/07/2026) to the actual page text: "Issued to communicate receipt or
+approval of an application or petition." Also cross-checked I-797C usage in
+case-was-received.md against the same page — both form numbers are correctly
+distinguished (I-797 = receipt/approval, I-797C = receipt/rejection/transfer/
+appointments), no contradiction between the two drafts.
+VERIFIED CLAIMS: "aprovação do I-130 ≠ green card" traced to content/leis/formularios/i-130.md; status names consistent with lib/uscis-status-pt.ts; I-797 quote verified live.
 UPL: none — "o que ela habilita varia caso a caso" defers to professional
 -->
