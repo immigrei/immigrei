@@ -217,7 +217,7 @@ export default function FormularioPage() {
             <span>
               {saveState === "saving" && "Salvando…"}
               {saveState === "saved" && "Salvo ✓"}
-              {saveState === "error" && "Sem salvar (offline)"}
+              {saveState === "error" && "Erro ao salvar — suas respostas ficam só nesta aba"}
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-pine-tint overflow-hidden">
