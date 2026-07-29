@@ -28,6 +28,7 @@ const jornada = [
   "Tudo do Retrato",
   "Sua jornada completa, etapa por etapa",
   "Kits e manuais passo a passo, por tipo de visto",
+  "Preencha em português, exporte pronto em inglês — sem traduzir nada",
   "Cofre de documentos, ligado a cada checklist",
   "Comunidade: publique e participe dos relatos",
 ];
@@ -67,6 +68,7 @@ export default function PlanosPage() {
           {/* Retrato — grátis */}
           <div className="flex flex-col bg-cream-2 rounded-2xl p-8 border border-pine-tint">
             <h2 className="text-ink font-bold text-xl mb-1">Retrato</h2>
+            <div className="h-7 mb-4" aria-hidden="true" />
             <p className="text-ink-faint text-sm mb-4">Onde você está agora</p>
             <p className="mb-2">
               <span
@@ -93,6 +95,7 @@ export default function PlanosPage() {
           {/* Jornada — mensal */}
           <div className="flex flex-col bg-cream-2 rounded-2xl p-8 border border-pine-tint">
             <h2 className="text-ink font-bold text-xl mb-1">Jornada</h2>
+            <div className="h-7 mb-4" aria-hidden="true" />
             <p className="text-ink-faint text-sm mb-4">Aonde você vai chegar</p>
             <p className="mb-2">
               <span
@@ -115,9 +118,11 @@ export default function PlanosPage() {
           {/* Jornada — anual (destaque) */}
           <div className="flex flex-col bg-cream-2 rounded-2xl p-8 border border-amber shadow-lg">
             <h2 className="text-ink font-bold text-xl mb-1">Jornada anual</h2>
-            <span className="self-start text-[11px] font-bold uppercase tracking-widest text-amber-deep bg-amber-tint px-3 py-1 rounded-full mb-4">
-              3 meses de graça
-            </span>
+            <div className="h-7 mb-4">
+              <span className="inline-block self-start text-[11px] font-bold uppercase tracking-widest text-amber-deep bg-amber-tint px-3 py-1 rounded-full">
+                3 meses de graça
+              </span>
+            </div>
             <p className="text-ink-faint text-sm mb-4">A mesma jornada, pagando menos</p>
             <p className="mb-2">
               <span
