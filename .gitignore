@@ -43,8 +43,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Claude Code local config
-.claude/
+# Claude Code local config (skills/agents/launch.json are shared, rest is local)
+.claude/*
+!.claude/skills/
+!.claude/agents/
+!.claude/launch.json
 memory/
 next-48h.html
 
