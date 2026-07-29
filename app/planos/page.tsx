@@ -114,10 +114,10 @@ export default function PlanosPage() {
 
           {/* Jornada — anual (destaque) */}
           <div className="flex flex-col bg-cream-2 rounded-2xl p-8 border border-amber shadow-lg">
+            <h2 className="text-ink font-bold text-xl mb-1">Jornada anual</h2>
             <span className="self-start text-[11px] font-bold uppercase tracking-widest text-amber-deep bg-amber-tint px-3 py-1 rounded-full mb-4">
               3 meses de graça
             </span>
-            <h2 className="text-ink font-bold text-xl mb-1">Jornada anual</h2>
             <p className="text-ink-faint text-sm mb-4">A mesma jornada, pagando menos</p>
             <p className="mb-2">
               <span
