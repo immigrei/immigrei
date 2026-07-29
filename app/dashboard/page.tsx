@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
 import { getStrategy } from "@/lib/strategy";
+import { getUserPlan } from "@/lib/plan";
 import { isDeniedStatus, isUscisSandbox } from "@/lib/uscis";
 import JourneyTimeline from "./JourneyTimeline";
 import I94Field from "./I94Field";
@@ -12,6 +13,7 @@ import VisaBulletinWidget from "./VisaBulletinWidget";
 import CaseTracker from "./CaseTracker";
 import ConsuladosWidget from "./ConsuladosWidget";
 import AppShell from "@/app/components/AppShell";
+import PaywallGate from "@/app/components/PaywallGate";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
@@ -79,6 +81,9 @@ export default async function DashboardPage() {
 
   if (!profile?.onboarding_completed) redirect("/onboarding");
 
+  const plan = await getUserPlan(userId);
+  const hasAccess = plan !== "free";
+
   const strategy = getStrategy(profile);
 
   const { data: userCases } = await supabase
@@ -87,6 +92,8 @@ export default async function DashboardPage() {
     .eq("user_id", userId)
     .eq("is_active", true)
     .order("created_at", { ascending: false });
+
+  const deniedCases = (userCases ?? []).filter((c) => c.last_status && isDeniedStatus(c.last_status));
 
   const { data: bulletin } = await supabase
     .from("visa_bulletin")
@@ -142,22 +149,50 @@ export default async function DashboardPage() {
           sandboxMode={isUscisSandbox()}
         />
 
-        {/* Strategic options for denied cases */}
-        {(userCases ?? [])
-          .filter((c) => c.last_status && isDeniedStatus(c.last_status))
-          .map((c) => (
-            <StrategicOptionsCard
-              key={c.id}
-              receiptNumber={c.receipt_number}
-              label={c.label}
-              statusDate={c.last_status_date}
-            />
-          ))}
+        {/* Strategic options for denied cases — mesmo conteúdo que /painel
+            gates behind hasAccess (guardrails/alternative paths), então o
+            Início não pode dar de graça o que o painel vende. */}
+        {deniedCases.length > 0 && (
+          hasAccess ? (
+            deniedCases.map((c) => (
+              <StrategicOptionsCard
+                key={c.id}
+                receiptNumber={c.receipt_number}
+                label={c.label}
+                statusDate={c.last_status_date}
+              />
+            ))
+          ) : (
+            <PaywallGate
+              titulo="Uma negativa não é o fim — é uma bifurcação"
+              descricao="Veja as portas que ainda estão abertas para o seu caso, com prazos de recurso e o kit certo para cada caminho. Assine para ver suas opções."
+            >
+              {deniedCases.map((c) => (
+                <StrategicOptionsCard
+                  key={c.id}
+                  receiptNumber={c.receipt_number}
+                  label={c.label}
+                  statusDate={c.last_status_date}
+                />
+              ))}
+            </PaywallGate>
+          )
+        )}
 
         {/* Journey timeline — mesmo getStrategy(profile) do /painel, então
             consular (DS-160, entrevista) vs Change-of-Status segue
-            profile.location em vez de uma lista genérica por visto. */}
-        <JourneyTimeline name={strategy.subtitulo} etapas={strategy.etapas} />
+            profile.location em vez de uma lista genérica por visto. Grátis
+            vê o resumo do estágio atual borrado, sem nenhum link ativo. */}
+        {hasAccess ? (
+          <JourneyTimeline name={strategy.subtitulo} etapas={strategy.etapas} />
+        ) : (
+          <PaywallGate
+            titulo="Sua jornada, passo a passo, em português"
+            descricao="Preencha os formulários em português e receba prontos em inglês — cada etapa da sua jornada, na ordem certa, com prazos e o que fazer em cada uma."
+          >
+            <JourneyTimeline name={strategy.subtitulo} etapas={strategy.etapas} />
+          </PaywallGate>
+        )}
 
         {/* Visa Bulletin */}
         <VisaBulletinWidget bulletin={bulletin} mainGoal={profile.main_goal} />

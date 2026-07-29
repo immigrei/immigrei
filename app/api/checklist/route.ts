@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import checklists from "@/app/documentos/[vistoId]/data";
+import { getUserPlan } from "@/lib/plan";
 
 const ChecklistBodySchema = z.object({
   vistoId: z.string(),
@@ -24,6 +25,11 @@ function isValidTarget(vistoId: string, documentoId: string): boolean {
 export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Kits de protocolo são exclusivos para assinantes." }, { status: 403 });
+  }
 
   const vistoId = req.nextUrl.searchParams.get("vistoId");
   if (!vistoId) return NextResponse.json({ error: "vistoId required" }, { status: 400 });

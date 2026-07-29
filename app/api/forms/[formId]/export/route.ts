@@ -18,6 +18,7 @@ import { fillPdf } from "@/lib/forms/fillPdf";
 import { fillWorksheet } from "@/lib/forms/fillWorksheet";
 import { allQuestions, isVisible, type Answers } from "@/lib/forms/types";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getUserPlan } from "@/lib/plan";
 
 export const runtime = "nodejs";
 
@@ -47,6 +48,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ formId: st
 
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Exportar formulários é exclusivo para assinantes." }, { status: 403 });
+  }
 
   const allowed = await checkRateLimit(`forms-export:${userId}`, { max: 10, windowMs: 10 * 60_000 });
   if (!allowed) {

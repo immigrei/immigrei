@@ -18,6 +18,7 @@ import { ensureProfile } from "@/lib/profile";
 import { getForm } from "@/lib/forms/registry";
 import { mergeAnswers, type ProfileForPrefill } from "@/lib/forms/prefill";
 import type { Answers } from "@/lib/forms/types";
+import { getUserPlan } from "@/lib/plan";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,11 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ formId: st
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
 
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Preencher formulários é exclusivo para assinantes." }, { status: 403 });
+  }
+
   const [profile, { data: submission }] = await Promise.all([
     loadProfile(userId),
     supabaseAdmin
@@ -69,6 +75,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ formId: st
 
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Preencher formulários é exclusivo para assinantes." }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => ({}));
   const parsedBody = AnswersEnvelopeSchema.safeParse(body);

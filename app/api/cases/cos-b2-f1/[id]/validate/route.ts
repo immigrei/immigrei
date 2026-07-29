@@ -19,6 +19,7 @@ import {
   type CosB2F1CaseFacts,
 } from "@/lib/rules/cosB2F1";
 import { deriveCaseStatus } from "@/lib/rules/caseStatus";
+import { getUserPlan } from "@/lib/plan";
 
 function toDateOrNull(value: string | null): Date | null {
   return value ? new Date(value) : null;
@@ -44,6 +45,11 @@ export async function POST(
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Este pathway é exclusivo para assinantes." }, { status: 403 });
   }
 
   const { id } = await params;

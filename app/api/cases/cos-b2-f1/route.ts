@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
+import { getUserPlan } from "@/lib/plan";
 
 const UPSERTABLE_FIELDS = [
   "i94_number",
@@ -47,6 +48,11 @@ export async function GET() {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Este pathway é exclusivo para assinantes." }, { status: 403 });
+  }
+
   const { data, error } = await supabaseAdmin
     .from("cos_b2_f1_cases")
     .select("*")
@@ -66,6 +72,11 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Este pathway é exclusivo para assinantes." }, { status: 403 });
   }
 
   const body = await req.json().catch(() => ({}));

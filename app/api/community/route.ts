@@ -15,9 +15,10 @@ import {
   findContactInfo,
 } from "@/lib/community";
 
-// Closed community: reading requires login; publishing requires an active
-// subscription. Every report enters as "pending" and only shows up in the
-// feed after manual approval.
+// Closed community: reading AND publishing require an active subscription
+// (free plan sees a locked teaser, no report content in the payload). Every
+// report enters as "pending" and only shows up in the feed after manual
+// approval.
 
 const VALID_VISAS = new Set(
   [...vistosEstudo, ...vistosNegocios].map((v) => v.id)
@@ -67,6 +68,13 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    // Locked, not an error: the client renders a paywall teaser from this.
+    // No report content ever reaches a free-plan browser.
+    return NextResponse.json({ reports: [], plan, locked: true });
+  }
+
   const vistoId = req.nextUrl.searchParams.get("vistoId");
 
   let query = supabaseAdmin
@@ -84,14 +92,13 @@ export async function GET(req: NextRequest) {
       .select("report_id")
       .eq("visto_id", vistoId);
     const reportIds = (ids ?? []).map((r) => r.report_id);
-    if (reportIds.length === 0) return NextResponse.json({ reports: [], plan: await getUserPlan(userId) });
+    if (reportIds.length === 0) return NextResponse.json({ reports: [], plan });
     query = query.in("id", reportIds);
   }
 
-  const [{ data, error }, { data: mine }, plan] = await Promise.all([
+  const [{ data, error }, { data: mine }] = await Promise.all([
     query,
     supabaseAdmin.from("report_reactions").select("report_id").eq("user_id", userId),
-    getUserPlan(userId),
   ]);
 
   if (error) {

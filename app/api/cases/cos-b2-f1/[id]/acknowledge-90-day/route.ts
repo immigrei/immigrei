@@ -13,6 +13,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getUserPlan } from "@/lib/plan";
 
 const ALREADY_ACKNOWLEDGED_ERROR = {
   error: "A ciência da regra dos 90 dias já foi registrada e não pode ser alterada.",
@@ -25,6 +26,11 @@ export async function POST(
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Este pathway é exclusivo para assinantes." }, { status: 403 });
   }
 
   const { id } = await params;

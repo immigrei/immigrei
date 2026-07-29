@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
+import PaywallGate from "@/app/components/PaywallGate";
 import { vistosEstudo, vistosNegocios } from "@/lib/vistosCatalog";
 import {
   AUTHOR_STATES,
@@ -46,6 +47,7 @@ function tempoRelativo(iso: string): string {
 export default function ComunidadePage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [plan, setPlan] = useState<string>("free");
+  const [locked, setLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState<string | null>(null);
 
@@ -55,6 +57,7 @@ export default function ComunidadePage() {
       .then((d) => {
         setReports(d.reports ?? []);
         setPlan(d.plan ?? "free");
+        setLocked(Boolean(d.locked));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -136,28 +139,6 @@ export default function ComunidadePage() {
           </div>
         )}
 
-        {assinante ? (
-          <Composer onPublished={onPublished} />
-        ) : (
-          !loading && (
-            <div className="rounded-2xl bg-pine p-5 mb-6">
-              <h2 className="text-lg font-semibold text-cream-2 mb-1" style={{ fontFamily: "var(--font-display)" }}>
-                Quer contar a sua história?
-              </h2>
-              <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(244,238,226,0.85)" }}>
-                Publicar relatos e reagir às histórias é exclusivo para assinantes.
-                Assinando, você também apoia a comunidade a continuar sem anúncios.
-              </p>
-              <Link
-                href="/planos"
-                className="block w-full text-center bg-amber hover:bg-amber-deep text-ink font-bold rounded-xl px-4 py-3 text-sm transition-colors"
-              >
-                Conhecer os planos
-              </Link>
-            </div>
-          )
-        )}
-
         {loading && (
           <div className="flex items-center gap-2 text-ink-faint text-sm mt-2">
             <span className="w-4 h-4 rounded-full border-2 border-pine-tint border-t-pine animate-spin inline-block" />
@@ -165,36 +146,93 @@ export default function ComunidadePage() {
           </div>
         )}
 
-        {meusPendentes.map((r) => (
-          <PendingCard key={r.id} report={r} />
-        ))}
-
-        {!loading && aprovados.length === 0 && (
-          <div className="rounded-2xl border border-pine-tint bg-cream-2 p-6 text-center mt-2">
-            <p className="text-sm font-semibold text-ink mb-1">
-              {filtro ? "Ainda não há relatos sobre este visto." : "Os primeiros relatos estão chegando."}
-            </p>
-            <p className="text-xs text-ink-soft leading-relaxed">
-              {assinante
-                ? "Sua história pode ser o mapa de outra pessoa — que tal ser quem começa?"
-                : "Em breve este espaço estará cheio de histórias reais da comunidade."}
-            </p>
-          </div>
+        {!loading && locked && (
+          <PaywallGate
+            titulo="Histórias reais de quem já passou pelo que você está vivendo"
+            descricao="Relatos de outros imigrantes brasileiros, com o que ninguém conta antes. Assine para ler e participar da comunidade."
+          >
+            <PlaceholderFeed />
+          </PaywallGate>
         )}
 
-        {aprovados.length > 0 && (
-          <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-3 mt-2" style={{ letterSpacing: "0.1em" }}>
-            Relatos da comunidade
-          </p>
-        )}
+        {!locked && (
+          <>
+            {assinante ? (
+              <Composer onPublished={onPublished} />
+            ) : (
+              !loading && (
+                <div className="rounded-2xl bg-pine p-5 mb-6">
+                  <h2 className="text-lg font-semibold text-cream-2 mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                    Quer contar a sua história?
+                  </h2>
+                  <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(244,238,226,0.85)" }}>
+                    Publicar relatos e reagir às histórias é exclusivo para assinantes.
+                    Assinando, você também apoia a comunidade a continuar sem anúncios.
+                  </p>
+                  <Link
+                    href="/planos"
+                    className="block w-full text-center bg-amber hover:bg-amber-deep text-ink font-bold rounded-xl px-4 py-3 text-sm transition-colors"
+                  >
+                    Conhecer os planos
+                  </Link>
+                </div>
+              )
+            )}
 
-        <div className="flex flex-col gap-4">
-          {aprovados.map((r) => (
-            <ReportCard key={r.id} report={r} assinante={assinante} onHelped={() => toggleHelped(r.id)} />
-          ))}
-        </div>
+            {meusPendentes.map((r) => (
+              <PendingCard key={r.id} report={r} />
+            ))}
+
+            {!loading && aprovados.length === 0 && (
+              <div className="rounded-2xl border border-pine-tint bg-cream-2 p-6 text-center mt-2">
+                <p className="text-sm font-semibold text-ink mb-1">
+                  {filtro ? "Ainda não há relatos sobre este visto." : "Os primeiros relatos estão chegando."}
+                </p>
+                <p className="text-xs text-ink-soft leading-relaxed">
+                  Sua história pode ser o mapa de outra pessoa — que tal ser quem começa?
+                </p>
+              </div>
+            )}
+
+            {aprovados.length > 0 && (
+              <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-3 mt-2" style={{ letterSpacing: "0.1em" }}>
+                Relatos da comunidade
+              </p>
+            )}
+
+            <div className="flex flex-col gap-4">
+              {aprovados.map((r) => (
+                <ReportCard key={r.id} report={r} assinante={assinante} onHelped={() => toggleHelped(r.id)} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </AppShell>
+  );
+}
+
+// Skeleton de relato — nenhum dado real chega ao navegador no plano grátis
+// (a API já devolve reports: [] quando locked), então a prévia borrada do
+// PaywallGate usa só esta silhueta estática.
+function PlaceholderFeed() {
+  return (
+    <div className="flex flex-col gap-4">
+      {[0, 1, 2].map((i) => (
+        <article key={i} className="rounded-2xl border border-pine-tint bg-cream-2 p-4">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="w-9 h-9 rounded-full bg-pine-tint flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <div className="h-3 w-28 bg-pine-tint rounded mb-1.5" />
+              <div className="h-2.5 w-16 bg-pine-tint rounded" />
+            </div>
+          </div>
+          <div className="h-4 w-3/4 bg-pine-tint rounded mb-2" />
+          <div className="h-3 w-full bg-pine-tint rounded mb-1.5" />
+          <div className="h-3 w-5/6 bg-pine-tint rounded" />
+        </article>
+      ))}
+    </div>
   );
 }
 
