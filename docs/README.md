@@ -6,10 +6,19 @@ This folder consolidates all Immigrei strategic, brand, technical, and research 
 
 ## 📋 Structure
 
+### `/legal`
+**Company formation, tax docs, and legal structure**
+- `Documentos LLC/` — Hash Vantage Group LLC formation (SS4, EIN, Northwest filings)
+
+**Usage:** Reference for company registration, tax compliance, legal entity documentation.
+
+---
+
 ### `/brand`
 **Brand identity, guidelines, and visual standards**
 - `Immigrei_Brand_Guidelines_v1.0.docx` — English brand guidelines (logo usage, color palette, typography rules)
 - `Immigrei_Manual_de_Marca_v1.0.docx` — Portuguese (PT-BR) brand manual
+- `Identidade Visual/` — Logo files, visual identity PDF, design exports from Figma
 
 **Usage:** Reference these when creating marketing copy, design assets, or anything representing Immigrei publicly.
 
@@ -25,11 +34,12 @@ This folder consolidates all Immigrei strategic, brand, technical, and research 
 ---
 
 ### `/technical`
-**Database schema, SQL migrations, and architecture docs**
+**Database schema, SQL migrations, API integration, and architecture docs**
 - `SQL-Lancamento-009-a-012.sql` — Supabase migrations for launches 009–012
 - `Proposta - Modelagem Supabase I-539 e Cofre de Documentos.md` — Supabase schema proposal for I-539 forms and document vault
+- `Torch API - USCIS/` — USCIS developer portal integration docs and attestation forms
 
-**Usage:** Reference when building new schema features, migrations, or understanding data models.
+**Usage:** Reference when building new schema features, migrations, API integrations, or understanding data models.
 
 ---
 
@@ -45,11 +55,12 @@ This folder consolidates all Immigrei strategic, brand, technical, and research 
 ---
 
 ### `/content`
-**Marketing copy, email sequences, and presentation scripts**
+**Marketing copy, email sequences, presentation scripts, and agent outputs**
 - `Rascunho - Sequencia de Emails D3 e D7.md` — Email flow drafts (Day 3, Day 7)
 - `Roteiro - Demo USCIS Producao (Felipe).md` — Demo script for production USCIS journey
+- `marketing-agent-compass.md` — Marketing agent workflow artifact (campaign/messaging outputs)
 
-**Usage:** Template for new email campaigns, onboarding flows, and sales demos.
+**Usage:** Template for new email campaigns, onboarding flows, sales demos, and agent-generated marketing assets.
 
 ---
 
@@ -84,10 +95,15 @@ When working on Immigrei:
 
 ## ✅ Consolidated From
 
-Originally scattered across Google Drive (`My Drive/Immigrei/`). Consolidated July 30, 2026 to:
-- Reduce cloud dependency
-- Enable AI agent access
-- Centralize knowledge
-- Version-control strategic assets
+Originally scattered across:
+- **Google Drive** (`My Drive/Immigrei/`) — Strategic plans, brand guidelines, viability reports
+- **Transcend Drive** (`Immigrei - local/`) — Company docs, brand assets, USCIS integration docs, marketing outputs
 
-**Google Drive folder can now be archived or deleted.**
+Consolidated July 30, 2026 to:
+- Reduce cloud dependency
+- Enable AI agent access (Buzz)
+- Centralize all knowledge in one source of truth
+- Version-control strategic assets
+- Enable portable backup/offline access
+
+**Next:** Google Drive folder can be archived. Transcend drive will mirror this full repo for portability.

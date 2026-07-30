@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script type="text/javascript" src="/newrelic.js" async></script>
+
+    <!-- Google Tag Manager -->
+    <script>
+      if (window.location.host === 'myaccount.uscis.gov') {
+        (function (w, d, s, l, i) {
+          w[l] = w[l] || [];
+          w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+          var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s),
+            dl = l != 'dataLayer' ? '&l=' + l : '';
+          j.async = true;
+          j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+          f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-5H8HDQ3');
+      }
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- AWS WAF - Application integration - CAPTCHA integration-->
+
+    <!-- Once Devops story for setting APIKEY/TAG on deploy is completed, this will be replaced with an ENV reference-->
+    <script>
+      if (window.location.host === 'myaccount.uscis.gov' || window.location.host === 'myaccount-preview.uscis.gov') {
+        const captchaTag = document.createElement('script');
+        captchaTag.type = 'text/javascript';
+        captchaTag.src = 'https://5655e0170af1.us-east-1.captcha-sdk.awswaf.com/5655e0170af1/jsapi.js';
+        captchaTag.defer = true;
+        document.head.appendChild(captchaTag);
+      } else {
+        const captchaTag = document.createElement('script');
+        captchaTag.type = 'text/javascript';
+        captchaTag.src = 'https://6fd8945be725.us-east-1.captcha-sdk.awswaf.com/6fd8945be725/jsapi.js';
+        captchaTag.defer = true;
+        document.head.appendChild(captchaTag);
+      }
+    </script>
+
+    <!-- End AWS WAF - Application integration - CAPTCHA integration -->
+
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Citizenship and Immigration Services" />
+    <meta id="index-meta-tag" name="robots" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- source sans pro font links: -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,400;0,600;1,200;1,400;1,600&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>Citizenship and Immigration Services</title>
+    <script>
+      if (window.location.host === 'myaccount-preview.uscis.gov') {
+        document.getElementById('index-meta-tag').setAttribute('content', 'noindex');
+      }
+    </script>
+    <script>
+      if (window.location.host === 'myaccount.uscis.gov') {
+        const dapscript = document.createElement('script');
+        dapscript.async = true;
+        dapscript.type = 'text/javascript';
+        dapscript.src = 'https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DHS&subagency=USCIS';
+        dapscript.id = '_fed_an_ua_tag';
+        document.head.appendChild(dapscript);
+      }
+    </script>
+    <script type="module" crossorigin src="/static/index-BvBHRtgc.js"></script>
+    <link rel="stylesheet" crossorigin href="/static/index-CE_9wxYw.css">
+  </head>
+
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-5H8HDQ3"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>
