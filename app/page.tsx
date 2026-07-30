@@ -10,7 +10,9 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-cream flex flex-col">
       <header className="flex items-center justify-between px-6 py-5">
-        <Logo variant="wordmark" className="text-2xl" />
+        <Link href="/">
+          <Logo variant="lockup" className="text-4xl" />
+        </Link>
         <Link
           href="/sign-in"
           className="text-sm font-medium text-pine hover:text-pine-deep transition-colors"

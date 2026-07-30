@@ -94,7 +94,7 @@ export default function EmBrevePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <header className="flex items-center justify-center px-6 py-6">
-        <Logo variant="wordmark" className="text-2xl" />
+        <Logo variant="lockup" className="text-4xl" />
       </header>
 
       <section className="flex-1 flex flex-col items-center justify-center px-6 text-center py-16">

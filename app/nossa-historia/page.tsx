@@ -44,7 +44,7 @@ export default function NossaHistoriaPage() {
     <main className="min-h-screen bg-cream">
       <header className="flex items-center justify-between px-6 py-6 max-w-3xl mx-auto">
         <Link href="/" aria-label="immigrei — início">
-          <Logo variant="wordmark" className="text-2xl" />
+          <Logo variant="lockup" className="text-4xl" />
         </Link>
       </header>
 
