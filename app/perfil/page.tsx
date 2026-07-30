@@ -39,8 +39,24 @@ export default async function PerfilPage() {
                 <path d="M9 18l6-6-6-6" />
               </svg>
             </a>
+            <a href="/termos" className="px-6 py-4 flex items-center justify-between group">
+              <span className="text-ink text-sm font-medium">Termos de Uso</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </a>
+            <a href="/privacidade" className="px-6 py-4 flex items-center justify-between group">
+              <span className="text-ink text-sm font-medium">Política de Privacidade</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </a>
           </div>
         </div>
+
+        <p className="text-ink-faint text-xs text-center">
+          immigrei é operado por Hash Vantage Group LLC.
+        </p>
       </div>
     </AppShell>
   );

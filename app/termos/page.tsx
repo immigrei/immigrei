@@ -56,7 +56,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "7. Contato",
     body: [
-      "Dúvidas sobre estes termos: visaemdia2026@gmail.com (e-mail oficial da immigrei durante o período de lançamento).",
+      "Dúvidas sobre estes termos: ola@immigrei.com.",
     ],
   },
 ];
@@ -76,8 +76,11 @@ export default function TermosPage() {
         >
           Termos de Uso
         </h1>
-        <p className="text-ink-faint text-sm mb-10">
+        <p className="text-ink-faint text-sm mb-1">
           Última atualização: {LAST_UPDATED}
+        </p>
+        <p className="text-ink-faint text-sm mb-10">
+          immigrei é operado por Hash Vantage Group LLC.
         </p>
         {sections.map((s) => (
           <section key={s.title} className="mb-8">

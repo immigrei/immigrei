@@ -62,7 +62,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "8. Mudanças e contato",
     body: [
-      "Se esta política mudar de forma relevante, avisaremos por e-mail. Contato: visaemdia2026@gmail.com (e-mail oficial da immigrei durante o período de lançamento).",
+      "Se esta política mudar de forma relevante, avisaremos por e-mail. Contato: ola@immigrei.com.",
     ],
   },
 ];
@@ -82,8 +82,11 @@ export default function PrivacidadePage() {
         >
           Política de Privacidade
         </h1>
-        <p className="text-ink-faint text-sm mb-6">
+        <p className="text-ink-faint text-sm mb-1">
           Última atualização: {LAST_UPDATED}
+        </p>
+        <p className="text-ink-faint text-sm mb-6">
+          immigrei é operado por Hash Vantage Group LLC.
         </p>
         <p className="text-ink-soft text-base leading-relaxed mb-10">
           Sabemos que dados migratórios são sensíveis — para muitos de nós,
