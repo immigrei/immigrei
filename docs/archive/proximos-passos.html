@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigrei — Próximos Passos</title>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --ink: #1a2433;
+    --muted: #5b6b80;
+    --line: #e3e9f1;
+    --green: #16a34a;
+    --green-bg: #e8f7ee;
+    --red: #dc2626;
+    --red-bg: #fdeaea;
+    --amber: #b45309;
+    --amber-bg: #fdf3e3;
+    --blue: #2563eb;
+    --blue-bg: #e9f0fe;
+    --purple: #7c3aed;
+    --purple-bg: #f1eafe;
+    --teal: #0d9488;
+    --teal-bg: #e6f6f4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  header h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 14px; }
+  .stack-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .stack-badges span {
+    background: var(--green-bg); color: var(--green);
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+    padding: 4px 10px; border-radius: 999px;
+  }
+
+  .progress-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    position: sticky; top: 10px; z-index: 10;
+    box-shadow: 0 4px 14px rgba(20, 40, 80, 0.06);
+  }
+  .progress-label { font-weight: 600; font-size: 0.92rem; white-space: nowrap; }
+  .bar { flex: 1; min-width: 160px; height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #16a34a, #4ade80); border-radius: 999px; transition: width 0.35s ease; }
+  #resetBtn {
+    border: 1px solid var(--line); background: #fff; color: var(--muted);
+    font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  }
+  #resetBtn:hover { color: var(--red); border-color: var(--red); }
+
+  .legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .tag {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .tag.felipe { background: var(--blue-bg); color: var(--blue); }
+  .tag.cesar  { background: var(--teal-bg); color: var(--teal); }
+  .tag.ambos  { background: var(--purple-bg); color: var(--purple); }
+  .tag.agora  { background: var(--red-bg); color: var(--red); }
+  .tag.semana { background: var(--amber-bg); color: var(--amber); }
+  .tag.fase   { background: var(--blue-bg); color: var(--blue); }
+  .legend-hint { font-size: 0.72rem; color: var(--muted); align-self: center; }
+
+  section.phase { margin-bottom: 34px; }
+  .phase h2 { font-size: 1.25rem; margin: 0 0 6px; }
+  .phase .phase-desc { color: var(--muted); font-size: 0.9rem; margin: 0 0 14px; }
+
+  .task {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    margin-bottom: 10px; overflow: hidden; transition: opacity 0.2s;
+  }
+  .task.done { opacity: 0.55; }
+  .task.done .task-title { text-decoration: line-through; }
+  .task-head {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; cursor: pointer;
+  }
+  .task-head input[type="checkbox"] {
+    width: 19px; height: 19px; margin-top: 2px; accent-color: var(--green); cursor: pointer; flex-shrink: 0;
+  }
+  .task-main { flex: 1; }
+  .task-title { font-weight: 600; font-size: 0.97rem; }
+  .task-tags { display: inline-flex; gap: 6px; margin-left: 8px; vertical-align: middle; }
+  .task-summary { color: var(--muted); font-size: 0.85rem; margin-top: 3px; }
+  .chevron { color: var(--muted); font-size: 0.8rem; margin-top: 4px; transition: transform 0.2s; flex-shrink: 0; }
+  .task.open .chevron { transform: rotate(180deg); }
+  .task-detail {
+    display: none; border-top: 1px dashed var(--line);
+    padding: 12px 16px 16px 47px; font-size: 0.86rem; color: var(--ink);
+  }
+  .task.open .task-detail { display: block; }
+  .task-detail code {
+    background: var(--bg); border: 1px solid var(--line);
+    padding: 1px 6px; border-radius: 5px; font-size: 0.82em;
+  }
+  .task-detail ol { margin: 8px 0 0; padding-left: 20px; }
+  .task-detail li { margin-bottom: 4px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.78rem; margin-top: 50px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Immigrei</h1>
+    <div class="subtitle">Plano de desenvolvimento — atualizado 10 Jun 2026</div>
+    <div class="stack-badges">
+      <span>VERCEL ✅</span><span>GITHUB ✅</span><span>SUPABASE ✅</span>
+    </div>
+  </header>
+
+  <div class="progress-card">
+    <div class="progress-label" id="progressLabel">Progresso: 0 de 15 tarefas</div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    <button id="resetBtn">Reiniciar</button>
+  </div>
+
+  <div class="legend">
+    <span class="tag felipe">FELIPE</span>
+    <span class="tag cesar">CÉSAR</span>
+    <span class="tag ambos">AMBOS</span>
+    <span class="tag agora">AGORA · Bloqueante</span>
+    <span class="tag semana">ESTA SEMANA · Alta prioridade</span>
+    <span class="tag fase">PRÓXIMA FASE · Planejado</span>
+  </div>
+
+  <!-- ================= FASE 1 ================= -->
+  <section class="phase">
+    <h2>🔧 Fase 1 — Infraestrutura &amp; Verificação</h2>
+    <p class="phase-desc">Vercel e GitHub já estão conectados. Foco agora: garantir que tudo que já foi commitado está rodando corretamente em produção — autenticação, banco, crons e e-mail.</p>
+
+    <div class="task" data-id="t1">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Testar o fluxo completo em produção (sign up → onboarding → /vistos)</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag agora">AGORA</span></span>
+          <div class="task-summary">Criar uma conta real no immigrei.vercel.app, passar pelo onboarding e confirmar que chega na tela de vistos com a seleção correta.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Criar uma conta real no <code>immigrei.vercel.app</code>, passar pelo onboarding completo e confirmar que o usuário chega na tela <code>/vistos</code> com a seleção correta refletindo as respostas dadas.
+      </div>
+    </div>
+
+    <div class="task" data-id="t2">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Verificar que os dados do onboarding estão salvos no Supabase</span>
+          <span class="task-tags"><span class="tag felipe">FELIPE</span><span class="tag agora">AGORA</span></span>
+          <div class="task-summary">Confirmar que o perfil do usuário (nacionalidade, visto atual, objetivo) está chegando nas tabelas corretas após o onboarding.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        No Supabase Dashboard → Table Editor:
+        <ol>
+          <li>Abra a tabela <code>profiles</code> — deve ter uma linha com seu <code>user_id</code> do Clerk</li>
+          <li>Verifique os campos: <code>nationality</code>, <code>current_status</code>, <code>goal</code></li>
+        </ol>
+        Se a tabela estiver vazia após o onboarding, o endpoint <code>/api/profile</code> pode estar com erro — verifique os logs no Vercel (Settings → Logs).
+      </div>
+    </div>
+
+    <div class="task" data-id="t3">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Testar o USCIS case status manualmente</span>
+          <span class="task-tags"><span class="tag felipe">FELIPE</span><span class="tag agora">AGORA</span></span>
+          <div class="task-summary">Fazer um POST para /api/uscis/case-status com um receipt number real e confirmar que retorna status.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Fazer um <code>POST</code> para <code>/api/uscis/case-status</code> com um receipt number real e confirmar que a API retorna o status do caso corretamente.
+      </div>
+    </div>
+
+    <div class="task" data-id="t4">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Disparar o cron do Visa Bulletin manualmente</span>
+          <span class="task-tags"><span class="tag felipe">FELIPE</span><span class="tag agora">AGORA</span></span>
+          <div class="task-summary">Testar se o cron mensal consegue buscar o Visa Bulletin do travel.state.gov e salvar no Supabase.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Executar o cron mensal manualmente e confirmar que ele busca o Visa Bulletin de <code>travel.state.gov</code> e salva os dados no Supabase sem erros.
+      </div>
+    </div>
+
+    <div class="task" data-id="t5">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Verificar domínio Resend e testar envio de e-mail</span>
+          <span class="task-tags"><span class="tag felipe">FELIPE</span><span class="tag agora">AGORA</span></span>
+          <div class="task-summary">Confirmar que o Resend está configurado e que o e-mail de notificação de caso chega na caixa de entrada.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Confirmar no painel do Resend que o domínio está verificado e disparar um e-mail de notificação de caso de teste, verificando que ele chega na caixa de entrada (e não no spam).
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FASE 2 ================= -->
+  <section class="phase">
+    <h2>📊 Fase 2 — Dashboard do Usuário</h2>
+    <p class="phase-desc">O dashboard existe como stub. Esta fase transforma ele em uma tela real onde o usuário vê sua jornada, adiciona casos e acompanha atualizações.</p>
+
+    <div class="task" data-id="t6">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Tela "Meu Caso" — adicionar receipt number e ver status</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag semana">ESTA SEMANA</span></span>
+          <div class="task-summary">Formulário no dashboard para o usuário colar o receipt number do USCIS e ver o status em tempo real. Salva no Supabase para rastreamento semanal.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Formulário no dashboard para o usuário colar o receipt number do USCIS e ver o status em tempo real. O caso é salvo no Supabase para rastreamento semanal automático.
+      </div>
+    </div>
+
+    <div class="task" data-id="t7">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Linha do tempo da jornada migratória</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag semana">ESTA SEMANA</span></span>
+          <div class="task-summary">Visualização vertical dos passos da jornada do usuário: onde está agora, o que já passou e o que vem a seguir.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Visualização vertical dos passos da jornada do usuário: onde está agora, o que já passou e o que vem a seguir — personalizada pelo visto selecionado no onboarding.
+      </div>
+    </div>
+
+    <div class="task" data-id="t8">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Widget "Visa Bulletin" no dashboard (EB e FB)</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag semana">ESTA SEMANA</span></span>
+          <div class="task-summary">Exibir as datas de prioridade do Visa Bulletin atual para as categorias relevantes ao perfil do usuário.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Exibir as datas de prioridade do Visa Bulletin atual para as categorias relevantes ao perfil do usuário. Os dados já estão salvos no Supabase.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FASE 3 ================= -->
+  <section class="phase">
+    <h2>💳 Fase 3 — Domínio, Pagamento &amp; Planos</h2>
+
+    <div class="task" data-id="t9">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Comprar e conectar o domínio immigrei.com</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag semana">ESTA SEMANA</span></span>
+          <div class="task-summary">~$12/ano no Namecheap ou Google Domains. Configurar DNS para apontar para o Vercel.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        ~$12/ano no Namecheap ou Google Domains. Configurar DNS para apontar para o Vercel e verificar o domínio no Resend para enviar e-mails de <code>@immigrei.com</code>.
+      </div>
+    </div>
+
+    <div class="task" data-id="t10">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Criar produtos no Stripe e tela de planos</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag semana">ESTA SEMANA</span></span>
+          <div class="task-summary">Criar os 3 produtos no Stripe Dashboard e construir a tela /planos com cards, comparação e botão de checkout.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Criar os 3 produtos no Stripe Dashboard e construir a tela <code>/planos</code> com cards de plano, tabela de comparação e botão de checkout.
+      </div>
+    </div>
+
+    <div class="task" data-id="t11">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Configurar webhook do Stripe no Vercel</span>
+          <span class="task-tags"><span class="tag felipe">FELIPE</span><span class="tag semana">ESTA SEMANA</span></span>
+          <div class="task-summary">Registrar o endpoint de webhook no Stripe para que pagamentos confirmados atualizem o plano do usuário.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Registrar o endpoint de webhook no Stripe para que pagamentos confirmados atualizem o plano do usuário automaticamente no Supabase.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FASE 4 ================= -->
+  <section class="phase">
+    <h2>✍️ Fase 4 — Conteúdo, UX &amp; Validação</h2>
+
+    <div class="task" data-id="t12">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Mapear as etapas de jornada para os 5 vistos principais</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag fase">PRÓXIMA FASE</span></span>
+          <div class="task-summary">Escrever as etapas reais de cada jornada: F-1, H-1B, O-1, EB-2 NIW e Green Card.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Escrever as etapas reais de cada jornada: F-1, H-1B, O-1, EB-2 NIW e Green Card. Cada etapa deve ter nome, descrição curta, documentos necessários e link USCIS oficial.
+      </div>
+    </div>
+
+    <div class="task" data-id="t13">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Landing page — refinar hero e adicionar seção de funcionalidades</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag fase">PRÓXIMA FASE</span></span>
+          <div class="task-summary">Hero forte com tagline, 3 blocos de features, prova social e CTA para cadastro.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        A landing page atual é básica. Adicionar: hero forte com tagline, 3 blocos de features, prova social (depoimento placeholder) e CTA para cadastro.
+      </div>
+    </div>
+
+    <div class="task" data-id="t14">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Testar com 5 usuários reais (Brazilians in the US)</span>
+          <span class="task-tags"><span class="tag ambos">AMBOS</span><span class="tag fase">PRÓXIMA FASE</span></span>
+          <div class="task-summary">Recrutar 5 brasileiros nos EUA com casos ativos e coletar feedback qualitativo.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Recrutar 5 brasileiros nos EUA com casos ativos. Deixar usar o app sem ajuda por 15 min e coletar feedback qualitativo sobre clareza, confiança e utilidade.
+      </div>
+    </div>
+
+    <div class="task" data-id="t15">
+      <div class="task-head">
+        <input type="checkbox" aria-label="Concluir tarefa">
+        <div class="task-main">
+          <span class="task-title">Implementar analytics básico (Vercel Analytics ou Posthog)</span>
+          <span class="task-tags"><span class="tag felipe">FELIPE</span><span class="tag fase">PRÓXIMA FASE</span></span>
+          <div class="task-summary">Entender onde os usuários abandonam o onboarding e qual é a taxa de conversão.</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="task-detail">
+        Entender onde os usuários abandonam o onboarding e qual é a taxa de conversão onboarding → seleção de visto → dashboard.
+      </div>
+    </div>
+  </section>
+
+  <footer>Immigrei — Próximos Passos · o progresso fica salvo neste navegador</footer>
+</div>
+
+<script>
+(function () {
+  var KEY = "immigrei-proximos-passos";
+  var tasks = Array.prototype.slice.call(document.querySelectorAll(".task"));
+  var label = document.getElementById("progressLabel");
+  var fill = document.getElementById("barFill");
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function save(state) { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+  function render() {
+    var state = load(), done = 0;
+    tasks.forEach(function (t) {
+      var checked = !!state[t.dataset.id];
+      t.classList.toggle("done", checked);
+      t.querySelector("input").checked = checked;
+      if (checked) done++;
+    });
+    label.textContent = "Progresso: " + done + " de " + tasks.length + " tarefas";
+    fill.style.width = (done / tasks.length * 100) + "%";
+  }
+
+  tasks.forEach(function (t) {
+    var cb = t.querySelector("input");
+    cb.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var state = load();
+      state[t.dataset.id] = cb.checked;
+      save(state);
+      render();
+    });
+    t.querySelector(".task-head").addEventListener("click", function (e) {
+      if (e.target === cb) return;
+      t.classList.toggle("open");
+    });
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    if (confirm("Reiniciar o progresso de todas as tarefas?")) {
+      localStorage.removeItem(KEY);
+      tasks.forEach(function (t) { t.classList.remove("open"); });
+      render();
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

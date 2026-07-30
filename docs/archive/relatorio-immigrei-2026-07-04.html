@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigrei — Relatório do dia · 04/07/2026</title>
+<style>
+  :root{--cream:#F7F2E9;--cream2:#FDFBF6;--pine:#1E4D3B;--pine-soft:#2E6B52;--ink:#22302B;--muted:#6B7670;--sage:#DDE8DB;--sage-deep:#3E6B4F;--clay-bg:#F3E2DC;--clay:#9C4A38;--amber-bg:#FBF0D9;--amber:#9A6B1F;--line:#E8E0D0;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--cream);color:var(--ink);line-height:1.55;padding:32px 16px}
+  .wrap{max-width:880px;margin:0 auto}
+  h1{font-family:Georgia,serif;color:var(--pine);font-size:2rem;margin-bottom:4px}
+  h2{font-family:Georgia,serif;color:var(--pine);font-size:1.3rem;margin:40px 0 14px;border-bottom:2px solid var(--line);padding-bottom:6px}
+  h3{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .sub{color:var(--muted);margin-bottom:24px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:20px 0}
+  .kpi{background:var(--cream2);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+  .kpi b{display:block;font-size:1.5rem;color:var(--pine)}
+  .kpi span{font-size:.75rem;color:var(--muted)}
+  .card{background:var(--cream2);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:14px}
+  .mock{border:1px dashed #C9BFA8;position:relative;margin-top:8px}
+  .mock::after{content:"reprodução fiel da tela verificada em 04/07";position:absolute;top:-9px;right:14px;background:var(--cream);font-size:.65rem;color:var(--muted);padding:0 8px}
+  .badge{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.05em;padding:4px 12px;border-radius:999px}
+  .b-ok{background:var(--sage);color:var(--sage-deep)}
+  .b-warn{background:var(--amber-bg);color:var(--amber)}
+  .block{background:var(--clay-bg);border:1px solid #E3C4B8;border-radius:14px;padding:16px;margin-top:10px}
+  .block h4{color:var(--clay);font-size:.75rem;letter-spacing:.08em;margin-bottom:8px}
+  .disclosure{background:var(--amber-bg);border:1px solid #E8D5A8;border-radius:14px;padding:16px;margin-top:10px}
+  .disclosure h4{color:var(--amber);font-size:.75rem;letter-spacing:.08em;margin-bottom:8px}
+  .links{font-size:.78rem;margin-top:10px}
+  .links a{color:var(--clay);margin-right:16px}
+  .disclosure .links a{color:var(--amber)}
+  .checks li{list-style:none;padding:8px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+  .checks li::before{content:"✓";display:inline-block;width:22px;height:22px;background:var(--sage);color:var(--sage-deep);border-radius:50%;text-align:center;line-height:22px;margin-right:10px;font-size:.8rem}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px}
+  th{text-align:left;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:2px solid var(--line)}
+  td{padding:6px 8px;border-bottom:1px solid var(--line)}
+  .mono{font-family:ui-monospace,Menlo,monospace;font-size:.75rem}
+  .pill-pass{color:var(--sage-deep);font-weight:700}
+  .pill-disc{color:var(--amber);font-weight:700}
+  .decision{background:var(--cream2);border-left:4px solid var(--pine);border-radius:0 14px 14px 0;padding:14px 18px;margin-bottom:12px}
+  .decision b{color:var(--pine)}
+  .decision .rec{font-size:.82rem;color:var(--muted);margin-top:4px}
+  .next{counter-reset:step}
+  .next li{list-style:none;padding:10px 0 10px 42px;position:relative;border-bottom:1px solid var(--line)}
+  .next li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:10px;width:28px;height:28px;background:var(--pine);color:#fff;border-radius:50%;text-align:center;line-height:28px;font-size:.8rem;font-weight:700}
+  .owner{font-size:.7rem;background:var(--sage);color:var(--sage-deep);border-radius:999px;padding:2px 10px;margin-left:8px;font-weight:700}
+  .owner.f{background:var(--amber-bg);color:var(--amber)}
+  .note{font-size:.78rem;color:var(--muted);background:var(--cream2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:8px}
+  footer{margin-top:48px;font-size:.75rem;color:var(--muted);text-align:center}
+  a{color:var(--pine-soft)}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>Immigrei — Relatório do dia 🚀</h1>
+<p class="sub">Sexta-feira, 04 de julho de 2026 · branch <span class="mono">feat/rules-engine-cos-b2-f1</span> · <a href="https://github.com/immigrei/immigrei/pull/2">PR #2 (draft)</a> · preparado para César &amp; Felipe</p>
+
+<div class="kpis">
+  <div class="kpi"><b>12</b><span>commits</span></div>
+  <div class="kpi"><b>+3.707</b><span>linhas de código</span></div>
+  <div class="kpi"><b>211</b><span>testes automatizados</span></div>
+  <div class="kpi"><b>6</b><span>regras federais verificadas na fonte</span></div>
+  <div class="kpi"><b>54</b><span>registros reais de auditoria no banco</span></div>
+  <div class="kpi"><b>2</b><span>migrations em produção</span></div>
+</div>
+
+<h2>Em uma frase</h2>
+<div class="card">O Immigrei saiu de um plano de arquitetura para um <b>fluxo funcional em produção-preview</b>: o usuário preenche os fatos do caso B1/B2 ➔ F-1, o sistema valida contra 6 regras federais (com texto oficial conferido letra a letra contra ecfr.gov e fam.state.gov), trava o que não pode prosseguir, registra ciência do que exige ciência, e grava trilha de auditoria imutável — <b>sem nunca dar conselho jurídico</b> (há um teste automatizado que quebra o build se alguma mensagem contiver verbo de conselho).</div>
+
+<h2>As telas construídas hoje</h2>
+
+<h3>1 · Card no dashboard (porta de entrada do fluxo)</h3>
+<div class="card mock">
+  <h3>Mudança de status B1/B2 → F-1</h3>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span>Checklist concluído.</span>
+    <span class="badge b-ok">VALIDADO</span>
+  </div>
+</div>
+
+<h3>2 · Bloqueio ministerial (caso com I-94 vencido — cita a lei, não opina)</h3>
+<div class="card mock">
+  <div class="block">
+    <h4>🚫 BLOQUEIO</h4>
+    <p style="font-size:.88rem">Não conseguimos preparar este pedido. A regra federal 8 CFR § 248.1(b) exige que a mudança de status seja protocolada enquanto o seu período autorizado de permanência (I-94) está vigente — e o seu I-94 registra 03/07/2026 como data-limite. Sabemos que essa notícia é difícil. Casos fora dos parâmetros do nosso compilador precisam de análise individual: podemos te conectar agora com um advogado parceiro.</p>
+    <div class="links"><a href="#">Ver a norma oficial →</a><a href="#">Falar com advogado parceiro</a></div>
+  </div>
+</div>
+
+<h3>3 · Disclosure dos 90 dias (informa a norma oficial e registra ciência — o usuário decide)</h3>
+<div class="card mock">
+  <div class="disclosure">
+    <h4>⚠️ CIÊNCIA NECESSÁRIA</h4>
+    <p style="font-size:.88rem">☑ Antes de continuar, precisamos que você leia uma regra oficial do Departamento de Estado. Você entrou nos EUA há 14 dias. O manual 9 FAM 302.9-4(B)(3)(g)(2) diz, em tradução livre: "Se um indivíduo agir de forma inconsistente com o seu status de não imigrante dentro de 90 dias (…), o oficial consular pode, a seu critério, presumir (…)". O Immigrei não avalia como essa regra se aplica ao seu caso — isso é uma análise jurídica individual. Você pode prosseguir por sua própria decisão, ou conversar antes com um advogado parceiro.</p>
+    <div class="links"><a href="#">Ver o texto original em inglês →</a></div>
+    <p style="font-size:.8rem;color:var(--sage-deep);margin-top:8px">✓ Ciência registrada.</p>
+  </div>
+</div>
+
+<h3>4 · Verificações do caso aprovado</h3>
+<div class="card mock">
+  <h3>Verificações</h3>
+  <ul class="checks">
+    <li>I-94 dentro do prazo autorizado</li>
+    <li>Janela dos 90 dias desde a entrada</li>
+    <li>Form I-20 / SEVIS ID válido</li>
+    <li>Taxa SEVIS I-901 paga</li>
+    <li>Sem matrícula antes da aprovação</li>
+    <li>Sem trabalho não autorizado</li>
+  </ul>
+</div>
+<p class="note">As telas acima são reproduções fiéis (mesmos textos e estados) das telas testadas ao vivo hoje, com login real, no banco real. Para ver o original: preview da Vercel no <a href="https://github.com/immigrei/immigrei/pull/2">PR #2</a> (aba "Checks" → link do deployment) ou <span class="mono">localhost:3000/dashboard</span> com o repo rodando.</p>
+
+<h2>Prova real — trilha de auditoria extraída do banco de produção</h2>
+<div class="card">
+<p style="font-size:.85rem">Cada validação grava, para sempre, o veredito de cada regra com a lei citada e o horário. Extração real da tabela <span class="mono">case_rule_results</span> às 20h de 04/07 (última validação do caso de teste; <b>54 registros no total</b>):</p>
+<table>
+  <tr><th>Regra</th><th>Veredito</th><th>Fonte legal</th><th>Avaliado em</th></tr>
+  <tr><td class="mono">I94_EXPIRED</td><td class="pill-pass">pass</td><td>8 CFR § 248.1(b)</td><td class="mono">04/07 09:11 UTC</td></tr>
+  <tr><td class="mono">DOS_90_DAY_WINDOW</td><td class="pill-disc">disclosure</td><td>9 FAM 302.9-4(B)(3)(g)(2)</td><td class="mono">04/07 09:11 UTC</td></tr>
+  <tr><td class="mono">I20_MISSING</td><td class="pill-pass">pass</td><td>8 CFR § 214.2(f)(1)(i)(A)</td><td class="mono">04/07 09:11 UTC</td></tr>
+  <tr><td class="mono">SEVIS_FEE_UNPAID</td><td class="pill-pass">pass</td><td>8 CFR § 214.13(a)(3)</td><td class="mono">04/07 09:11 UTC</td></tr>
+  <tr><td class="mono">B2_STUDY_STARTED</td><td class="pill-pass">pass</td><td>8 CFR § 214.2(b)(7)</td><td class="mono">04/07 09:11 UTC</td></tr>
+  <tr><td class="mono">UNAUTHORIZED_WORK</td><td class="pill-pass">pass</td><td>8 CFR § 214.1(e); INA § 248(a)(1)</td><td class="mono">04/07 09:11 UTC</td></tr>
+</table>
+<p class="note">Destaque: as citações <b>214.13(a)(3)</b> e <b>(g)(2)</b> estão corretas porque a auditoria de hoje conferiu os 6 textos contra a API oficial do eCFR e o fam.state.gov — e achou 4 divergências (1 citação errada, 3 textos desatualizados), todas corrigidas em código E no banco (migration 011). Isso é o "grounding" funcionando: o app cita a lei como ela é hoje, não como a IA lembrava dela.</p>
+</div>
+
+<h2>Também ficou pronto (sem tela, mas com valor)</h2>
+<div class="card" style="font-size:.9rem">
+  <b>Blindagem UPL automatizada</b> — 78 dos 211 testes vigiam as mensagens: se alguém escrever "recomendamos" ou "você deveria" numa mensagem de UI, o build quebra.<br><br>
+  <b>Pacote de revisão do advogado</b> — documento pronto com as 13 mensagens, tradução lado a lado com o original e 2 perguntas estratégicas (<span class="mono">docs/attorney-review-package.md</span>).<br><br>
+  <b>Template "catch and dispatch"</b> — processo de meio dia para qualificar cada visto novo antes de codar (<span class="mono">docs/pathway-due-diligence-template.md</span>).<br><br>
+  <b>RFC-002 já desenhado</b> — o plano do dashboard novo (relógio do I-94, processo ativo, radar), da página pública /fontes e do funil mapa➔GPS (<span class="mono">docs/rfc-002-dashboard-snapshot-funil-mapa-gps.md</span>).
+</div>
+
+<h2>🗳 Pontos de discussão / aprovação (César + Felipe)</h2>
+<div class="decision"><b>1. Merge do PR #2?</b><br>Coloca o fluxo B1/B2➔F-1 no ar em immigrei.vercel.app (o domínio público immigrei.com continua no modo "em breve" — risco de exposição baixo). Banco já migrado; merge não exige passo técnico extra.<div class="rec">Recomendação: testar o preview no celular (link nos checks do PR) e mergear se estiver confortável. Draft → "Ready for review" → Merge.</div></div>
+<div class="decision"><b>2. Aprovar o RFC-002 (dashboard novo)?</b><br>O dashboard atual mostra jornada genérica com checkmarks decorativos e um widget de "próximos passos" que dá conselho (herança antiga — será removido). O RFC-002 troca tudo por estado real: prazos do I-94, verificações do caso, radar USCIS.<div class="rec">Recomendação: aprovar; é a primeira tarefa de código de amanhã, em branch novo após o merge.</div></div>
+<div class="decision"><b>3. Quando contratar a passada legal humana?</b><br>O pacote do advogado está pronto e já passou por um "ensaio adversarial" com outra IA. Nenhum usuário pagante deve ver essas telas antes do aval de advogado licenciado.<div class="rec">Recomendação: iniciar a busca/contato já (é o item de maior lead time), com meta de aval antes da primeira cobrança.</div></div>
+<div class="decision"><b>4. Teste com 5 usuários reais da waitlist?</b><br>Com o merge feito, dá para convidar 5 brasileiros em B1/B2 da waitlist para usar o fluxo (grátis, assistido) e assistir onde travam. É o primeiro dado de demanda de verdade.<div class="rec">Recomendação: Felipe seleciona os 5; roteiro de teste sai junto com o RFC-002.</div></div>
+
+<h2>Próximos passos sugeridos (ordem de amanhã)</h2>
+<ol class="next">
+  <li>Testar o preview da Vercel no celular (os dois) <span class="owner">César</span><span class="owner f">Felipe</span></li>
+  <li>Decidir merge do PR #2 <span class="owner">César</span><span class="owner f">Felipe</span></li>
+  <li>Implementar RFC-002 T1 — Dashboard Snapshot (branch novo, prompt pronto) <span class="owner">Claude + terminal</span></li>
+  <li>Página /fontes (T2 — pequena, alto valor de demo) <span class="owner">Claude + terminal</span></li>
+  <li>Contatar advogado para a passada legal (pacote pronto para enviar) <span class="owner">César</span></li>
+  <li>Selecionar 5 da waitlist para teste assistido <span class="owner f">Felipe</span></li>
+</ol>
+
+<footer>Gerado por Claude (Fable 5) em 04/07/2026 · dados de auditoria extraídos ao vivo do Supabase de produção · telas reproduzidas dos testes reais do dia<br>Detalhes técnicos completos: <span class="mono">docs/rfc-001…md</span>, <span class="mono">docs/rfc-002…md</span> e <a href="https://github.com/immigrei/immigrei/pull/2">PR #2</a></footer>
+
+</div></body>
+</html>
