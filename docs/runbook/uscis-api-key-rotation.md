@@ -55,3 +55,9 @@ Don't wait for the 365-day cycle — rotate immediately:
 3. Revoke the compromised key in the Developer Portal the moment the new
    one is confirmed working.
 4. Check Sentry / Vercel access logs for anything unusual in the meantime.
+5. **Notify USCIS.** The Terms of Use we agreed to
+   (myaccount.uscis.gov/legal-terms, "Duty of Incident Reporting") require
+   this explicitly: *"If my online account has been compromised in any way,
+   I will notify USCIS immediately, by either calling the Contact Center at
+   800-375-5283 or sending USCIS an electronic message."* Rotating the key
+   quietly on our end isn't enough — call or message them the same day.
