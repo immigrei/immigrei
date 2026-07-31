@@ -328,6 +328,11 @@ export default function DocumentosPage() {
       .catch(() => {});
   }, []);
 
+  async function removerFixado(id: string) {
+    setProcessos((prev) => prev.filter((p) => p.id !== id));
+    await fetch(`/api/user-processes/${id}`, { method: "DELETE" }).catch(() => {});
+  }
+
   const recomendadoId = inferirKitRecomendado(profile);
   const recomendado   = KITS.find((k) => k.id === recomendadoId);
 
@@ -380,15 +385,22 @@ export default function DocumentosPage() {
               Fixados — seus processos em paralelo
             </p>
             {processos.filter((p) => p.kit_id).map((p) => (
-              <Link
+              <div
                 key={p.id}
-                href={`/documentos/${p.kit_id}`}
                 className="flex items-center gap-2 rounded-2xl border border-pine-tint bg-cream-2 px-4 py-3 hover:border-pine transition-colors"
               >
-                <span className="flex-shrink-0 text-sm">📌</span>
-                <span className="flex-1 text-sm font-semibold text-ink">{p.label}</span>
-                <span className="flex-shrink-0 text-xs font-bold text-pine">Abrir →</span>
-              </Link>
+                <Link href={`/documentos/${p.kit_id}`} className="flex-1 min-w-0 flex items-center gap-2">
+                  <span className="flex-shrink-0 text-sm">📌</span>
+                  <span className="flex-1 min-w-0 text-sm font-semibold text-ink truncate">{p.label}</span>
+                  <span className="flex-shrink-0 text-xs font-bold text-pine">Abrir →</span>
+                </Link>
+                <button
+                  onClick={() => removerFixado(p.id)}
+                  className="flex-shrink-0 text-xs font-bold text-clay hover:text-clay/80 transition-colors"
+                >
+                  Remover
+                </button>
+              </div>
             ))}
           </div>
         )}
