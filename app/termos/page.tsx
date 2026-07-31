@@ -10,7 +10,12 @@ export const metadata: Metadata = {
 };
 
 // Minuta para revisão do advogado parceiro antes do lançamento pago.
-const LAST_UPDATED = "7 de julho de 2026";
+// Mesclado em 31 jul 2026: base completa da revisão do Felipe (teto de
+// responsabilidade, propriedade intelectual, conteúdo da comunidade,
+// profissionais parceiros, reembolso, foro) + a adição de compliance
+// USCIS do César (branch feat/uscis-compliance-landing-page, commit
+// 8f00ff8) — consentimento ativo em vez de aviso passivo na seção 6.
+const LAST_UPDATED = "31 de julho de 2026";
 
 const sections: { title: string; body: string[] }[] = [
   {
@@ -19,6 +24,7 @@ const sections: { title: string; body: string[] }[] = [
       "A immigrei é uma plataforma de tecnologia que organiza informação pública sobre processos de imigração nos EUA: mostra etapas, requisitos objetivos, prazos e documentos, e permite acompanhar o andamento do seu caso junto a fontes oficiais (USCIS, Departamento de Estado, consulados).",
       "A immigrei NÃO é um escritório de advocacia, não presta aconselhamento jurídico e não substitui a orientação de um advogado licenciado. A plataforma nunca recomenda qual caminho migratório você deve seguir, não avalia o mérito do seu caso e não prevê resultados. Validações exibidas no app verificam apenas requisitos técnicos objetivos publicados pelas agências federais americanas, sempre com citação da fonte oficial.",
       "Quando o app indicar que algo \"requer análise individual\", isso significa que a questão depende de julgamento jurídico — procure um profissional licenciado. A immigrei pode conectar você a profissionais independentes verificados; eles não são empregados nem representantes da immigrei, e a relação profissional é estabelecida diretamente entre você e eles.",
+      "A immigrei é construída e operada por uma equipe de tecnologia — não temos advogados no quadro societário nem no time. Não damos, e não temos capacidade de dar, aconselhamento jurídico em nenhuma circunstância; nosso trabalho é organizar informação pública e construir as ferramentas para você usá-la, nada além disso.",
     ],
   },
   {
@@ -45,16 +51,51 @@ const sections: { title: string; body: string[] }[] = [
     body: [
       "O conteúdo da immigrei é baseado em fontes oficiais e revisado com cuidado, mas regras de imigração mudam com frequência e cada caso tem particularidades. O serviço é fornecido \"como está\", sem garantia de completude, atualidade ou adequação ao seu caso específico.",
       "Na máxima extensão permitida em lei, a immigrei não se responsabiliza por decisões tomadas com base no conteúdo da plataforma, por decisões de agências governamentais sobre o seu caso, nem por danos indiretos. Nada nestes termos limita responsabilidades que não possam ser limitadas por lei.",
+      "Quando a lei permitir um teto, nossa responsabilidade total por qualquer reclamação é limitada ao maior valor entre US$100 e o que você pagou à immigrei nos 12 meses anteriores ao fato que originou a reclamação. [Rascunho — teto sugerido pelo Claude; o advogado deve confirmar o valor e se é executável na jurisdição escolhida.]",
     ],
   },
   {
-    title: "6. Encerramento e alterações",
+    title: "6. Suspensão, encerramento e alterações",
     body: [
-      "Você pode encerrar sua conta a qualquer momento e solicitar a exclusão dos seus dados (ver Política de Privacidade). Podemos alterar estes termos; mudanças relevantes serão comunicadas por e-mail com antecedência razoável.",
+      "Você pode encerrar sua conta a qualquer momento e solicitar a exclusão dos seus dados (ver Política de Privacidade). Se mudarmos estes termos de forma relevante, pedimos seu consentimento ativo antes de você continuar usando a immigrei, junto com um resumo em linguagem simples do que mudou.",
+      "Também podemos suspender ou encerrar sua conta em caso de uso indevido da plataforma (ver seção 4), fraude, não pagamento, ou por exigência legal — nesses casos avisaremos você, exceto quando a lei ou o risco de fraude não permitir.",
     ],
   },
   {
-    title: "7. Contato",
+    title: "7. Propriedade intelectual",
+    body: [
+      "O software, design, marca e conteúdo editorial da immigrei (os guias, manuais e textos que nós escrevemos) pertencem à immigrei. Você recebe uma licença pessoal, não exclusiva e não transferível para usar a plataforma enquanto sua conta estiver ativa.",
+      "O que você insere (respostas do questionário, documentos que envia ao cofre, dados do seu caso) continua seu. Você nos dá uma licença limitada para usar esses dados apenas para operar o serviço para você.",
+    ],
+  },
+  {
+    title: "8. Conteúdo que você publica na comunidade",
+    body: [
+      "Você é responsável pelo que publica nos relatos da comunidade. Relatos passam por aprovação manual antes de aparecer publicamente, mas isso não é uma verificação de veracidade — a immigrei não garante a exatidão do que outros usuários escrevem e não recomenda nem endossa nenhum relato.",
+      "Você mantém os direitos sobre o que escreve, mas nos dá licença para exibi-lo na plataforma. Podemos remover qualquer relato que viole estes termos ou que você nos peça para remover.",
+    ],
+  },
+  {
+    title: "9. Profissionais parceiros",
+    body: [
+      "A immigrei pode receber uma taxa de indicação de profissionais parceiros quando você é conectado a eles — isso nunca muda o preço que você paga ao profissional. [Rascunho — confirmar com o Felipe/César se essa estrutura de indicação já existe ou é hipotética, e ajustar a redação conforme o fato.]",
+      "A immigrei verifica credenciais básicas dos profissionais listados, mas a relação e a responsabilidade profissional são inteiramente entre você e o profissional escolhido.",
+    ],
+  },
+  {
+    title: "10. Reembolsos",
+    body: [
+      "Não fazemos reembolso proporcional de períodos já iniciados — ao cancelar, seu acesso pago continua até o fim do período já pago (ver seção 3), e a cobrança seguinte simplesmente não acontece. [Rascunho — confirmar se querem oferecer garantia de reembolso nos primeiros dias, comum em produtos de assinatura.]",
+    ],
+  },
+  {
+    title: "11. Lei aplicável e foro",
+    body: [
+      "Estes termos são regidos pelas leis do Estado de Wyoming, EUA — onde a Hash Vantage Group LLC é registrada — e qualquer disputa será resolvida nos tribunais desse estado. [Rascunho — falta advogado confirmar se faz sentido prever arbitragem antes de ação judicial, dado que o público é majoritariamente brasileiro.]",
+    ],
+  },
+  {
+    title: "12. Contato",
     body: [
       "Dúvidas sobre estes termos: ola@immigrei.com.",
     ],
