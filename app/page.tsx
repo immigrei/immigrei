@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Logo from "./components/Logo";
+import Footer from "./components/Footer";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -43,6 +44,8 @@ export default async function HomePage() {
           Começar agora — é gratuito
         </Link>
       </section>
+
+      <Footer />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "../components/Logo";
+import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 // Minuta para revisão do advogado parceiro antes do lançamento pago.
-const LAST_UPDATED = "7 de julho de 2026";
+const LAST_UPDATED = "1 de agosto de 2026";
 
 const sections: { title: string; body: string[] }[] = [
   {
@@ -46,24 +47,41 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "5. Retenção e exclusão",
     body: [
-      "Mantemos seus dados enquanto sua conta existir. Você pode pedir a exclusão completa a qualquer momento pelo e-mail abaixo — removemos seus dados dos nossos sistemas em até 30 dias, exceto o que a lei exigir manter (ex.: registros fiscais de pagamento).",
+      "Mantemos seus dados enquanto sua conta existir. Se sua conta ficar inativa por mais de 24 meses sem uso, podemos excluir automaticamente os dados não essenciais, avisando você por e-mail antes.",
+      "Você pode pedir a exclusão completa a qualquer momento pelo e-mail abaixo — removemos seus dados dos nossos sistemas em até 30 dias, exceto o que a lei exigir manter (ex.: registros fiscais de pagamento).",
     ],
   },
   {
     title: "6. Seus direitos",
     body: [
-      "Você pode acessar, corrigir, exportar ou excluir seus dados. Atendemos os direitos previstos na LGPD (Brasil) e nas leis de privacidade aplicáveis dos EUA. Basta escrever para o e-mail de contato.",
+      "Você pode acessar, corrigir, exportar ou excluir seus dados. Atendemos os direitos previstos na LGPD (Brasil) e nas leis de privacidade aplicáveis dos EUA, incluindo a California Consumer Privacy Act (CCPA) para residentes da Califórnia. Basta escrever para o e-mail de contato.",
     ],
   },
   {
-    title: "7. Crianças",
+    title: "7. Se houver um vazamento de dados",
+    body: [
+      "Se identificarmos um incidente de segurança que exponha seus dados pessoais, vamos avisar você por e-mail assim que possível, explicando o que aconteceu, quais dados foram afetados e o que fazer a respeito. Também cumpriremos qualquer obrigação legal de notificação aplicável.",
+    ],
+  },
+  {
+    title: "8. Se a immigrei mudar de dono",
+    body: [
+      "Se a immigrei for vendida, incorporada ou encerrar as atividades, seus dados podem ser transferidos como parte desse processo. Vamos avisar você antes disso acontecer, e a nova empresa (se houver) precisará seguir uma política de privacidade pelo menos tão protetiva quanto esta — ou te dar a opção de exportar ou excluir seus dados antes da transferência.",
+    ],
+  },
+  {
+    title: "9. Crianças",
     body: ["A immigrei não é destinada a menores de 18 anos."],
   },
   {
-    title: "8. Mudanças e contato",
+    title: "10. Mudanças nesta política",
     body: [
-      "Se esta política mudar de forma relevante, avisaremos por e-mail. Contato: ola@immigrei.com.",
+      "Se mudarmos esta política de forma relevante, pedimos seu consentimento ativo antes de você continuar usando a immigrei — não é só um aviso passivo. Junto com o pedido, mostramos um resumo em linguagem simples do que mudou, pra você não precisar reler o documento inteiro.",
     ],
+  },
+  {
+    title: "11. Contato",
+    body: ["Dúvidas sobre esta política: ola@immigrei.com."],
   },
 ];
 
@@ -112,6 +130,7 @@ export default function PrivacidadePage() {
           .
         </p>
       </article>
+      <Footer />
     </main>
   );
 }

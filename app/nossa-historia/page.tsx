@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import WaitlistForm from "../em-breve/WaitlistForm";
 import Logo from "../components/Logo";
+import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
@@ -132,11 +133,8 @@ export default function NossaHistoriaPage() {
           <WaitlistForm />
         </div>
 
-        <p className="text-center text-ink-faint text-xs mt-10 leading-relaxed">
-          © {new Date().getFullYear()} immigrei. Não somos um escritório de
-          advocacia.
-        </p>
       </article>
+      <Footer />
     </main>
   );
 }
