@@ -370,31 +370,35 @@ export default function DocumentosPage() {
 
         {!loading && profile && <I94Card value={profile.i94_expiry_date ?? null} />}
 
+        {/* Fixados — independente de existir "Seu caminho" ou não. Perfis
+            sem kit único recomendado (ex: green_card + trazer_familia) são
+            justamente quem mais tende a ter processos em paralelo, então
+            isso não pode ficar preso dentro do bloco do recomendado. */}
+        {!loading && processos.filter((p) => p.kit_id).length > 0 && (
+          <div className="mb-8 flex flex-col gap-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.1em" }}>
+              Fixados — seus processos em paralelo
+            </p>
+            {processos.filter((p) => p.kit_id).map((p) => (
+              <Link
+                key={p.id}
+                href={`/documentos/${p.kit_id}`}
+                className="flex items-center gap-2 rounded-2xl border border-pine-tint bg-cream-2 px-4 py-3 hover:border-pine transition-colors"
+              >
+                <span className="flex-shrink-0 text-sm">📌</span>
+                <span className="flex-1 text-sm font-semibold text-ink">{p.label}</span>
+                <span className="flex-shrink-0 text-xs font-bold text-pine">Abrir →</span>
+              </Link>
+            ))}
+          </div>
+        )}
+
         {!loading && recomendado && (
           <div className="mb-8">
             <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-3" style={{ letterSpacing: "0.1em" }}>
               Seu caminho
             </p>
             <KitCard kit={recomendado} destaque onClick={() => router.push(`/documentos/${recomendado.id}`)} />
-
-            {processos.filter((p) => p.kit_id).length > 0 && (
-              <div className="mt-4 flex flex-col gap-2">
-                <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.1em" }}>
-                  Fixados — seus processos em paralelo
-                </p>
-                {processos.filter((p) => p.kit_id).map((p) => (
-                  <Link
-                    key={p.id}
-                    href={`/documentos/${p.kit_id}`}
-                    className="flex items-center gap-2 rounded-2xl border border-pine-tint bg-cream-2 px-4 py-3 hover:border-pine transition-colors"
-                  >
-                    <span className="flex-shrink-0 text-sm">📌</span>
-                    <span className="flex-1 text-sm font-semibold text-ink">{p.label}</span>
-                    <span className="flex-shrink-0 text-xs font-bold text-pine">Abrir →</span>
-                  </Link>
-                ))}
-              </div>
-            )}
 
             {!catalogoAberto && (
               <button
