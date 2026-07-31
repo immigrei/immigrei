@@ -139,10 +139,11 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 - Facebook ✅
 - Phone number: disabled for now (add as optional 2FA later)
 
-### Stripe products (to be created):
-- **Immigrei Base** — $9/month (recurring)
-- **Immigrei Core** — $29/month (recurring)
-- **Immigrei Concierge** — $1,499 one-time
+### Stripe products (live, created Jul 28, 2026):
+- **Immigrei** — single subscription tier
+  - Monthly: $29.90/month — `price_1Ty5wp4BxAIRzYfOnpJku6Xb`
+  - Annual: $269.00/year — `price_1Ty5wp4BxAIRzYfOtgyBbThC`
+- Price IDs hardcoded in `lib/stripe.ts` with env override (`STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_ANNUAL`)
 
 ---
 
@@ -232,9 +233,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - [x] Legal knowledge base — content/leis; all 11 catalog visas have dedicated /vistos/[id] pages (Jul 16, 2026)
 - [x] Document vault, community tab, SEVP school directory (/escolas), I-94 cron
 - [x] Marketing agent roster — 5 skills + compliance subagent, pipeline docs + 4 unpublished sample drafts in content/marketing (Jul 28, 2026)
+- [x] Stripe products live — single subscription tier, monthly + annual (Jul 28, 2026)
 
 **Known gaps / next up:**
 
 - [ ] E-1/E-2 change-of-status kit (L-1/J-1/M-1 already have one)
-- [ ] Stripe products created in dashboard (Base $9, Core $29, Concierge $1,499)
 - [ ] Denial-exit matrix completion (matriz de saídas por negativa)

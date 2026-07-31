@@ -12,6 +12,12 @@ export interface Visto {
   descricao: string;
   chave: string;   // o requisito-porteiro que destrava o caminho (fonte oficial)
   degrau: string;  // o plano de crescimento p/ quem ainda não está pronto
+  // true quando o degrau na verdade aponta pra OUTRO caminho (ex.: E-2 sem
+  // tratado → segunda cidadania; ESTA sem VWP → B-1/B-2). Nesses casos faz
+  // sentido oferecer "Ver outros caminhos". Nos demais (F-1, H-1B, O-1...),
+  // "não estar pronto" significa construir o dossiê NESTE caminho, não trocar
+  // — mostrar o link ali confundiria quem só precisa de tempo, não de rota.
+  degrauRedireciona?: boolean;
   destaque: { tipo: "star" | "warning" | "block"; texto: string } | null;
   stats: { label: string; valor: string; ok: boolean }[];
   // Passo a passo da ponte rumo ao Green Card ("direto, reto e sem curva"):
@@ -166,6 +172,7 @@ export const vistosNegocios: Visto[] = [
       "Cidadania de país com tratado com os EUA + investimento substancial já comprometido num negócio operante.",
     degrau:
       "Brasileiro não tem tratado — mas a porta costuma ser a segunda cidadania (italiana, portuguesa, espanhola por descendência). Sem ela, os caminhos análogos são L-1 e EB-5.",
+    degrauRedireciona: true,
     destaque: {
       tipo: "block",
       texto: "O Brasil não tem tratado E-2 — disponível apenas com cidadania de país-membro.",
@@ -190,6 +197,7 @@ export const vistosNegocios: Visto[] = [
       "Cidadania de país com tratado + mais de 50% do volume de comércio da empresa entre os EUA e o país do tratado.",
     degrau:
       "O degrau é o histórico: contratos e faturamento recorrentes com os EUA constroem o caso. Brasileiros precisam da segunda cidadania (como no E-2).",
+    degrauRedireciona: true,
     destaque: {
       tipo: "block",
       texto: "O Brasil não tem tratado E-1 — disponível apenas com cidadania de país-membro.",
@@ -214,6 +222,7 @@ export const vistosNegocios: Visto[] = [
       "Passaporte de país participante do VWP (a maioria da Europa e outros países com tratado) + ESTA aprovado antes de embarcar.",
     degrau:
       "Sem passaporte elegível ao VWP? O caminho é o B-1/B-2 pelo consulado — veja o card ao lado.",
+    degrauRedireciona: true,
     destaque: {
       tipo: "warning",
       texto:
@@ -348,6 +357,7 @@ export const vistosFamiliaEProtecao: Visto[] = [
       "Encontro pessoal com o(a) noivo(a) nos últimos 2 anos + ambos livres para casar — o cidadão americano protocola o I-129F.",
     degrau:
       "Já casados, não noivos? O caminho é outro: IR-1/CR-1 pelo I-130, direto — sem I-129F.",
+    degrauRedireciona: true,
     destaque: {
       tipo: "warning",
       texto: "O casamento precisa acontecer dentro de 90 dias da entrada — sem prorrogação. Perder o prazo fecha a porta do K-1.",

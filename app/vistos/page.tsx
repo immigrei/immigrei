@@ -30,6 +30,9 @@ function VistoCard({
   selecionado,
   onSelect,
   detailHref,
+  isExtensionOption = false,
+  onNotReady,
+  outrosExpandido = false,
 }: {
   visto: Visto;
   nationality: Nationality;
@@ -38,6 +41,16 @@ function VistoCard({
   // Quando o visto tem página dedicada, o CTA navega para ela em vez de
   // selecionar — a confirmação acontece lá (mesmo fluxo de salvamento).
   detailHref?: string;
+  // Card do visto atual mostrado como opção "enquanto isso" (ex.: B-1/B-2
+  // estendendo rumo ao H-1B) — ver deriveExtensionFocusId no onboarding.
+  isExtensionOption?: boolean;
+  // Só os cards recomendados recebem isto — expande/recolhe "Outros
+  // caminhos" ali embaixo (sem tirar a pessoa do card, diferente de rolar a
+  // página). Ver toggleOutrosCaminhos em VistosPage.
+  onNotReady?: () => void;
+  // Estado atual do toggle acima — troca o rótulo do botão entre "ver" e
+  // "ocultar". Só importa quando onNotReady existe.
+  outrosExpandido?: boolean;
 }) {
   const locked =
     visto.availability === "treaty-only" && nationality === "brazilian";
@@ -79,13 +92,21 @@ function VistoCard({
       )}
 
       {/* Badge */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 flex-wrap">
         <span
           className={`text-xs px-2.5 py-1 rounded-full font-semibold ${badgeStyles[visto.badgeColor]}`}
           style={{ fontSize: "11px", letterSpacing: "0.05em" }}
         >
           {visto.badge}
         </span>
+        {isExtensionOption && (
+          <span
+            className="text-xs px-2.5 py-1 rounded-full font-semibold bg-amber-tint text-amber-deep"
+            style={{ fontSize: "11px", letterSpacing: "0.05em" }}
+          >
+            🕓 Enquanto isso: Extensão
+          </span>
+        )}
       </div>
 
       {/* Name */}
@@ -104,8 +125,17 @@ function VistoCard({
         </p>
       </div>
 
-      {/* Blocos de decisão compartilhados com os resultados do onboarding */}
-      <VistoCatalogDetails visto={visto} showRumoGc={!locked} />
+      {/* Blocos de decisão compartilhados com os resultados do onboarding —
+          degrau ("ainda não está pronto?") sai daqui e é posicionado abaixo,
+          antes ou depois do CTA conforme visto.degrauRedireciona. */}
+      <VistoCatalogDetails visto={visto} showRumoGc={!locked} showDegrau={false} />
+
+      {/* Degrau quando REDIRECIONA para outro caminho (E-1, E-2, ESTA): é
+          informação que decide SE a pessoa deve clicar no CTA, não um reforço
+          pra depois — por isso vem antes, como um gate de decisão. */}
+      {visto.degrauRedireciona && (
+        <DegrauBlock visto={visto} onNotReady={onNotReady} outrosExpandido={outrosExpandido} />
+      )}
 
       {/* CTA */}
       {!locked && detailHref && (
@@ -130,15 +160,49 @@ function VistoCard({
           Quero seguir esse caminho →
         </button>
       )}
+
+      {/* Degrau quando é plano de CONSTRUÇÃO no mesmo caminho (F-1, H-1B,
+          O-1...): reforço pra depois de já ter visto o CTA, não muda a
+          decisão de seguir ou não. */}
+      {!visto.degrauRedireciona && (
+        <DegrauBlock visto={visto} onNotReady={onNotReady} outrosExpandido={outrosExpandido} />
+      )}
     </article>
+  );
+}
+
+// Bloco "Ainda não está pronto?" — usado tanto acima quanto abaixo do CTA em
+// VistoCard, conforme visto.degrauRedireciona (ver lib/vistosCatalog.ts).
+function DegrauBlock({
+  visto,
+  onNotReady,
+  outrosExpandido,
+}: {
+  visto: Visto;
+  onNotReady?: () => void;
+  outrosExpandido?: boolean;
+}) {
+  return (
+    <div className="bg-cream rounded-xl px-4 py-3">
+      <p className="text-ink-faint text-xs font-bold uppercase tracking-wider mb-1">🌱 Ainda não está pronto?</p>
+      <p className="text-ink-soft text-sm leading-relaxed">{visto.degrau}</p>
+      {onNotReady && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onNotReady(); }}
+          className="mt-2 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors"
+        >
+          {outrosExpandido ? "Ocultar outros caminhos ↑" : "Ver outros caminhos →"}
+        </button>
+      )}
+    </div>
   );
 }
 
 // ─── Section header ────────────────────────────────────────────────────────
 
-function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+function SectionHeader({ title, subtitle, id }: { title: string; subtitle: string; id?: string }) {
   return (
-    <div className="max-w-5xl mx-auto mb-6 mt-12 first:mt-0">
+    <div id={id} className="max-w-5xl mx-auto mb-6 mt-12 first:mt-0 scroll-mt-6">
       <div className="flex items-center gap-3 mb-1">
         <div className="h-px flex-1 bg-ink/10" />
         <h2
@@ -173,6 +237,10 @@ export default function VistosPage() {
   // Cards recomendados pelo onboarding (param `focus`) — sobem para uma
   // seção própria; os demais continuam visíveis como rotas paralelas.
   const [focusIds, setFocusIds] = useState<string[]>([]);
+  // Entre os recomendados, qual é o visto atual mostrado como opção
+  // "enquanto isso" (ex.: B-1/B-2 estendendo rumo ao H-1B) — ver
+  // deriveExtensionFocusId em app/onboarding/page.tsx.
+  const [extensionId, setExtensionId] = useState<string | null>(null);
 
   useEffect(() => {
     // Reading window.location requires deferring to an effect (SSR has no
@@ -193,7 +261,26 @@ export default function VistosPage() {
       const valid = new Set([...vistosEstudo, ...vistosNegocios].map((v) => v.id));
       setFocusIds(focus.split(",").filter((id) => valid.has(id)));
     }
+    const extFocus = params.get("extFocus");
+    if (extFocus) setExtensionId(extFocus);
   }, []);
+
+  // Quando há recomendados, "Outros caminhos" começa recolhido — o botão nos
+  // cards (ver DegrauBlock) expande/recolhe em vez de rolar a página até lá,
+  // pra não parecer que estamos empurrando quem só quer construir o dossiê
+  // do caminho recomendado pra longe dele.
+  const [outrosExpandido, setOutrosExpandido] = useState(false);
+
+  useEffect(() => {
+    if (!outrosExpandido) return;
+    // A seção só existe no DOM depois deste render — espera o próximo frame.
+    const raf = requestAnimationFrame(() => {
+      document.getElementById("outros-caminhos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [outrosExpandido]);
+
+  const toggleOutrosCaminhos = () => setOutrosExpandido((v) => !v);
 
   const todosVistos = [...vistosEstudo, ...vistosNegocios];
   const vistoSelecionado = todosVistos.find((v) => v.id === selecionado);
@@ -213,6 +300,14 @@ export default function VistosPage() {
     .filter((v): v is Visto => Boolean(v));
   const estudoRestantes = vistosEstudo.filter((v) => !focusIds.includes(v.id));
   const negociosRestantes = vistosNegocios.filter((v) => !focusIds.includes(v.id));
+  // Primeira seção "Outros caminhos" que de fato renderiza — é ela que
+  // recebe a âncora de rolagem quando o botão nos cards recomendados expande
+  // a seção.
+  const outrosCaminhosAnchor =
+    estudoRestantes.length > 0 ? "estudo" : negociosRestantes.length > 0 ? "negocios" : null;
+  // Sem recomendados, "Outros caminhos" nem existe como conceito — as seções
+  // abaixo são o conteúdo principal e ficam sempre visíveis.
+  const mostrarOutrosCaminhos = recomendados.length === 0 || outrosExpandido;
 
   async function confirmarVisto() {
     if (!vistoSelecionado || saving) return;
@@ -296,6 +391,9 @@ export default function VistosPage() {
                   selecionado={selecionado === v.id}
                   onSelect={() => setSelecionado(v.id)}
                   detailHref={detailHrefFor(v.id)}
+                  isExtensionOption={v.id === extensionId}
+                  onNotReady={outrosCaminhosAnchor ? toggleOutrosCaminhos : undefined}
+                  outrosExpandido={outrosExpandido}
                 />
               ))}
             </div>
@@ -304,9 +402,10 @@ export default function VistosPage() {
       )}
 
       {/* Section 1 — Estudo & Intercâmbio */}
-      {estudoRestantes.length > 0 && (
+      {estudoRestantes.length > 0 && mostrarOutrosCaminhos && (
         <>
           <SectionHeader
+            id={outrosCaminhosAnchor === "estudo" ? "outros-caminhos" : undefined}
             title={recomendados.length > 0 ? "Outros caminhos — Estudo & Intercâmbio" : "Estudo & Intercâmbio"}
             subtitle="Vistos para quem vem estudar, pesquisar ou participar de programas de intercâmbio"
           />
@@ -326,9 +425,10 @@ export default function VistosPage() {
       )}
 
       {/* Section 2 — Negócios & Investimento */}
-      {negociosRestantes.length > 0 && (
+      {negociosRestantes.length > 0 && mostrarOutrosCaminhos && (
         <>
           <SectionHeader
+            id={outrosCaminhosAnchor === "negocios" ? "outros-caminhos" : undefined}
             title={recomendados.length > 0 ? "Outros caminhos — Negócios & Investimento" : "Negócios & Investimento"}
             subtitle="Vistos para empreendedores, executivos e investidores — alguns exigem tratado entre países"
           />

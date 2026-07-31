@@ -13,9 +13,13 @@ import type { Visto } from "@/lib/vistosCatalog";
 export default function VistoCatalogDetails({
   visto,
   showRumoGc = true,
+  showDegrau = true,
 }: {
   visto: Visto;
   showRumoGc?: boolean;
+  // A grid de /vistos renderiza o degrau fora deste componente (abaixo do
+  // CTA, com botão de rolagem) — ver VistoCard em app/vistos/page.tsx.
+  showDegrau?: boolean;
 }) {
   return (
     <>
@@ -26,10 +30,12 @@ export default function VistoCatalogDetails({
       </div>
 
       {/* Degrau para quem não está pronto */}
-      <div className="bg-cream rounded-xl px-4 py-3">
-        <p className="text-ink-faint text-xs font-bold uppercase tracking-wider mb-1">🌱 Ainda não está pronto?</p>
-        <p className="text-ink-soft text-sm leading-relaxed">{visto.degrau}</p>
-      </div>
+      {showDegrau && (
+        <div className="bg-cream rounded-xl px-4 py-3">
+          <p className="text-ink-faint text-xs font-bold uppercase tracking-wider mb-1">🌱 Ainda não está pronto?</p>
+          <p className="text-ink-soft text-sm leading-relaxed">{visto.degrau}</p>
+        </div>
+      )}
 
       {visto.destaque && (
         <div
