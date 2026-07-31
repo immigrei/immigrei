@@ -128,7 +128,7 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 | Styling | Tailwind CSS |
 | Database | Supabase (PostgreSQL) — East US, North Virginia |
 | Auth | Clerk — Email, Google, Apple, Facebook |
-| Payments | Stripe (test mode) |
+| Payments | Stripe (live) |
 | Deploy | Vercel — immigrei.vercel.app |
 | Repo | github.com/immigrei/immigrei |
 
@@ -139,10 +139,9 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 - Facebook ✅
 - Phone number: disabled for now (add as optional 2FA later)
 
-### Stripe products (to be created):
-- **Immigrei Base** — $9/month (recurring)
-- **Immigrei Core** — $29/month (recurring)
-- **Immigrei Concierge** — $1,499 one-time
+### Stripe products (live, created Jul 28 2026):
+- **Immigrei Jornada** — $29.90/month or $269/year (recurring) — the paid tier; free "Retrato" tier has no Stripe product
+- Earlier **Immigrei Base** ($9/mo) and **Immigrei Core** ($29/mo) products are archived, superseded by Jornada
 
 ---
 
@@ -220,7 +219,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 **MVP foundation — all delivered:**
 
 - [x] Next.js project scaffolded, deployed to Vercel (immigrei.vercel.app)
-- [x] Supabase (East US) + Clerk (Email/Google/Apple/Facebook) + Stripe (test mode) — configured, packages installed, .env.local set
+- [x] Supabase (East US) + Clerk (Email/Google/Apple/Facebook) + Stripe (live) — configured, packages installed, .env.local set
 - [x] Auth flow (sign up / sign in) — /vistos and /caminhos gated behind login
 - [x] User onboarding flow — branching questionnaire, single best-match result card
 - [x] Dashboard / immigration status view — /painel with data-driven journey progress
@@ -230,9 +229,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - [x] Legal knowledge base — content/leis; all 11 catalog visas have dedicated /vistos/[id] pages (Jul 16, 2026)
 - [x] Document vault, community tab, SEVP school directory (/escolas), I-94 cron
 - [x] Marketing agent roster — 5 skills + compliance subagent, pipeline docs + 4 unpublished sample drafts in content/marketing (Jul 28, 2026)
+- [x] Stripe switched to live mode — checkout verified working end-to-end in production (Jul 29, 2026)
 
 **Known gaps / next up:**
 
 - [ ] E-1/E-2 change-of-status kit (L-1/J-1/M-1 already have one)
-- [ ] Stripe products created in dashboard (Base $9, Core $29, Concierge $1,499)
 - [ ] Denial-exit matrix completion (matriz de saídas por negativa)
