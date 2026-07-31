@@ -188,6 +188,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 > Keys are stored in the team's password manager. Never commit .env.local to GitHub.
 
+**Security:** `.env.local` is protected by `.gitignore` (pattern `.env*`) — will never be committed to GitHub. However, local agents (Buzz, Claude Code, etc.) running on your machine have filesystem access and **can read `.env.local`**. This is intentional — agents need API credentials to function. Keep your machine secure; only run agents you trust.
+
 ---
 
 ## 8. Team
