@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import CofreLink from "@/app/components/CofreLink";
+import I94Card from "@/app/components/I94Card";
 
 interface Profile {
   visa_type: string | null;
   location:  "brasil" | "eua" | null;
   main_goal: string | null;
+  i94_expiry_date?: string | null;
 }
 
 interface Kit {
@@ -356,6 +358,8 @@ export default function DocumentosPage() {
             Identificando seu kit...
           </div>
         )}
+
+        {!loading && profile && <I94Card value={profile.i94_expiry_date ?? null} />}
 
         {!loading && recomendado && (
           <div className="mb-8">

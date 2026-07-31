@@ -6,6 +6,7 @@ import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import OptionsList from "@/app/components/OptionsList";
 import PaywallGate from "@/app/components/PaywallGate";
+import I94Card from "@/app/components/I94Card";
 import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
 import { applyProgress, type ProgressSignals } from "@/lib/journey-progress";
 import { traduzirStatus } from "@/lib/uscis-status-pt";
@@ -201,6 +202,9 @@ export default function PainelClient({ hasAccess }: { hasAccess: boolean }) {
           </p>
           <p className="text-sm text-ink leading-relaxed">{s.situacao}</p>
         </div>
+
+        {/* Prazo do I-94 — mesmo dado da Início, só visualização aqui */}
+        <I94Card value={profile.i94_expiry_date ?? null} />
 
         {/* Porta de Green Card por vínculo familiar — vale para qualquer
             jornada principal, não só quem está seguindo o caminho de família */}
