@@ -51,6 +51,26 @@ export default function I94Field({ initialValue }: { initialValue: string | null
     }
   }
 
+  async function remover() {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ i94_expiry_date: null }),
+      });
+      if (!res.ok) throw new Error();
+      setValue(null);
+      setDraft("");
+      setEditing(false);
+    } catch {
+      setError("Não conseguimos remover agora. Tente de novo.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (editing) {
     return (
       <div className="px-6 py-4 flex flex-col gap-2">
@@ -79,14 +99,25 @@ export default function I94Field({ initialValue }: { initialValue: string | null
           </button>
         </div>
         {error && <p className="text-xs text-clay">{error}</p>}
-        <a
-          href="https://i94.cbp.dhs.gov"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs font-semibold text-pine underline underline-offset-2 w-fit"
-        >
-          Não sei meu prazo — consultar em i94.cbp.dhs.gov →
-        </a>
+        <div className="flex items-center gap-4">
+          <a
+            href="https://i94.cbp.dhs.gov"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold text-pine underline underline-offset-2 w-fit"
+          >
+            Não sei meu prazo — consultar em i94.cbp.dhs.gov →
+          </a>
+          {value && (
+            <button
+              onClick={remover}
+              disabled={saving}
+              className="text-xs font-semibold text-clay underline underline-offset-2 disabled:opacity-40"
+            >
+              Remover data
+            </button>
+          )}
+        </div>
       </div>
     );
   }

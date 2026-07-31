@@ -1977,7 +1977,10 @@ export default function OnboardingPage() {
   // Residentes permanentes e cidadãos não escolhem visto na vitrine — a
   // jornada deles já está definida. Salvamos o perfil direto e vamos ao
   // painel; sem login, o mesmo stash de /vistos sobrevive ao sign-up.
-  async function saveProfileAndGoToDashboard(visaType: "green_card" | "citizen") {
+  // "outro" cobre quem não conseguiu confirmar o I-94 (destino "i94"): sem
+  // isso a pessoa nunca marca onboarding_completed e fica presa fora do
+  // app, sem nenhum caminho de volta a não ser o link externo do CBP.
+  async function saveProfileAndGoToDashboard(visaType: "green_card" | "citizen" | "outro") {
     if (savingProfile) return;
     setSavingProfile(true);
     setSaveError(null);
@@ -2309,15 +2312,25 @@ export default function OnboardingPage() {
             </p>
           )}
           {destino.kind === "i94" ? (
-            <a
-              href="https://i94.cbp.dhs.gov/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full block text-center bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
-              style={{ fontFamily: "var(--font-body)" }}
-            >
-              Conferir meu I-94 no site oficial →
-            </a>
+            <div className="w-full flex flex-col items-center gap-3">
+              <a
+                href="https://i94.cbp.dhs.gov/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full block text-center bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                Conferir meu I-94 no site oficial →
+              </a>
+              <button
+                onClick={() => saveProfileAndGoToDashboard("outro")}
+                disabled={savingProfile}
+                className="text-sm font-semibold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors disabled:opacity-60"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                {savingProfile ? "Salvando..." : "Ainda não consegui verificar — continuar mesmo assim →"}
+              </button>
+            </div>
           ) : destino.kind === "dashboard" ? (
             <button
               onClick={() => saveProfileAndGoToDashboard(destino.visaType)}
