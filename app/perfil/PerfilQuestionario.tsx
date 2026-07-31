@@ -607,7 +607,11 @@ export default function PerfilQuestionario() {
           <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.08em" }}>
             Transferência dentro da empresa
           </p>
-          <Field label="Sua empresa atual tem operação nos EUA e no Brasil (mesma empresa, filial ou grupo)?">
+          <Field
+            label={`Sua empresa atual tem operação nos EUA e ${
+              data.lives_outside_brazil && data.residence_country ? `em ${data.residence_country}` : "no Brasil"
+            } (mesma empresa, filial ou grupo)?`}
+          >
             <ButtonGroup
               options={[{ value: "sim", label: "Sim" }, { value: "nao", label: "Não" }]}
               value={data.l1_us_br_operations === true ? "sim" : data.l1_us_br_operations === false ? "nao" : null}

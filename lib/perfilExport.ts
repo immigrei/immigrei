@@ -84,7 +84,7 @@ const T = {
     citizenship: "Cidadania",
     capitalAvailable: "Capital disponível pra investir", capitalRange: "Faixa de valor",
     businessOwner: "Já é dono(a) ou sócio(a) de empresa", yes: "Sim", no: "Não",
-    l1Operations: "Empresa com operação EUA + Brasil", l1Years: "Tempo em liderança/especialização",
+    l1Operations: "Empresa com operação nos EUA e no outro país", l1Years: "Tempo em liderança/especialização",
     situation: "Como é a situação hoje", concern: "O que mais preocupa",
     tried: "O que já foi tentado",
     empty: "Não informado.",
@@ -109,7 +109,7 @@ const T = {
     citizenship: "Citizenship",
     capitalAvailable: "Capital available to invest", capitalRange: "Amount range",
     businessOwner: "Already owns or co-owns a business", yes: "Yes", no: "No",
-    l1Operations: "Employer operates in both the US and Brazil", l1Years: "Time in leadership/specialized role",
+    l1Operations: "Employer operates in both the US and the other country", l1Years: "Time in leadership/specialized role",
     situation: "Current situation", concern: "Main concern",
     tried: "What's already been tried",
     empty: "Not provided.",
@@ -314,7 +314,8 @@ export async function generatePerfilPdf(data: PerfilExportData, locale: Locale):
   // ── L-1 ───────────────────────────────────────────────────────────────
   if (data.l1_us_br_operations) {
     sectionTitle(t.sectionL1);
-    fieldLine(t.l1Operations, t.yes);
+    const otherCountry = data.lives_outside_brazil && data.residence_country ? data.residence_country : "Brasil";
+    fieldLine(t.l1Operations, `${t.yes} (EUA + ${otherCountry})`);
     if (data.l1_leadership_years) {
       fieldLine(t.l1Years, L1_YEARS[data.l1_leadership_years]?.[locale] ?? "");
     }
