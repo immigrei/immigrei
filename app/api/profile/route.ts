@@ -13,6 +13,14 @@ const ExperienceYearsSchema = z.enum(["0-2", "3-5", "6-10", "10+"]);
 const EnglishTestNameSchema = z.enum(["TOEFL", "IELTS", "Duolingo English Test", "PTE Academic", "Outro"]);
 const InvestorCapitalRangeSchema = z.enum(["menos_50k", "50k_100k", "100k_500k", "500k_mais"]);
 const L1LeadershipYearsSchema = z.enum(["menos_1", "1_3", "3_mais"]);
+// Cada teste de inglês tem escala própria — nota fora do range real do teste
+// não é um erro de digitação sutil, é impossível (ex: PTE Academic vai até 90).
+const ENGLISH_TEST_SCORE_RANGE: Record<string, { min: number; max: number }> = {
+  TOEFL: { min: 0, max: 120 },
+  IELTS: { min: 0, max: 9 },
+  "Duolingo English Test": { min: 10, max: 160 },
+  "PTE Academic": { min: 10, max: 90 },
+};
 // Critérios de habilidade extraordinária, 8 CFR §214.2(o)(3) — chaves fixas,
 // o texto de cada uma vive só no componente (copy pode mudar sem migração).
 const O1CriteriaSchema = z.enum([
@@ -42,22 +50,27 @@ export async function POST(req: NextRequest) {
   const {
     visa_type, arrival_date, main_goal, location, nationality, chosen_school, i94_expiry_date, family_ties, f1_program_start_date,
     // Perfil — Parte 1 (básico/carreira)
-    birth_date, birth_city, birth_country, current_city, current_state, gender,
+    birth_date, birth_city, birth_country, birth_state, current_city, current_state, gender,
     english_level, english_test_taken, english_test_name, english_test_score,
     education_level, profession, experience_years, achievements,
     // Perfil — sinais estruturados (O-1A/EB-1A, investidor, L-1)
     o1_criteria, investor_capital_available, investor_capital_range, business_owner_experience,
-    l1_us_br_operations, l1_leadership_years,
+    citizenship_country,
+    l1_us_br_operations, l1_in_leadership_role, l1_leadership_years,
+    // Perfil — residência (mora fora do Brasil?)
+    lives_outside_brazil, residence_country,
     // Perfil — Parte 2 (perguntas abertas)
     bio_situation, bio_concern, bio_tried,
   } = body;
 
   const perfilFields = [
-    birth_date, birth_city, birth_country, current_city, current_state, gender,
+    birth_date, birth_city, birth_country, birth_state, current_city, current_state, gender,
     english_level, english_test_taken, english_test_name, english_test_score,
     education_level, profession, experience_years, achievements,
     o1_criteria, investor_capital_available, investor_capital_range, business_owner_experience,
-    l1_us_br_operations, l1_leadership_years,
+    citizenship_country,
+    l1_us_br_operations, l1_in_leadership_role, l1_leadership_years,
+    lives_outside_brazil, residence_country,
     bio_situation, bio_concern, bio_tried,
   ];
 
@@ -91,7 +104,10 @@ export async function POST(req: NextRequest) {
   if (birth_date !== undefined && birth_date !== null && !DateStringSchema.safeParse(birth_date).success) {
     return NextResponse.json({ error: "Invalid birth_date" }, { status: 400 });
   }
-  for (const [key, value] of Object.entries({ birth_city, birth_country, current_city, current_state, profession })) {
+  for (const [key, value] of Object.entries({
+    birth_city, birth_country, birth_state, current_city, current_state, profession,
+    residence_country, citizenship_country,
+  })) {
     if (value !== undefined && value !== null && !ShortTextSchema.safeParse(value).success) {
       return NextResponse.json({ error: `Invalid ${key}` }, { status: 400 });
     }
@@ -110,6 +126,16 @@ export async function POST(req: NextRequest) {
   }
   if (english_test_score !== undefined && english_test_score !== null && !ShortTextSchema.safeParse(english_test_score).success) {
     return NextResponse.json({ error: "Invalid english_test_score" }, { status: 400 });
+  }
+  if (english_test_score !== undefined && english_test_score !== null) {
+    const testName = english_test_name ?? undefined;
+    const range = testName ? ENGLISH_TEST_SCORE_RANGE[testName] : undefined;
+    if (range) {
+      const parsed = Number(String(english_test_score).replace(",", "."));
+      if (!Number.isFinite(parsed) || parsed < range.min || parsed > range.max) {
+        return NextResponse.json({ error: `Invalid english_test_score for ${testName} (expected ${range.min}-${range.max})` }, { status: 400 });
+      }
+    }
   }
   if (education_level !== undefined && education_level !== null && !EducationLevelSchema.safeParse(education_level).success) {
     return NextResponse.json({ error: "Invalid education_level" }, { status: 400 });
@@ -130,7 +156,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid o1_criteria" }, { status: 400 });
     }
   }
-  for (const [key, value] of Object.entries({ investor_capital_available, business_owner_experience, l1_us_br_operations })) {
+  for (const [key, value] of Object.entries({
+    investor_capital_available, business_owner_experience, l1_us_br_operations,
+    l1_in_leadership_role, lives_outside_brazil,
+  })) {
     if (value !== undefined && value !== null && typeof value !== "boolean") {
       return NextResponse.json({ error: `Invalid ${key}` }, { status: 400 });
     }
@@ -163,6 +192,7 @@ export async function POST(req: NextRequest) {
   if (birth_date !== undefined) row.birth_date = birth_date;
   if (birth_city !== undefined) row.birth_city = birth_city;
   if (birth_country !== undefined) row.birth_country = birth_country;
+  if (birth_state !== undefined) row.birth_state = birth_state;
   if (current_city !== undefined) row.current_city = current_city;
   if (current_state !== undefined) row.current_state = current_state;
   if (gender !== undefined) row.gender = gender;
@@ -181,8 +211,12 @@ export async function POST(req: NextRequest) {
   if (investor_capital_available !== undefined) row.investor_capital_available = investor_capital_available;
   if (investor_capital_range !== undefined) row.investor_capital_range = investor_capital_range;
   if (business_owner_experience !== undefined) row.business_owner_experience = business_owner_experience;
+  if (citizenship_country !== undefined) row.citizenship_country = citizenship_country;
   if (l1_us_br_operations !== undefined) row.l1_us_br_operations = l1_us_br_operations;
+  if (l1_in_leadership_role !== undefined) row.l1_in_leadership_role = l1_in_leadership_role;
   if (l1_leadership_years !== undefined) row.l1_leadership_years = l1_leadership_years;
+  if (lives_outside_brazil !== undefined) row.lives_outside_brazil = lives_outside_brazil;
+  if (residence_country !== undefined) row.residence_country = residence_country;
   if (chosen_school !== undefined) {
     row.chosen_school = chosen_school === null ? null : {
       school_name: String(chosen_school.school_name),

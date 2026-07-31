@@ -11,8 +11,11 @@ import { useEffect, useState } from "react";
 
 interface PerfilData {
   birth_date?:                  string | null;
-  birth_city?:                  string | null;
   birth_country?:               string | null;
+  birth_state?:                 string | null;
+  birth_city?:                  string | null;
+  lives_outside_brazil?:        boolean | null;
+  residence_country?:           string | null;
   current_city?:                string | null;
   current_state?:               string | null;
   gender?:                      string | null;
@@ -28,7 +31,9 @@ interface PerfilData {
   investor_capital_available?:  boolean | null;
   investor_capital_range?:      string | null;
   business_owner_experience?:   boolean | null;
+  citizenship_country?:         string | null;
   l1_us_br_operations?:         boolean | null;
+  l1_in_leadership_role?:       boolean | null;
   l1_leadership_years?:         string | null;
   bio_situation?:               string | null;
   bio_concern?:                 string | null;
@@ -58,6 +63,27 @@ const EXPERIENCE_RANGES = [
   { value: "10+", label: "10+ anos" },
 ];
 
+const BRAZIL_STATES = [
+  "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal",
+  "Espírito Santo", "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul",
+  "Minas Gerais", "Pará", "Paraíba", "Paraná", "Pernambuco", "Piauí",
+  "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul", "Rondônia",
+  "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins",
+].map((uf) => ({ value: uf, label: uf }));
+
+// Rótulo do campo "estado/província/região" varia com o país de residência —
+// sem lista fechada por país (custoso pra manter certo pra +190 países), só
+// o texto do campo muda pra soar natural.
+const RESIDENCE_STATE_LABEL: Record<string, string> = {
+  Brasil: "Estado",
+  "Estados Unidos": "State",
+  Portugal: "Distrito",
+  Canadá: "Província",
+};
+function residenceStateLabel(country: string | null | undefined): string {
+  return RESIDENCE_STATE_LABEL[country ?? ""] ?? "Estado / Província / Região";
+}
+
 const GENDERS = [
   { value: "feminino", label: "Feminino" },
   { value: "masculino", label: "Masculino" },
@@ -85,6 +111,22 @@ const ENGLISH_TEST_SCORE_HINT: Record<string, string> = {
   "PTE Academic": "10 a 90 (ex: 65)",
   Outro: "Nota ou resultado do teste",
 };
+
+// Mesmo range aplicado no servidor (app/api/profile/route.ts) — aqui só pra
+// avisar na hora, antes de tentar salvar.
+const ENGLISH_TEST_SCORE_RANGE: Record<string, { min: number; max: number }> = {
+  TOEFL: { min: 0, max: 120 },
+  IELTS: { min: 0, max: 9 },
+  "Duolingo English Test": { min: 10, max: 160 },
+  "PTE Academic": { min: 10, max: 90 },
+};
+function scoreOutOfRange(testName: string | null | undefined, score: string | null | undefined): boolean {
+  if (!testName || !score) return false;
+  const range = ENGLISH_TEST_SCORE_RANGE[testName];
+  if (!range) return false;
+  const parsed = Number(score.replace(",", "."));
+  return !Number.isFinite(parsed) || parsed < range.min || parsed > range.max;
+}
 
 const INVESTOR_CAPITAL_RANGES = [
   { value: "menos_50k", label: "Menos de US$50k" },
@@ -193,6 +235,31 @@ function CheckboxList({
   );
 }
 
+function Select({
+  options,
+  value,
+  onChange,
+  placeholder,
+}: {
+  options: { value: string; label: string }[];
+  value: string | null | undefined;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <select
+      value={value ?? ""}
+      onChange={(e) => onChange(e.target.value)}
+      className={inputClass}
+    >
+      <option value="" disabled>{placeholder}</option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+  );
+}
+
 const inputClass =
   "w-full px-3 py-2.5 rounded-xl border border-pine-tint bg-cream text-ink text-sm focus:outline-none focus:ring-2 focus:ring-pine focus:border-pine transition";
 
@@ -226,6 +293,10 @@ export default function PerfilQuestionario() {
   }
 
   async function salvar() {
+    if (scoreOutOfRange(data.english_test_name, data.english_test_score)) {
+      setError("Corrige a nota do teste de inglês antes de salvar.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -309,17 +380,6 @@ export default function PerfilQuestionario() {
             <ButtonGroup options={GENDERS} value={data.gender} onChange={(v) => set("gender", v)} />
           </Field>
 
-          <Field label="Cidade de nascimento">
-            <input
-              type="text"
-              maxLength={120}
-              value={data.birth_city ?? ""}
-              onChange={(e) => set("birth_city", e.target.value)}
-              placeholder="Ex: Belo Horizonte"
-              className={inputClass}
-            />
-          </Field>
-
           <Field label="País de nascimento">
             <input
               type="text"
@@ -331,6 +391,51 @@ export default function PerfilQuestionario() {
             />
           </Field>
 
+          {data.birth_country === "Brasil" && (
+            <Field label="Estado de nascimento">
+              <Select
+                options={BRAZIL_STATES}
+                value={data.birth_state}
+                onChange={(v) => set("birth_state", v)}
+                placeholder="Selecione o estado"
+              />
+            </Field>
+          )}
+
+          <Field label="Cidade de nascimento">
+            <input
+              type="text"
+              maxLength={120}
+              value={data.birth_city ?? ""}
+              onChange={(e) => set("birth_city", e.target.value)}
+              placeholder="Ex: Belo Horizonte"
+              className={inputClass}
+            />
+          </Field>
+        </div>
+
+        <Field label="Você mora fora do Brasil hoje?">
+          <ButtonGroup
+            options={[{ value: "sim", label: "Sim" }, { value: "nao", label: "Não" }]}
+            value={data.lives_outside_brazil === true ? "sim" : data.lives_outside_brazil === false ? "nao" : null}
+            onChange={(v) => set("lives_outside_brazil", v === "sim")}
+          />
+        </Field>
+
+        <div className="grid sm:grid-cols-2 gap-5">
+          {data.lives_outside_brazil && (
+            <Field label="País onde mora hoje">
+              <input
+                type="text"
+                maxLength={120}
+                value={data.residence_country ?? ""}
+                onChange={(e) => set("residence_country", e.target.value)}
+                placeholder="Ex: Estados Unidos"
+                className={inputClass}
+              />
+            </Field>
+          )}
+
           <Field label="Cidade onde mora hoje">
             <input
               type="text"
@@ -341,7 +446,7 @@ export default function PerfilQuestionario() {
             />
           </Field>
 
-          <Field label="Estado onde mora hoje">
+          <Field label={data.lives_outside_brazil ? residenceStateLabel(data.residence_country) : "Estado onde mora hoje"}>
             <input
               type="text"
               maxLength={120}
@@ -383,6 +488,11 @@ export default function PerfilQuestionario() {
                 placeholder={ENGLISH_TEST_SCORE_HINT[data.english_test_name ?? "Outro"] ?? ENGLISH_TEST_SCORE_HINT.Outro}
                 className={`${inputClass} sm:max-w-xs`}
               />
+              {scoreOutOfRange(data.english_test_name, data.english_test_score) && (
+                <p className="text-xs font-semibold" style={{ color: "var(--clay)" }}>
+                  Essa nota está fora do range possível pro {data.english_test_name} ({ENGLISH_TEST_SCORE_HINT[data.english_test_name ?? "Outro"]}).
+                </p>
+              )}
             </Field>
           </div>
         )}
@@ -437,6 +547,16 @@ export default function PerfilQuestionario() {
           <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.08em" }}>
             Investimento e negócio próprio
           </p>
+          <Field label="Qual sua cidadania? (importa pra visto de investidor — alguns exigem país de tratado com os EUA)">
+            <input
+              type="text"
+              maxLength={120}
+              value={data.citizenship_country ?? ""}
+              onChange={(e) => set("citizenship_country", e.target.value)}
+              placeholder="Ex: Brasileira"
+              className={`${inputClass} sm:max-w-xs`}
+            />
+          </Field>
           <Field label="Você tem capital disponível pra investir num negócio nos EUA?">
             <ButtonGroup
               options={[{ value: "sim", label: "Sim" }, { value: "nao", label: "Não" }]}
@@ -474,7 +594,16 @@ export default function PerfilQuestionario() {
             />
           </Field>
           {data.l1_us_br_operations && (
-            <Field label="Há quanto tempo você está numa função de gerência, liderança ou conhecimento especializado?">
+            <Field label="Você já atua em função de gerência, liderança ou conhecimento especializado?">
+              <ButtonGroup
+                options={[{ value: "sim", label: "Sim" }, { value: "nao", label: "Não" }]}
+                value={data.l1_in_leadership_role === true ? "sim" : data.l1_in_leadership_role === false ? "nao" : null}
+                onChange={(v) => set("l1_in_leadership_role", v === "sim")}
+              />
+            </Field>
+          )}
+          {data.l1_us_br_operations && data.l1_in_leadership_role && (
+            <Field label="Há quanto tempo?">
               <ButtonGroup
                 options={L1_LEADERSHIP_YEARS}
                 value={data.l1_leadership_years}

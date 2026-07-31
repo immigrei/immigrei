@@ -19,8 +19,11 @@ export type Locale = "pt" | "en";
 export interface PerfilExportData {
   full_name?:                   string | null;
   birth_date?:                  string | null;
-  birth_city?:                  string | null;
   birth_country?:               string | null;
+  birth_state?:                 string | null;
+  birth_city?:                  string | null;
+  lives_outside_brazil?:        boolean | null;
+  residence_country?:           string | null;
   current_city?:                string | null;
   current_state?:               string | null;
   gender?:                      string | null;
@@ -36,7 +39,9 @@ export interface PerfilExportData {
   investor_capital_available?:  boolean | null;
   investor_capital_range?:      string | null;
   business_owner_experience?:   boolean | null;
+  citizenship_country?:         string | null;
   l1_us_br_operations?:         boolean | null;
+  l1_in_leadership_role?:       boolean | null;
   l1_leadership_years?:         string | null;
   bio_situation?:               string | null;
   bio_concern?:                 string | null;
@@ -74,6 +79,7 @@ const T = {
     experience: "Anos de experiência", english: "Inglês", test: "Teste", score: "Nota",
     criteriaNone: "Nenhum critério marcado até agora.",
     achievementsLabel: "Detalhes",
+    citizenship: "Cidadania",
     capitalAvailable: "Capital disponível pra investir", capitalRange: "Faixa de valor",
     businessOwner: "Já é dono(a) ou sócio(a) de empresa", yes: "Sim", no: "Não",
     l1Operations: "Empresa com operação EUA + Brasil", l1Years: "Tempo em liderança/especialização",
@@ -98,6 +104,7 @@ const T = {
     experience: "Years of experience", english: "English", test: "Test", score: "Score",
     criteriaNone: "No criteria marked yet.",
     achievementsLabel: "Details",
+    citizenship: "Citizenship",
     capitalAvailable: "Capital available to invest", capitalRange: "Amount range",
     businessOwner: "Already owns or co-owns a business", yes: "Yes", no: "No",
     l1Operations: "Employer operates in both the US and Brazil", l1Years: "Time in leadership/specialized role",
@@ -257,8 +264,13 @@ export async function generatePerfilPdf(data: PerfilExportData, locale: Locale):
   sectionTitle(t.sectionBasics);
   fieldLine(t.name, data.full_name ?? "");
   fieldLine(t.birthDate, formatDate(data.birth_date, locale));
-  fieldLine(t.bornIn, [data.birth_city, data.birth_country].filter(Boolean).join(", "));
-  fieldLine(t.livesIn, [data.current_city, data.current_state].filter(Boolean).join(", "));
+  fieldLine(t.bornIn, [data.birth_city, data.birth_state, data.birth_country].filter(Boolean).join(", "));
+  fieldLine(
+    t.livesIn,
+    [data.current_city, data.current_state, data.lives_outside_brazil ? data.residence_country : null]
+      .filter(Boolean)
+      .join(", "),
+  );
   fieldLine(t.education, data.education_level ? EDUCATION_LEVEL[data.education_level]?.[locale] ?? "" : "");
   fieldLine(t.profession, data.profession ?? "");
   fieldLine(t.experience, data.experience_years ? EXPERIENCE_YEARS[data.experience_years]?.[locale] ?? "" : "");
@@ -284,6 +296,7 @@ export async function generatePerfilPdf(data: PerfilExportData, locale: Locale):
   // ── Investidor ────────────────────────────────────────────────────────
   if (data.investor_capital_available || data.business_owner_experience) {
     sectionTitle(t.sectionInvestor);
+    fieldLine(t.citizenship, data.citizenship_country ?? "");
     fieldLine(t.capitalAvailable, data.investor_capital_available ? t.yes : t.no);
     if (data.investor_capital_available && data.investor_capital_range) {
       fieldLine(t.capitalRange, INVESTOR_RANGE[data.investor_capital_range]?.[locale] ?? "");
