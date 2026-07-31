@@ -66,6 +66,50 @@ export default function VistoIdClient({ hasAccess }: { hasAccess: boolean }) {
   const [marcados, setMarcados] = useState<Set<string>>(new Set());
   const [infoAberto, setInfoAberto] = useState<string | null>(null);
 
+  // ── Confirmar como processo paralelo — grátis mesmo no plano free, já
+  // que é o próprio usuário organizando os caminhos que está seguindo, não
+  // conteúdo pago do kit em si (ver ParallelProcessesCard).
+  const [processoId, setProcessoId] = useState<string | null>(null);
+  const [confirmando, setConfirmando] = useState(false);
+
+  useEffect(() => {
+    if (!vistoId) return;
+    fetch("/api/user-processes")
+      .then((r) => (r.ok ? r.json() : { processes: [] }))
+      .then((d) => {
+        const existente = (d.processes ?? []).find((p: { kit_id: string | null }) => p.kit_id === vistoId);
+        setProcessoId(existente?.id ?? null);
+      })
+      .catch(() => {});
+  }, [vistoId]);
+
+  async function confirmarJornada() {
+    if (!checklist) return;
+    setConfirmando(true);
+    try {
+      const res = await fetch("/api/user-processes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kitId: vistoId, label: checklist.nome, status: "ativo" }),
+      });
+      const data = await res.json();
+      if (res.ok) setProcessoId(data.process.id);
+    } finally {
+      setConfirmando(false);
+    }
+  }
+
+  async function removerJornada() {
+    if (!processoId) return;
+    setConfirmando(true);
+    try {
+      await fetch(`/api/user-processes/${processoId}`, { method: "DELETE" });
+      setProcessoId(null);
+    } finally {
+      setConfirmando(false);
+    }
+  }
+
   useEffect(() => {
     if (!infoAberto) return;
     const fechar = () => setInfoAberto(null);
@@ -469,6 +513,29 @@ export default function VistoIdClient({ hasAccess }: { hasAccess: boolean }) {
             {checklist.nome}
           </h1>
           <p className="text-ink-soft text-sm leading-relaxed">{checklist.intro}</p>
+
+          {processoId ? (
+            <div className="mt-4 flex items-center gap-3">
+              <span className="text-sm font-semibold text-pine">
+                ✓ Este é um dos seus processos em paralelo
+              </span>
+              <button
+                onClick={removerJornada}
+                disabled={confirmando}
+                className="text-xs font-bold text-clay hover:text-clay/80 transition-colors disabled:opacity-40"
+              >
+                Remover
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={confirmarJornada}
+              disabled={confirmando}
+              className="mt-4 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors disabled:opacity-40"
+            >
+              {confirmando ? "Salvando..." : "Confirmar esta jornada como processo paralelo →"}
+            </button>
+          )}
         </div>
 
         {hasAccess ? (
