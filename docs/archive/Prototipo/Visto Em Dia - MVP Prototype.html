@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visto Em Dia — Protótipo MVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F4EEE2; --cream-2:#FBF7EF; --surface:#FFFFFF;
+    --ink:#1B2520; --ink-soft:#55615A; --ink-faint:#8B958F;
+    --pine:#1E5E4E; --pine-deep:#164A3D; --pine-tint:#E4EFE9;
+    --amber:#E8A33D; --amber-deep:#CC8A22; --amber-tint:#FBEDD4;
+    --sage:#5E9E81; --clay:#C2542F; --clay-tint:#F4DDD2;
+    --line:rgba(27,37,32,.10); --line-2:rgba(27,37,32,.06);
+    --shadow:0 12px 32px -12px rgba(22,40,32,.22);
+    --shadow-sm:0 4px 14px -6px rgba(22,40,32,.18);
+    --r:22px; --r-sm:14px;
+    --sans:'Hanken Grotesk',system-ui,sans-serif;
+    --serif:'Fraunces',Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:var(--sans);background:
+      radial-gradient(1200px 600px at 20% -5%, #2a6b59 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #2c4a40 0%, transparent 50%),
+      #1a2b25;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:28px 16px;color:var(--ink);
+  }
+  .stage{display:flex;flex-direction:column;align-items:center;gap:18px}
+  .brandbar{display:flex;align-items:center;gap:12px;color:#EAF3EE}
+  .brandbar .nm{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:.3px}
+  .brandbar .nm span{color:var(--amber)}
+  .brandbar small{font-size:12.5px;color:#A9C2B7;font-weight:500}
+
+  /* DEVICE FRAME */
+  .device{
+    width:393px;height:830px;background:var(--cream);border-radius:46px;
+    box-shadow:0 40px 80px -20px rgba(0,0,0,.55), 0 0 0 11px #0d1714, 0 0 0 13px #243a32;
+    position:relative;overflow:hidden;display:flex;flex-direction:column;
+  }
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:128px;height:30px;background:#0d1714;border-radius:0 0 18px 18px;z-index:60}
+  .statusbar{height:46px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:13px;font-weight:600;color:var(--ink);z-index:55}
+  .statusbar .r{display:flex;gap:6px;align-items:center;font-size:12px}
+
+  /* SCROLL AREA */
+  .viewport{flex:1;position:relative;overflow:hidden}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch}
+  .screen.active{display:flex;animation:fade .42s ease both}
+  .screen::-webkit-scrollbar{width:0}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .pad{padding:14px 18px 26px}
+  .pad-b{padding-bottom:96px}
+
+  /* TYPO */
+  h1{font-family:var(--serif);font-weight:600;font-size:27px;line-height:1.12;letter-spacing:-.4px}
+  h2{font-family:var(--serif);font-weight:600;font-size:20px;letter-spacing:-.2px}
+  .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--pine)}
+  .muted{color:var(--ink-soft)}
+  .faint{color:var(--ink-faint)}
+  .sm{font-size:13px}.xs{font-size:11.5px}
+
+  /* BUTTONS */
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;font-family:var(--sans);font-weight:600;font-size:15.5px;border-radius:999px;padding:15px 22px;transition:transform .14s, box-shadow .2s, background .2s;width:100%}
+  .btn:active{transform:scale(.975)}
+  .btn-amber{background:var(--amber);color:#3a2706;box-shadow:0 8px 20px -8px rgba(204,138,34,.7)}
+  .btn-pine{background:var(--pine);color:#fff;box-shadow:0 8px 20px -10px rgba(30,94,78,.7)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+  .btn-soft{background:var(--pine-tint);color:var(--pine-deep)}
+  .btn-sm{padding:10px 16px;font-size:13.5px;width:auto}
+
+  /* CARDS */
+  .card{background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm);border:1px solid var(--line-2)}
+  .card+.card{margin-top:13px}
+  .row{display:flex;align-items:center;gap:12px}
+  .between{display:flex;align-items:center;justify-content:space-between}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:600;background:var(--cream);border:1px solid var(--line);color:var(--ink);cursor:pointer;transition:.18s}
+  .chip.on{background:var(--pine);color:#fff;border-color:var(--pine)}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:11.5px;font-weight:700}
+  .pill.green{background:var(--pine-tint);color:var(--pine-deep)}
+  .pill.amber{background:var(--amber-tint);color:var(--amber-deep)}
+  .pill.clay{background:var(--clay-tint);color:var(--clay)}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .icn{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+  /* BOTTOM TABS */
+  .tabbar{position:absolute;left:0;right:0;bottom:0;height:78px;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:6px 6px 18px;z-index:40}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:10.5px;font-weight:600;font-family:var(--sans);flex:1;transition:.18s}
+  .tab svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .tab.on{color:var(--pine)}
+  .tab.on .tdot{opacity:1}
+  .tdot{width:4px;height:4px;border-radius:50%;background:var(--amber);opacity:0}
+
+  /* HEADER */
+  .apphead{position:sticky;top:0;z-index:30;background:linear-gradient(var(--cream) 72%,transparent);padding:8px 18px 10px;display:flex;align-items:center;justify-content:space-between}
+  .ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pine),var(--sage));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+  .iconbtn{width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+  .badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:var(--clay);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--cream)}
+
+  /* GAUGE */
+  .gauge{position:relative;width:128px;height:128px;flex-shrink:0}
+  .gauge svg{transform:rotate(-90deg)}
+  .gauge .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gauge .num{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1}
+  .gauge .lab{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--amber-deep);margin-top:2px}
+
+  /* PATHWAY STEPPER */
+  .ladder{position:relative;padding-left:8px}
+  .step{display:flex;gap:14px;padding-bottom:18px;position:relative}
+  .step:not(:last-child)::before{content:"";position:absolute;left:13px;top:30px;bottom:-4px;width:2px;background:var(--line)}
+  .step.done:not(:last-child)::before{background:var(--sage)}
+  .node{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--line);background:var(--surface);color:var(--ink-faint);z-index:2}
+  .step.done .node{background:var(--sage);border-color:var(--sage);color:#fff}
+  .step.now .node{background:var(--amber);border-color:var(--amber);color:#3a2706;box-shadow:0 0 0 5px var(--amber-tint)}
+
+  /* TIMELINE / LINE MAP */
+  .linemap{display:flex;align-items:center;gap:0;margin:6px 0 4px}
+  .lm-node{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .lm-node.done{background:var(--pine);border-color:var(--pine)}
+  .lm-node.now{background:var(--amber);border-color:var(--amber)}
+  .lm-bar{height:3px;flex:1;background:var(--line)}
+  .lm-bar.done{background:var(--pine)}
+
+  /* BARS (service center) */
+  .scbar{display:flex;align-items:center;gap:8px;margin-bottom:9px;font-size:12.5px}
+  .scbar .code{width:38px;font-weight:700;color:var(--ink-soft)}
+  .scbar .track{flex:1;height:22px;background:var(--cream);border-radius:7px;overflow:hidden}
+  .scbar .fill{height:100%;background:#cfe2d8;border-radius:7px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-weight:700;color:var(--pine-deep);font-size:11.5px}
+  .scbar.you .fill{background:var(--pine);color:#fff}
+
+  /* CHAT */
+  .bub{max-width:80%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.4;margin-bottom:10px}
+  .bub.ai{background:var(--surface);border:1px solid var(--line-2);border-bottom-left-radius:5px;align-self:flex-start}
+  .bub.me{background:var(--pine);color:#fff;border-bottom-right-radius:5px;align-self:flex-end;margin-left:auto}
+  .disc{background:var(--amber-tint);color:var(--amber-deep);font-size:11.5px;font-weight:600;padding:8px 12px;border-radius:10px;display:flex;gap:7px;align-items:center}
+
+  /* PROGRESS */
+  .prog{height:7px;background:var(--cream);border-radius:99px;overflow:hidden}
+  .prog>span{display:block;height:100%;background:var(--pine);border-radius:99px}
+
+  /* COUNTRY GRID */
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .country{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:14px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:.16s;font-weight:600;font-size:14px}
+  .country .fl{font-size:26px}
+  .country.on{border-color:var(--pine);background:var(--pine-tint)}
+
+  /* PLANS */
+  .plan{border:1.5px solid var(--line);border-radius:var(--r);padding:18px;background:var(--surface);position:relative}
+  .plan.feat{border-color:var(--amber);box-shadow:0 12px 30px -14px rgba(204,138,34,.5)}
+  .plan .tag{position:absolute;top:-11px;left:18px;background:var(--amber);color:#3a2706;font-size:10.5px;font-weight:700;padding:4px 11px;border-radius:99px;letter-spacing:.5px}
+  .plan .price{font-family:var(--serif);font-size:30px;font-weight:600}
+  .feat-li{display:flex;gap:9px;align-items:flex-start;font-size:13px;margin-top:9px;color:var(--ink-soft)}
+  .feat-li svg{width:16px;height:16px;stroke:var(--pine);flex-shrink:0;margin-top:2px}
+
+  /* OVERLAY MENU */
+  .demobtn{position:fixed;right:18px;bottom:18px;z-index:200;background:var(--amber);color:#3a2706;border:none;border-radius:99px;padding:12px 18px;font-weight:700;font-family:var(--sans);cursor:pointer;box-shadow:0 10px 24px -8px rgba(0,0,0,.5);font-size:13.5px}
+  .sheet{position:fixed;inset:0;z-index:210;background:rgba(13,23,20,.55);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center}
+  .sheet.open{display:flex;animation:fade .25s ease}
+  .sheet-inner{background:var(--cream-2);width:100%;max-width:460px;border-radius:26px 26px 0 0;padding:22px 20px 30px;max-height:80vh;overflow-y:auto}
+  .nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  .nav-item{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:13px;font-weight:600;font-size:13px;cursor:pointer;display:flex;flex-direction:column;gap:3px;text-align:left}
+  .nav-item small{font-weight:500;color:var(--ink-faint);font-size:11px}
+
+  .locked{position:relative}
+  .locked .veil{position:absolute;inset:0;background:rgba(251,247,239,.78);backdrop-filter:blur(2px);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:18px}
+
+  .splash{background:
+      radial-gradient(700px 360px at 50% -8%, #2a6b59 0%, transparent 60%),
+      linear-gradient(180deg,#1e5e4e,#164a3d);
+    color:#EAF3EE;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:60px 26px 34px}
+  .logomark{width:74px;height:74px}
+  .lang-pills{display:flex;gap:8px;justify-content:center}
+  .lang-pill{padding:8px 16px;border-radius:99px;border:1.5px solid rgba(255,255,255,.28);color:#EAF3EE;font-weight:600;font-size:13px;cursor:pointer;background:transparent;font-family:var(--sans)}
+  .lang-pill.on{background:var(--amber);color:#3a2706;border-color:var(--amber)}
+  .seg{display:flex;background:var(--cream);border-radius:99px;padding:4px;gap:4px}
+  .seg button{flex:1;border:none;background:transparent;padding:9px;border-radius:99px;font-weight:600;font-size:13px;cursor:pointer;font-family:var(--sans);color:var(--ink-soft)}
+  .seg button.on{background:var(--surface);color:var(--pine);box-shadow:var(--shadow-sm)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="brandbar">
+    <span class="nm">Visto Em Dia <span>✓</span></span>
+    <small>Protótipo MVP · só interface (dados fictícios)</small>
+  </div>
+
+  <div class="device">
+    <div class="notch"></div>
+    <div class="statusbar">
+      <span>10:42</span>
+      <span class="r">●●● &nbsp;📶&nbsp; 🔋</span>
+    </div>
+
+    <div class="viewport" id="vp">
+
+      <!-- ============ SPLASH ============ -->
+      <section class="screen active" id="s-splash">
+        <div class="splash">
+          <div></div>
+          <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px">
+            <svg class="logomark" viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="46" stroke="#E8A33D" stroke-width="2.5" opacity=".5"/>
+              <circle cx="50" cy="50" r="37" stroke="#E8A33D" stroke-width="1.5" stroke-dasharray="3 4.5" opacity=".55"/>
+              <path d="M33 51 L45 63 L69 37" stroke="#E8A33D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+              <div style="font-family:var(--serif);font-size:40px;font-weight:600;line-height:1.02">Visto<br>Em Dia</div>
+              <p style="color:#A9C2B7;font-size:15px;margin-top:10px;max-width:250px">Seu status migratório sempre em dia. Sem medo, com clareza.</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="lang-pills">
+              <button class="lang-pill on" onclick="setLang('pt',this)">Português</button>
+              <button class="lang-pill" onclick="setLang('es',this)">Español</button>
+              <button class="lang-pill" onclick="setLang('en',this)">English</button>
+            </div>
+            <button class="btn btn-amber" onclick="go('s-country')" data-i18n="cta_create">Criar minha conta</button>
+            <button class="btn btn-ghost" style="color:#EAF3EE;border-color:rgba(255,255,255,.3)" onclick="go('s-painel');showTabs()" data-i18n="cta_enter">Já tenho conta</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ NATIONALITY ============ -->
+      <section class="screen" id="s-country">
+        <div class="pad">
+          <div class="prog" style="margin:6px 0 18px"><span style="width:25%"></span></div>
+          <span class="eyebrow">Passo 1 de 4</span>
+          <h1 style="margin:8px 0 4px" data-i18n="nat_q">De onde você é?</h1>
+          <p class="muted sm" data-i18n="nat_sub">Personalizamos seu conteúdo e prazos pelo seu país de origem.</p>
+          <div class="chip" style="width:100%;justify-content:flex-start;margin:16px 0;color:var(--ink-faint)">🔍 <span data-i18n="nat_search">Buscar país…</span></div>
+          <div class="cgrid">
+            <div class="country on" onclick="pick(this)"><span class="fl">🇧🇷</span> Brasil</div>
+            <div class="country" onclick="pick(this)"><span class="fl">🇲🇽</span> México</div>
+            <div class="country" onclick="pick(this)"><span class="fl">🇻🇪</span> Venezuela</div>
+            <div class="country" onclick="pick(this)"><span class="fl">🇨🇴</span> Colômbia</div>
+            <div class="country" onclick="pick(this)"><span class="fl">🇦🇷</span> Argentina</div>
+            <div class="country" onclick="pick(this)"><span class="fl">🇵🇪</span> Peru</div>
+          </div>
+          <button class="btn btn-pine" style="margin-top:20px" onclick="go('s-intake')" data-i18n="continue">Continuar</button>
+        </div>
+      </section>
+
+      <!-- ============ INTAKE ============ -->
+      <section class="screen" id="s-intake">
+        <div class="pad">
+          <div class="prog" style="margin:6px 0 18px"><span style="width:60%"></span></div>
+          <span class="eyebrow">Passo 2 de 4</span>
+          <h1 style="margin:8px 0 4px" data-i18n="in_q">Conte sobre seu caso</h1>
+          <p class="muted sm" data-i18n="in_sub">Leva 1 minuto. Você pode editar depois.</p>
+
+          <div class="card" style="margin-top:18px">
+            <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px" data-i18n="in_status">Status atual</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <span class="chip on">B1/B2</span><span class="chip">F1</span>
+              <span class="chip">H1B</span><span class="chip">F2</span><span class="chip">Outro</span>
+            </div>
+          </div>
+          <div class="card">
+            <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px" data-i18n="in_type">Tipo de caso</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <span class="chip on">I-539</span><span class="chip">I-485</span>
+              <span class="chip">I-765</span><span class="chip">I-130</span>
+            </div>
+          </div>
+          <div class="grid2" style="margin-top:13px">
+            <div class="card" style="margin:0">
+              <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px" data-i18n="in_date">Data de filing</p>
+              <p style="font-weight:600;margin-top:8px">30/06/2025</p>
+            </div>
+            <div class="card" style="margin:0">
+              <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px">Receipt #</p>
+              <p style="font-weight:600;margin-top:8px;font-size:13px">LIN2590148230</p>
+            </div>
+          </div>
+          <button class="btn btn-pine" style="margin-top:20px" onclick="go('s-snapshot')" data-i18n="continue">Continuar</button>
+        </div>
+      </section>
+
+      <!-- ============ SNAPSHOT TEASER ============ -->
+      <section class="screen" id="s-snapshot">
+        <div class="pad" style="text-align:center">
+          <div class="prog" style="margin:6px 0 22px"><span style="width:90%"></span></div>
+          <h1 data-i18n="snap_h">Aqui está seu primeiro raio-x</h1>
+          <p class="muted sm" style="margin-top:6px" data-i18n="snap_sub">Felipe, montamos um resumo da sua situação.</p>
+
+          <div class="card" style="margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div class="gauge" id="g2"></div>
+            <p class="pill amber" data-i18n="snap_status">Estadia autorizada · Atenção</p>
+          </div>
+
+          <div class="card" style="text-align:left;border-left:4px solid var(--amber)">
+            <div class="row"><span style="font-size:18px">⏳</span><div><p style="font-weight:600;font-size:14px" data-i18n="snap_a1">Seu RFE vence em 12 dias</p><p class="xs muted" data-i18n="snap_a1s">Resposta enviada — acompanhe a decisão.</p></div></div>
+          </div>
+          <div class="card" style="text-align:left;border-left:4px solid var(--clay)">
+            <div class="row"><span style="font-size:18px">⚠️</span><div><p style="font-weight:600;font-size:14px" data-i18n="snap_a2">Trabalho via LLC pode ser um risco</p><p class="xs muted" data-i18n="snap_a2s">Vale conversar com um advogado.</p></div></div>
+          </div>
+
+          <button class="btn btn-amber" style="margin-top:20px" onclick="go('s-painel');showTabs()" data-i18n="snap_cta">Desbloquear minha trajetória</button>
+        </div>
+      </section>
+
+      <!-- ============ PAINEL ============ -->
+      <section class="screen" id="s-painel">
+        <div class="apphead">
+          <div class="row">
+            <div class="ava">F</div>
+            <div><p class="xs faint" data-i18n="hi">Olá,</p><p style="font-weight:700;font-size:15px;margin-top:-2px">Felipe</p></div>
+          </div>
+          <div class="row" style="gap:8px">
+            <button class="iconbtn" onclick="go('s-notif')"><span>🔔</span><span class="badge">3</span></button>
+            <button class="iconbtn" onclick="go('s-perfil')"><span>⚙️</span></button>
+          </div>
+        </div>
+        <div class="pad pad-b">
+          <!-- status -->
+          <div class="card" style="background:linear-gradient(135deg,var(--pine),var(--pine-deep));color:#fff;border:none">
+            <div class="between">
+              <span class="pill" style="background:rgba(255,255,255,.18);color:#EAF3EE"><span class="dot" style="background:var(--amber)"></span> <span data-i18n="p_badge">Atenção</span></span>
+              <span class="xs" style="color:#A9C2B7">I-539 · LIN…8230</span>
+            </div>
+            <h2 style="color:#fff;margin:12px 0 4px" data-i18n="p_status">Você está em estadia autorizada</h2>
+            <p class="sm" style="color:#C5DAD0" data-i18n="p_status_s">Enquanto seu I-539 está pendente, você não acumula presença ilegal.</p>
+          </div>
+
+          <!-- score + counters -->
+          <div class="card" style="display:flex;gap:16px;align-items:center">
+            <div class="gauge" id="g1"></div>
+            <div style="flex:1">
+              <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px" data-i18n="p_score">Score de conformidade</p>
+              <p class="sm muted" style="margin-top:6px" data-i18n="p_score_s">Bom, mas há pontos a resolver antes que virem risco.</p>
+            </div>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="p_deadlines">Vencimentos</p>
+          <div class="grid2">
+            <div class="card" style="margin:0;border-top:3px solid var(--clay)">
+              <p class="xs faint">RFE</p><p style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--clay)">12d</p><p class="xs muted" data-i18n="p_rfe">Prazo de resposta</p>
+            </div>
+            <div class="card" style="margin:0;border-top:3px solid var(--amber)">
+              <p class="xs faint">I-94</p><p style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--amber-deep)">—</p><p class="xs muted" data-i18n="p_i94">Coberto (pendente)</p>
+            </div>
+            <div class="card" style="margin:0;border-top:3px solid var(--sage)">
+              <p class="xs faint">Passaporte</p><p style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--pine)">418d</p><p class="xs muted" data-i18n="p_pass">Validade</p>
+            </div>
+            <div class="card" style="margin:0;border-top:3px solid var(--ink-faint)">
+              <p class="xs faint">EAD</p><p style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--ink-faint)">N/A</p><p class="xs muted" data-i18n="p_ead">Não solicitado</p>
+            </div>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="p_alerts">Alertas</p>
+          <div class="card" style="border-left:4px solid var(--clay);margin:0">
+            <div class="row"><span style="font-size:17px">⏳</span><div style="flex:1"><p class="sm" style="font-weight:600" data-i18n="p_al1">Responda/acompanhe o RFE</p><p class="xs muted">Vence em 12 dias</p></div><span class="faint">›</span></div>
+          </div>
+          <div class="card" style="border-left:4px solid var(--amber)">
+            <div class="row"><span style="font-size:17px">🏠</span><div style="flex:1"><p class="sm" style="font-weight:600" data-i18n="p_al2">Atualize seu endereço no USCIS</p><p class="xs muted">AR-11 · evita perder cartas</p></div><span class="faint">›</span></div>
+          </div>
+
+          <!-- next step -->
+          <div class="card" style="margin-top:14px;background:var(--amber-tint);border:1px solid var(--amber)">
+            <span class="eyebrow" style="color:var(--amber-deep)" data-i18n="p_next">Próximo passo sugerido</span>
+            <p style="font-weight:600;margin:8px 0 4px" data-i18n="p_next_t">Organizar evidências para o F1</p>
+            <p class="xs muted" data-i18n="p_next_s">Informativo — não é aconselhamento jurídico.</p>
+          </div>
+
+          <div class="row" style="gap:10px;margin-top:16px">
+            <button class="btn btn-pine" onclick="switchTab('s-traj','t-traj')" data-i18n="p_btn1">Ver trajetória</button>
+            <button class="btn btn-soft" onclick="switchTab('s-docs','t-docs')" data-i18n="p_btn2">Documentos</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TRAJETÓRIA ============ -->
+      <section class="screen" id="s-traj">
+        <div class="apphead"><h2 data-i18n="t_title">Sua trajetória</h2><button class="iconbtn" onclick="go('s-perfil')"><span>⚙️</span></button></div>
+        <div class="pad pad-b">
+          <div class="disc" style="margin-bottom:14px"><span>ℹ️</span><span data-i18n="t_disc">Isto é informação, não aconselhamento jurídico.</span></div>
+
+          <div class="card">
+            <div class="ladder">
+              <div class="step done"><div class="node">✓</div><div><p style="font-weight:600;font-size:14px">B1/B2</p><p class="xs muted" data-i18n="t_s1">Turismo — seu ponto de partida</p></div></div>
+              <div class="step now"><div class="node">★</div><div><p style="font-weight:600;font-size:14px">F1 <span class="pill amber" style="margin-left:6px" data-i18n="t_here">você está aqui</span></p><p class="xs muted" data-i18n="t_s2">Mudança de status via I-539</p></div></div>
+              <div class="step"><div class="node">3</div><div><p style="font-weight:600;font-size:14px">CPT / OPT</p><p class="xs muted" data-i18n="t_s3">Trabalho durante/após o curso</p></div></div>
+              <div class="step"><div class="node">4</div><div><p style="font-weight:600;font-size:14px">H1B</p><p class="xs muted" data-i18n="t_s4">Visto de trabalho patrocinado</p></div></div>
+              <div class="step"><div class="node">5</div><div><p style="font-weight:600;font-size:14px">Green Card</p><p class="xs muted" data-i18n="t_s5">Residência permanente</p></div></div>
+              <div class="step"><div class="node">6</div><div><p style="font-weight:600;font-size:14px" data-i18n="t_s6">Cidadania</p></div></div>
+            </div>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="t_compare">Comparar opções</p>
+          <div class="card">
+            <div class="between"><p style="font-weight:600">F1 — Acadêmico</p><span class="pill green" data-i18n="t_rec">mais flexível</span></div>
+            <p class="xs muted" style="margin-top:6px" data-i18n="t_f1">OPT + STEM, melhor caminho de longo prazo. Complexidade média · 6-12 meses típicos.</p>
+            <p class="xs faint" style="margin-top:8px" data-i18n="t_disc2">Informação geral — confirme com um advogado.</p>
+          </div>
+          <div class="card">
+            <div class="between"><p style="font-weight:600">M1 — Vocacional</p><span class="pill amber">limitado</span></div>
+            <p class="xs muted" style="margin-top:6px" data-i18n="t_m1">Treino técnico, sem CPT, transição fraca para H1B.</p>
+          </div>
+
+          <div class="locked card" style="margin-top:14px;min-height:120px">
+            <p style="font-weight:600">O-1 — Habilidade extraordinária</p>
+            <div class="veil">
+              <span style="font-size:22px">🔒</span>
+              <p class="sm" style="font-weight:600" data-i18n="t_lock">Análise completa no plano Core</p>
+              <button class="btn btn-amber btn-sm" onclick="go('s-paywall')" data-i18n="unlock">Desbloquear</button>
+            </div>
+          </div>
+
+          <button class="btn btn-pine" style="margin-top:16px" onclick="go('s-concierge')" data-i18n="t_cta">Falar com um advogado sobre isto</button>
+        </div>
+      </section>
+
+      <!-- ============ DOCUMENTOS ============ -->
+      <section class="screen" id="s-docs">
+        <div class="apphead"><h2 data-i18n="d_title">Documentos</h2><button class="iconbtn"><span>＋</span></button></div>
+        <div class="pad pad-b">
+          <div class="disc" style="margin-bottom:14px"><span>🛡️</span><span data-i18n="d_disc">Geramos o rascunho — um advogado revisa antes de enviar.</span></div>
+
+          <p class="eyebrow" style="margin-bottom:10px" data-i18n="d_check">Checklist do I-539</p>
+          <div class="card">
+            <label class="row" style="padding:8px 0;cursor:pointer"><span class="icn" style="background:var(--pine-tint);color:var(--pine)">✓</span><span class="sm" style="flex:1;font-weight:500" data-i18n="d_c1">Cópia do passaporte</span><span class="pill green" data-i18n="d_done">enviado</span></label>
+            <div style="height:1px;background:var(--line-2)"></div>
+            <label class="row" style="padding:8px 0;cursor:pointer"><span class="icn" style="background:var(--pine-tint);color:var(--pine)">✓</span><span class="sm" style="flex:1;font-weight:500" data-i18n="d_c2">I-797C (recibo)</span><span class="pill green" data-i18n="d_done2">enviado</span></label>
+            <div style="height:1px;background:var(--line-2)"></div>
+            <label class="row" style="padding:8px 0;cursor:pointer"><span class="icn" style="background:var(--cream);color:var(--ink-faint)">○</span><span class="sm" style="flex:1;font-weight:500" data-i18n="d_c3">Carta da escola / I-20</span><span class="pill amber" data-i18n="d_pend">pendente</span></label>
+            <div style="height:1px;background:var(--line-2)"></div>
+            <label class="row" style="padding:8px 0;cursor:pointer"><span class="icn" style="background:var(--cream);color:var(--ink-faint)">○</span><span class="sm" style="flex:1;font-weight:500" data-i18n="d_c4">Comprovante financeiro</span><span class="pill amber" data-i18n="d_pend2">pendente</span></label>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="d_vault">Cofre de documentos</p>
+          <div class="grid2">
+            <div class="card" style="margin:0;text-align:center;padding:16px"><div style="font-size:28px">📄</div><p class="xs" style="font-weight:600;margin-top:6px">Passaporte.pdf</p></div>
+            <div class="card" style="margin:0;text-align:center;padding:16px"><div style="font-size:28px">📄</div><p class="xs" style="font-weight:600;margin-top:6px">I-797C.pdf</p></div>
+            <div class="card" style="margin:0;text-align:center;padding:16px;border:1.5px dashed var(--line);box-shadow:none;background:transparent"><div style="font-size:28px">⬆️</div><p class="xs muted" style="margin-top:6px" data-i18n="d_up">Enviar</p></div>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="d_forms">Preparação de formulários</p>
+          <div class="card">
+            <div class="between"><p style="font-weight:600">I-539</p><span class="xs faint">82%</span></div>
+            <div class="prog" style="margin:8px 0 10px"><span style="width:82%"></span></div>
+            <button class="btn btn-soft btn-sm" style="width:100%" onclick="go('s-form')" data-i18n="d_cont">Continuar preenchimento</button>
+          </div>
+          <div class="card">
+            <div class="between"><p style="font-weight:600">I-765 (EAD)</p><span class="xs faint">0%</span></div>
+            <div class="prog" style="margin:8px 0 10px"><span style="width:4%"></span></div>
+            <button class="btn btn-ghost btn-sm" style="width:100%" data-i18n="d_start">Começar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ FORM (mock) ============ -->
+      <section class="screen" id="s-form">
+        <div class="apphead"><button class="iconbtn" onclick="switchTab('s-docs','t-docs')"><span>‹</span></button><h2>I-539</h2><span class="xs faint">82%</span></div>
+        <div class="pad pad-b">
+          <div class="prog" style="margin-bottom:18px"><span style="width:82%"></span></div>
+          <div class="card">
+            <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px" data-i18n="f_q1">Nome completo</p>
+            <div style="border:1.5px solid var(--line);border-radius:12px;padding:13px;margin-top:8px;font-weight:600">Felipe ___________</div>
+          </div>
+          <div class="card">
+            <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px" data-i18n="f_q2">Data de entrada nos EUA</p>
+            <div style="border:1.5px solid var(--line);border-radius:12px;padding:13px;margin-top:8px;color:var(--ink-faint)">DD / MM / AAAA</div>
+          </div>
+          <div class="card">
+            <p class="xs faint" style="font-weight:700;text-transform:uppercase;letter-spacing:1px" data-i18n="f_q3">Status pretendido</p>
+            <div style="display:flex;gap:8px;margin-top:10px"><span class="chip on">F1</span><span class="chip">M1</span><span class="chip">J1</span></div>
+          </div>
+          <div class="disc" style="margin-top:12px"><span>🛡️</span><span data-i18n="f_disc">Seu rascunho será revisado por um advogado parceiro.</span></div>
+          <button class="btn btn-pine" style="margin-top:16px" onclick="switchTab('s-docs','t-docs')" data-i18n="f_save">Salvar e voltar</button>
+        </div>
+      </section>
+
+      <!-- ============ MEU CASO ============ -->
+      <section class="screen" id="s-caso">
+        <div class="apphead"><h2 data-i18n="c_title">Meu caso</h2><button class="iconbtn"><span>⋯</span></button></div>
+        <div class="pad pad-b">
+          <div class="card">
+            <div class="between"><p style="font-weight:700">I-539 · LIN2590148230</p><span class="pill amber" data-i18n="c_st">RFE respondido</span></div>
+            <div class="linemap">
+              <div class="lm-node done">✓</div><div class="lm-bar done"></div>
+              <div class="lm-node done">✓</div><div class="lm-bar done"></div>
+              <div class="lm-node now"></div><div class="lm-bar"></div>
+              <div class="lm-node"></div><div class="lm-bar"></div>
+              <div class="lm-node"></div>
+            </div>
+            <div class="between xs faint" style="margin-top:4px"><span data-i18n="c_st1">Recebido</span><span data-i18n="c_st2">RFE</span><span data-i18n="c_st3">Resposta</span><span data-i18n="c_st4">Decisão</span></div>
+          </div>
+
+          <div class="card" style="background:var(--pine-tint);border:none">
+            <p class="sm" style="font-weight:600;color:var(--pine-deep)" data-i18n="c_est">⏱ 80% dos casos concluídos em 6 meses</p>
+            <p class="xs muted" style="margin-top:4px" data-i18n="c_est_s">Você: 323 dias desde o filing · última atualização há 41 dias</p>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="c_sc">Tempo médio por service center</p>
+          <div class="card">
+            <div class="scbar"><span class="code">MSC</span><div class="track"><div class="fill" style="width:18%">18</div></div></div>
+            <div class="scbar"><span class="code">EAC</span><div class="track"><div class="fill" style="width:50%">85</div></div></div>
+            <div class="scbar"><span class="code">WAC</span><div class="track"><div class="fill" style="width:54%">92</div></div></div>
+            <div class="scbar you"><span class="code">LIN</span><div class="track"><div class="fill" style="width:73%">124 · você</div></div></div>
+            <div class="scbar"><span class="code">AAO</span><div class="track"><div class="fill" style="width:100%">171</div></div></div>
+            <p class="xs faint" style="text-align:center;margin-top:4px" data-i18n="c_avg">Média geral: 87 dias</p>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="c_hist">Histórico de mensagens</p>
+          <div class="card">
+            <div class="row" style="align-items:flex-start"><span class="dot" style="background:var(--pine);margin-top:6px"></span><div style="flex:1"><p class="sm" style="font-weight:600" data-i18n="c_m1">Resposta ao RFE recebida</p><p class="xs faint">07 abr 2026</p></div><span class="faint">⌄</span></div>
+            <div style="height:1px;background:var(--line-2);margin:10px 0"></div>
+            <div class="row" style="align-items:flex-start"><span class="dot" style="background:var(--line);margin-top:6px"></span><div style="flex:1"><p class="sm" style="font-weight:600" data-i18n="c_m2">Pedido de evidência (RFE) enviado</p><p class="xs faint">25 fev 2026</p></div><span class="faint">⌄</span></div>
+          </div>
+          <button class="btn btn-ghost" style="margin-top:14px" data-i18n="c_check">Verificar no site do USCIS ↗</button>
+        </div>
+      </section>
+
+      <!-- ============ ASSISTENTE ============ -->
+      <section class="screen" id="s-ai">
+        <div class="apphead"><div class="row"><div class="icn" style="background:var(--pine);color:#fff;width:34px;height:34px">✓</div><h2 data-i18n="a_title">Assistente</h2></div><span class="pill green">12/300</span></div>
+        <div class="pad pad-b" style="display:flex;flex-direction:column">
+          <div class="disc" style="margin-bottom:14px"><span>ℹ️</span><span data-i18n="a_disc">Informação, não aconselhamento jurídico. Para decisões, fale com um advogado.</span></div>
+          <div style="display:flex;flex-direction:column">
+            <div class="bub ai" data-i18n="a_b1">Oi, Felipe! Posso explicar prazos, formulários e termos da imigração. O que você quer entender?</div>
+            <div class="bub me" data-i18n="a_b2">O que acontece se meu I-539 for negado?</div>
+            <div class="bub ai" data-i18n="a_b3">Em geral, se o I-539 é negado e seu I-94 já expirou, você pode passar a acumular presença ilegal. Cada caso é diferente — quer que eu te conecte a um advogado parceiro? <br><span style="color:var(--amber-deep);font-weight:600">⚠️ Informação geral.</span></div>
+          </div>
+          <p class="eyebrow" style="margin:8px 0 10px" data-i18n="a_sug">Perguntas sugeridas</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="chip" data-i18n="a_q1">Posso trabalhar com meu LLC?</span>
+            <span class="chip" data-i18n="a_q2">O que é CPT?</span>
+            <span class="chip" data-i18n="a_q3">Quanto tempo leva o F1?</span>
+          </div>
+          <div class="card" style="margin-top:16px;display:flex;gap:10px;align-items:center;padding:10px 14px">
+            <span class="sm faint" style="flex:1" data-i18n="a_input">Escreva sua pergunta…</span>
+            <button class="iconbtn" style="background:var(--pine);border:none;color:#fff">➤</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PAYWALL ============ -->
+      <section class="screen" id="s-paywall">
+        <div class="apphead"><button class="iconbtn" onclick="back()"><span>‹</span></button><h2 data-i18n="pw_title">Planos</h2><span></span></div>
+        <div class="pad pad-b">
+          <p class="muted sm" style="text-align:center;margin-bottom:14px" data-i18n="pw_sub">Cancele quando quiser. Sem anúncios, sempre.</p>
+          <div class="seg" style="margin-bottom:18px">
+            <button class="on" data-i18n="pw_m">Mensal</button><button data-i18n="pw_q">Trimestral · -20%</button>
+          </div>
+
+          <div class="plan">
+            <p style="font-weight:700" data-i18n="pw_base">Base</p>
+            <p class="price">US$ 9<span class="sm faint" style="font-family:var(--sans)">/mês</span></p>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_b1">Painel + rastreador de caso</span></div>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_b2">Cofre de documentos + lembretes</span></div>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_b3">Conteúdo em PT/ES/EN</span></div>
+            <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:14px" data-i18n="pw_choose">Escolher</button>
+          </div>
+
+          <div class="plan feat" style="margin-top:18px">
+            <span class="tag" data-i18n="pw_pop">MAIS ESCOLHIDO</span>
+            <p style="font-weight:700">Core</p>
+            <p class="price">US$ 29<span class="sm faint" style="font-family:var(--sans)">/mês</span></p>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_c1">Tudo do Base +</span></div>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_c2">Recomendador de trajetória (IA)</span></div>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_c3">Preparação de I-539, I-765, I-20</span></div>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_c4">1 check-in com advogado/ano</span></div>
+            <button class="btn btn-amber btn-sm" style="width:100%;margin-top:14px" data-i18n="pw_choose2">Assinar Core</button>
+          </div>
+
+          <div class="plan" style="margin-top:18px">
+            <p style="font-weight:700">Concierge</p>
+            <p class="price">US$ 1.499<span class="sm faint" style="font-family:var(--sans)" data-i18n="pw_case">/caso</span></p>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_co1">Advogado de registro (attorney of record)</span></div>
+            <div class="feat-li"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="pw_co2">Pacote completo + rede de advogados</span></div>
+            <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:14px" onclick="go('s-concierge')" data-i18n="pw_talk">Conhecer</button>
+          </div>
+
+          <!-- social proof -->
+          <div class="card" style="margin-top:18px;text-align:center">
+            <p style="font-weight:700;font-family:var(--serif);font-size:18px">★★★★★</p>
+            <p class="xs faint" style="margin:2px 0 10px" data-i18n="pw_proof">+11.000 imigrantes mantêm seus casos em dia com a gente</p>
+            <p class="sm muted" style="font-style:italic" data-i18n="pw_rev">"Me avisou do RFE antes da carta do USCIS chegar." — Ana, 🇻🇪</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CONCIERGE ============ -->
+      <section class="screen" id="s-concierge">
+        <div class="apphead"><button class="iconbtn" onclick="back()"><span>‹</span></button><h2 data-i18n="cg_title">Advogados</h2><span></span></div>
+        <div class="pad pad-b">
+          <div class="card" style="background:var(--pine-tint);border:none">
+            <p style="font-weight:600;color:var(--pine-deep)" data-i18n="cg_h">Como funciona o "advogado de registro"</p>
+            <p class="xs muted" style="margin-top:6px" data-i18n="cg_s">O Visto Em Dia prepara seu caso. O advogado parceiro assume legalmente (G-28) e representa você. A decisão jurídica é sempre dele.</p>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="cg_match">Parceiros recomendados</p>
+          <div class="card">
+            <div class="row"><div class="ava" style="background:linear-gradient(135deg,#8a5a2b,#c2542f)">MR</div><div style="flex:1"><p style="font-weight:600">Maria Rocha, Esq.</p><p class="xs muted">🇧🇷 PT · EN · 14 anos · I-539/F1</p></div><span class="pill green">★ 4.9</span></div>
+            <button class="btn btn-pine btn-sm" style="width:100%;margin-top:12px" data-i18n="cg_book">Agendar consulta</button>
+          </div>
+          <div class="card">
+            <div class="row"><div class="ava" style="background:linear-gradient(135deg,#1e5e4e,#5e9e81)">JL</div><div style="flex:1"><p style="font-weight:600">Jorge Luna, Esq.</p><p class="xs muted">🇲🇽 ES · EN · 9 anos · mudança de status</p></div><span class="pill green">★ 4.8</span></div>
+            <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px" data-i18n="cg_book2">Agendar consulta</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PERFIL ============ -->
+      <section class="screen" id="s-perfil">
+        <div class="apphead"><button class="iconbtn" onclick="switchTab('s-painel','t-painel')"><span>‹</span></button><h2 data-i18n="pf_title">Perfil</h2><span></span></div>
+        <div class="pad pad-b">
+          <div class="card" style="text-align:center">
+            <div class="ava" style="width:64px;height:64px;font-size:24px;margin:0 auto 10px">F</div>
+            <p style="font-weight:700;font-size:17px">Felipe</p>
+            <p class="xs muted">🇧🇷 Brasil · Broward, FL · B1/B2</p>
+            <span class="pill amber" style="margin-top:8px" data-i18n="pf_plan">Plano Base</span>
+          </div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="pf_lang">Idioma</p>
+          <div class="card"><div class="seg"><button class="on" onclick="setLang('pt',null,this)">PT</button><button onclick="setLang('es',null,this)">ES</button><button onclick="setLang('en',null,this)">EN</button></div></div>
+
+          <p class="eyebrow" style="margin:18px 0 10px" data-i18n="pf_acc">Conta</p>
+          <div class="card" style="padding:4px 0">
+            <div class="row" style="padding:13px 16px"><span>🔔</span><span class="sm" style="flex:1;font-weight:500" data-i18n="pf_notif">Notificações</span><span class="faint">›</span></div>
+            <div style="height:1px;background:var(--line-2)"></div>
+            <div class="row" style="padding:13px 16px" onclick="go('s-paywall')"><span>💳</span><span class="sm" style="flex:1;font-weight:500" data-i18n="pf_sub">Gerenciar assinatura</span><span class="faint">›</span></div>
+            <div style="height:1px;background:var(--line-2)"></div>
+            <div class="row" style="padding:13px 16px"><span>🛡️</span><span class="sm" style="flex:1;font-weight:500" data-i18n="pf_priv">Privacidade dos dados</span><span class="faint">›</span></div>
+            <div style="height:1px;background:var(--line-2)"></div>
+            <div class="row" style="padding:13px 16px"><span>↩️</span><span class="sm" style="flex:1;font-weight:500;color:var(--clay)" onclick="go('s-splash');hideTabs()" data-i18n="pf_out">Sair</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ NOTIFICAÇÕES ============ -->
+      <section class="screen" id="s-notif">
+        <div class="apphead"><button class="iconbtn" onclick="switchTab('s-painel','t-painel')"><span>‹</span></button><h2 data-i18n="n_title">Notificações</h2><span></span></div>
+        <div class="pad pad-b">
+          <div class="card" style="border-left:4px solid var(--clay)"><div class="row"><span style="font-size:17px">⏳</span><div style="flex:1"><p class="sm" style="font-weight:600" data-i18n="n1">RFE vence em 12 dias</p><p class="xs faint">há 2 horas</p></div></div></div>
+          <div class="card" style="border-left:4px solid var(--pine)"><div class="row"><span style="font-size:17px">✅</span><div style="flex:1"><p class="sm" style="font-weight:600" data-i18n="n2">USCIS recebeu sua resposta ao RFE</p><p class="xs faint">07 abr</p></div></div></div>
+          <div class="card" style="border-left:4px solid var(--amber)"><div class="row"><span style="font-size:17px">📰</span><div style="flex:1"><p class="sm" style="font-weight:600" data-i18n="n3">Novidade: EAD agora vale 18 meses</p><p class="xs faint">12 mai</p></div></div></div>
+        </div>
+      </section>
+
+    </div><!-- /viewport -->
+
+    <!-- BOTTOM TABS -->
+    <nav class="tabbar" id="tabbar" style="display:none">
+      <button class="tab on" id="t-painel" onclick="switchTab('s-painel',this)">
+        <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>
+        <span data-i18n="nav1">Painel</span><span class="tdot"></span>
+      </button>
+      <button class="tab" id="t-traj" onclick="switchTab('s-traj',this)">
+        <svg viewBox="0 0 24 24"><path d="M6 19V5m0 0l-3 3m3-3l3 3m6 11V9m0 10l3-3m-3 3l-3-3"/></svg>
+        <span data-i18n="nav2">Trajetória</span><span class="tdot"></span>
+      </button>
+      <button class="tab" id="t-docs" onclick="switchTab('s-docs',this)">
+        <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5"/></svg>
+        <span data-i18n="nav3">Docs</span><span class="tdot"></span>
+      </button>
+      <button class="tab" id="t-caso" onclick="switchTab('s-caso',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span data-i18n="nav4">Meu Caso</span><span class="tdot"></span>
+      </button>
+      <button class="tab" id="t-ai" onclick="switchTab('s-ai',this)">
+        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 01-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1121 11.5z"/></svg>
+        <span data-i18n="nav5">Assistente</span><span class="tdot"></span>
+      </button>
+    </nav>
+  </div><!-- /device -->
+
+  <p style="color:#7e988c;font-size:12px;max-width:393px;text-align:center">Toque em <b style="color:#cfe2d8">Telas</b> (canto inferior direito) para navegar livremente entre todas as telas do protótipo.</p>
+</div>
+
+<!-- DEMO NAV -->
+<button class="demobtn" onclick="toggleSheet()">☰ Telas</button>
+<div class="sheet" id="sheet" onclick="if(event.target===this)toggleSheet()">
+  <div class="sheet-inner">
+    <div class="between"><h2 style="font-size:18px">Navegar o protótipo</h2><button class="iconbtn" onclick="toggleSheet()">✕</button></div>
+    <p class="xs faint" style="margin-top:4px">Onboarding</p>
+    <div class="nav-grid">
+      <button class="nav-item" onclick="jump('s-splash',false)">Splash <small>Boas-vindas + idioma</small></button>
+      <button class="nav-item" onclick="jump('s-country',false)">Nacionalidade <small>Passo 1</small></button>
+      <button class="nav-item" onclick="jump('s-intake',false)">Intake do caso <small>Passo 2</small></button>
+      <button class="nav-item" onclick="jump('s-snapshot',false)">Raio-x inicial <small>Passo 4</small></button>
+    </div>
+    <p class="xs faint" style="margin-top:14px">App (abas)</p>
+    <div class="nav-grid">
+      <button class="nav-item" onclick="jump('s-painel',true,'t-painel')">Painel <small>Dashboard</small></button>
+      <button class="nav-item" onclick="jump('s-traj',true,'t-traj')">Trajetória <small>Pathway</small></button>
+      <button class="nav-item" onclick="jump('s-docs',true,'t-docs')">Documentos <small>Forms + cofre</small></button>
+      <button class="nav-item" onclick="jump('s-caso',true,'t-caso')">Meu Caso <small>Tracker</small></button>
+      <button class="nav-item" onclick="jump('s-ai',true,'t-ai')">Assistente <small>Chat IA</small></button>
+    </div>
+    <p class="xs faint" style="margin-top:14px">Transversais</p>
+    <div class="nav-grid">
+      <button class="nav-item" onclick="jump('s-paywall',false)">Paywall <small>3 planos</small></button>
+      <button class="nav-item" onclick="jump('s-concierge',false)">Concierge <small>Advogados</small></button>
+      <button class="nav-item" onclick="jump('s-perfil',false)">Perfil <small>Config + idioma</small></button>
+      <button class="nav-item" onclick="jump('s-notif',false)">Notificações</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let lastScreen='s-splash';
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el=document.getElementById(id); el.classList.add('active'); el.scrollTop=0;
+    lastScreen=id;
+    // hide tabs on onboarding/standalone
+    const appScreens=['s-painel','s-traj','s-docs','s-caso','s-ai'];
+    document.getElementById('tabbar').style.display = appScreens.includes(id)?'flex':(['s-form','s-paywall','s-concierge','s-perfil','s-notif'].includes(id)?'none':'none');
+  }
+  function switchTab(id,tabEl){
+    go(id); showTabs();
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    if(typeof tabEl==='string'){const e=document.getElementById(tabEl);if(e)e.classList.add('on');}
+    else if(tabEl&&tabEl.classList){tabEl.classList.add('on');}
+  }
+  function showTabs(){document.getElementById('tabbar').style.display='flex';}
+  function hideTabs(){document.getElementById('tabbar').style.display='none';}
+  function back(){switchTab('s-painel','t-painel');}
+  function pick(el){el.parentNode.querySelectorAll('.country').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+  function toggleSheet(){document.getElementById('sheet').classList.toggle('open');}
+  function jump(id,tabs,tabId){
+    if(tabs){switchTab(id,tabId);}else{go(id);}
+    document.getElementById('sheet').classList.remove('open');
+  }
+
+  // gauges
+  function drawGauge(elId,val,label){
+    const r=54,c=2*Math.PI*r,off=c*(1-val/100);
+    document.getElementById(elId).innerHTML=`
+      <svg width="128" height="128" viewBox="0 0 128 128">
+        <circle cx="64" cy="64" r="${r}" stroke="#EFE7D8" stroke-width="11" fill="none"/>
+        <circle cx="64" cy="64" r="${r}" stroke="${val>=75?'#1E5E4E':val>=50?'#E8A33D':'#C2542F'}" stroke-width="11" fill="none"
+          stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)" class="gline-${elId}"/>
+      </svg>
+      <div class="val"><span class="num">${val}</span><span class="lab">${label}</span></div>`;
+    setTimeout(()=>{document.querySelector('.gline-'+elId).style.strokeDashoffset=off;},120);
+  }
+
+  // i18n (rótulos principais)
+  const T={
+    pt:{cta_create:"Criar minha conta",cta_enter:"Já tenho conta",continue:"Continuar",unlock:"Desbloquear",
+      nav1:"Painel",nav2:"Trajetória",nav3:"Docs",nav4:"Meu Caso",nav5:"Assistente",hi:"Olá,",
+      p_status:"Você está em estadia autorizada",t_title:"Sua trajetória",d_title:"Documentos",c_title:"Meu caso",a_title:"Assistente"},
+    es:{cta_create:"Crear mi cuenta",cta_enter:"Ya tengo cuenta",continue:"Continuar",unlock:"Desbloquear",
+      nav1:"Panel",nav2:"Trayecto",nav3:"Docs",nav4:"Mi Caso",nav5:"Asistente",hi:"Hola,",
+      p_status:"Estás en estancia autorizada",t_title:"Tu trayecto",d_title:"Documentos",c_title:"Mi caso",a_title:"Asistente"},
+    en:{cta_create:"Create my account",cta_enter:"I have an account",continue:"Continue",unlock:"Unlock",
+      nav1:"Home",nav2:"Pathway",nav3:"Docs",nav4:"My Case",nav5:"Assistant",hi:"Hi,",
+      p_status:"You're in authorized stay",t_title:"Your pathway",d_title:"Documents",c_title:"My case",a_title:"Assistant"}
+  };
+  function setLang(l,pillEl,segEl){
+    document.querySelectorAll('[data-i18n]').forEach(n=>{const k=n.getAttribute('data-i18n');if(T[l]&&T[l][k])n.textContent=T[l][k];});
+    if(pillEl){pillEl.parentNode.querySelectorAll('.lang-pill').forEach(p=>p.classList.remove('on'));pillEl.classList.add('on');}
+    if(segEl){segEl.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));segEl.classList.add('on');}
+  }
+
+  // init
+  drawGauge('g1',74,'Atenção');
+  drawGauge('g2',72,'Atenção');
+  // redraw snapshot gauge when shown
+  const obs=new MutationObserver(()=>{if(document.getElementById('s-snapshot').classList.contains('active'))drawGauge('g2',72,'Atenção');});
+  obs.observe(document.getElementById('s-snapshot'),{attributes:true});
+</script>
+</body>
+</html>
