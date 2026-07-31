@@ -201,8 +201,18 @@ export default async function DashboardPage() {
         {/* Case tracker */}
         <CaseTracker />
 
-        {/* Parallel processes — more than one journey may be running at once */}
-        <ParallelProcessesCard />
+        {/* Parallel processes — more than one journey may be running at once.
+            Exclusivo para assinantes, como todo o resto do painel pago. */}
+        {hasAccess ? (
+          <ParallelProcessesCard />
+        ) : (
+          <PaywallGate
+            titulo="Acompanhe todos os seus processos em paralelo"
+            descricao="B-1/B-2, F-1, I-130 — se você tem mais de uma jornada rodando ao mesmo tempo, veja todos os prazos juntos, num só lugar. Assine para destravar."
+          >
+            <ParallelProcessesCard />
+          </PaywallGate>
+        )}
 
         {/* Consulados widget */}
         <ConsuladosWidget />

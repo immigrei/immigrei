@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getUserPlan } from "@/lib/plan";
 
 const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -20,6 +21,11 @@ const PatchBodySchema = z.object({
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Processos em paralelo são exclusivos para assinantes." }, { status: 403 });
+  }
 
   const { id } = await ctx.params;
   const rawBody = await req.json().catch(() => ({}));

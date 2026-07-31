@@ -73,7 +73,7 @@ export default function VistoIdClient({ hasAccess }: { hasAccess: boolean }) {
   const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
-    if (!vistoId) return;
+    if (!vistoId || !hasAccess) return;
     fetch("/api/user-processes")
       .then((r) => (r.ok ? r.json() : { processes: [] }))
       .then((d) => {
@@ -81,7 +81,7 @@ export default function VistoIdClient({ hasAccess }: { hasAccess: boolean }) {
         setProcessoId(existente?.id ?? null);
       })
       .catch(() => {});
-  }, [vistoId]);
+  }, [vistoId, hasAccess]);
 
   async function confirmarJornada() {
     if (!checklist) return;
@@ -514,27 +514,29 @@ export default function VistoIdClient({ hasAccess }: { hasAccess: boolean }) {
           </h1>
           <p className="text-ink-soft text-sm leading-relaxed">{checklist.intro}</p>
 
-          {processoId ? (
-            <div className="mt-4 flex items-center gap-3">
-              <span className="text-sm font-semibold text-pine">
-                ✓ Este é um dos seus processos em paralelo
-              </span>
+          {hasAccess && (
+            processoId ? (
+              <div className="mt-4 flex items-center gap-3">
+                <span className="text-sm font-semibold text-pine">
+                  ✓ Este é um dos seus processos em paralelo
+                </span>
+                <button
+                  onClick={removerJornada}
+                  disabled={confirmando}
+                  className="text-xs font-bold text-clay hover:text-clay/80 transition-colors disabled:opacity-40"
+                >
+                  Remover
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={removerJornada}
+                onClick={confirmarJornada}
                 disabled={confirmando}
-                className="text-xs font-bold text-clay hover:text-clay/80 transition-colors disabled:opacity-40"
+                className="mt-4 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors disabled:opacity-40"
               >
-                Remover
+                {confirmando ? "Salvando..." : "Confirmar esta jornada como processo paralelo →"}
               </button>
-            </div>
-          ) : (
-            <button
-              onClick={confirmarJornada}
-              disabled={confirmando}
-              className="mt-4 text-sm font-bold text-pine hover:text-pine-deep underline underline-offset-4 transition-colors disabled:opacity-40"
-            >
-              {confirmando ? "Salvando..." : "Confirmar esta jornada como processo paralelo →"}
-            </button>
+            )
           )}
         </div>
 

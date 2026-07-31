@@ -14,6 +14,7 @@ import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
+import { getUserPlan } from "@/lib/plan";
 
 const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -28,6 +29,11 @@ const CreateBodySchema = z.object({
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Processos em paralelo são exclusivos para assinantes." }, { status: 403 });
+  }
 
   const { data, error } = await supabaseAdmin
     .from("user_processes")
@@ -47,6 +53,11 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Processos em paralelo são exclusivos para assinantes." }, { status: 403 });
+  }
 
   const rawBody = await req.json().catch(() => ({}));
   const parsed = CreateBodySchema.safeParse(rawBody);
