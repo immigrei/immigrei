@@ -134,8 +134,8 @@ export function getDeniedCaseStrategies(statusDate?: string | null): StrategyOpt
         "Sair dos EUA antes do Green Card pode ativar barreiras de reentrada de 3 ou 10 anos",
       ],
       kits: [
-        { label: "Kit I-130 — cônjuge de cidadão (com I-485)", status: "em_breve" },
-        { label: "Kit I-130 — cônjuge de residente (F2A)", status: "em_breve" },
+        { label: "Kit I-130 — cônjuge de cidadão (com I-485)", kitId: "familia-ir", status: "disponivel" },
+        { label: "Kit I-130 — cônjuge de residente (F2A)", kitId: "family-gc", status: "disponivel" },
       ],
     },
     {
@@ -826,8 +826,8 @@ export function getAlternativePaths(profile?: {
         "Casamento precisa ser genuíno — o USCIS investiga; fraude bane o Green Card para sempre",
       ],
       kits: [
-        { label: "Kit I-130 — cônjuge de cidadão (com I-485)", status: "em_breve" },
-        { label: "Kit I-130 — cônjuge de residente (F2A, com ou sem status)", status: "em_breve" },
+        { label: "Kit I-130 — cônjuge de cidadão (com I-485)", kitId: "familia-ir", status: "disponivel" },
+        { label: "Kit I-130 — cônjuge de residente (F2A, com ou sem status)", kitId: "family-gc", status: "disponivel" },
       ],
     },
     {
