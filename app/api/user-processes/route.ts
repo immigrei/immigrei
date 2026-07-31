@@ -79,10 +79,27 @@ export async function POST(req: NextRequest) {
     updated_at: new Date().toISOString(),
   };
 
-  // Confirming the same kit twice updates the existing row (the partial
-  // unique index on (user_id, kit_id) only covers rows with a kit_id).
-  const query = kitId
-    ? supabaseAdmin.from("user_processes").upsert(row, { onConflict: "user_id,kit_id" })
+  // Confirming the same kit twice updates the existing row instead of
+  // duplicating it. Done as a manual find-then-write rather than
+  // .upsert(onConflict) — the (user_id, kit_id) unique index is partial
+  // (only covers active rows with a kit_id), and Postgres's ON CONFLICT
+  // shorthand can't target a partial index, so upsert() 500s with
+  // "no unique or exclusion constraint matching the ON CONFLICT
+  // specification" every time.
+  let existingId: string | null = null;
+  if (kitId) {
+    const { data: existing } = await supabaseAdmin
+      .from("user_processes")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("kit_id", kitId)
+      .eq("is_active", true)
+      .maybeSingle();
+    existingId = existing?.id ?? null;
+  }
+
+  const query = existingId
+    ? supabaseAdmin.from("user_processes").update(row).eq("id", existingId)
     : supabaseAdmin.from("user_processes").insert(row);
 
   const { data, error } = await query.select().single();
