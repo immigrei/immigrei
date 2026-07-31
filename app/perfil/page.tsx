@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import AppShell from "@/app/components/AppShell";
+import PerfilQuestionario from "./PerfilQuestionario";
 
 export default async function PerfilPage() {
   const { userId } = await auth();
@@ -33,12 +34,10 @@ export default async function PerfilPage() {
             </div>
           </div>
           <div className="divide-y divide-pine-tint">
-            <a href="/onboarding/edit" className="px-6 py-4 flex items-center justify-between group">
-              <span className="text-ink text-sm font-medium">Editar informações de imigração</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </a>
+            {/* "Editar informações de imigração" removido — apontava pra
+                /onboarding/edit, que nunca existiu. Editar tipo de visto/
+                objetivo hoje só é possível resetando o onboarding inteiro
+                (DELETE /api/profile); falta uma tela de edição de verdade. */}
             <a href="/termos" className="px-6 py-4 flex items-center justify-between group">
               <span className="text-ink text-sm font-medium">Termos de Uso</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -52,6 +51,10 @@ export default async function PerfilPage() {
               </svg>
             </a>
           </div>
+        </div>
+
+        <div className="bg-cream-2 rounded-2xl border border-pine-tint p-6 mb-5">
+          <PerfilQuestionario />
         </div>
 
         <p className="text-ink-faint text-xs text-center">

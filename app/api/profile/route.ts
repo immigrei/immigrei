@@ -5,6 +5,24 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const FamilyTiesSchema = z.enum(["spouse_citizen", "parent_child_citizen", "family_gc", "none"]);
+const EnglishLevelSchema = z.enum(["basico", "intermediario", "avancado", "fluente"]);
+const EducationLevelSchema = z.enum([
+  "ensino_medio", "graduacao_andamento", "graduacao_completa", "pos_graduacao", "mestrado", "doutorado",
+]);
+const ExperienceYearsSchema = z.enum(["0-2", "3-5", "6-10", "10+"]);
+const EnglishTestNameSchema = z.enum(["TOEFL", "IELTS", "Duolingo English Test", "PTE Academic", "Outro"]);
+const InvestorCapitalRangeSchema = z.enum(["menos_50k", "50k_100k", "100k_500k", "500k_mais"]);
+const L1LeadershipYearsSchema = z.enum(["menos_1", "1_3", "3_mais"]);
+// Critérios de habilidade extraordinária, 8 CFR §214.2(o)(3) — chaves fixas,
+// o texto de cada uma vive só no componente (copy pode mudar sem migração).
+const O1CriteriaSchema = z.enum([
+  "premio", "associacao", "midia", "julgamento", "contribuicao_original", "publicacao", "papel_critico", "salario_alto",
+]);
+// Campos abertos do perfil — limite generoso o bastante pra ter conteúdo de
+// verdade, curto o bastante pra continuar sendo objetivo (não é campo livre
+// sem fim, é "me conte em poucas frases").
+const OpenTextSchema = z.string().trim().max(280);
+const ShortTextSchema = z.string().trim().max(120);
 const ChosenSchoolSchema = z.object({
   school_name: z.string().min(1),
   city: z.string().min(1),
@@ -21,12 +39,32 @@ export async function POST(req: NextRequest) {
 
   const user = await currentUser();
   const body = await req.json().catch(() => ({}));
-  const { visa_type, arrival_date, main_goal, location, nationality, chosen_school, i94_expiry_date, family_ties, f1_program_start_date } = body;
+  const {
+    visa_type, arrival_date, main_goal, location, nationality, chosen_school, i94_expiry_date, family_ties, f1_program_start_date,
+    // Perfil — Parte 1 (básico/carreira)
+    birth_date, birth_city, birth_country, current_city, current_state, gender,
+    english_level, english_test_taken, english_test_name, english_test_score,
+    education_level, profession, experience_years, achievements,
+    // Perfil — sinais estruturados (O-1A/EB-1A, investidor, L-1)
+    o1_criteria, investor_capital_available, investor_capital_range, business_owner_experience,
+    l1_us_br_operations, l1_leadership_years,
+    // Perfil — Parte 2 (perguntas abertas)
+    bio_situation, bio_concern, bio_tried,
+  } = body;
+
+  const perfilFields = [
+    birth_date, birth_city, birth_country, current_city, current_state, gender,
+    english_level, english_test_taken, english_test_name, english_test_score,
+    education_level, profession, experience_years, achievements,
+    o1_criteria, investor_capital_available, investor_capital_range, business_owner_experience,
+    l1_us_br_operations, l1_leadership_years,
+    bio_situation, bio_concern, bio_tried,
+  ];
 
   if (
     !visa_type && !arrival_date && !main_goal && !location && !nationality &&
     chosen_school === undefined && i94_expiry_date === undefined && family_ties === undefined &&
-    f1_program_start_date === undefined
+    f1_program_start_date === undefined && perfilFields.every((f) => f === undefined)
   ) {
     return NextResponse.json({ error: "No fields to save" }, { status: 400 });
   }
@@ -48,6 +86,62 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid chosen_school" }, { status: 400 });
   }
 
+  // Perfil — todos os campos são opcionais (null limpa o campo), mas quando
+  // preenchidos precisam bater com o formato esperado.
+  if (birth_date !== undefined && birth_date !== null && !DateStringSchema.safeParse(birth_date).success) {
+    return NextResponse.json({ error: "Invalid birth_date" }, { status: 400 });
+  }
+  for (const [key, value] of Object.entries({ birth_city, birth_country, current_city, current_state, profession })) {
+    if (value !== undefined && value !== null && !ShortTextSchema.safeParse(value).success) {
+      return NextResponse.json({ error: `Invalid ${key}` }, { status: 400 });
+    }
+  }
+  if (gender !== undefined && gender !== null && !ShortTextSchema.safeParse(gender).success) {
+    return NextResponse.json({ error: "Invalid gender" }, { status: 400 });
+  }
+  if (english_level !== undefined && english_level !== null && !EnglishLevelSchema.safeParse(english_level).success) {
+    return NextResponse.json({ error: "Invalid english_level" }, { status: 400 });
+  }
+  if (english_test_taken !== undefined && english_test_taken !== null && typeof english_test_taken !== "boolean") {
+    return NextResponse.json({ error: "Invalid english_test_taken" }, { status: 400 });
+  }
+  if (english_test_name !== undefined && english_test_name !== null && !EnglishTestNameSchema.safeParse(english_test_name).success) {
+    return NextResponse.json({ error: "Invalid english_test_name" }, { status: 400 });
+  }
+  if (english_test_score !== undefined && english_test_score !== null && !ShortTextSchema.safeParse(english_test_score).success) {
+    return NextResponse.json({ error: "Invalid english_test_score" }, { status: 400 });
+  }
+  if (education_level !== undefined && education_level !== null && !EducationLevelSchema.safeParse(education_level).success) {
+    return NextResponse.json({ error: "Invalid education_level" }, { status: 400 });
+  }
+  if (experience_years !== undefined && experience_years !== null && !ExperienceYearsSchema.safeParse(experience_years).success) {
+    return NextResponse.json({ error: "Invalid experience_years" }, { status: 400 });
+  }
+  for (const [key, value] of Object.entries({ achievements, bio_situation, bio_concern, bio_tried })) {
+    if (value !== undefined && value !== null && !OpenTextSchema.safeParse(value).success) {
+      return NextResponse.json({ error: `Invalid ${key}` }, { status: 400 });
+    }
+  }
+
+  // Sinais estruturados — cada um opcional, mas quando presentes precisam
+  // bater com a lista fechada (não é texto livre, é gatilho de caminho).
+  if (o1_criteria !== undefined && o1_criteria !== null) {
+    if (!Array.isArray(o1_criteria) || !o1_criteria.every((c: unknown) => O1CriteriaSchema.safeParse(c).success)) {
+      return NextResponse.json({ error: "Invalid o1_criteria" }, { status: 400 });
+    }
+  }
+  for (const [key, value] of Object.entries({ investor_capital_available, business_owner_experience, l1_us_br_operations })) {
+    if (value !== undefined && value !== null && typeof value !== "boolean") {
+      return NextResponse.json({ error: `Invalid ${key}` }, { status: 400 });
+    }
+  }
+  if (investor_capital_range !== undefined && investor_capital_range !== null && !InvestorCapitalRangeSchema.safeParse(investor_capital_range).success) {
+    return NextResponse.json({ error: "Invalid investor_capital_range" }, { status: 400 });
+  }
+  if (l1_leadership_years !== undefined && l1_leadership_years !== null && !L1LeadershipYearsSchema.safeParse(l1_leadership_years).success) {
+    return NextResponse.json({ error: "Invalid l1_leadership_years" }, { status: 400 });
+  }
+
   const row: Record<string, unknown> = {
     clerk_user_id: userId,
     full_name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim(),
@@ -65,6 +159,30 @@ export async function POST(req: NextRequest) {
   if (i94_expiry_date !== undefined) row.i94_expiry_date = i94_expiry_date;
   if (family_ties !== undefined) row.family_ties = family_ties;
   if (f1_program_start_date !== undefined) row.f1_program_start_date = f1_program_start_date;
+  // Perfil — cada campo é independente, salva só o que veio no corpo.
+  if (birth_date !== undefined) row.birth_date = birth_date;
+  if (birth_city !== undefined) row.birth_city = birth_city;
+  if (birth_country !== undefined) row.birth_country = birth_country;
+  if (current_city !== undefined) row.current_city = current_city;
+  if (current_state !== undefined) row.current_state = current_state;
+  if (gender !== undefined) row.gender = gender;
+  if (english_level !== undefined) row.english_level = english_level;
+  if (english_test_taken !== undefined) row.english_test_taken = english_test_taken;
+  if (english_test_name !== undefined) row.english_test_name = english_test_name;
+  if (english_test_score !== undefined) row.english_test_score = english_test_score;
+  if (education_level !== undefined) row.education_level = education_level;
+  if (profession !== undefined) row.profession = profession;
+  if (experience_years !== undefined) row.experience_years = experience_years;
+  if (achievements !== undefined) row.achievements = achievements;
+  if (bio_situation !== undefined) row.bio_situation = bio_situation;
+  if (bio_concern !== undefined) row.bio_concern = bio_concern;
+  if (bio_tried !== undefined) row.bio_tried = bio_tried;
+  if (o1_criteria !== undefined) row.o1_criteria = o1_criteria;
+  if (investor_capital_available !== undefined) row.investor_capital_available = investor_capital_available;
+  if (investor_capital_range !== undefined) row.investor_capital_range = investor_capital_range;
+  if (business_owner_experience !== undefined) row.business_owner_experience = business_owner_experience;
+  if (l1_us_br_operations !== undefined) row.l1_us_br_operations = l1_us_br_operations;
+  if (l1_leadership_years !== undefined) row.l1_leadership_years = l1_leadership_years;
   if (chosen_school !== undefined) {
     row.chosen_school = chosen_school === null ? null : {
       school_name: String(chosen_school.school_name),
