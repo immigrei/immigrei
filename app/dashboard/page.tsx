@@ -11,6 +11,7 @@ import CaseStatusCard, { UserCase } from "./CaseStatusCard";
 import StrategicOptionsCard from "./StrategicOptionsCard";
 import VisaBulletinWidget from "./VisaBulletinWidget";
 import CaseTracker from "./CaseTracker";
+import ParallelProcessesCard from "@/app/components/ParallelProcessesCard";
 import ConsuladosWidget from "./ConsuladosWidget";
 import AppShell from "@/app/components/AppShell";
 import PaywallGate from "@/app/components/PaywallGate";
@@ -199,6 +200,9 @@ export default async function DashboardPage() {
 
         {/* Case tracker */}
         <CaseTracker />
+
+        {/* Parallel processes — more than one journey may be running at once */}
+        <ParallelProcessesCard />
 
         {/* Consulados widget */}
         <ConsuladosWidget />

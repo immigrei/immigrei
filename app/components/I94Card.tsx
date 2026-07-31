@@ -1,4 +1,4 @@
-import { daysUntilI94Expiry } from "@/lib/i94";
+import { daysUntilI94Expiry, urgencyStyle } from "@/lib/i94";
 
 /**
  * Read-only I-94 deadline card for /painel and /documentos — same data and
@@ -13,12 +13,6 @@ function formatDate(dateStr: string) {
     month: "long",
     year: "numeric",
   });
-}
-
-function urgencyStyle(days: number): { text: string; badge: string } {
-  if (days < 0) return { text: "text-clay", badge: "bg-clay/10 text-clay" };
-  if (days <= 30) return { text: "text-amber-deep", badge: "bg-amber-tint text-amber-deep" };
-  return { text: "text-ink", badge: "bg-pine-tint text-pine-deep" };
 }
 
 export default function I94Card({ value }: { value: string | null }) {

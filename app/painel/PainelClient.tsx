@@ -7,6 +7,7 @@ import AppShell from "@/app/components/AppShell";
 import OptionsList from "@/app/components/OptionsList";
 import PaywallGate from "@/app/components/PaywallGate";
 import I94Card from "@/app/components/I94Card";
+import ParallelProcessesCard from "@/app/components/ParallelProcessesCard";
 import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
 import { applyProgress, type ProgressSignals } from "@/lib/journey-progress";
 import { traduzirStatus } from "@/lib/uscis-status-pt";
@@ -252,6 +253,9 @@ export default function PainelClient({ hasAccess }: { hasAccess: boolean }) {
             ))}
           </Link>
         )}
+
+        {/* Processos em paralelo — mais de uma jornada pode estar rodando ao mesmo tempo */}
+        <ParallelProcessesCard />
 
         {/* Destaque (alerta ou ok) */}
         {s.destaque && (
