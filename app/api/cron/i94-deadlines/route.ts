@@ -13,7 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { daysUntilI94Expiry } from "@/lib/i94";
-import { sendI94DeadlineAlert } from "@/lib/notifications";
+import { sendI94DeadlineAlert, sendI94ReminderToFillIn } from "@/lib/notifications";
 import { clerkClient } from "@clerk/nextjs/server";
 
 export const maxDuration = 300;
@@ -76,7 +76,60 @@ export async function GET(req: NextRequest) {
     from += PAGE;
   }
 
-  const summary = { startedAt, finishedAt: new Date().toISOString(), scanned, sent, errors };
+  // Second pass: nudge profiles that never filled in the I-94 date at all —
+  // one-time only (i94_reminder_sent_at gates it), so this never becomes a
+  // recurring nag. Separate from the milestone loop above because it scans
+  // the opposite condition (date IS null) and writes back a marker instead
+  // of just reading.
+  let remindScanned = 0, remindSent = 0, remindErrors = 0;
+  from = 0;
+  while (true) {
+    const { data: profiles, error } = await supabaseAdmin
+      .from("profiles")
+      .select("clerk_user_id, full_name")
+      .is("i94_expiry_date", null)
+      .is("i94_reminder_sent_at", null)
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      console.error("[i94-deadlines] Supabase error (reminder pass):", error.message);
+      break;
+    }
+    if (!profiles || profiles.length === 0) break;
+
+    for (const p of profiles) {
+      remindScanned++;
+      try {
+        const clerk = await clerkClient();
+        const user  = await clerk.users.getUser(p.clerk_user_id);
+        const email = user.emailAddresses?.[0]?.emailAddress;
+        if (!email) continue;
+
+        await sendI94ReminderToFillIn({
+          to:       email,
+          userName: p.full_name ?? user.firstName ?? "",
+        });
+        await supabaseAdmin
+          .from("profiles")
+          .update({ i94_reminder_sent_at: new Date().toISOString() })
+          .eq("clerk_user_id", p.clerk_user_id);
+        remindSent++;
+      } catch (err) {
+        remindErrors++;
+        console.error(`[i94-deadlines] Reminder error for user ${p.clerk_user_id}:`, err);
+      }
+    }
+
+    if (profiles.length < PAGE) break;
+    from += PAGE;
+  }
+
+  const summary = {
+    startedAt,
+    finishedAt: new Date().toISOString(),
+    scanned, sent, errors,
+    remindScanned, remindSent, remindErrors,
+  };
   console.log("[i94-deadlines] Completed:", summary);
   return NextResponse.json(summary);
 }

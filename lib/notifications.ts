@@ -222,6 +222,63 @@ export async function sendI94DeadlineAlert({
   await getResend().emails.send({ from: FROM, to, subject, html });
 }
 
+// ── I-94 field left blank ────────────────────────────────────────────────
+
+export async function sendI94ReminderToFillIn({
+  to,
+  userName,
+}: {
+  to:       string;
+  userName: string;
+}) {
+  const subject = "📅 Adicione o prazo do seu I-94 — Immigrei";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <span style="font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;">Immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8B958F;margin:0 0 12px;">
+        Prazo do I-94
+      </p>
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        Ainda não sabemos seu prazo de permanência
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;">
+        Olá${userName ? ", " + userName : ""}!
+      </p>
+
+      <div style="padding:14px 16px;background:#E4EFE9;border-radius:10px;border:1px solid #1E5E4E33;margin-bottom:24px;">
+        <p style="font-size:15px;font-weight:600;color:#1E5E4E;margin:0;line-height:1.5;">
+          A data que realmente define até quando você pode ficar nos EUA é a do I-94 — não a validade do visto no passaporte. Sem ela, não conseguimos te avisar antes do vencimento.
+        </p>
+      </div>
+
+      <a href="${APP_URL}/dashboard"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
+        Adicionar meu prazo do I-94 →
+      </a>
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Confira sua data em <strong>i94.cbp.dhs.gov</strong> — leva 2 minutos.</p>
+      <p style="margin:6px 0 0">Não somos um escritório de advocacia. Para decisões, consulte um profissional.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
 // ── Visa Bulletin updated ──────────────────────────────────────────────────
 
 export async function sendBulletinUpdate({
