@@ -14,6 +14,7 @@ import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
+import { getUserPlan } from "@/lib/plan";
 
 const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -28,6 +29,11 @@ const CreateBodySchema = z.object({
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Processos em paralelo são exclusivos para assinantes." }, { status: 403 });
+  }
 
   const { data, error } = await supabaseAdmin
     .from("user_processes")
@@ -47,6 +53,11 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const plan = await getUserPlan(userId);
+  if (plan === "free") {
+    return NextResponse.json({ error: "Processos em paralelo são exclusivos para assinantes." }, { status: 403 });
+  }
 
   const rawBody = await req.json().catch(() => ({}));
   const parsed = CreateBodySchema.safeParse(rawBody);
@@ -68,10 +79,27 @@ export async function POST(req: NextRequest) {
     updated_at: new Date().toISOString(),
   };
 
-  // Confirming the same kit twice updates the existing row (the partial
-  // unique index on (user_id, kit_id) only covers rows with a kit_id).
-  const query = kitId
-    ? supabaseAdmin.from("user_processes").upsert(row, { onConflict: "user_id,kit_id" })
+  // Confirming the same kit twice updates the existing row instead of
+  // duplicating it. Done as a manual find-then-write rather than
+  // .upsert(onConflict) — the (user_id, kit_id) unique index is partial
+  // (only covers active rows with a kit_id), and Postgres's ON CONFLICT
+  // shorthand can't target a partial index, so upsert() 500s with
+  // "no unique or exclusion constraint matching the ON CONFLICT
+  // specification" every time.
+  let existingId: string | null = null;
+  if (kitId) {
+    const { data: existing } = await supabaseAdmin
+      .from("user_processes")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("kit_id", kitId)
+      .eq("is_active", true)
+      .maybeSingle();
+    existingId = existing?.id ?? null;
+  }
+
+  const query = existingId
+    ? supabaseAdmin.from("user_processes").update(row).eq("id", existingId)
     : supabaseAdmin.from("user_processes").insert(row);
 
   const { data, error } = await query.select().single();

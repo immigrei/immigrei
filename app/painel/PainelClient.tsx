@@ -254,8 +254,18 @@ export default function PainelClient({ hasAccess }: { hasAccess: boolean }) {
           </Link>
         )}
 
-        {/* Processos em paralelo — mais de uma jornada pode estar rodando ao mesmo tempo */}
-        <ParallelProcessesCard />
+        {/* Processos em paralelo — mais de uma jornada pode estar rodando ao mesmo tempo.
+            Exclusivo para assinantes, como o resto do painel pago. */}
+        {hasAccess ? (
+          <ParallelProcessesCard />
+        ) : (
+          <PaywallGate
+            titulo="Acompanhe todos os seus processos em paralelo"
+            descricao="B-1/B-2, F-1, I-130 — se você tem mais de uma jornada rodando ao mesmo tempo, veja todos os prazos juntos, num só lugar. Assine para destravar."
+          >
+            <ParallelProcessesCard />
+          </PaywallGate>
+        )}
 
         {/* Destaque (alerta ou ok) */}
         {s.destaque && (
