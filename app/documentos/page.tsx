@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import CofreLink from "@/app/components/CofreLink";
 import I94Card from "@/app/components/I94Card";
+import type { UserProcess } from "@/app/components/ParallelProcessesCard";
 
 interface Profile {
   visa_type: string | null;
@@ -311,12 +313,19 @@ export default function DocumentosPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [mostrarTodos, setMostrarTodos] = useState(false);
+  const [processos, setProcessos] = useState<UserProcess[]>([]);
 
   useEffect(() => {
     fetch("/api/profile")
       .then((r) => r.json())
       .then((d) => { setProfile(d.profile ?? null); setLoading(false); })
       .catch(() => setLoading(false));
+    // 403 pra plano grátis é esperado (ninguém free tem processo confirmado
+    // mesmo) — só ignora e deixa a lista vazia, sem exibir erro aqui.
+    fetch("/api/user-processes")
+      .then((r) => (r.ok ? r.json() : { processes: [] }))
+      .then((d) => setProcessos(d.processes ?? []))
+      .catch(() => {});
   }, []);
 
   const recomendadoId = inferirKitRecomendado(profile);
@@ -367,6 +376,25 @@ export default function DocumentosPage() {
               Seu caminho
             </p>
             <KitCard kit={recomendado} destaque onClick={() => router.push(`/documentos/${recomendado.id}`)} />
+
+            {processos.filter((p) => p.kit_id).length > 0 && (
+              <div className="mt-4 flex flex-col gap-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.1em" }}>
+                  Fixados — seus processos em paralelo
+                </p>
+                {processos.filter((p) => p.kit_id).map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/documentos/${p.kit_id}`}
+                    className="flex items-center gap-2 rounded-2xl border border-pine-tint bg-cream-2 px-4 py-3 hover:border-pine transition-colors"
+                  >
+                    <span className="flex-shrink-0 text-sm">📌</span>
+                    <span className="flex-1 text-sm font-semibold text-ink">{p.label}</span>
+                    <span className="flex-shrink-0 text-xs font-bold text-pine">Abrir →</span>
+                  </Link>
+                ))}
+              </div>
+            )}
 
             {!catalogoAberto && (
               <button
