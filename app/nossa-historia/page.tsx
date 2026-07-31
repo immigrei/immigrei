@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import WaitlistForm from "../em-breve/WaitlistForm";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
+import Card from "../components/Card";
+import CtaButton from "../components/CtaButton";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
@@ -109,13 +110,10 @@ export default function NossaHistoriaPage() {
         </h2>
         <div className="grid sm:grid-cols-2 gap-4">
           {valores.map((v) => (
-            <div
-              key={v.title}
-              className="bg-cream-2 border border-pine-tint rounded-2xl p-6"
-            >
+            <Card key={v.title}>
               <h3 className="text-ink font-bold text-base mb-2">{v.title}</h3>
               <p className="text-ink-soft text-sm leading-relaxed">{v.text}</p>
-            </div>
+            </Card>
           ))}
         </div>
 
@@ -127,10 +125,10 @@ export default function NossaHistoriaPage() {
             Sua jornada merece um mapa.
           </h2>
           <p className="text-pine-tint text-base mb-6 max-w-md">
-            Estamos construindo a immigrei agora. Entre na lista e seja avisado
-            em primeira mão.
+            Comece agora — é gratuito, e leva menos de 5 minutos para ver o
+            seu caminho.
           </p>
-          <WaitlistForm />
+          <CtaButton href="/onboarding">Começar agora — é gratuito</CtaButton>
         </div>
 
       </article>
