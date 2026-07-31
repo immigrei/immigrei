@@ -35,6 +35,7 @@ interface PerfilData {
   has_other_citizenship?:       boolean | null;
   other_citizenship_country?:   string | null;
   l1_us_br_operations?:         boolean | null;
+  l1_foreign_operation_country?: string | null;
   l1_in_leadership_role?:       boolean | null;
   l1_leadership_years?:         string | null;
   bio_situation?:               string | null;
@@ -607,17 +608,25 @@ export default function PerfilQuestionario() {
           <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.08em" }}>
             Transferência dentro da empresa
           </p>
-          <Field
-            label={`Sua empresa atual tem operação nos EUA e ${
-              data.lives_outside_brazil && data.residence_country ? `em ${data.residence_country}` : "no Brasil"
-            } (mesma empresa, filial ou grupo)?`}
-          >
+          <Field label="Sua empresa atual tem operação nos EUA e em outro país (mesma empresa, filial ou grupo)?">
             <ButtonGroup
               options={[{ value: "sim", label: "Sim" }, { value: "nao", label: "Não" }]}
               value={data.l1_us_br_operations === true ? "sim" : data.l1_us_br_operations === false ? "nao" : null}
               onChange={(v) => set("l1_us_br_operations", v === "sim")}
             />
           </Field>
+          {data.l1_us_br_operations && (
+            <Field label="Em qual outro país?">
+              <input
+                type="text"
+                maxLength={120}
+                value={data.l1_foreign_operation_country ?? ""}
+                onChange={(e) => set("l1_foreign_operation_country", e.target.value)}
+                placeholder="Ex: Brasil"
+                className={`${inputClass} sm:max-w-xs`}
+              />
+            </Field>
+          )}
           {data.l1_us_br_operations && (
             <Field label="Você já atua em função de gerência, liderança ou conhecimento especializado?">
               <ButtonGroup

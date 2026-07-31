@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     // Perfil — sinais estruturados (O-1A/EB-1A, investidor, L-1)
     o1_criteria, investor_capital_available, investor_capital_range, business_owner_experience,
     citizenship_country, has_other_citizenship, other_citizenship_country,
-    l1_us_br_operations, l1_in_leadership_role, l1_leadership_years,
+    l1_us_br_operations, l1_in_leadership_role, l1_leadership_years, l1_foreign_operation_country,
     // Perfil — residência (mora fora do Brasil?)
     lives_outside_brazil, residence_country,
     // Perfil — Parte 2 (perguntas abertas)
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     english_level, english_test_taken, english_test_name, english_test_score,
     education_level, profession, experience_years, achievements,
     o1_criteria, investor_capital_available, investor_capital_range, business_owner_experience,
-    citizenship_country, has_other_citizenship, other_citizenship_country,
+    citizenship_country, has_other_citizenship, other_citizenship_country, l1_foreign_operation_country,
     l1_us_br_operations, l1_in_leadership_role, l1_leadership_years,
     lives_outside_brazil, residence_country,
     bio_situation, bio_concern, bio_tried,
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
   }
   for (const [key, value] of Object.entries({
     birth_city, birth_country, birth_state, current_city, current_state, profession,
-    residence_country, citizenship_country, other_citizenship_country,
+    residence_country, citizenship_country, other_citizenship_country, l1_foreign_operation_country,
   })) {
     if (value !== undefined && value !== null && !ShortTextSchema.safeParse(value).success) {
       return NextResponse.json({ error: `Invalid ${key}` }, { status: 400 });
@@ -217,6 +217,7 @@ export async function POST(req: NextRequest) {
   if (l1_us_br_operations !== undefined) row.l1_us_br_operations = l1_us_br_operations;
   if (l1_in_leadership_role !== undefined) row.l1_in_leadership_role = l1_in_leadership_role;
   if (l1_leadership_years !== undefined) row.l1_leadership_years = l1_leadership_years;
+  if (l1_foreign_operation_country !== undefined) row.l1_foreign_operation_country = l1_foreign_operation_country;
   if (lives_outside_brazil !== undefined) row.lives_outside_brazil = lives_outside_brazil;
   if (residence_country !== undefined) row.residence_country = residence_country;
   if (chosen_school !== undefined) {

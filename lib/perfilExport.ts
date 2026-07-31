@@ -43,6 +43,7 @@ export interface PerfilExportData {
   has_other_citizenship?:       boolean | null;
   other_citizenship_country?:   string | null;
   l1_us_br_operations?:         boolean | null;
+  l1_foreign_operation_country?: string | null;
   l1_in_leadership_role?:       boolean | null;
   l1_leadership_years?:         string | null;
   bio_situation?:               string | null;
@@ -314,8 +315,7 @@ export async function generatePerfilPdf(data: PerfilExportData, locale: Locale):
   // ── L-1 ───────────────────────────────────────────────────────────────
   if (data.l1_us_br_operations) {
     sectionTitle(t.sectionL1);
-    const otherCountry = data.lives_outside_brazil && data.residence_country ? data.residence_country : "Brasil";
-    fieldLine(t.l1Operations, `${t.yes} (EUA + ${otherCountry})`);
+    fieldLine(t.l1Operations, data.l1_foreign_operation_country ? `${t.yes} (EUA + ${data.l1_foreign_operation_country})` : t.yes);
     if (data.l1_leadership_years) {
       fieldLine(t.l1Years, L1_YEARS[data.l1_leadership_years]?.[locale] ?? "");
     }
