@@ -710,7 +710,13 @@ const KIT_BY_PREFIX: Array<[RegExp, string]> = [
 
 export function attachKitLinks(results: VisaResult[]): VisaResult[] {
   return results.map((r) => {
-    if (r.href || r.blocked) return r;
+    // "→" marca um card-ponte entre dois vistos (ex.: "B-1/B-2 → H-1B via
+    // Mudança de Status"). O prefixo bate com o kit do visto ATUAL (ex.
+    // /^B-1/), mas o card é sobre o visto de DESTINO — sem manual próprio
+    // ainda, esses ficam sem kit em vez de apontar pro kit errado (bug real:
+    // "B-1/B-2 → H-1B" virava link do kit "b1" e poluía o foco de /vistos
+    // com o visto atual como se fosse recomendação).
+    if (r.href || r.blocked || r.visa.includes("→")) return r;
     const hit = KIT_BY_PREFIX.find(([re]) => re.test(r.visa));
     return hit ? { ...r, href: `/documentos/${hit[1]}` } : r;
   });
@@ -729,6 +735,12 @@ const CATALOG_IDS = new Set([
   "f1", "m1", "j1", "h1b", "o1", "l1", "b1", "esta", "e2", "e1", "eb2niw", "eb5",
 ]);
 
+// Âncoras vindas das respostas — cobrem extensões e manuais de caminho,
+// cujos títulos não carregam kit próprio.
+const visaToCard: Record<string, string> = {
+  b1b2: "b1", f1: "f1", j1: "j1", h1b: "h1b", l1: "l1", m1: "m1", o1: "o1",
+};
+
 export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
   const ids = new Set<string>();
   const add = (id?: string | null) => {
@@ -742,14 +754,20 @@ export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
     if (m) add(m[1]);
   }
 
-  // 2. Âncoras vindas das respostas — cobrem extensões e manuais de caminho,
-  //    cujos títulos não carregam kit próprio.
-  const visaToCard: Record<string, string> = {
-    b1b2: "b1", f1: "f1", j1: "j1", h1b: "h1b", l1: "l1", m1: "m1", o1: "o1",
-  };
+  // 2. Visto atual entra no foco tanto pra quem só quer estender (o card É
+  //    o plano) quanto pra quem está mudando de status (o card vira a opção
+  //    "enquanto isso" — ver deriveExtensionFocusId, que sinaliza esse caso
+  //    pro /vistos desenhar o selo certo em vez de tratá-lo como destino).
   if (a.q_change_goal === "extend" || a.q_change_goal === "work_change")
     add(visaToCard[a.q_current_visa]);
   if (a.q_target_visa) add(visaToCard[a.q_target_visa]);
+  // Mudando de status pra outro visto (ex.: B-1/B-2 → H-1B): o visto atual
+  // volta ao foco de propósito, como opção "enquanto isso" — ver
+  // deriveExtensionFocusId, que sinaliza esse card específico pro /vistos
+  // desenhar o selo "Enquanto isso: Extensão" em vez de tratá-lo como se
+  // fosse uma alternativa equivalente ao destino escolhido.
+  if (a.q_change_goal === "change_status" && a.q_target_visa && a.q_target_visa !== a.q_current_visa)
+    add(visaToCard[a.q_current_visa]);
   if (a.q_study_type === "university" || a.q_study_type === "language") add("f1");
   if (a.q_study_type === "vocational") add("m1");
   if (a.q_study_type === "exchange") add("j1");
@@ -767,6 +785,23 @@ export function deriveFocusIds(a: Answers, results: VisaResult[]): string[] {
   if (a.q_permanent_path === "invest") add("eb5");
 
   return [...ids];
+}
+
+// Quando o objetivo é mudar para outro visto (change_status), o card do
+// visto atual segue no foco (ver acima) mas não é o destino escolhido — é a
+// opção "ganhar tempo" (ex.: seguir de B-1/B-2 estendendo enquanto o H-1B
+// não sai). O /vistos usa este id pra desenhar um selo "Enquanto isso:
+// Extensão" nesse card específico, em vez de destacá-lo como se fosse uma
+// alternativa equivalente ao visto-alvo.
+//
+// Não cobre "work_change" (mudar de empregador/área permanecendo no mesmo
+// visto) — ali o visto atual É o plano, sem card de destino diferente pra
+// comparar.
+export function deriveExtensionFocusId(a: Answers): string | null {
+  if (a.q_change_goal !== "change_status") return null;
+  if (!a.q_target_visa || a.q_target_visa === a.q_current_visa) return null;
+  const id = a.q_current_visa ? visaToCard[a.q_current_visa] : undefined;
+  return id && CATALOG_IDS.has(id) ? id : null;
 }
 
 // ─── Destination derivation ───────────────────────────────────────────────────
@@ -878,6 +913,8 @@ export function deriveDestination(a: Answers, results: VisaResult[]): Destinatio
   // profissional que um catálogo genérico.
   if (focus.length === 0) return { kind: "profissionais" };
   params.set("focus", focus.join(","));
+  const extensionId = deriveExtensionFocusId(a);
+  if (extensionId) params.set("extFocus", extensionId);
 
   return { kind: "vistos", query: params.toString() };
 }

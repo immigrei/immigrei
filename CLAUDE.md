@@ -139,9 +139,12 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 - Facebook ✅
 - Phone number: disabled for now (add as optional 2FA later)
 
-### Stripe products (live, created Jul 28 2026):
-- **Immigrei Jornada** — $29.90/month or $269/year (recurring) — the paid tier; free "Retrato" tier has no Stripe product
-- Earlier **Immigrei Base** ($9/mo) and **Immigrei Core** ($29/mo) products are archived, superseded by Jornada
+### Stripe products (live, created Jul 28, 2026):
+- **Immigrei** — single subscription tier; free "Retrato" tier has no Stripe product
+  - Monthly: $29.90/month — `price_1Ty5wp4BxAIRzYfOnpJku6Xb`
+  - Annual: $269.00/year — `price_1Ty5wp4BxAIRzYfOtgyBbThC`
+- Price IDs hardcoded in `lib/stripe.ts` with env override (`STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_ANNUAL`)
+- Earlier **Immigrei Base** ($9/mo) and **Immigrei Core** ($29/mo) products are archived, superseded by this tier
 
 ---
 
@@ -187,6 +190,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 > Keys are stored in the team's password manager. Never commit .env.local to GitHub.
 
+**Security:** `.env.local` is protected by `.gitignore` (pattern `.env*`) — will never be committed to GitHub. However, local agents (Buzz, Claude Code, etc.) running on your machine have filesystem access and **can read `.env.local`**. This is intentional — agents need API credentials to function. Keep your machine secure; only run agents you trust.
+
 ---
 
 ## 8. Team
@@ -229,6 +234,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - [x] Legal knowledge base — content/leis; all 11 catalog visas have dedicated /vistos/[id] pages (Jul 16, 2026)
 - [x] Document vault, community tab, SEVP school directory (/escolas), I-94 cron
 - [x] Marketing agent roster — 5 skills + compliance subagent, pipeline docs + 4 unpublished sample drafts in content/marketing (Jul 28, 2026)
+- [x] Stripe products live — single subscription tier, monthly + annual (Jul 28, 2026)
 - [x] Stripe switched to live mode — checkout verified working end-to-end in production (Jul 29, 2026)
 
 **Known gaps / next up:**

@@ -10,6 +10,7 @@ import {
   attachKitLinks,
   computeRecommendations,
   deriveDestination,
+  deriveExtensionFocusId,
   deriveFocusIds,
   deriveMainGoal,
   questionMap,
@@ -245,6 +246,25 @@ describe("focus da vitrine derivado por persona", () => {
   it("turista brasileiro → foca B-1/B-2", () => {
     expect(focus({ q_location: "outside", q_goal: "visit", q_nationality: "brazilian" }))
       .toContain("b1");
+  });
+
+  it("B-1/B-2 mudando de status pra H-1B → foca os dois, mas B-1/B-2 é sinalizado como 'enquanto isso' (não vira link do kit b1 por acidente)", () => {
+    const a = {
+      q_location: "in_us", q_current_status: "in_status",
+      q_current_visa: "b1b2", q_change_goal: "change_status", q_target_visa: "h1b",
+    };
+    expect(recs(a).find((r) => r.visa.includes("→"))?.href).toBeUndefined();
+    expect(focus(a)).toEqual(expect.arrayContaining(["b1", "h1b"]));
+    expect(deriveExtensionFocusId(a)).toBe("b1");
+  });
+
+  it("H-1B: mudar de empregador (work_change) → só o H-1B em foco, sem selo de extensão (o card É o plano)", () => {
+    const a = {
+      q_location: "in_us", q_current_status: "in_status",
+      q_current_visa: "h1b", q_change_goal: "work_change",
+    };
+    expect(focus(a)).toEqual(["h1b"]);
+    expect(deriveExtensionFocusId(a)).toBeNull();
   });
 });
 
