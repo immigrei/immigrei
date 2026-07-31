@@ -40,6 +40,8 @@ export interface PerfilExportData {
   investor_capital_range?:      string | null;
   business_owner_experience?:   boolean | null;
   citizenship_country?:         string | null;
+  has_other_citizenship?:       boolean | null;
+  other_citizenship_country?:   string | null;
   l1_us_br_operations?:         boolean | null;
   l1_in_leadership_role?:       boolean | null;
   l1_leadership_years?:         string | null;
@@ -296,7 +298,12 @@ export async function generatePerfilPdf(data: PerfilExportData, locale: Locale):
   // ── Investidor ────────────────────────────────────────────────────────
   if (data.investor_capital_available || data.business_owner_experience) {
     sectionTitle(t.sectionInvestor);
-    fieldLine(t.citizenship, data.citizenship_country ?? "");
+    fieldLine(
+      t.citizenship,
+      data.has_other_citizenship && data.other_citizenship_country
+        ? `${data.citizenship_country ?? ""} + ${data.other_citizenship_country}`.trim()
+        : data.citizenship_country ?? "",
+    );
     fieldLine(t.capitalAvailable, data.investor_capital_available ? t.yes : t.no);
     if (data.investor_capital_available && data.investor_capital_range) {
       fieldLine(t.capitalRange, INVESTOR_RANGE[data.investor_capital_range]?.[locale] ?? "");

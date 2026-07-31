@@ -32,6 +32,8 @@ interface PerfilData {
   investor_capital_range?:      string | null;
   business_owner_experience?:   boolean | null;
   citizenship_country?:         string | null;
+  has_other_citizenship?:       boolean | null;
+  other_citizenship_country?:   string | null;
   l1_us_br_operations?:         boolean | null;
   l1_in_leadership_role?:       boolean | null;
   l1_leadership_years?:         string | null;
@@ -547,7 +549,7 @@ export default function PerfilQuestionario() {
           <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.08em" }}>
             Investimento e negócio próprio
           </p>
-          <Field label="Qual sua cidadania? (importa pra visto de investidor — alguns exigem país de tratado com os EUA)">
+          <Field label="Qual sua cidadania principal? (importa pra visto de investidor — alguns exigem país de tratado com os EUA)">
             <input
               type="text"
               maxLength={120}
@@ -557,6 +559,25 @@ export default function PerfilQuestionario() {
               className={`${inputClass} sm:max-w-xs`}
             />
           </Field>
+          <Field label="Você tem outra cidadania além dessa? (ex: italiana, portuguesa — pode abrir outros caminhos de visto)">
+            <ButtonGroup
+              options={[{ value: "sim", label: "Sim" }, { value: "nao", label: "Não" }]}
+              value={data.has_other_citizenship === true ? "sim" : data.has_other_citizenship === false ? "nao" : null}
+              onChange={(v) => set("has_other_citizenship", v === "sim")}
+            />
+          </Field>
+          {data.has_other_citizenship && (
+            <Field label="Qual outra cidadania">
+              <input
+                type="text"
+                maxLength={120}
+                value={data.other_citizenship_country ?? ""}
+                onChange={(e) => set("other_citizenship_country", e.target.value)}
+                placeholder="Ex: Italiana"
+                className={`${inputClass} sm:max-w-xs`}
+              />
+            </Field>
+          )}
           <Field label="Você tem capital disponível pra investir num negócio nos EUA?">
             <ButtonGroup
               options={[{ value: "sim", label: "Sim" }, { value: "nao", label: "Não" }]}
