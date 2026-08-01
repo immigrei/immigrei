@@ -41,6 +41,18 @@ for project memories (e.g. launch sequencing) that explain *why* something
 is intentionally deferred vs. actually broken. Don't flag an intentional
 deferral as an accidental gap — say which it is.
 
+## 2.5. If the Vercel MCP is connected, pull real production signal
+
+`list_projects` / `get_project` / `list_deployments` for deploy health and
+domains, and — most valuable — `get_runtime_errors` (7-day window) for
+error clusters actually happening in production. This surfaces real bugs
+the static code scan can't see (wrong Stripe account on a key, a broken
+upsert on a specific route, a dropped table still referenced). Cross-check
+error `request_log_url` / account IDs against the Stripe MCP's
+`get_stripe_account_info` — a mismatched `acct_...` id is a real, high
+severity finding (means checkout is hitting the wrong Stripe account).
+Also check `get_project_deployment_protection` for SSO/password gating.
+
 ## 3. Read MCP connector state for this session
 
 The system reminders at session start list: tools already loaded,
@@ -59,7 +71,19 @@ never something you can authorize), still connecting.
 - ⚪ **mute** — informational / not required for the product (e.g. unrelated
   personal MCPs, unauthenticated optional tools)
 
-## 5. Publish the dashboard
+## 5. Write for non-devs
+
+César and Felipe are not engineers — every alert and every connector row
+needs a one-line **business analogy** (💬 label), not just the technical
+name. Think retail/ops/sales comparisons: Supabase is "the master
+spreadsheet," Clerk is "the security guard at the door," Stripe is "the
+card machine," Resend is "the automatic mailman," Sentry is "the fire
+alarm," Vercel Cron jobs are "employees who do the same task on a timer
+without anyone pressing a button," MCP connectors are "the assistant's
+visitor badge to specific rooms." Never ship a row with only the technical
+detail — the analogy is not optional polish, it's the point.
+
+## 6. Publish the dashboard
 
 Before writing HTML, load the `artifact-design` skill — this is a UI/tool,
 not a document: lead with a summary strip (counts by severity), put alerts
@@ -79,7 +103,7 @@ every future run — don't change it).
 Write the working HTML file to the scratchpad directory, not into the
 Immigrei repo — this is an ops artifact, not app code.
 
-## 6. Summarize in chat
+## 7. Summarize in chat
 
 After publishing, give the user a short text summary (counts + the 1–3 most
 severe alerts) — don't make them open the link to know if something's on
