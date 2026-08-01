@@ -119,7 +119,7 @@ const faq: FaqItem[] = [
   },
   {
     q: "Ainda preciso de um advogado?",
-    a: "Depende do seu caso — e é exatamente isso que a immigrei ajuda você a entender. Para muitas situações, clareza e organização já resolvem a maior parte do caminho. Quando o seu caso realmente exigir um profissional, você vai saber exatamente disso — e o que perguntar quando for atrás de um.",
+    a: "Essa decisão continua sendo sua, com base em orientação jurídica licenciada — a immigrei não avalia se o seu caso precisa de um advogado. O que fazemos é organizar onde você está e o que vem a seguir, para que uma eventual conversa com um profissional seja mais rápida, mais barata e com as perguntas certas na mão.",
   },
   {
     q: "Funciona para o meu tipo de visto?",
