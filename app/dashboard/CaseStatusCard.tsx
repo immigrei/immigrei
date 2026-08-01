@@ -38,7 +38,7 @@ function normalizeReceipt(raw: string): string {
 
 function statusStyle(result: { isApproved: boolean; isDenied: boolean }) {
   if (result.isApproved) return { box: "bg-pine-tint border-sage", badge: "bg-sage text-white", label: "Aprovado" };
-  if (result.isDenied) return { box: "bg-[#FDECEA] border-clay", badge: "bg-clay text-white", label: "Atenção" };
+  if (result.isDenied) return { box: "bg-clay/10 border-clay", badge: "bg-clay text-white", label: "Atenção" };
   return { box: "bg-amber-tint border-amber", badge: "bg-amber text-ink", label: "Em andamento" };
 }
 
