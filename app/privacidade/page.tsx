@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "../components/Logo";
+import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
@@ -148,6 +149,7 @@ export default function PrivacidadePage() {
           .
         </p>
       </article>
+      <Footer />
     </main>
   );
 }

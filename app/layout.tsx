@@ -31,7 +31,15 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="pt-BR" className={`${fraunces.variable} ${hankenGrotesk.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-cream text-ink">
-          {children}
+          <a
+            href="#conteudo-principal"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3 focus:bg-pine focus:text-cream focus:px-4 focus:py-2 focus:rounded-lg"
+          >
+            Pular para o conteúdo
+          </a>
+          <div id="conteudo-principal" className="flex-1 flex flex-col">
+            {children}
+          </div>
           <CookieConsent />
         </body>
       </html>

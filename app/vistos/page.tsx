@@ -241,6 +241,9 @@ export default function VistosPage() {
   // "enquanto isso" (ex.: B-1/B-2 estendendo rumo ao H-1B) — ver
   // deriveExtensionFocusId em app/onboarding/page.tsx.
   const [extensionId, setExtensionId] = useState<string | null>(null);
+  // Quando há recomendados, "Outros caminhos" começa recolhido — o botão nos
+  // cards (ver DegrauBlock) expande/recolhe em vez de rolar a página até lá.
+  const [outrosExpandido, setOutrosExpandido] = useState(false);
 
   useEffect(() => {
     // Reading window.location requires deferring to an effect (SSR has no
@@ -264,12 +267,6 @@ export default function VistosPage() {
     const extFocus = params.get("extFocus");
     if (extFocus) setExtensionId(extFocus);
   }, []);
-
-  // Quando há recomendados, "Outros caminhos" começa recolhido — o botão nos
-  // cards (ver DegrauBlock) expande/recolhe em vez de rolar a página até lá,
-  // pra não parecer que estamos empurrando quem só quer construir o dossiê
-  // do caminho recomendado pra longe dele.
-  const [outrosExpandido, setOutrosExpandido] = useState(false);
 
   useEffect(() => {
     if (!outrosExpandido) return;
