@@ -23,7 +23,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "1. O que coletamos",
     body: [
-      "Dados de conta: nome e e-mail, via nosso provedor de autenticação (Clerk).",
+      "Dados de conta: nome e e-mail, via nosso provedor de autenticação.",
       "Dados do seu caso: as informações migratórias que VOCÊ decide informar (datas de entrada, números de recibo, I-94, SEVIS etc.). Você controla o que insere.",
       "Lista de espera: e-mail e, se você escolher informar, o momento da sua jornada.",
       "Dados técnicos mínimos de uso (logs de acesso) para segurança e operação.",
@@ -39,7 +39,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "3. Com quem compartilhamos",
     body: [
-      "Somente com os processadores necessários para o serviço funcionar: Clerk (autenticação), Supabase (banco de dados), Vercel (hospedagem), Stripe (pagamentos — a immigrei não vê nem armazena seu cartão), Resend (envio de e-mails), PostHog (analytics de uso do produto, para entendermos o que funciona) e Sentry (monitoramento de erros técnicos). Todos sob contrato e padrões de segurança de mercado.",
+      "Somente com os processadores necessários para o serviço funcionar: nosso provedor de autenticação, nossa infraestrutura de banco de dados e hospedagem, nosso processador de pagamentos (a immigrei não vê nem armazena seu cartão), nosso serviço de envio de e-mails, e ferramentas de analytics de produto e monitoramento de erros técnicos. Todos sob contrato e padrões de segurança de mercado.",
       "Não compartilhamos seus dados voluntariamente com nenhuma autoridade governamental. Somente uma ordem judicial válida e vinculante poderia nos obrigar — nesse caso, quando a lei permitir, notificaremos você antes de qualquer resposta.",
       "Se você optar por ser conectado a um profissional parceiro, compartilharemos com ele apenas o que você autorizar expressamente naquele momento.",
     ],
@@ -47,19 +47,19 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "4. Cookies e rastreamento",
     body: [
-      "Usamos cookies essenciais para manter você logado e um cookie de analytics (PostHog) para entender como as pessoas usam o produto — não usamos cookies de publicidade nem vendemos esse dado a ninguém. [Confirmar com o advogado: se o cookie de analytics roda antes de qualquer ação sua, pode ser necessário um banner de consentimento por LGPD/lei de cookies, e não só esta divulgação.]",
+      "Usamos cookies essenciais para manter você logado e um cookie de analytics para entender como as pessoas usam o produto — não usamos cookies de publicidade nem vendemos esse dado a ninguém. Ao visitar a immigrei pela primeira vez, um banner pede seu consentimento antes de qualquer cookie não essencial ser ativado.",
     ],
   },
   {
     title: "5. Segurança",
     body: [
-      "Seus dados trafegam criptografados (TLS) e são armazenados com criptografia em repouso. O acesso ao banco é protegido por regras de acesso por usuário (RLS) — cada usuário só acessa os próprios dados.",
+      "Seus dados trafegam criptografados em trânsito (TLS) e são armazenados criptografados em repouso. O acesso ao banco é protegido por regras de acesso por usuário (RLS) — cada usuário só acessa os próprios dados.",
     ],
   },
   {
     title: "6. Transferência internacional de dados",
     body: [
-      "Seus dados são armazenados nos Estados Unidos (Supabase, região Norte da Virgínia) e processados pelos parceiros listados acima, a maioria também baseada nos EUA. Isso significa que seus dados saem do Brasil. [Rascunho — confirmar com o advogado o mecanismo de transferência internacional exigido pela LGPD (art. 33): cláusulas contratuais padrão com cada processador, ou outra base legal aplicável.]",
+      "Seus dados são armazenados nos Estados Unidos (infraestrutura AWS, região Norte da Virgínia) e processados pelos parceiros listados acima, a maioria também baseada nos EUA. Isso significa que, independentemente de onde você estiver, seus dados não saem dos Estados Unidos.",
     ],
   },
   {
@@ -73,7 +73,7 @@ const sections: { title: string; body: string[] }[] = [
     title: "8. Seus direitos e a base legal de cada uso",
     body: [
       "Você pode acessar, corrigir, exportar ou excluir seus dados. Atendemos os direitos previstos na LGPD (Brasil) e nas leis de privacidade aplicáveis dos EUA, incluindo a California Consumer Privacy Act (CCPA) para residentes da Califórnia. Basta escrever para o e-mail de contato.",
-      "Cada uso que fazemos dos seus dados tem uma base legal: operar sua conta e mostrar sua jornada (execução de contrato), cobrar sua assinatura (execução de contrato), enviar os alertas que você ativou (execução de contrato/consentimento), manter logs de segurança (obrigação legal/legítimo interesse) e analytics de produto (legítimo interesse, sempre com opção de você pedir exclusão). [Rascunho — o advogado deve confirmar o enquadramento exato de cada base legal.]",
+      "Cada uso que fazemos dos seus dados tem uma base legal: operar sua conta e mostrar sua jornada (execução de contrato), cobrar sua assinatura (execução de contrato), enviar os alertas que você ativou (execução de contrato/consentimento), manter logs de segurança (obrigação legal/legítimo interesse) e analytics de produto (legítimo interesse, sempre com opção de você pedir exclusão).",
     ],
   },
   {

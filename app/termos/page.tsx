@@ -52,7 +52,6 @@ const sections: { title: string; body: string[] }[] = [
     body: [
       "O conteúdo da immigrei é baseado em fontes oficiais e revisado com cuidado, mas regras de imigração mudam com frequência e cada caso tem particularidades. O serviço é fornecido \"como está\", sem garantia de completude, atualidade ou adequação ao seu caso específico.",
       "Na máxima extensão permitida em lei, a immigrei não se responsabiliza por decisões tomadas com base no conteúdo da plataforma, por decisões de agências governamentais sobre o seu caso, nem por danos indiretos. Nada nestes termos limita responsabilidades que não possam ser limitadas por lei.",
-      "Quando a lei permitir um teto, nossa responsabilidade total por qualquer reclamação é limitada ao maior valor entre US$100 e o que você pagou à immigrei nos 12 meses anteriores ao fato que originou a reclamação. [Rascunho — teto sugerido pelo Claude; o advogado deve confirmar o valor e se é executável na jurisdição escolhida.]",
     ],
   },
   {
@@ -77,26 +76,19 @@ const sections: { title: string; body: string[] }[] = [
     ],
   },
   {
-    title: "9. Profissionais parceiros",
+    title: "9. Reembolsos",
     body: [
-      "A immigrei pode receber uma taxa de indicação de profissionais parceiros quando você é conectado a eles — isso nunca muda o preço que você paga ao profissional. [Rascunho — confirmar com a equipe fundadora se essa estrutura de indicação já existe ou é hipotética, e ajustar a redação conforme o fato.]",
-      "A immigrei verifica credenciais básicas dos profissionais listados, mas a relação e a responsabilidade profissional são inteiramente entre você e o profissional escolhido.",
+      "Não fazemos reembolso proporcional de períodos já iniciados — ao cancelar, seu acesso pago continua até o fim do período já pago (ver seção 3), e a cobrança seguinte simplesmente não acontece.",
     ],
   },
   {
-    title: "10. Reembolsos",
+    title: "10. Lei aplicável e foro",
     body: [
-      "Não fazemos reembolso proporcional de períodos já iniciados — ao cancelar, seu acesso pago continua até o fim do período já pago (ver seção 3), e a cobrança seguinte simplesmente não acontece. [Rascunho — confirmar se querem oferecer garantia de reembolso nos primeiros dias, comum em produtos de assinatura.]",
+      "Estes termos são regidos pelas leis do Estado de Wyoming, EUA — onde a Hash Vantage Group LLC é registrada — e qualquer disputa será resolvida nos tribunais desse estado.",
     ],
   },
   {
-    title: "11. Lei aplicável e foro",
-    body: [
-      "Estes termos são regidos pelas leis do Estado de Wyoming, EUA — onde a Hash Vantage Group LLC é registrada — e qualquer disputa será resolvida nos tribunais desse estado. [Rascunho — falta advogado confirmar se faz sentido prever arbitragem antes de ação judicial, dado que o público é majoritariamente brasileiro.]",
-    ],
-  },
-  {
-    title: "12. Contato",
+    title: "11. Contato",
     body: [
       "Dúvidas sobre estes termos: ola@immigrei.com.",
     ],

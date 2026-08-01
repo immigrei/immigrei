@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
+import CookieConsent from "./components/CookieConsent";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -39,6 +40,7 @@ export default function RootLayout({
           <div id="conteudo-principal" className="flex-1 flex flex-col">
             {children}
           </div>
+          <CookieConsent />
         </body>
       </html>
     </ClerkProvider>
