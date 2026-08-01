@@ -11,7 +11,13 @@ export const metadata: Metadata = {
 };
 
 // Minuta para revisão do advogado parceiro antes do lançamento pago.
-const LAST_UPDATED = "1 de agosto de 2026";
+// Mesclado em 31 jul 2026: base completa da revisão do Felipe (PostHog/
+// Sentry nomeados, seções de cookies e transferência internacional) +
+// as adições de compliance USCIS do César (branch
+// feat/uscis-compliance-landing-page, commit 8f00ff8) — vazamento de
+// dados, mudança de dono, consentimento ativo em vez de aviso passivo,
+// exclusão por inatividade e menção à CCPA.
+const LAST_UPDATED = "31 de julho de 2026";
 
 const sections: { title: string; body: string[] }[] = [
   {
@@ -33,54 +39,67 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "3. Com quem compartilhamos",
     body: [
-      "Somente com os processadores necessários para o serviço funcionar: Clerk (autenticação), Supabase (banco de dados), Vercel (hospedagem), Stripe (pagamentos — a immigrei não vê nem armazena seu cartão) e Resend (envio de e-mails). Todos sob contrato e padrões de segurança de mercado.",
+      "Somente com os processadores necessários para o serviço funcionar: Clerk (autenticação), Supabase (banco de dados), Vercel (hospedagem), Stripe (pagamentos — a immigrei não vê nem armazena seu cartão), Resend (envio de e-mails), PostHog (analytics de uso do produto, para entendermos o que funciona) e Sentry (monitoramento de erros técnicos). Todos sob contrato e padrões de segurança de mercado.",
       "Não compartilhamos seus dados voluntariamente com nenhuma autoridade governamental. Somente uma ordem judicial válida e vinculante poderia nos obrigar — nesse caso, quando a lei permitir, notificaremos você antes de qualquer resposta.",
       "Se você optar por ser conectado a um profissional parceiro, compartilharemos com ele apenas o que você autorizar expressamente naquele momento.",
     ],
   },
   {
-    title: "4. Segurança",
+    title: "4. Cookies e rastreamento",
+    body: [
+      "Usamos cookies essenciais para manter você logado e um cookie de analytics (PostHog) para entender como as pessoas usam o produto — não usamos cookies de publicidade nem vendemos esse dado a ninguém. [Confirmar com o advogado: se o cookie de analytics roda antes de qualquer ação sua, pode ser necessário um banner de consentimento por LGPD/lei de cookies, e não só esta divulgação.]",
+    ],
+  },
+  {
+    title: "5. Segurança",
     body: [
       "Seus dados trafegam criptografados (TLS) e são armazenados com criptografia em repouso. O acesso ao banco é protegido por regras de acesso por usuário (RLS) — cada usuário só acessa os próprios dados.",
     ],
   },
   {
-    title: "5. Retenção e exclusão",
+    title: "6. Transferência internacional de dados",
+    body: [
+      "Seus dados são armazenados nos Estados Unidos (Supabase, região Norte da Virgínia) e processados pelos parceiros listados acima, a maioria também baseada nos EUA. Isso significa que seus dados saem do Brasil. [Rascunho — confirmar com o advogado o mecanismo de transferência internacional exigido pela LGPD (art. 33): cláusulas contratuais padrão com cada processador, ou outra base legal aplicável.]",
+    ],
+  },
+  {
+    title: "7. Retenção e exclusão",
     body: [
       "Mantemos seus dados enquanto sua conta existir. Se sua conta ficar inativa por mais de 24 meses sem uso, podemos excluir automaticamente os dados não essenciais, avisando você por e-mail antes.",
       "Você pode pedir a exclusão completa a qualquer momento pelo e-mail abaixo — removemos seus dados dos nossos sistemas em até 30 dias, exceto o que a lei exigir manter (ex.: registros fiscais de pagamento).",
     ],
   },
   {
-    title: "6. Seus direitos",
+    title: "8. Seus direitos e a base legal de cada uso",
     body: [
       "Você pode acessar, corrigir, exportar ou excluir seus dados. Atendemos os direitos previstos na LGPD (Brasil) e nas leis de privacidade aplicáveis dos EUA, incluindo a California Consumer Privacy Act (CCPA) para residentes da Califórnia. Basta escrever para o e-mail de contato.",
+      "Cada uso que fazemos dos seus dados tem uma base legal: operar sua conta e mostrar sua jornada (execução de contrato), cobrar sua assinatura (execução de contrato), enviar os alertas que você ativou (execução de contrato/consentimento), manter logs de segurança (obrigação legal/legítimo interesse) e analytics de produto (legítimo interesse, sempre com opção de você pedir exclusão). [Rascunho — o advogado deve confirmar o enquadramento exato de cada base legal.]",
     ],
   },
   {
-    title: "7. Se houver um vazamento de dados",
+    title: "9. Se houver um vazamento de dados",
     body: [
       "Se identificarmos um incidente de segurança que exponha seus dados pessoais, vamos avisar você por e-mail assim que possível, explicando o que aconteceu, quais dados foram afetados e o que fazer a respeito. Também cumpriremos qualquer obrigação legal de notificação aplicável.",
     ],
   },
   {
-    title: "8. Se a immigrei mudar de dono",
+    title: "10. Se a immigrei mudar de dono",
     body: [
       "Se a immigrei for vendida, incorporada ou encerrar as atividades, seus dados podem ser transferidos como parte desse processo. Vamos avisar você antes disso acontecer, e a nova empresa (se houver) precisará seguir uma política de privacidade pelo menos tão protetiva quanto esta — ou te dar a opção de exportar ou excluir seus dados antes da transferência.",
     ],
   },
   {
-    title: "9. Crianças",
+    title: "11. Crianças",
     body: ["A immigrei não é destinada a menores de 18 anos."],
   },
   {
-    title: "10. Mudanças nesta política",
+    title: "12. Mudanças nesta política",
     body: [
       "Se mudarmos esta política de forma relevante, pedimos seu consentimento ativo antes de você continuar usando a immigrei — não é só um aviso passivo. Junto com o pedido, mostramos um resumo em linguagem simples do que mudou, pra você não precisar reler o documento inteiro.",
     ],
   },
   {
-    title: "11. Contato",
+    title: "13. Contato",
     body: ["Dúvidas sobre esta política: ola@immigrei.com."],
   },
 ];
