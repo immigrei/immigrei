@@ -4,7 +4,9 @@
 
 export interface FaqItem {
   q: string;
-  a: string;
+  a: React.ReactNode;
+  /** Plain-text version for the FAQPage JSON-LD, only needed when `a` isn't a bare string (e.g. it contains a link). */
+  aText?: string;
 }
 
 export default function Faq({ items }: { items: FaqItem[] }) {
@@ -14,7 +16,10 @@ export default function Faq({ items }: { items: FaqItem[] }) {
     mainEntity: items.map((item) => ({
       "@type": "Question",
       name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: typeof item.a === "string" ? item.a : item.aText ?? "",
+      },
     })),
   };
 

@@ -7,7 +7,7 @@ import Eyebrow from "./components/Eyebrow";
 import SectionHeading from "./components/SectionHeading";
 import Card from "./components/Card";
 import CtaButton from "./components/CtaButton";
-import Faq from "./components/Faq";
+import Faq, { type FaqItem } from "./components/Faq";
 import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
@@ -27,18 +27,51 @@ export const metadata: Metadata = {
   },
 };
 
+function IconPath() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="19" r="1.6" fill="currentColor" opacity="0.35" />
+      <circle cx="10" cy="14" r="1.6" fill="currentColor" opacity="0.6" />
+      <circle cx="15" cy="9" r="1.8" fill="currentColor" />
+      <path d="M15 5h4v4" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function IconSpeech() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 5h16v10H9l-4 4v-4H4z" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function IconPeople() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8.5" cy="8" r="3" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M2.5 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="17.5" cy="9" r="2.3" stroke="currentColor" strokeWidth="1.8" opacity="0.55" />
+      <path d="M15.2 13.7c2.5.3 4.3 2.1 4.3 5" stroke="currentColor" strokeWidth="1.8" opacity="0.55" />
+    </svg>
+  );
+}
+
 const pillars = [
   {
     title: "Caminho completo",
     text: "Não só onde seu caso está — mas para onde você vai e o que é preciso em cada etapa.",
+    icon: <IconPath />,
   },
   {
     title: "No seu idioma",
     text: "Português primeiro. Sem juridiquês, sem respostas contraditórias do Google.",
+    icon: <IconSpeech />,
   },
   {
-    title: "Rede de confiança",
-    text: "Profissionais verificados a um toque de distância, quando você estiver pronto.",
+    title: "Comunidade real",
+    text: "Relatos de brasileiros que já passaram pelo que você está vivendo agora.",
+    icon: <IconPeople />,
   },
 ];
 
@@ -57,30 +90,44 @@ const trustChips = [
   },
 ];
 
-const faq = [
+const faq: FaqItem[] = [
   {
     q: "A immigrei é um escritório de advocacia?",
-    a: "Não — e isso é proposital. A immigrei organiza a informação da sua jornada: onde seu caso está, o que vem a seguir e o que é preciso em cada etapa, tudo em português. Não damos aconselhamento jurídico. Quando o seu caso pedir um profissional, conectamos você a advogados e consultores verificados.",
+    a: "Não — e isso é proposital. A immigrei organiza a sua jornada: onde seu caso está, o que vem a seguir e o que é preciso em cada etapa, tudo em português. Não damos aconselhamento jurídico — isso continua sendo trabalho de advogado.",
   },
   {
     q: "Quanto custa usar a immigrei?",
-    a: "Tem plano gratuito — você já começa a organizar a sua jornada sem pagar nada. Se quiser mais profundidade (acompanhamento de caso, cofre de documentos, rede de profissionais), os planos pagos começam em poucos dólares por mês.",
+    a: (
+      <>
+        O plano <strong className="text-ink">Retrato</strong> é gratuito para
+        sempre: rastreamento do seu caso em tempo real, alertas de status e
+        prazos — sem pagar nada. Se quiser ver para onde a sua jornada vai
+        (kits por tipo de visto, cofre de documentos, comunidade), isso é a{" "}
+        <strong className="text-ink">Jornada</strong>, nosso único plano
+        pago.{" "}
+        <Link href="/planos" className="text-pine underline underline-offset-4">
+          Veja os planos →
+        </Link>
+      </>
+    ),
+    aText:
+      "O plano Retrato é gratuito para sempre: rastreamento do seu caso em tempo real, alertas de status e prazos — sem pagar nada. Se quiser ver para onde a sua jornada vai (kits por tipo de visto, cofre de documentos, comunidade), isso é a Jornada, nosso único plano pago.",
   },
   {
     q: "Como sei que isso não é golpe?",
-    a: "Entendemos a desconfiança — o mercado de imigração está cheio disso. Somos dois brasileiros que passamos pelo mesmo processo e construímos a immigrei porque sentimos a falta dela. Seus dados são criptografados, isolados por usuário, e o status do seu caso vem direto da fonte oficial (USCIS) — nunca inventado.",
+    a: "Entendemos a desconfiança — o mercado de imigração está cheio disso. A immigrei nasceu de imigrantes brasileiros que passaram pelo mesmo processo e sentiram a falta dela. Seus dados são criptografados, isolados por usuário, e o status do seu caso vem direto da fonte oficial (USCIS) — nunca inventado.",
   },
   {
     q: "Ainda preciso de um advogado?",
-    a: "Depende do seu caso — e é exatamente isso que a immigrei ajuda você a entender. Para muitas situações, clareza e organização já resolvem. Quando o caso pede um profissional, conectamos você a alguém verificado, no momento certo.",
+    a: "Depende do seu caso — e é exatamente isso que a immigrei ajuda você a entender. Para muitas situações, clareza e organização já resolvem a maior parte do caminho. Quando o seu caso realmente exigir um profissional, você vai saber exatamente disso — e o que perguntar quando for atrás de um.",
   },
   {
     q: "Funciona para o meu tipo de visto?",
-    a: "Cobrimos os caminhos mais comuns de brasileiros nos EUA — de estudante (F-1, M-1) a trabalho (H-1B, O-1, L-1), negócios, green card e mais.",
+    a: "Provavelmente sim. Hoje cobrimos os caminhos mais comuns de brasileiros nos EUA: estudante (F-1, M-1), trabalho (H-1B, O-1, L-1), negócios (E-1, E-2), ajuste de status, extensões e green card. Se o seu ainda não estiver na lista, avisamos assim que adicionarmos — e você já pode começar pelo caminho geral, que serve de base para qualquer visto.",
   },
   {
-    q: "É em português mesmo, ou só a interface?",
-    a: "Tudo — as explicações, os próximos passos, o suporte. Sabemos que sua vida não deveria depender de entender juridiquês em inglês.",
+    q: "“Em português” é só a interface, ou é tudo mesmo?",
+    a: "É tudo. As explicações, os próximos passos, o suporte — pensado em português desde o início, não traduzido em cima da hora. Sua vida não deveria depender de entender juridiquês em inglês.",
   },
 ];
 
@@ -126,17 +173,16 @@ export default async function HomePage() {
             Quem está construindo
           </Eyebrow>
           <p className="text-ink-soft text-base leading-relaxed mb-4">
-            A immigrei nasceu de dois brasileiros —{" "}
-            <strong className="text-ink">Cesar</strong>, que imigrou para a
-            Austrália, e <strong className="text-ink">Felipe</strong>, para os
-            Estados Unidos — que viveram na pele a falta de um mapa: formulário
-            confuso, prazo apertado, e ligação de US$ 300 com advogado que
-            terminava com mais dúvida do que resposta. Construímos a
-            ferramenta que procuramos e não encontramos.
+            A immigrei nasceu de dois amigos brasileiros — um imigrou para a
+            Austrália, o outro para os Estados Unidos — que viveram na pele a
+            falta de um mapa: formulário confuso, prazo apertado, e ligação de
+            US$ 300 com advogado que terminava com mais dúvida do que
+            resposta. Construímos a ferramenta que procuramos e não
+            encontramos.
           </p>
           <div className="flex items-center justify-center gap-6 mb-4 text-sm text-ink-soft">
-            <span>🇦🇺 Cesar — Austrália</span>
-            <span>🇺🇸 Felipe — Estados Unidos</span>
+            <span>🇦🇺 Um de nós, na Austrália</span>
+            <span>🇺🇸 O outro, nos Estados Unidos</span>
           </div>
           <Link
             href="/nossa-historia"
@@ -174,7 +220,7 @@ export default async function HomePage() {
       <section className="px-6 pb-20">
         <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
           {pillars.map((p) => (
-            <Card key={p.title}>
+            <Card key={p.title} icon={p.icon}>
               <h3 className="text-ink font-bold text-base mb-2">{p.title}</h3>
               <p className="text-ink-soft text-sm leading-relaxed">{p.text}</p>
             </Card>

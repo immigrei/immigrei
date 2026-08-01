@@ -36,8 +36,8 @@ const valores = [
     text: "Não simulamos empatia — a carregamos. Cada tela foi pensada por quem já sentiu esse frio na barriga.",
   },
   {
-    title: "Ajuda de confiança",
-    text: "Quando você precisar de um profissional, ele estará a um toque — verificado, transparente, nos seus termos.",
+    title: "Comunidade que soma",
+    text: "Você não é o primeiro brasileiro a passar por isso, nem vai ser o último. Trocamos experiência real entre quem já passou e quem está passando agora.",
   },
 ];
 
@@ -64,9 +64,8 @@ export default function NossaHistoriaPage() {
 
         <div className="space-y-6 text-ink-soft text-lg leading-relaxed">
           <p>
-            O <strong className="text-ink">Cesar</strong> foi para a Austrália.
-            O <strong className="text-ink">Felipe</strong>, para os Estados
-            Unidos. Dois caminhos diferentes, a mesma experiência: a
+            Dois amigos brasileiros. Um foi para a Austrália. O outro, para os
+            Estados Unidos. Dois caminhos diferentes, a mesma experiência: a
             desorientação de chegar num lugar novo e descobrir que ninguém tem
             um mapa para o que vem a seguir.
           </p>

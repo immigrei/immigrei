@@ -79,7 +79,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "9. Profissionais parceiros",
     body: [
-      "A immigrei pode receber uma taxa de indicação de profissionais parceiros quando você é conectado a eles — isso nunca muda o preço que você paga ao profissional. [Rascunho — confirmar com o Felipe/César se essa estrutura de indicação já existe ou é hipotética, e ajustar a redação conforme o fato.]",
+      "A immigrei pode receber uma taxa de indicação de profissionais parceiros quando você é conectado a eles — isso nunca muda o preço que você paga ao profissional. [Rascunho — confirmar com a equipe fundadora se essa estrutura de indicação já existe ou é hipotética, e ajustar a redação conforme o fato.]",
       "A immigrei verifica credenciais básicas dos profissionais listados, mas a relação e a responsabilidade profissional são inteiramente entre você e o profissional escolhido.",
     ],
   },

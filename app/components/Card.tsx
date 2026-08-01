@@ -14,15 +14,23 @@ export default function Card({
   children,
   padding = "md",
   className,
+  icon,
 }: {
   children: React.ReactNode;
   padding?: CardPadding;
   className?: string;
+  /** Optional line icon, shown in a tinted circle badge above the content. */
+  icon?: React.ReactNode;
 }) {
   return (
     <div
       className={`bg-cream-2 border border-pine-tint rounded-2xl ${PADDING[padding]} ${className ?? ""}`}
     >
+      {icon && (
+        <div className="w-11 h-11 rounded-full bg-pine-tint flex items-center justify-center mb-4 text-pine">
+          {icon}
+        </div>
+      )}
       {children}
     </div>
   );
