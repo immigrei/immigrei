@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "../components/Logo";
+import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
@@ -50,7 +51,7 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "6. Encerramento e alterações",
     body: [
-      "Você pode encerrar sua conta a qualquer momento e solicitar a exclusão dos seus dados (ver Política de Privacidade). Podemos alterar estes termos; mudanças relevantes serão comunicadas por e-mail com antecedência razoável.",
+      "Você pode encerrar sua conta a qualquer momento e solicitar a exclusão dos seus dados (ver Política de Privacidade). Se mudarmos estes termos de forma relevante, pedimos seu consentimento ativo antes de você continuar usando a immigrei, junto com um resumo em linguagem simples do que mudou.",
     ],
   },
   {
@@ -100,6 +101,7 @@ export default function TermosPage() {
           .
         </p>
       </article>
+      <Footer />
     </main>
   );
 }

@@ -6,6 +6,7 @@ const isPublicRoute = createRouteMatcher([
   "/nossa-historia(.*)",
   "/termos",
   "/privacidade",
+  "/seguranca",
   "/sitemap.xml",
   "/robots.txt",
   "/planos",
@@ -14,6 +15,10 @@ const isPublicRoute = createRouteMatcher([
   "/onboarding(.*)",
   // SEVP school directory: public government data, acquisition/SEO surface.
   "/escolas(.*)",
+  // Visa education catalog: public, citation-backed content — same reasoning.
+  // The "confirm this path" action inside it already handles a logged-out
+  // visitor gracefully (see ConfirmBar.tsx: 401 -> stash -> /sign-up).
+  "/vistos(.*)",
   // API routes authenticate themselves (CRON_SECRET or Clerk auth() in the
   // handler). auth.protect() returns an HTML 404 for unauthenticated API
   // calls, which blocks Vercel Cron and breaks JSON error responses.
