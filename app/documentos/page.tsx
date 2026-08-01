@@ -305,7 +305,21 @@ const GRUPOS_LABEL: Record<string, string> = {
   "L-1": "Transferência intracompanhia",
   "EB-2 NIW": "Green Card",
   "E-2": "Investidor",
+  "E-1": "Comerciante",
   "B-1/B-2": "Turismo e negócios",
+  "ESTA": "Visa Waiver Program",
+  "IR-1/IR-2": "Família de cidadão americano",
+  "K-1": "Noivo(a) de cidadão americano",
+  "F2A/F2B": "Família de residente permanente",
+  "EB-5": "Investimento",
+  "Asilo": "Proteção humanitária",
+  "Portas estreitas": "Sem vínculo familiar, passou do prazo",
+  "F2A + Overstay": "Familiar com Green Card, em overstay",
+  "N-400": "Cidadania americana",
+  "I-90": "Renovação de Green Card",
+  "I-131": "Viagens com Green Card",
+  "F-2/H-4/L-2/J-2": "Dependentes",
+  "DV Lottery": "Loteria de vistos",
 };
 
 export default function DocumentosPage() {
