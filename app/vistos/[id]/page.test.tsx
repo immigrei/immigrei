@@ -8,8 +8,8 @@ import { FontesOficiaisSection } from "./page";
  * be rendered here without ConfirmBar/VoltarButton, which call
  * next/navigation's useRouter and need a live App Router context.
  *
- * /vistos(.*) requires login (proxy.ts) — there's no signed-out visitor to
- * gate for anymore, so this only checks the always-on rendering.
+ * /vistos(.*) is public (proxy.ts) — this only checks the always-on
+ * rendering, which is the same for signed-in and signed-out visitors.
  */
 
 const f1 = VISTO_PAGES.f1;

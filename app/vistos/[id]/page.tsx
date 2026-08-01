@@ -27,9 +27,21 @@ export async function generateMetadata({
   const { id } = await params;
   const visto = todosVistos.find((v) => v.id === id);
   if (!visto) return {};
+  const title = `${visto.codigo} — ${visto.nome} | immigrei`;
+  const url = `https://immigrei.com/vistos/${id}`;
   return {
-    title: `${visto.codigo} — ${visto.nome} | immigrei`,
+    metadataBase: new URL("https://immigrei.com"),
+    title,
     description: visto.descricao,
+    alternates: { canonical: `/vistos/${id}` },
+    openGraph: {
+      title,
+      description: visto.descricao,
+      url,
+      siteName: "immigrei",
+      locale: "pt_BR",
+      type: "article",
+    },
   };
 }
 
@@ -101,11 +113,44 @@ export default async function VistoPage({
   const visto = todosVistos.find((v) => v.id === id);
   if (!page || !visto) notFound();
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: visto.nome,
+    description: visto.descricao,
+    author: { "@type": "Organization", name: "immigrei" },
+    inLanguage: "pt-BR",
+    datePublished: page.verificadoEm,
+    dateModified: page.verificadoEm,
+  };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "immigrei", item: "https://immigrei.com/" },
+      { "@type": "ListItem", position: 2, name: "Vistos", item: "https://immigrei.com/vistos" },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: visto.nome,
+        item: `https://immigrei.com/vistos/${id}`,
+      },
+    ],
+  };
+
   return (
     <main
       className="min-h-screen bg-cream px-6 py-8 pb-32"
       style={{ fontFamily: "var(--font-body)" }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="max-w-2xl mx-auto">
         {/* Back — o cofre fica sempre visível aqui, independente do visto escolhido */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-6">

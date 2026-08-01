@@ -477,9 +477,9 @@ export async function sendWaitlistWelcome(to: string) {
       ${item("📅", "Radar de datas e eventos", "o visa bulletin do mês explicado e os consulados itinerantes perto de você")}
       <p style="font-size:15px;color:#55615A;line-height:1.7;margin:0 0 16px;">🤝&nbsp; <strong style="color:#1B2520;">E quando o caso pedir julgamento humano</strong> — aquelas decisões com subjetividade que só um especialista pode avaliar — conectamos você a profissionais verificados, sem sair do app. A Immigrei segue organizando tudo; o especialista entra na hora certa.</p>
       <p style="font-size:15px;color:#55615A;margin:0 0 24px;line-height:1.65;">
-        Quem constrói somos nós: Cesar (imigrou para a Austrália) e Felipe
-        (para os EUA). Vivemos essa incerteza na pele — por isso quem está na
-        lista entra primeiro, com acesso antecipado.
+        Quem constrói somos nós: dois amigos brasileiros — um imigrou para a
+        Austrália, o outro para os EUA. Vivemos essa incerteza na pele — por
+        isso quem está na lista entra primeiro, com acesso antecipado.
       </p>
 
       <a href="https://immigrei.com/nossa-historia"
