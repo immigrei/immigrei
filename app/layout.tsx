@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
+import CookieConsent from "./components/CookieConsent";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -31,6 +32,7 @@ export default function RootLayout({
       <html lang="pt-BR" className={`${fraunces.variable} ${hankenGrotesk.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-cream text-ink">
           {children}
+          <CookieConsent />
         </body>
       </html>
     </ClerkProvider>
