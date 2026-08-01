@@ -8,6 +8,12 @@ Sentry.init({
   // Free-tier friendly: sample a slice of normal traffic, not every request.
   tracesSampleRate: 0.1,
   enabled: process.env.NODE_ENV === "production",
+  ignoreErrors: [
+    // ClerkJS's session "touch" heartbeat failing on a transient client
+    // network blip (offline, flaky connection). Clerk retries this
+    // internally and users never notice — not actionable from our code.
+    /ClerkJS: Network error/,
+  ],
 });
 
 // Opted out until the user accepts the cookie banner (CookieConsent.tsx) —
