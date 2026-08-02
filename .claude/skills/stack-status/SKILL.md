@@ -71,17 +71,32 @@ never something you can authorize), still connecting.
 - ⚪ **mute** — informational / not required for the product (e.g. unrelated
   personal MCPs, unauthenticated optional tools)
 
-## 5. Write for non-devs
+## 5. Write for non-devs — AND teach the real vocabulary
 
-César and Felipe are not engineers — every alert and every connector row
-needs a one-line **business analogy** (💬 label), not just the technical
-name. Think retail/ops/sales comparisons: Supabase is "the master
-spreadsheet," Clerk is "the security guard at the door," Stripe is "the
-card machine," Resend is "the automatic mailman," Sentry is "the fire
-alarm," Vercel Cron jobs are "employees who do the same task on a timer
-without anyone pressing a button," MCP connectors are "the assistant's
-visitor badge to specific rooms." Never ship a row with only the technical
-detail — the analogy is not optional polish, it's the point.
+César and Felipe are not engineers, but they explicitly want to build
+shared technical language over time (their words: "hoje já sabemos o que é
+gitignore, env var, cron"). So every alert and every connector row needs
+**two** paired lines, never just one:
+
+- 💬 **Em termos simples** — a retail/ops/sales analogy. Supabase is "the
+  master spreadsheet," Clerk is "the security guard at the door," Stripe is
+  "the card machine," Resend is "the automatic mailman," Sentry is "the
+  fire alarm," Vercel Cron jobs are "employees who do the same task on a
+  timer without anyone pressing a button," MCP connectors are "the
+  assistant's visitor badge to specific rooms."
+- 🔤 **Termo técnico** — the real jargon/acronym (BaaS, RLS, IdP, PSP, CI/CD,
+  PaaS, APM, sandbox vs. production, client-side vs. server-side,
+  observability, embeddings, OAuth scope, restricted key, NHI, least
+  privilege, secrets rotation, account ID mismatch, input sanitization,
+  schema drift, deployment immutability, etc.) with a plain-language
+  definition in the same line — never just the acronym alone.
+
+Add a one-line legend near the top of the page explaining the 💬/🔤
+convention, and — inside the Identidades & credenciais section — a compact
+glossary block for the standing due-diligence vocabulary (NHI, Least
+Privilege, Secrets Rotation, OAuth Scope, Restricted Key, TPRM). Never ship
+a row with only the analogy or only the jargon — pairing both, every time,
+is the point: it's how they build the shared vocabulary run over run.
 
 ## 6. Publish the dashboard
 
