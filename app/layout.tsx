@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import CookieConsent from "./components/CookieConsent";
@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   title: "immigrei — Sua jornada migratória nos EUA, com clareza",
   description:
     "O companheiro completo para sua jornada de imigração nos EUA. Construído por imigrantes, para imigrantes.",
+};
+
+// viewport-fit=cover is required for env(safe-area-inset-*) to resolve to
+// a real value on iOS Safari/PWA — without it BottomNav/SearchFab's
+// safe-area padding is always 0, even with the CSS in place.
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

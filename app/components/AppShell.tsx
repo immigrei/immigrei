@@ -5,6 +5,7 @@ import Link from "next/link";
 import BottomNav from "./BottomNav";
 import HeaderUserButton from "./HeaderUserButton";
 import Logo from "./Logo";
+import SearchFab from "./SearchFab";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   // Lets the cookie banner (CookieConsent.tsx, in the root layout) know a
@@ -32,6 +33,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
+      <SearchFab />
       <BottomNav />
     </div>
   );

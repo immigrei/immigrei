@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:search-embeddings": "tsx scripts/build-search-embeddings.ts"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "^2.7.2",
@@ -33,6 +34,7 @@
     "eslint-config-next": "16.2.12",
     "mupdf": "^1.28.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5",
     "vitest": "^4.1.9"
   },

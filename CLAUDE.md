@@ -186,6 +186,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+VOYAGE_API_KEY=
 ```
 
 > Keys are stored in the team's password manager. Never commit .env.local to GitHub.
@@ -236,8 +237,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - [x] Marketing agent roster — 5 skills + compliance subagent, pipeline docs + 4 unpublished sample drafts in content/marketing (Jul 28, 2026)
 - [x] Stripe products live — single subscription tier, monthly + annual (Jul 28, 2026)
 - [x] Stripe switched to live mode — checkout verified working end-to-end in production (Jul 29, 2026)
+- [x] E-1/E-2 change-of-status kits — full checklist content in data.ts, not just catalog stubs
+- [x] Denial-exit matrix — all 13 catalog categories covered in lib/strategies.ts (Jul 28, 2026)
+- [x] "Explorar outros vistos" now shows all 22 visa categories in the documentos catalog, not just 9 (Aug 1, 2026)
 
-**Known gaps / next up:**
+**Known gaps / next up (blockers before public launch):**
 
-- [ ] E-1/E-2 change-of-status kit (L-1/J-1/M-1 already have one)
-- [ ] Denial-exit matrix completion (matriz de saídas por negativa)
+- [ ] **Stripe checkout regression, unconfirmed** — 13 failed subscription attempts Jul 29–30 hit the wrong Stripe account + a malformed Authorization header; stopped on its own at 02:09 Jul 30, never confirmed as intentionally fixed. Verify against live Stripe/Vercel logs before relying on checkout again.
+- [ ] **USCIS Case-Status still on sandbox** — the cron/API hit `api-int.uscis.gov`, not production. Blocks the core "where does my case stand" promise. Waiting on USCIS to grant prod access (requires 5 consecutive days of sandbox traffic, per `uscis-sandbox-traffic` cron).
+- [ ] **No real-time error alerting** — Sentry has no Slack alert rule; none of the 5 Vercel cron jobs alert on failure. Needs native Sentry→Slack and Vercel monitoring setup (account-level, not code).
+- [ ] Confirm the `user_processes` 42P10 fix (commit a4424c5, Jul 30) actually stopped the errors seen into the morning of Jul 31.
