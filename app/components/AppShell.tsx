@@ -2,6 +2,7 @@ import Link from "next/link";
 import BottomNav from "./BottomNav";
 import HeaderUserButton from "./HeaderUserButton";
 import Logo from "./Logo";
+import SearchFab from "./SearchFab";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +21,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
+      <SearchFab />
       <BottomNav />
     </div>
   );

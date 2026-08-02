@@ -44,3 +44,10 @@ body {
   color: var(--ink);
   font-family: var(--font-sans), sans-serif;
 }
+
+/* Activates BottomNav's safe-area-pb class and lets SearchFab's inline
+   env(safe-area-inset-bottom) resolve to a real value on notched/home-
+   indicator phones — requires viewport-fit=cover (see app/layout.tsx). */
+@utility safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
