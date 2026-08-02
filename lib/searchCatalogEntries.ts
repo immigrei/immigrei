@@ -8,7 +8,7 @@ import { todosVistos } from "@/lib/vistosCatalog";
 import { KITS } from "@/lib/kitsCatalog";
 import { MANUAIS } from "@/lib/manuais";
 
-export type SearchResultType = "visto" | "kit" | "manual";
+export type SearchResultType = "visto" | "kit" | "manual" | "atalho";
 
 export interface CatalogEntry {
   type: SearchResultType;
@@ -38,6 +38,44 @@ function withSynonyms(type: SearchResultType, id: string, text: string): string 
   const extra = SEARCH_SYNONYMS[`${type}:${id}`];
   return extra ? `${text} ${extra}` : text;
 }
+
+// Static in-app destinations that aren't part of the vistos/kits/caminhos
+// catalog but people search for by intent anyway (e.g. "meus pdfs" should
+// find the document vault, not the closest unrelated catalog entry).
+const ATALHOS: Omit<CatalogEntry, "type">[] = [
+  {
+    id: "cofre",
+    title: "Cofre de Documentos",
+    snippet: "Guarde e organize os arquivos da sua jornada em um só lugar.",
+    href: "/documentos/cofre",
+    gated: true, // app/documentos/cofre/page.tsx always gates
+    text: "Cofre de Documentos meus pdfs meus documentos meus arquivos uploads comprovantes passaporte identidade digitalizar anexos",
+  },
+  {
+    id: "painel",
+    title: "Painel",
+    snippet: "Acompanhe o progresso da sua jornada e os próximos passos.",
+    href: "/painel",
+    gated: false,
+    text: "Painel meu progresso próximos passos status da jornada resumo",
+  },
+  {
+    id: "comunidade",
+    title: "Comunidade",
+    snippet: "Relatos de brasileiros que já passaram pelo que você está vivendo.",
+    href: "/comunidade",
+    gated: true, // app/api/community/route.ts strips content for free
+    text: "Comunidade relatos experiências outros brasileiros histórias fórum",
+  },
+  {
+    id: "profissionais",
+    title: "Profissionais",
+    snippet: "Conecte-se com advogados e profissionais de imigração.",
+    href: "/profissionais",
+    gated: false,
+    text: "Profissionais advogado advogados consultoria jurídica indicação",
+  },
+];
 
 export function buildCatalogEntries(): CatalogEntry[] {
   const vistoEntries: CatalogEntry[] = todosVistos.map((v) => ({
@@ -70,5 +108,7 @@ export function buildCatalogEntries(): CatalogEntry[] {
     text: withSynonyms("manual", m.slug, `${m.badge} ${m.titulo} ${m.subtitulo}`),
   }));
 
-  return [...vistoEntries, ...kitEntries, ...manualEntries];
+  const atalhoEntries: CatalogEntry[] = ATALHOS.map((a) => ({ type: "atalho", ...a }));
+
+  return [...vistoEntries, ...kitEntries, ...manualEntries, ...atalhoEntries];
 }

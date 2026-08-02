@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 // Mirrors lib/searchIndex.ts's SearchResultType — kept as a local literal
 // union instead of importing it, since that module is server-only (reads
 // lib/searchEmbeddings.json off disk) and has no business in a client bundle.
-type SearchResultType = "visto" | "kit" | "manual";
+type SearchResultType = "visto" | "kit" | "manual" | "atalho";
 
 interface SearchHit {
   type: SearchResultType;
@@ -21,6 +21,7 @@ const typeLabel: Record<SearchResultType, string> = {
   visto: "Visto",
   kit: "Kit",
   manual: "Caminho",
+  atalho: "Atalho",
 };
 
 function LockIcon() {
