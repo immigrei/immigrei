@@ -57,6 +57,14 @@ function IconPeople() {
   );
 }
 
+// As duas respostas de q_location, a primeira pergunta do questionário
+// (ver questionMap em app/onboarding/page.tsx). Os valores precisam bater
+// com as opções de lá — é o que o param ?q_location= carrega.
+const startOptions = [
+  { value: "in_us", flag: "🇺🇸", label: "Estou nos EUA" },
+  { value: "outside", flag: "🌍", label: "Estou fora dos EUA" },
+];
+
 const pillars = [
   {
     title: "Caminho completo",
@@ -150,9 +158,9 @@ export default async function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="flex flex-col items-center text-center px-6 py-20">
-        <Eyebrow className="mb-6">Construído por imigrantes, para imigrantes</Eyebrow>
-        <SectionHeading as="h1" size="hero" className="mb-6 max-w-2xl">
+      <section className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:pt-14 sm:pb-20">
+        <Eyebrow className="mb-5">Construído por imigrantes, para imigrantes</Eyebrow>
+        <SectionHeading as="h1" size="hero" className="mb-5 max-w-2xl">
           Sua jornada migratória nos EUA,{" "}
           <span className="text-pine">com clareza.</span>
         </SectionHeading>
@@ -160,10 +168,32 @@ export default async function HomePage() {
           Não só onde você está — mas para onde você vai, o que precisa fazer e
           com quem pode contar.
         </p>
-        <CtaButton href="/onboarding">Começar agora — é gratuito</CtaButton>
-        <p className="text-ink-faint text-sm mt-4">
-          Sem cartão de crédito. Leva menos de 5 minutos.
-        </p>
+
+        {/* A primeira pergunta do questionário, trazida para a dobra. Escolher
+            aqui já responde "Onde você está agora?" e pula a tela de
+            boas-vindas — ver ?q_location= em app/onboarding/page.tsx. */}
+        <div className="w-full max-w-md">
+          <p className="text-ink font-semibold text-base mb-3">
+            Onde você está agora?
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {startOptions.map((o) => (
+              <Link
+                key={o.value}
+                href={`/onboarding?q_location=${o.value}`}
+                className="flex items-center justify-center gap-2.5 bg-cream-2 border-2 border-pine text-ink font-semibold rounded-xl px-5 py-4 hover:bg-pine hover:text-cream transition-colors"
+              >
+                <span aria-hidden className="text-xl">
+                  {o.flag}
+                </span>
+                {o.label}
+              </Link>
+            ))}
+          </div>
+          <p className="text-ink-faint text-sm mt-4">
+            Gratuito, sem cartão de crédito. Leva menos de 2 minutos.
+          </p>
+        </div>
       </section>
 
       {/* Founders / skin-in-the-game credibility */}

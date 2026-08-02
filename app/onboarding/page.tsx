@@ -1904,13 +1904,31 @@ export default function OnboardingPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
+    // O hero da home já faz a primeira pergunta ("Onde você está agora?") e
+    // manda a resposta em ?q_location=. Quem chega assim não vê a tela de
+    // boas-vindas nem responde a mesma coisa de novo — cai direto na
+    // pergunta seguinte. O param vence o estado salvo: é a escolha que a
+    // pessoa acabou de fazer, agora.
+    const fromHero = new URLSearchParams(window.location.search).get("q_location");
+    if (fromHero === "in_us" || fromHero === "outside") {
+      const { next } = questionMap.q_location;
+      const seguinte =
+        typeof next === "function" ? next(fromHero, { q_location: fromHero }) : next;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPhase("questions");
+      setAnswers({ q_location: fromHero });
+      // q_location fica no histórico para o "Voltar" levar de volta a ela,
+      // com a resposta já marcada, em vez de cair na tela de boas-vindas.
+      setHistory(["q_location", seguinte]);
+      return;
+    }
+
     // Reading sessionStorage requires deferring to an effect (SSR has none);
     // this restore can only ever happen once, on mount.
     try {
       const raw = sessionStorage.getItem(ONBOARDING_STATE_KEY);
       if (!raw) return;
       const saved = JSON.parse(raw);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved.phase === "questions" || saved.phase === "results") setPhase(saved.phase);
       if (saved.answers && typeof saved.answers === "object") setAnswers(saved.answers);
       if (Array.isArray(saved.history) && saved.history.length > 0) setHistory(saved.history);

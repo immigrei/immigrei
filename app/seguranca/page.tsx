@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/seguranca" },
 };
 
-const sections: { title: string; body: string[] }[] = [
+const sections: { title: string; titleNode?: React.ReactNode; body: string[] }[] = [
   {
     title: "Criptografia em trânsito e em repouso",
     body: [
@@ -55,7 +55,12 @@ const sections: { title: string; body: string[] }[] = [
     ],
   },
   {
-    title: "Encontrou uma vulnerabilidade?",
+    title: "Encontrou um bug de segurança?",
+    titleNode: (
+      <>
+        Encontrou um <em>bug</em> de segurança?
+      </>
+    ),
     body: [
       "Se você identificar um problema de segurança, escreva para ola@immigrei.com. Levamos qualquer relato a sério e respondemos o mais rápido possível.",
     ],
@@ -83,7 +88,7 @@ export default function SegurancaPage() {
         </p>
         {sections.map((s) => (
           <section key={s.title} className="mb-8">
-            <h2 className="text-ink font-bold text-lg mb-3">{s.title}</h2>
+            <h2 className="text-ink font-bold text-lg mb-3">{s.titleNode ?? s.title}</h2>
             {s.body.map((p) => (
               <p key={p.slice(0, 40)} className="text-ink-soft text-base leading-relaxed mb-3">
                 {p}
