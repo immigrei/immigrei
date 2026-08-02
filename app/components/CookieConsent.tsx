@@ -41,7 +41,11 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-cream-2 border-t border-pine-tint px-4 py-4 sm:px-6 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+    // z-[60] + the cookie-consent-banner offset in globals.css: on
+    // authenticated pages BottomNav.tsx is also fixed bottom-0 z-50 — without
+    // both, this banner (later in the DOM, same layer) paints over the nav
+    // and blocks every tab until the user picks Aceitar/Recusar.
+    <div className="cookie-consent-banner fixed bottom-0 inset-x-0 z-[60] bg-cream-2 border-t border-pine-tint px-4 py-4 sm:px-6 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] transition-[bottom]">
       <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
         <p className="text-ink-soft text-sm leading-relaxed flex-1">
           Usamos um cookie de analytics para entender como as pessoas usam a immigrei — nada de publicidade, nunca vendemos esse dado. Veja nossa{" "}
