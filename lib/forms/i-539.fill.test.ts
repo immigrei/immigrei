@@ -17,6 +17,8 @@ const ANSWERS: Answers = {
   given_name: "Ana",
   middle_name: "",
   a_number: "",
+  uscis_online_account: "1234-5678-9012",
+  ssn: "123-45-6789",
   mail_street: "742 Evergreen Ter",
   mail_unit_type: "apt",
   mail_unit_number: "12",
@@ -104,6 +106,9 @@ describe("I-539 fill", () => {
   it("formats dates as USCIS mm/dd/yyyy", async () => {
     const form = await fillAndReload(ANSWERS);
     expect(form.getTextField("form1[0].#subform[1].P1_Line8_DateOfBirth[0]").getText()).toBe("03/15/1998");
+    // Dashes must be stripped — the PDF fields are digits-only with a fixed maxLength.
+    expect(form.getTextField("form1[0].#subform[1].P1_Line9_SSN[0]").getText()).toBe("123456789");
+    expect(form.getTextField("form1[0].#subform[0].Pt1Line2_USCISOnlineAcctNumber[0]").getText()).toBe("123456789012");
     expect(form.getTextField("form1[0].#subform[1].SupA_Line1i_DateOfArrival[0]").getText()).toBe("01/10/2026");
     expect(form.getTextField("form1[0].#subform[1].P3_Line1a_DateExtended[0]").getText()).toBe("06/30/2028");
   });

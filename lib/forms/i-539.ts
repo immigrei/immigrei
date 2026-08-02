@@ -43,6 +43,13 @@ function isoToUsDate(value: unknown): string {
   return `${m}/${d}/${y}`;
 }
 
+// The PDF's SSN and USCIS online account fields are digits-only with a fixed
+// maxLength; users often type them with dashes/spaces (e.g. "123-45-6789"),
+// which overflows the field and silently drops the value on export.
+function digitsOnly(value: unknown): string {
+  return typeof value === "string" ? value.replace(/\D/g, "") : "";
+}
+
 // Exact option strings of the PDF's status dropdowns (note the leading space —
 // it is part of the stored option value and must match verbatim).
 const CURRENT_STATUS_OPTIONS: Option[] = [
@@ -255,7 +262,7 @@ export const I539: FormSpec = {
           labelPt: "Número da conta online do USCIS",
           helpPt: "Opcional. Só se você já criou uma conta em my.uscis.gov.",
           type: "text",
-          pdf: { kind: "text", field: `${S0}Pt1Line2_USCISOnlineAcctNumber[0]` },
+          pdf: { kind: "text", field: `${S0}Pt1Line2_USCISOnlineAcctNumber[0]`, transform: digitsOnly },
         },
       ],
     },
@@ -459,7 +466,7 @@ export const I539: FormSpec = {
           labelPt: "Número do Social Security (SSN)",
           helpPt: "Opcional. Só se você já tiver um.",
           type: "text",
-          pdf: { kind: "text", field: `${S1}P1_Line9_SSN[0]` },
+          pdf: { kind: "text", field: `${S1}P1_Line9_SSN[0]`, transform: digitsOnly },
         },
       ],
     },
