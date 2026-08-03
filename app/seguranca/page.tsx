@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
+import LanguageToggle from "../components/LanguageToggle";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
   title: "Segurança — immigrei",
   description: "Como a immigrei protege seus dados e o status do seu caso.",
-  alternates: { canonical: "/seguranca" },
+  alternates: {
+    canonical: "/seguranca",
+    languages: { "pt-BR": "/seguranca", en: "/seguranca/en" },
+  },
 };
 
 const sections: { title: string; titleNode?: React.ReactNode; body: string[] }[] = [
@@ -70,10 +74,11 @@ const sections: { title: string; titleNode?: React.ReactNode; body: string[] }[]
 export default function SegurancaPage() {
   return (
     <main className="min-h-screen bg-cream">
-      <header className="flex items-center px-6 py-6 max-w-3xl mx-auto">
+      <header className="flex items-center justify-between px-6 py-6 max-w-3xl mx-auto">
         <Link href="/" aria-label="immigrei — início">
           <Logo variant="lockup" className="text-4xl" />
         </Link>
+        <LanguageToggle ptHref="/seguranca" enHref="/seguranca/en" lang="pt" />
       </header>
       <article className="max-w-2xl mx-auto px-6 pb-20">
         <h1
