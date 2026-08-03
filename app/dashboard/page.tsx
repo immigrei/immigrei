@@ -1,5 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ensureProfile } from "@/lib/profile";
 import { getStrategy } from "@/lib/strategy";
@@ -126,7 +127,8 @@ export default async function DashboardPage() {
           <div className="divide-y divide-pine-tint">
             <InfoRow
               label="Caminho escolhido"
-              value={VISA_LABELS[profile.visa_type] ?? profile.visa_type}
+              value={profile.visa_type === "outro" ? "Outros vistos" : VISA_LABELS[profile.visa_type] ?? profile.visa_type}
+              href={profile.visa_type === "outro" ? "/vistos" : undefined}
             />
             {profile.arrival_date && (
               <InfoRow
@@ -233,13 +235,19 @@ export default async function DashboardPage() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, href }: { label: string; value: string; href?: string }) {
   return (
     <div className="px-6 py-4 flex flex-col gap-0.5">
       <span className="text-xs font-bold uppercase tracking-widest text-ink-faint">
         {label}
       </span>
-      <span className="text-ink text-base font-medium">{value}</span>
+      {href ? (
+        <Link href={href} className="text-pine text-base font-medium underline underline-offset-2 hover:text-pine-deep transition-colors">
+          {value} →
+        </Link>
+      ) : (
+        <span className="text-ink text-base font-medium">{value}</span>
+      )}
     </div>
   );
 }
@@ -305,6 +313,37 @@ function NextSteps({ visaType, mainGoal }: { visaType: string; mainGoal: string 
   const match = visaSteps.find((s) => s.goal === mainGoal) ?? visaSteps[0];
 
   if (!match) {
+    // visa_type "outro" = onboarding não encontrou um caminho específico
+    // pra destacar (deriveDestination, focus vazio) — a mensagem genérica
+    // abaixo é um beco sem saída pra esse caso específico. Duas portas
+    // clicáveis em vez disso: navegar a vitrine sozinho, ou ir direto pra
+    // um profissional (sem sair do app — profissionais é feature paga).
+    if (visaType === "outro") {
+      return (
+        <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">
+            Próximos passos
+          </p>
+          <p className="text-ink text-sm leading-relaxed mb-4">
+            Seu perfil ainda não caiu num caminho específico — isso é comum e tem solução.
+          </p>
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/vistos"
+              className="block text-center bg-amber text-ink font-bold py-3 px-5 rounded-xl text-sm hover:bg-amber-deep transition-colors"
+            >
+              Explorar outros vistos →
+            </Link>
+            <Link
+              href="/profissionais"
+              className="block text-center text-pine font-semibold text-sm py-2 hover:text-pine-deep transition-colors"
+            >
+              Falar com um profissional verificado →
+            </Link>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="bg-amber-tint rounded-2xl p-6 border border-amber mb-5">
         <p className="text-xs font-bold uppercase tracking-widest text-amber-deep mb-2">
