@@ -13,6 +13,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { scrapeAllConsulados, type ConsuladoEvent } from "@/lib/consulados";
 import { sendConsuladoAlert } from "@/lib/notifications";
 import { clerkClient } from "@clerk/nextjs/server";
+import { notifySlackAlert } from "@/lib/slack-alert";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -30,6 +31,7 @@ export async function GET(req: NextRequest) {
     scraped = events.length;
   } catch (err) {
     console.error("[consulados] Scrape failed:", err);
+    await notifySlackAlert(`🔴 [consulados] Cron falhou no scrape: ${String(err)}`);
     return NextResponse.json({ error: "Scrape failed", details: String(err) }, { status: 500 });
   }
 
@@ -107,5 +109,8 @@ export async function GET(req: NextRequest) {
 
   const summary = { startedAt, finishedAt: new Date().toISOString(), scraped, inserted, notified, errors };
   console.log("[consulados] Completed:", summary);
+  if (errors > 0) {
+    await notifySlackAlert(`⚠️ [consulados] Rodou com ${errors} erro(s) — ver logs da Vercel. Resumo: ${JSON.stringify(summary)}`);
+  }
   return NextResponse.json(summary);
 }

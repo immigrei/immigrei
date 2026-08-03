@@ -15,6 +15,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { daysUntilI94Expiry } from "@/lib/i94";
 import { sendI94DeadlineAlert, sendI94ReminderToFillIn } from "@/lib/notifications";
 import { clerkClient } from "@clerk/nextjs/server";
+import { notifySlackAlert } from "@/lib/slack-alert";
 
 export const maxDuration = 300;
 
@@ -31,6 +32,7 @@ export async function GET(req: NextRequest) {
   const startedAt = new Date().toISOString();
   const today = new Date();
   let scanned = 0, sent = 0, errors = 0;
+  let supabaseError: string | null = null;
 
   let from = 0;
   const PAGE = 100;
@@ -44,6 +46,7 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error("[i94-deadlines] Supabase error:", error.message);
+      supabaseError = error.message;
       break;
     }
     if (!profiles || profiles.length === 0) break;
@@ -93,6 +96,7 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error("[i94-deadlines] Supabase error (reminder pass):", error.message);
+      supabaseError = supabaseError ?? error.message;
       break;
     }
     if (!profiles || profiles.length === 0) break;
@@ -131,5 +135,10 @@ export async function GET(req: NextRequest) {
     remindScanned, remindSent, remindErrors,
   };
   console.log("[i94-deadlines] Completed:", summary);
+  if (supabaseError) {
+    await notifySlackAlert(`🔴 [i94-deadlines] Erro no Supabase, cron pode ter parado cedo: ${supabaseError}`);
+  } else if (errors + remindErrors > 0) {
+    await notifySlackAlert(`⚠️ [i94-deadlines] Rodou com ${errors + remindErrors} erro(s) — ver logs da Vercel. Resumo: ${JSON.stringify(summary)}`);
+  }
   return NextResponse.json(summary);
 }

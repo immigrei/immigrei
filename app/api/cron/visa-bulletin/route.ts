@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { fetchLatestBulletin } from "@/lib/visa-bulletin";
+import { notifySlackAlert } from "@/lib/slack-alert";
 
 export async function GET(req: NextRequest) {
   // Verify cron secret
@@ -67,6 +68,7 @@ export async function GET(req: NextRequest) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[visa-bulletin] Error:", message);
+    await notifySlackAlert(`🔴 [visa-bulletin] Cron falhou: ${message}`);
     return NextResponse.json({ status: "error", error: message }, { status: 500 });
   }
 }

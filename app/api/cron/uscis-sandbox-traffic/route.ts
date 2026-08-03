@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { fetchCaseStatus, isUscisSandbox } from "@/lib/uscis";
+import { notifySlackAlert } from "@/lib/slack-alert";
 
 // Staging receipts oficiais (spec do Case Status API em developer.uscis.gov)
 const STAGING_RECEIPTS = [
@@ -43,6 +44,20 @@ export async function GET(req: NextRequest) {
     const r = await fetchCaseStatus(receipt);
     results.push({ receipt, status: r.status, error: r.error });
     await sleep(DELAY_MS);
+  }
+
+  // STAGING_RECEIPTS should always succeed (they're the USCIS-provided
+  // fixtures) — if all of them error out, the sandbox itself (or our
+  // credentials) is down. Silent failure here resets USCIS's "5
+  // consecutive days of traffic" production-access requirement without
+  // anyone noticing, so this is worth a real alert, not just a log line.
+  const stagingErrors = results
+    .slice(0, STAGING_RECEIPTS.length)
+    .filter((r) => r.error).length;
+  if (stagingErrors === STAGING_RECEIPTS.length) {
+    await notifySlackAlert(
+      `🔴 [uscis-sandbox-traffic] Todos os ${STAGING_RECEIPTS.length} receipts de staging falharam — sandbox da USCIS ou credenciais podem estar fora do ar. Resumo: ${JSON.stringify(results)}`
+    );
   }
 
   return NextResponse.json({ ranAt: new Date().toISOString(), results });

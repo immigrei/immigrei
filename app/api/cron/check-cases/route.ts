@@ -14,6 +14,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { fetchCaseStatus } from "@/lib/uscis";
 import { sendCaseStatusUpdate } from "@/lib/notifications";
 import { clerkClient } from "@clerk/nextjs/server";
+import { notifySlackAlert } from "@/lib/slack-alert";
 
 // Allow long runs — with 1.5s per case the default timeout would cut the
 // job after a handful of cases (300s = Vercel Hobby ceiling, ~180 cases)
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
 
   const startedAt = new Date().toISOString();
   let checked = 0, updated = 0, errors = 0;
+  let supabaseError: string | null = null;
 
   // Fetch all active cases — paginate in batches of 100
   let from = 0;
@@ -48,6 +50,7 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error("[check-cases] Supabase error:", error.message);
+      supabaseError = error.message;
       break;
     }
     if (!cases || cases.length === 0) break;
@@ -126,5 +129,10 @@ export async function GET(req: NextRequest) {
   };
 
   console.log("[check-cases] Completed:", summary);
+  if (supabaseError) {
+    await notifySlackAlert(`🔴 [check-cases] Erro no Supabase, cron pode ter parado cedo: ${supabaseError}`);
+  } else if (errors > 0) {
+    await notifySlackAlert(`⚠️ [check-cases] Rodou com ${errors} erro(s) — ver logs da Vercel. Resumo: ${JSON.stringify(summary)}`);
+  }
   return NextResponse.json(summary);
 }
