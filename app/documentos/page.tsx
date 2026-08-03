@@ -63,6 +63,12 @@ function inferirKitRecomendado(profile: Profile | null): string | null {
   if (visa_type === "e1")      return location === "eua" ? "e1-cos" : "e1";
   if (visa_type === "eb5")     return "eb5";
   if (visa_type === "asylee")  return "asylee";
+  if (visa_type === "family-gc")           return "family-gc";
+  if (visa_type === "family-gc-overstay")  return "family-gc-overstay";
+  if (visa_type === "familia-ir")          return "familia-ir";
+  if (visa_type === "overstay-sem-vinculo") return "overstay-sem-vinculo";
+  if (visa_type === "dv-lottery")          return "dv-lottery";
+  if (visa_type === "dependente-cos")      return "dependente-cos";
   if (location === "brasil")   return "f1";
   if (location === "eua" && main_goal === "renovar_visto") return "f1-renovacao";
   if (location === "eua")      return "f1-cos";

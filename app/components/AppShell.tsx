@@ -2,12 +2,15 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import BottomNav from "./BottomNav";
 import HeaderUserButton from "./HeaderUserButton";
 import Logo from "./Logo";
 import SearchFab from "./SearchFab";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const { isLoaded, isSignedIn } = useUser();
+
   // Lets the cookie banner (CookieConsent.tsx, in the root layout) know a
   // fixed bottom-0 BottomNav is also on screen, so it can offset itself
   // above the nav instead of covering it — see the `has-bottom-nav` rule
@@ -16,6 +19,33 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     document.body.classList.add("has-bottom-nav");
     return () => document.body.classList.remove("has-bottom-nav");
   }, []);
+
+  // Onboarding CTAs that send a signed-out user to a specific destination
+  // (saveProfileAndGoTo's "documentos"/"profissionais" destinos) pass that
+  // destination as Clerk's redirect_url, so sign-up drops them straight
+  // there instead of back on /onboarding — which is the only place that
+  // used to flush the profile stashed in localStorage during the 401. That
+  // left the profile (and onboarding_completed) never saved, so /dashboard
+  // bounced them back to /onboarding on the next visit. AppShell renders on
+  // every authenticated page those destinations can land on, so it's the
+  // one place that reliably catches the flush no matter where sign-up sent
+  // the user.
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    const pending = localStorage.getItem("immigrei_pending_profile");
+    if (!pending) return;
+    fetch("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: pending,
+    })
+      .then((res) => {
+        if (res.ok) localStorage.removeItem("immigrei_pending_profile");
+      })
+      .catch(() => {
+        // next mount (this page or another AppShell page) tries again
+      });
+  }, [isLoaded, isSignedIn]);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">
