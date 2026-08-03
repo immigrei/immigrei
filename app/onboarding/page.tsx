@@ -2437,7 +2437,7 @@ export default function OnboardingPage() {
             <button
               onClick={() =>
                 destino.kind === "profissionais"
-                  ? saveProfileAndGoTo("/profissionais")
+                  ? saveProfileAndGoTo("/dashboard", { visa_type: "outro" })
                   : destino.kind === "documentos"
                     ? saveProfileAndGoTo("/dashboard", { visa_type: destino.vistoId })
                     : goToVistos(destino.query)
@@ -2448,11 +2448,9 @@ export default function OnboardingPage() {
             >
               {savingProfile && destino.kind !== "vistos"
                 ? "Salvando sua jornada..."
-                : destino.kind === "profissionais"
-                  ? "Encontrar ajuda profissional →"
-                  : destino.kind === "documentos"
-                    ? "Ir para o meu painel →"
-                    : "Ver minha jornada em detalhe →"}
+                : destino.kind === "profissionais" || destino.kind === "documentos"
+                  ? "Ir para o meu painel →"
+                  : "Ver minha jornada em detalhe →"}
             </button>
           )}
 

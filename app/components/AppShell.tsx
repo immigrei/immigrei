@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import BottomNav from "./BottomNav";
 import HeaderUserButton from "./HeaderUserButton";
@@ -10,6 +11,7 @@ import SearchFab from "./SearchFab";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useUser();
+  const router = useRouter();
 
   // Lets the cookie banner (CookieConsent.tsx, in the root layout) know a
   // fixed bottom-0 BottomNav is also on screen, so it can offset itself
@@ -40,12 +42,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       body: pending,
     })
       .then((res) => {
-        if (res.ok) localStorage.removeItem("immigrei_pending_profile");
+        if (res.ok) {
+          localStorage.removeItem("immigrei_pending_profile");
+          // The server components on this page (dashboard/painel) already
+          // rendered with the pre-save profile — refresh so they re-fetch
+          // and show the journey that was just persisted, instead of the
+          // stale one until the next manual reload.
+          router.refresh();
+        }
       })
       .catch(() => {
         // next mount (this page or another AppShell page) tries again
       });
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, router]);
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">
