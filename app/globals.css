@@ -51,3 +51,13 @@ body {
 @utility safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* AppShell.tsx toggles this class while BottomNav is mounted, so the cookie
+   banner (CookieConsent.tsx) — otherwise a sibling fixed to the same
+   bottom-0 edge — sits above the nav instead of covering it. Both default
+   to the same z-50, so without this offset the banner (later in the DOM)
+   paints over the nav and blocks every tab until the user picks Aceitar/
+   Recusar. */
+body.has-bottom-nav .cookie-consent-banner {
+  bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}

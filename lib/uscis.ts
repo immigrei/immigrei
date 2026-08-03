@@ -40,6 +40,15 @@ export function isUscisSandbox(): boolean {
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
+// Carries the HTTP status so callers can route it through describeApiFailure()
+// — the same specific, user-honest handling every case-status response gets
+// — instead of the generic catch-all in fetchCaseStatus().
+class UscisOauthError extends Error {
+  constructor(public readonly httpStatus: number) {
+    super(`USCIS oauth returned HTTP ${httpStatus}`);
+  }
+}
+
 async function getUscisApiToken(): Promise<string> {
   if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
     return cachedToken.token;
@@ -54,7 +63,7 @@ async function getUscisApiToken(): Promise<string> {
     }).toString(),
     signal: AbortSignal.timeout(10_000),
   });
-  if (!res.ok) throw new Error(`USCIS oauth returned HTTP ${res.status}`);
+  if (!res.ok) throw new UscisOauthError(res.status);
   const data = await res.json();
   const expiresIn = Number(data.expires_in ?? 1800);
   cachedToken = {
@@ -146,7 +155,20 @@ async function fetchCaseStatusViaApi(
   normalized: string,
   fetchedAt: string,
 ): Promise<CaseStatusResult> {
-  let token = await getUscisApiToken();
+  let token: string;
+  try {
+    token = await getUscisApiToken();
+  } catch (err) {
+    // Bad/revoked credentials fail here, before we ever reach the
+    // case-status call — route through the same 401/403 messaging a
+    // case-status-level auth failure would get, instead of falling
+    // through to fetchCaseStatus()'s generic catch-all.
+    if (err instanceof UscisOauthError) {
+      return describeApiFailure(err.httpStatus, normalized, fetchedAt);
+    }
+    throw err;
+  }
+
   let res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
     headers: { Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(10_000),
@@ -155,7 +177,14 @@ async function fetchCaseStatusViaApi(
   // 401 once: the cached token may have just expired — refresh and retry.
   if (res.status === 401 && cachedToken) {
     cachedToken = null;
-    token = await getUscisApiToken();
+    try {
+      token = await getUscisApiToken();
+    } catch (err) {
+      if (err instanceof UscisOauthError) {
+        return describeApiFailure(err.httpStatus, normalized, fetchedAt);
+      }
+      throw err;
+    }
     res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(10_000),

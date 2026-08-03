@@ -57,6 +57,14 @@ function IconPeople() {
   );
 }
 
+// As duas respostas de q_location, a primeira pergunta do questionário
+// (ver questionMap em app/onboarding/page.tsx). Os valores precisam bater
+// com as opções de lá — é o que o param ?q_location= carrega.
+const startOptions = [
+  { value: "in_us", flag: "🇺🇸", label: "Estou nos EUA" },
+  { value: "outside", flag: "🌍", label: "Estou fora dos EUA" },
+];
+
 const pillars = [
   {
     title: "Caminho completo",
@@ -90,6 +98,34 @@ const trustChips = [
   },
 ];
 
+// Contraste com a experiência que a pessoa já teve — não com produtos
+// nomeados. A coluna da esquerda descreve a vivência do imigrante (o que ele
+// reconhece de imediato), não afirmações sobre concorrentes: claim sobre
+// preço/idioma de marca alheia envelhece e vira risco jurídico. O lastro da
+// pesquisa está em docs/competitive-intel (SimpleCitizen, mai/2026).
+const comparisons = [
+  {
+    antes: "Você abre o site do USCIS, lê “Case Was Received” em inglês e continua sem saber o que isso significa pra você.",
+    depois: "O mesmo status, explicado em português — o que é, o que significa no seu caso e o que costuma vir depois.",
+  },
+  {
+    antes: "Você descobre que existia um prazo depois que ele já passou.",
+    depois: "Avisos dos seus prazos antes, não depois — I-94, extensões e mudanças de status.",
+  },
+  {
+    antes: "US$ 300 por 15 minutos com advogado só pra entender o básico do seu próprio caso.",
+    depois: "O básico você entende sozinho, em português. O advogado entra quando o caso realmente pede.",
+  },
+  {
+    antes: "Os apps mostram um status e param aí. Você segue sem saber qual é o próximo passo.",
+    depois: "A jornada inteira: onde você está, para onde vai e o que preparar em cada etapa.",
+  },
+  {
+    antes: "Centenas de dólares por aplicação, cobrados de uma vez.",
+    depois: "Rastreamento do seu caso grátis para sempre. A jornada completa por US$ 29,90/mês.",
+  },
+];
+
 const faq: FaqItem[] = [
   {
     q: "A immigrei é um escritório de advocacia?",
@@ -112,6 +148,10 @@ const faq: FaqItem[] = [
     ),
     aText:
       "O plano Retrato é gratuito para sempre: rastreamento do seu caso em tempo real, alertas de status e prazos — sem pagar nada. Se quiser ver para onde a sua jornada vai (kits por tipo de visto, cofre de documentos, comunidade), isso é a Jornada, nosso único plano pago.",
+  },
+  {
+    q: "Já uso um app de acompanhamento de caso. Qual é a diferença?",
+    a: "Acompanhar o status é o começo, não o fim — e isso a immigrei faz de graça, no plano Retrato. A diferença está no que vem depois: em vez de parar no status, mostramos para onde aquele caso pode ir, o que preparar em cada etapa e quais prazos vêm pela frente. Tudo em português, do aviso ao formulário.",
   },
   {
     q: "Como sei que isso não é golpe?",
@@ -150,9 +190,9 @@ export default async function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="flex flex-col items-center text-center px-6 py-20">
-        <Eyebrow className="mb-6">Construído por imigrantes, para imigrantes</Eyebrow>
-        <SectionHeading as="h1" size="hero" className="mb-6 max-w-2xl">
+      <section className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:pt-14 sm:pb-20">
+        <Eyebrow className="mb-5">Construído por imigrantes, para imigrantes</Eyebrow>
+        <SectionHeading as="h1" size="hero" className="mb-5 max-w-2xl">
           Sua jornada migratória nos EUA,{" "}
           <span className="text-pine">com clareza.</span>
         </SectionHeading>
@@ -160,10 +200,32 @@ export default async function HomePage() {
           Não só onde você está — mas para onde você vai, o que precisa fazer e
           com quem pode contar.
         </p>
-        <CtaButton href="/onboarding">Começar agora — é gratuito</CtaButton>
-        <p className="text-ink-faint text-sm mt-4">
-          Sem cartão de crédito. Leva menos de 5 minutos.
-        </p>
+
+        {/* A primeira pergunta do questionário, trazida para a dobra. Escolher
+            aqui já responde "Onde você está agora?" e pula a tela de
+            boas-vindas — ver ?q_location= em app/onboarding/page.tsx. */}
+        <div className="w-full max-w-md">
+          <p className="text-ink font-semibold text-base mb-3">
+            Onde você está agora?
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {startOptions.map((o) => (
+              <Link
+                key={o.value}
+                href={`/onboarding?q_location=${o.value}`}
+                className="flex items-center justify-center gap-2.5 bg-cream-2 border-2 border-pine text-ink font-semibold rounded-xl px-5 py-4 hover:bg-pine hover:text-cream transition-colors"
+              >
+                <span aria-hidden className="text-xl">
+                  {o.flag}
+                </span>
+                {o.label}
+              </Link>
+            ))}
+          </div>
+          <p className="text-ink-faint text-sm mt-4">
+            Gratuito, sem cartão de crédito. Leva menos de 2 minutos.
+          </p>
+        </div>
       </section>
 
       {/* Founders / skin-in-the-game credibility */}
@@ -190,6 +252,56 @@ export default async function HomePage() {
           >
             Leia a nossa história →
           </Link>
+        </div>
+      </section>
+
+      {/* Diferenciação — responde "por que não continuar como estou?" logo
+          depois da credibilidade dos fundadores, que é quando a objeção
+          aparece. */}
+      <section className="px-6 pb-20">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <Eyebrow className="mb-3">Por que a immigrei</Eyebrow>
+            <SectionHeading size="section" className="mb-3">
+              Você já tentou resolver isso sozinho.
+            </SectionHeading>
+            <p className="text-ink-soft text-base leading-relaxed max-w-xl mx-auto">
+              A gente sabe como costuma ser — passamos por isso antes de
+              construir a immigrei.
+            </p>
+          </div>
+
+          {/* Cabeçalho das colunas: só no desktop. No celular cada linha
+              carrega o próprio rótulo, logo abaixo. */}
+          <div className="hidden sm:grid sm:grid-cols-2 gap-4 mb-3 px-1">
+            <p className="text-xs font-bold uppercase tracking-widest text-ink-faint">
+              Como costuma ser
+            </p>
+            <p className="text-xs font-bold uppercase tracking-widest text-pine">
+              Com a immigrei
+            </p>
+          </div>
+
+          <ul className="space-y-3">
+            {comparisons.map((c) => (
+              <li key={c.antes} className="grid sm:grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-ink/10 bg-cream px-5 py-4">
+                  <p className="sm:hidden text-[11px] font-bold uppercase tracking-widest text-ink-faint mb-1.5">
+                    Como costuma ser
+                  </p>
+                  <p className="text-ink-soft text-sm leading-relaxed">{c.antes}</p>
+                </div>
+                <div className="rounded-2xl border border-pine-tint bg-cream-2 px-5 py-4">
+                  <p className="sm:hidden text-[11px] font-bold uppercase tracking-widest text-pine mb-1.5">
+                    Com a immigrei
+                  </p>
+                  <p className="text-ink text-sm leading-relaxed font-medium">
+                    {c.depois}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

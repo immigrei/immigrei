@@ -6,7 +6,9 @@
 type HeadingSize = "hero" | "section" | "subsection";
 
 const SIZE: Record<HeadingSize, string> = {
-  hero: "text-5xl md:text-6xl font-semibold leading-tight",
+  // O passo em text-4xl existe para o celular: a tagline inteira a 48px
+  // empurrava o primeiro clique para baixo da dobra em telas de ~375px.
+  hero: "text-4xl sm:text-5xl md:text-6xl font-semibold leading-tight",
   section: "text-2xl md:text-3xl font-semibold leading-tight",
   subsection: "text-xl md:text-2xl font-semibold leading-tight",
 };
