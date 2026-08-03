@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import AppShell from "@/app/components/AppShell";
 import PerfilQuestionario from "./PerfilQuestionario";
+import SubscriptionSection from "./SubscriptionSection";
+import { getUserPlan } from "@/lib/plan";
 
 export default async function PerfilPage() {
   const { userId } = await auth();
@@ -11,6 +13,7 @@ export default async function PerfilPage() {
   const user = await currentUser();
   const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Você";
   const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
+  const plan = await getUserPlan(userId);
 
   return (
     <AppShell>
@@ -52,6 +55,8 @@ export default async function PerfilPage() {
             </a>
           </div>
         </div>
+
+        {plan !== "free" && <SubscriptionSection plan={plan} />}
 
         <div className="bg-cream-2 rounded-2xl border border-pine-tint p-6 mb-5">
           <PerfilQuestionario />
