@@ -1,0 +1,27 @@
+# Project: Immigrei (Immigration App)
+
+## 🎯 Project Overview
+- **Stack:** Next.js (App Router), Supabase (DB), Clerk (Auth), Stripe (Payments).
+- **Goal:** Manage immigration processes, visa applications, and user profiles.
+
+## 🛠 Coding Standards & Preferences
+- **Language:** TypeScript.
+- **Validation:** Use **Zod** for all schema and input validation.
+- **Components:** Prefer Server Components; use 'use client' only when necessary.
+- **Architecture:** Use Server Actions for database mutations.
+
+## 🗄 Database & Auth (Crucial)
+- **Primary Table:** `public.profiles`.
+- **Identity:** Users are NOT in Supabase Auth. They are linked via `clerk_user_id`.
+- **Mapping:** Always use `clerk_user_id` as the foreign key/filter when fetching user data.
+- **Permissions:** Respect RLS; only query public schema unless specified.
+
+## 🚀 Behavior & Tool Usage
+- **DO:** Prioritize native MCP tools (Stripe, Supabase, Vercel) for any external data.
+- **DO:** Use the `Developer` extension to read the file structure before suggesting code.
+- **DON'T:** Use "Code Mode" or write custom scripts for simple database or infrastructure queries.
+- **DON'T:** Provide long explanations. Be concise and move straight to execution.
+
+## 📦 Deployment & Infra
+- **Platform:** Vercel.
+- **Workflow:** Ensure environment variables are checked before suggesting deployment-related fixes.
