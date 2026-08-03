@@ -244,11 +244,17 @@ export default function VistosPage() {
   // Quando há recomendados, "Outros caminhos" começa recolhido — o botão nos
   // cards (ver DegrauBlock) expande/recolhe em vez de rolar a página até lá.
   const [outrosExpandido, setOutrosExpandido] = useState(false);
+  // A vitrine é acessada tanto no meio do onboarding (sem caminho salvo
+  // ainda — "Voltar" reabre o card de resultado) quanto já logado, a partir
+  // do Início ("Voltar" deve voltar pro Início, não pro onboarding). O
+  // param `from` distingue os dois casos — ver app/dashboard/page.tsx.
+  const [cameFromApp, setCameFromApp] = useState(false);
 
   useEffect(() => {
     // Reading window.location requires deferring to an effect (SSR has no
     // window); the values below can only ever be set once, on mount.
     const params = new URLSearchParams(window.location.search);
+    if (params.get("from") === "dashboard") setCameFromApp(true);
     const nat = params.get("nationality");
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (nat === "brazilian" || nat === "other") setNationality("brazilian");
@@ -340,10 +346,12 @@ export default function VistosPage() {
 
   return (
     <main className="min-h-screen bg-cream px-4 py-12 md:py-16 pb-28">
-      {/* Back — o onboarding guarda o progresso na sessão e reabre nos resultados */}
+      {/* Back — de dentro do app (Início), volta pro Início; no meio do
+          onboarding, o onboarding guarda o progresso na sessão e reabre nos
+          resultados. */}
       <div className="max-w-5xl mx-auto mb-6">
         <button
-          onClick={() => router.push("/onboarding")}
+          onClick={() => router.push(cameFromApp ? "/dashboard" : "/onboarding")}
           className="text-ink-faint hover:text-ink transition-colors text-sm font-medium flex items-center gap-1"
           style={{ fontFamily: "var(--font-body)" }}
         >

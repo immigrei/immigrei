@@ -128,7 +128,7 @@ export default async function DashboardPage() {
             <InfoRow
               label="Caminho escolhido"
               value={profile.visa_type === "outro" ? "Outros vistos" : VISA_LABELS[profile.visa_type] ?? profile.visa_type}
-              href={profile.visa_type === "outro" ? "/vistos" : undefined}
+              href={profile.visa_type === "outro" ? "/vistos?from=dashboard" : undefined}
             />
             {profile.arrival_date && (
               <InfoRow
@@ -329,7 +329,7 @@ function NextSteps({ visaType, mainGoal }: { visaType: string; mainGoal: string 
           </p>
           <div className="flex flex-col gap-2">
             <Link
-              href="/vistos"
+              href="/vistos?from=dashboard"
               className="block text-center bg-amber text-ink font-bold py-3 px-5 rounded-xl text-sm hover:bg-amber-deep transition-colors"
             >
               Explorar outros vistos →
