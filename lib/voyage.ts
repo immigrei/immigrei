@@ -49,10 +49,35 @@ async function embed(input: string[], inputType: InputType): Promise<number[][] 
   }
 }
 
+// Short-lived in-memory cache for query embeddings — every 300ms typing
+// pause in SearchOverlay fires a request, so a single search ("meus pdfs"
+// typed with a mid-word hesitation) can otherwise cost 2-3 Voyage calls,
+// and two people testing the same query each pay for it again. This is
+// per-process memory (each Vercel serverless instance has its own), so it
+// doesn't fully solve concurrent-load rate limiting, but it cuts real
+// redundant calls in the common case: repeated/retyped/shared queries.
+const QUERY_CACHE_MAX = 200;
+const QUERY_CACHE_TTL_MS = 10 * 60_000;
+const queryCache = new Map<string, { embedding: number[] | null; expiresAt: number }>();
+
 /** Embed a single user search query. Returns null on any failure (missing key, timeout, API error) — callers must fall back to keyword-only matching. */
 export async function embedQuery(text: string): Promise<number[] | null> {
+  const key = text.trim().toLowerCase();
+  const cached = queryCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.embedding;
+
   const result = await embed([text], "query");
-  return result ? result[0] : null;
+  const embedding = result ? result[0] : null;
+
+  // Evict oldest entry before inserting if at capacity — Map preserves
+  // insertion order, so the first key is the oldest.
+  if (queryCache.size >= QUERY_CACHE_MAX) {
+    const oldestKey = queryCache.keys().next().value;
+    if (oldestKey !== undefined) queryCache.delete(oldestKey);
+  }
+  queryCache.set(key, { embedding, expiresAt: Date.now() + QUERY_CACHE_TTL_MS });
+
+  return embedding;
 }
 
 /** Embed catalog documents in bulk (used only by scripts/build-search-embeddings.ts). */

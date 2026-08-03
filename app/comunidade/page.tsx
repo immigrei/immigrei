@@ -32,6 +32,17 @@ interface Report {
 const CATALOGO = [...vistosEstudo, ...vistosNegocios];
 const CODIGO_POR_ID = new Map(CATALOGO.map((v) => [v.id, v.codigo]));
 
+// Mirrors lib/searchIndex.ts / lib/escolas.ts's normalize() — same
+// accent-insensitive approach. Duplicated instead of imported: this is a
+// client component and lib/searchIndex.ts is server-only (reads a file off
+// disk), so importing it here would break the client bundle.
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
 function tempoRelativo(iso: string): string {
   const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   if (dias <= 0) return "hoje";
@@ -50,6 +61,7 @@ export default function ComunidadePage() {
   const [locked, setLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState<string | null>(null);
+  const [busca, setBusca] = useState("");
 
   useEffect(() => {
     fetch("/api/community")
@@ -64,7 +76,12 @@ export default function ComunidadePage() {
   }, []);
 
   const assinante = plan !== "free";
-  const visiveis = filtro ? reports.filter((r) => r.visas.includes(filtro)) : reports;
+  const buscaNorm = normalize(busca.trim());
+  const visiveis = reports.filter((r) => {
+    if (filtro && !r.visas.includes(filtro)) return false;
+    if (buscaNorm && !normalize(`${r.title} ${r.body}`).includes(buscaNorm)) return false;
+    return true;
+  });
   const meusPendentes = visiveis.filter((r) => r.isMine && r.status !== "approved");
   const aprovados = visiveis.filter((r) => r.status === "approved");
 
@@ -124,6 +141,27 @@ export default function ComunidadePage() {
             Não substituem aconselhamento jurídico.
           </p>
         </div>
+
+        {!loading && !locked && reports.length > 0 && (
+          <div className="relative mb-3">
+            <input
+              type="text"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar nos relatos…"
+              className="w-full rounded-xl border border-pine-tint bg-cream-2 px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-pine"
+            />
+            {busca && (
+              <button
+                onClick={() => setBusca("")}
+                aria-label="Limpar busca"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink text-sm"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        )}
 
         {filtros.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
@@ -186,7 +224,11 @@ export default function ComunidadePage() {
             {!loading && aprovados.length === 0 && (
               <div className="rounded-2xl border border-pine-tint bg-cream-2 p-6 text-center mt-2">
                 <p className="text-sm font-semibold text-ink mb-1">
-                  {filtro ? "Ainda não há relatos sobre este visto." : "Os primeiros relatos estão chegando."}
+                  {buscaNorm
+                    ? "Nenhum relato encontrado pra essa busca."
+                    : filtro
+                      ? "Ainda não há relatos sobre este visto."
+                      : "Os primeiros relatos estão chegando."}
                 </p>
                 <p className="text-xs text-ink-soft leading-relaxed">
                   Sua história pode ser o mapa de outra pessoa — que tal ser quem começa?
