@@ -37,6 +37,7 @@ export default function SearchOverlay({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
+  const [answer, setAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -65,6 +66,7 @@ export default function SearchOverlay({ onClose }: { onClose: () => void }) {
     debounceRef.current = setTimeout(async () => {
       if (!trimmed) {
         setResults([]);
+        setAnswer(null);
         setSearched(false);
         setLoading(false);
         return;
@@ -72,10 +74,12 @@ export default function SearchOverlay({ onClose }: { onClose: () => void }) {
       setLoading(true);
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`);
-        const data = res.ok ? await res.json() : { results: [] };
+        const data = res.ok ? await res.json() : { answer: null, results: [] };
         setResults(data.results ?? []);
+        setAnswer(data.answer ?? null);
       } catch {
         setResults([]);
+        setAnswer(null);
       } finally {
         setLoading(false);
         setSearched(true);
@@ -125,6 +129,12 @@ export default function SearchOverlay({ onClose }: { onClose: () => void }) {
           <p className="text-ink-faint text-sm text-center mt-10">
             Nenhum resultado para &ldquo;{q}&rdquo;.
           </p>
+        )}
+
+        {!loading && answer && (
+          <div className="rounded-2xl bg-pine-tint px-4 py-4 mb-4">
+            <p className="text-sm text-ink leading-relaxed">{answer}</p>
+          </div>
         )}
 
         {!loading && results.length > 0 && (

@@ -7,6 +7,7 @@
 import { todosVistos } from "@/lib/vistosCatalog";
 import { KITS } from "@/lib/kitsCatalog";
 import { MANUAIS } from "@/lib/manuais";
+import { FAQ_BANK } from "@/lib/faqBank";
 
 export type SearchResultType = "visto" | "kit" | "manual" | "atalho";
 
@@ -111,4 +112,26 @@ export function buildCatalogEntries(): CatalogEntry[] {
   const atalhoEntries: CatalogEntry[] = ATALHOS.map((a) => ({ type: "atalho", ...a }));
 
   return [...vistoEntries, ...kitEntries, ...manualEntries, ...atalhoEntries];
+}
+
+// A FAQ entry isn't a clickable card — no href/gated — it's the source of an
+// "answer" paragraph shown above the card results (see lib/searchIndex.ts).
+// Kept as a separate type/builder from CatalogEntry rather than shoehorning
+// it into that shape.
+export interface FaqIndexEntry {
+  id: string;
+  pergunta: string; // scored like CatalogEntry.title (exact/startsWith/includes tiers)
+  resposta: string;
+  vistosRelacionados: string[];
+  text: string; // exact string embedded — mirrors CatalogEntry.text
+}
+
+export function buildFaqBankEntries(): FaqIndexEntry[] {
+  return FAQ_BANK.map((f) => ({
+    id: f.id,
+    pergunta: f.pergunta,
+    resposta: f.resposta,
+    vistosRelacionados: f.vistosRelacionados,
+    text: `${f.categoria} ${f.pergunta}`,
+  }));
 }

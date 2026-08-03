@@ -33,7 +33,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildCatalogEntries } from "../lib/searchCatalogEntries";
+import { buildCatalogEntries, buildFaqBankEntries } from "../lib/searchCatalogEntries";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -71,9 +71,15 @@ async function main() {
   // Dynamic import, on purpose — see the file-header comment above.
   const { embedDocuments } = await import("../lib/voyage");
 
-  const entries = buildCatalogEntries();
+  // FAQ bank entries share the same {type, id, text} shape as catalog
+  // entries for embedding purposes — tagged "pergunta" so lib/searchIndex.ts
+  // can key them separately (CACHED_EMBEDDINGS.get(`pergunta:${id}`)).
+  const entries = [
+    ...buildCatalogEntries(),
+    ...buildFaqBankEntries().map((f) => ({ type: "pergunta" as const, id: f.id, text: f.text })),
+  ];
   const model = process.env.VOYAGE_EMBED_MODEL || "voyage-3.5-lite";
-  console.log(`Embedando ${entries.length} itens do catálogo (vistos + kits + caminhos) com ${model}...`);
+  console.log(`Embedando ${entries.length} itens do catálogo (vistos + kits + caminhos + perguntas) com ${model}...`);
 
   const embeddings = await embedDocuments(entries.map((e) => e.text));
   if (!embeddings) {

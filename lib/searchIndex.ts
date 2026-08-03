@@ -9,7 +9,7 @@
 
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
-import { buildCatalogEntries, type CatalogEntry, type SearchResultType } from "@/lib/searchCatalogEntries";
+import { buildCatalogEntries, buildFaqBankEntries, type CatalogEntry, type SearchResultType } from "@/lib/searchCatalogEntries";
 import type { UserPlan } from "@/lib/plan";
 
 export type { SearchResultType };
@@ -41,6 +41,24 @@ function buildIndex(): IndexEntry[] {
 
 // Static data → build once at module load, not per-request.
 const INDEX: IndexEntry[] = buildIndex();
+
+interface FaqSearchEntry {
+  id: string;
+  perguntaN: string;
+  resposta: string;
+  vistosRelacionados: string[];
+  text: string;
+  haystack: string;
+}
+
+const FAQ_INDEX: FaqSearchEntry[] = buildFaqBankEntries().map((f) => ({
+  id: f.id,
+  perguntaN: normalize(f.pergunta),
+  resposta: f.resposta,
+  vistosRelacionados: f.vistosRelacionados,
+  text: f.text,
+  haystack: normalize(f.text),
+}));
 
 interface CachedEmbedding {
   type: SearchResultType;
@@ -86,13 +104,18 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-function keywordScore(entry: IndexEntry, nq: string): number {
-  const titleN = normalize(entry.title);
+// Shared by catalog entries (against `title`) and FAQ entries (against
+// `pergunta`) — same exact/startsWith/includes/haystack tiering either way.
+function titleTierScore(titleN: string, haystack: string, nq: string): number {
   if (titleN === nq) return 100;
   if (titleN.startsWith(nq)) return 80;
   if (titleN.includes(nq)) return 60;
-  if (entry.haystack.includes(nq)) return 30;
+  if (haystack.includes(nq)) return 30;
   return 0;
+}
+
+function keywordScore(entry: IndexEntry, nq: string): number {
+  return titleTierScore(normalize(entry.title), entry.haystack, nq);
 }
 
 const SEMANTIC_INCLUDE_THRESHOLD = 0.35;
@@ -188,4 +211,73 @@ export function searchCatalogs(
     href: entry.href,
     locked: entry.gated && plan === "free",
   }));
+}
+
+/**
+ * Matches the query against the curated FAQ bank (lib/faqBank.ts) — never
+ * live-generated, see that file's header for why. Returns the single
+ * best-matching entry if it clears the same bar used to include a catalog
+ * result (kw > 0 or semantic >= SEMANTIC_INCLUDE_THRESHOLD), else null.
+ * There's only ever one FAQ answer shown per search, so no "confident
+ * leader" logic is needed here — just "is the best match good enough."
+ */
+function matchFaq(nq: string, queryEmbedding: number[] | null): FaqSearchEntry | null {
+  if (!nq || FAQ_INDEX.length === 0) return null;
+
+  let best: { entry: FaqSearchEntry; score: number; kw: number; semantic: number } | null = null;
+  for (const entry of FAQ_INDEX) {
+    const kw = titleTierScore(entry.perguntaN, entry.haystack, nq);
+
+    let semantic = 0;
+    if (queryEmbedding) {
+      const cached = CACHED_EMBEDDINGS.get(`pergunta:${entry.id}`);
+      if (cached && cached.text === entry.text) {
+        semantic = cosineSimilarity(queryEmbedding, cached.embedding);
+      } else if (cached) {
+        console.warn(`Search embedding stale for pergunta:${entry.id} — run "npm run build:search-embeddings"`);
+      }
+    }
+
+    const score = kw + semantic * SEMANTIC_WEIGHT;
+    if (!best || score > best.score) best = { entry, score, kw, semantic };
+  }
+
+  if (!best) return null;
+  const qualifies = best.kw > 0 || best.semantic >= SEMANTIC_INCLUDE_THRESHOLD;
+  return qualifies ? best.entry : null;
+}
+
+export interface SearchWithAnswer {
+  answer: string | null;
+  results: SearchHit[];
+}
+
+/**
+ * Server-only. Same contract as searchCatalogs, plus a curated FAQ answer
+ * when the query matches one well. The FAQ match never injects cards that
+ * searchCatalogs wouldn't already return on its own — it only reorders the
+ * existing pool, moving the FAQ's related vistos/kits/caminhos to the front.
+ * This preserves the "don't dilute a confident single answer" behavior:
+ * boosting can't turn a 1-card result into a padded list.
+ */
+export function searchWithAnswer(
+  query: string,
+  plan: UserPlan,
+  queryEmbedding: number[] | null,
+  limit = 20
+): SearchWithAnswer {
+  const results = searchCatalogs(query, plan, queryEmbedding, limit);
+
+  const nq = normalize(query.trim());
+  const faqHit = matchFaq(nq, queryEmbedding);
+  if (!faqHit) return { answer: null, results };
+
+  const boostedIds = new Set(faqHit.vistosRelacionados);
+  const reordered = [...results].sort((a, b) => {
+    const aBoost = boostedIds.has(a.id) ? 0 : 1;
+    const bBoost = boostedIds.has(b.id) ? 0 : 1;
+    return aBoost - bBoost; // stable sort — preserves relative order within each group
+  });
+
+  return { answer: faqHit.resposta, results: reordered };
 }
