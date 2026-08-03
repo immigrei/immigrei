@@ -128,7 +128,7 @@ export default function PrivacidadeEnPage() {
           immigrei is operated by Hash Vantage Group LLC.
         </p>
         <p className="text-ink-soft text-base leading-relaxed mb-10">
-          We know immigration data is sensitive — for many of us, it's the
+          We know immigration data is sensitive — for many of us, it&apos;s the
           most sensitive thing there is. This policy is short and free of
           legalese on purpose: you deserve to understand exactly what
           happens with your data.

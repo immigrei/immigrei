@@ -85,7 +85,7 @@ export default function SegurancaEnPage() {
           Security
         </h1>
         <p className="text-ink-soft text-base leading-relaxed mb-10">
-          Immigration data is sensitive. Here's exactly what we do, in
+          Immigration data is sensitive. Here&apos;s exactly what we do, in
           practice, to protect yours.
         </p>
         {sections.map((s) => (
