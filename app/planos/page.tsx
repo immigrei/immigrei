@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PLANS } from "@/lib/stripe";
 import PlanButton from "./PlanButton";
 
 export const metadata: Metadata = {
@@ -33,7 +34,28 @@ const jornada = [
   "Comunidade: publique e participe dos relatos",
 ];
 
-const ECONOMIA = "US$ 89,80";
+// Só o plano anual tem itens próprios; o resto do card repete a lista da
+// Jornada mensal, para as duas nunca divergirem.
+const jornadaAnualExtra = [
+  "Preço travado por 12 meses",
+];
+
+// Tudo derivado de lib/stripe.ts — os valores exibidos são os mesmos que o
+// checkout cobra, sem chance de divergirem quando o preço mudar.
+const MENSAL = PLANS.monthly.amount;
+const ANUAL = PLANS.annual.amount;
+const ANUAL_POR_MES = ANUAL / 12;
+const ECONOMIA_VALOR = MENSAL * 12 - ANUAL;
+const ECONOMIA_PCT = Math.round((ECONOMIA_VALOR / (MENSAL * 12)) * 100);
+
+function usd(valor: number) {
+  return `US$ ${valor.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+const ECONOMIA = usd(ECONOMIA_VALOR);
 
 function Feature({ children }: { children: React.ReactNode }) {
   return (
@@ -56,10 +78,12 @@ export default function PlanosPage() {
             className="text-4xl md:text-5xl font-semibold text-ink mb-4"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Clareza tem um plano para você
+            Comece de graça. Avance quando fizer sentido.
           </h1>
           <p className="text-ink-soft text-lg max-w-xl mx-auto">
-            Comece sabendo onde você está. Evolua para saber aonde vai.
+            O <strong className="text-ink">Retrato</strong> mostra onde você
+            está. A <strong className="text-ink">Jornada</strong> mostra aonde
+            você pode chegar.
           </p>
         </header>
 
@@ -70,7 +94,7 @@ export default function PlanosPage() {
             <h2 className="text-ink font-bold text-xl mb-1">Retrato</h2>
             <div className="h-7 mb-4" aria-hidden="true" />
             <p className="text-ink-faint text-sm mb-4">Onde você está agora</p>
-            <p className="mb-2">
+            <p className="mb-2 flex items-baseline gap-x-2 flex-wrap min-h-[2.75rem]">
               <span
                 className="text-4xl font-semibold text-ink"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -97,7 +121,7 @@ export default function PlanosPage() {
             <h2 className="text-ink font-bold text-xl mb-1">Jornada</h2>
             <div className="h-7 mb-4" aria-hidden="true" />
             <p className="text-ink-faint text-sm mb-4">Aonde você vai chegar</p>
-            <p className="mb-2">
+            <p className="mb-2 flex items-baseline gap-x-2 flex-wrap min-h-[2.75rem]">
               <span
                 className="text-4xl font-semibold text-ink"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -112,7 +136,7 @@ export default function PlanosPage() {
                 <Feature key={f}>{f}</Feature>
               ))}
             </ul>
-            <PlanButton plan="monthly" />
+            <PlanButton plan="monthly" label="Assinar mensal" />
           </div>
 
           {/* Jornada — anual (destaque) */}
@@ -124,33 +148,64 @@ export default function PlanosPage() {
               </span>
             </div>
             <p className="text-ink-faint text-sm mb-4">A mesma jornada, pagando menos</p>
-            <p className="mb-2">
+            {/* O número que fecha a decisão é o mensal equivalente: só assim a
+                pessoa compara com os {usd(MENSAL)} do card ao lado sem fazer
+                conta de cabeça. O valor cobrado vem logo abaixo, explícito. */}
+            <p className="mb-2 flex items-baseline gap-x-2 gap-y-0 flex-wrap min-h-[2.75rem]">
               <span
                 className="text-4xl font-semibold text-ink"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                US$ 269
+                {usd(ANUAL_POR_MES)}
               </span>
-              <span className="text-ink-faint text-sm">/ano</span>
+              <span className="text-ink-faint text-sm">/mês</span>
+              <span className="text-ink-faint text-sm line-through decoration-clay/60">
+                {usd(MENSAL)}
+              </span>
             </p>
             <p className="text-sage text-sm font-semibold mb-6 h-5">
-              Equivale a 9 meses
+              Cobrado {usd(ANUAL)} por ano
             </p>
             <ul className="space-y-3 mb-8 flex-1">
-              <Feature>Tudo da Jornada mensal</Feature>
+              {jornada.map((f) => (
+                <Feature key={f}>{f}</Feature>
+              ))}
+              {jornadaAnualExtra.map((f) => (
+                <Feature key={f}>{f}</Feature>
+              ))}
               <Feature>
-                Economia de <strong className="text-ink">{ECONOMIA}</strong> por ano
+                Você economiza <strong className="text-ink">{ECONOMIA}</strong> por
+                ano — {ECONOMIA_PCT}% a menos
               </Feature>
-              <Feature>Preço travado por 12 meses</Feature>
             </ul>
-            <PlanButton plan="annual" highlight />
+            <PlanButton
+              plan="annual"
+              highlight
+              label={`Assinar anual e economizar ${ECONOMIA_PCT}%`}
+            />
           </div>
 
         </div>
 
-        <p className="text-center text-ink-faint text-sm mt-10">
-          Cancele quando quiser. Pagamento seguro via Stripe.
-        </p>
+        {/* Selo de pagamento — asset oficial da Stripe, servido sem
+            modificação (as brand guidelines deles exigem a marca intacta,
+            por isso o roxo #635BFF do arquivo não vira variável da marca). */}
+        <div className="mt-10 flex flex-col items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- SVG estático
+              de 9 KB: next/image não otimiza SVG, só adicionaria wrapper e a
+              necessidade de liberar dangerouslyAllowSVG. */}
+          <img
+            src="/brand/powered-by-stripe.svg"
+            alt="Powered by Stripe"
+            width={132}
+            height={30}
+            className="h-[30px] w-auto"
+          />
+          <p className="text-center text-ink-faint text-sm">
+            Cancele quando quiser. A immigrei nunca vê nem armazena o número do
+            seu cartão.
+          </p>
+        </div>
       </div>
     </main>
   );

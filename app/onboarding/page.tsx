@@ -1899,6 +1899,9 @@ export default function OnboardingPage() {
   const [animating, setAnimating] = useState(false);
   // Chave "questionId:value" do card com o painel ⓘ aberto (um por vez).
   const [openInfo, setOpenInfo] = useState<string | null>(null);
+  // Chegou pela pergunta do hero da home (?q_location=), em vez da tela de
+  // boas-vindas — muda para onde o "Voltar" leva na primeira pergunta.
+  const [cameFromHero, setCameFromHero] = useState(false);
   const [resuming, setResuming] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -1915,6 +1918,7 @@ export default function OnboardingPage() {
       const seguinte =
         typeof next === "function" ? next(fromHero, { q_location: fromHero }) : next;
       // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCameFromHero(true);
       setPhase("questions");
       setAnswers({ q_location: fromHero });
       // q_location fica no histórico para o "Voltar" levar de volta a ela,
@@ -2018,6 +2022,13 @@ export default function OnboardingPage() {
 
   function goBack() {
     if (history.length <= 1) {
+      // Quem respondeu a primeira pergunta no hero da home nunca viu a tela
+      // de boas-vindas — jogar essa pessoa nela no "Voltar" seria mandá-la
+      // para uma tela nova, não para trás. O passo anterior dela é a home.
+      if (cameFromHero) {
+        router.push("/");
+        return;
+      }
       setPhase("welcome");
       return;
     }

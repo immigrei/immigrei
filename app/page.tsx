@@ -98,6 +98,19 @@ const trustChips = [
   },
 ];
 
+// Os domínios oficiais realmente citados nas 15 páginas de visto (ver
+// fontesOficiais em lib/vistoPages.ts e a whitelist em content/leis/fontes.md).
+// Texto, nunca logo/selo: citar uma fonte é fato verificável, exibir o brasão
+// de uma agência federal sugere vínculo que não existe — e o selo do
+// USCIS/DHS é protegido por lei.
+const fontesOficiais = [
+  "uscis.gov",
+  "travel.state.gov",
+  "ecfr.gov",
+  "cbp.gov",
+  "studyinthestates.dhs.gov",
+];
+
 // Contraste com a experiência que a pessoa já teve — não com produtos
 // nomeados. A coluna da esquerda descreve a vivência do imigrante (o que ele
 // reconhece de imediato), não afirmações sobre concorrentes: claim sobre
@@ -225,6 +238,33 @@ export default async function HomePage() {
           <p className="text-ink-faint text-sm mt-4">
             Gratuito, sem cartão de crédito. Leva menos de 2 minutos.
           </p>
+        </div>
+      </section>
+
+      {/* Faixa de autoridade — o equivalente honesto ao mural de logos: não
+          temos clientes para exibir, mas temos a procedência do conteúdo,
+          que é o que essa pessoa precisa confiar. */}
+      <section className="bg-cream-2 border-y border-pine-tint px-6 py-8 mb-20">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-ink-soft text-sm mb-5 max-w-lg mx-auto leading-relaxed">
+            Cada informação aqui vem de uma fonte oficial do governo americano —
+            e a gente mostra qual, em cada página, com a data da última
+            verificação.
+          </p>
+          <ul className="flex flex-wrap items-center justify-center gap-2.5">
+            {fontesOficiais.map((f) => (
+              <li
+                key={f}
+                className="flex items-center gap-2 rounded-full border border-pine-tint bg-pine-tint/40 px-4 py-2 text-pine text-sm md:text-base font-bold tracking-tight"
+              >
+                <span
+                  aria-hidden
+                  className="h-1.5 w-1.5 rounded-full bg-sage shrink-0"
+                />
+                {f}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
