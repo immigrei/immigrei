@@ -2078,7 +2078,7 @@ export default function OnboardingPage() {
   // Perfis que saem da vitrine (vínculo familiar, casos sensíveis) precisam
   // ter a resposta do questionário salva antes de navegar, senão o painel
   // nunca sabe desse vínculo e a pessoa não tem perfil algum ao voltar.
-  // `dest` é a rota final: /profissionais ou um kit em /documentos/[vistoId].
+  // `dest` é a rota final: /profissionais ou /dashboard.
   async function saveProfileAndGoTo(dest: string, extra?: Record<string, unknown>) {
     if (savingProfile) return;
     setSavingProfile(true);
@@ -2097,8 +2097,13 @@ export default function OnboardingPage() {
         body: JSON.stringify(payload),
       });
       if (res.status === 401) {
+        // Sem redirect_url de propósito: /dashboard checa onboarding_completed
+        // no servidor, antes de qualquer JS do cliente rodar, então mandar
+        // direto pra lá bate na checagem antes do perfil ser salvo. Deixa o
+        // Clerk cair no /onboarding (comportamento padrão), cujo efeito de
+        // "resuming" salva o pendente e só então navega pro destino certo.
         localStorage.setItem("immigrei_pending_profile", JSON.stringify(payload));
-        router.push(`/sign-up?redirect_url=${encodeURIComponent(dest)}`);
+        router.push("/sign-up");
         return;
       }
     } catch {
@@ -2418,7 +2423,7 @@ export default function OnboardingPage() {
                 <button
                   key={link.href}
                   onClick={() =>
-                    saveProfileAndGoTo(link.href, { visa_type: link.href.replace("/documentos/", "") })
+                    saveProfileAndGoTo("/dashboard", { visa_type: link.href.replace("/documentos/", "") })
                   }
                   disabled={savingProfile}
                   className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
