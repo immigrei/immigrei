@@ -736,6 +736,121 @@ export function getStrategy(profile: Profile): Strategy {
     };
   }
 
+  // ── Família de residente permanente (F2A/F2B) ───────────────────────────
+  // Beneficiário direto de uma petição de green card, não só o card
+  // secundário de family_ties — o visa_type É o caminho principal aqui,
+  // vindo do destino "documentos" do onboarding (deriveDestination).
+  if (visa_type === "family-gc") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "F2A/F2B · Familiar de Residente Permanente",
+      situacao:  `Cônjuge ou filho solteiro de quem já tem Green Card entra numa categoria de preferência com fila numérica real — diferente da família de cidadão americano, aqui não existe "parente imediato" sem fila.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Protocolar o I-130",                desc: "Quem peticiona é o TITULAR do Green Card, não você — reúna a prova do vínculo e do status dele.", linkExterno: { label: "Formulário em uscis.gov/i-130", url: "https://www.uscis.gov/i-130" } },
+        { num: "2", estado: "proximo", titulo: "Acompanhar a data de prioridade",   desc: "F2A (cônjuge/filho menor) ou F2B (filho solteiro adulto) — a fila varia por categoria e país de nascimento. Acompanhe no Boletim de Vistos." },
+        { num: "3", estado: "futuro",  titulo: "Visto consular ou ajuste de status", desc: "Quando a data de prioridade fica current: consulado (fora dos EUA) ou I-485 (dentro, em status válido)." },
+        { num: "✓", estado: "futuro",  titulo: "Green Card aprovado",               desc: "Você se torna residente permanente." },
+      ],
+      guardrails: [
+        { tipo: "atencao", texto: "Diferente de família de cidadão, aqui existe fila real — nada acontece antes da data de prioridade da I-130 ficar current." },
+      ],
+      kitId:    "family-gc",
+      kitLabel: "Kit F2A/F2B — familiar de residente permanente",
+    };
+  }
+
+  // ── Família de residente permanente, em overstay ────────────────────────
+  if (visa_type === "family-gc-overstay") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "F2A + Overstay · Familiar de Residente Permanente",
+      situacao:  "Seu familiar residente permanente já pode peticionar você agora — o protocolo garante seu lugar na fila F2A. Mas com overstay, o ajuste de status por dentro dessa categoria, em regra, não é permitido.",
+      destaque: { tipo: "alerta", texto: "Não saia dos EUA sem análise individual — as barras de 3/10 anos disparam na saída (INA §212(a)(9)(B))." },
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Protocolar o I-130 agora",         desc: "Vale a pena independente do próximo passo — a data de protocolo é sua posição na fila.", linkExterno: { label: "Formulário em uscis.gov/i-130", url: "https://www.uscis.gov/i-130" } },
+        { num: "2", estado: "proximo", titulo: "Acompanhar dois cenários em paralelo", desc: "Seu familiar se naturalizar (você passa a parente imediato, sem fila) ou sua vez na fila F2A chegar — o que vier primeiro." },
+        { num: "✓", estado: "futuro",  titulo: "Caminho se define",                desc: "O cenário que se confirmar define o próximo passo — o Immigrei acompanha." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "Não saia dos EUA sem avaliar as barras de 3/10 anos primeiro — a saída pode fechar a porta que você está tentando abrir." },
+      ],
+      kitId:    "family-gc-overstay",
+      kitLabel: "Kit F2A + Overstay",
+    };
+  }
+
+  // ── Família de cidadão americano (parente imediato) ─────────────────────
+  if (visa_type === "familia-ir") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "IR-1/IR-2 · Família de Cidadão Americano",
+      situacao:  "Cônjuges, filhos e pais de cidadãos americanos são parentes imediatos — não entram em fila de espera. O processo tem duas fases: a petição I-130 no USCIS e depois o visto de imigrante no consulado.",
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Protocolar o I-130",              desc: "Quem peticiona é o parente cidadão americano — não você.", tag: "US$625", linkExterno: { label: "Formulário em uscis.gov/i-130", url: "https://www.uscis.gov/i-130" } },
+        { num: "2", estado: "proximo", titulo: "NVC e DS-260",                    desc: "Após aprovada, a petição segue para o National Visa Center — processo consular, sem fila de preferência." },
+        { num: "3", estado: "futuro",  titulo: "Entrevista consular",             desc: "Dossiê completo + entrevista no consulado mais próximo de onde você mora." },
+        { num: "✓", estado: "futuro",  titulo: "Visto de imigrante aprovado",     desc: "Green Card ao entrar nos EUA." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "Não peça visto de turista ou tente entrar nos EUA enquanto o processo corre — pode ser negado por intenção imigratória declarada." },
+      ],
+      kitId:    "familia-ir",
+      kitLabel: "Kit IR-1/IR-2 — família de cidadão americano",
+    };
+  }
+
+  // ── Overstay sem vínculo familiar qualificado ────────────────────────────
+  if (visa_type === "overstay-sem-vinculo") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "Portas estreitas · sem processo único",
+      situacao:  "Diferente de F-1, EB-5, asilo ou família de green card, esse perfil não tem um processo único a seguir — as portas que existem dependem de fatos específicos do seu caso.",
+      destaque: { tipo: "alerta", texto: "Pedir asilo sem temor fundado de perseguição real não passa de uma avaliação séria, e um pedido frívolo fecha permanentemente qualquer benefício futuro (INA §208(d)(6))." },
+      etapas: [
+        { num: "1", estado: "agora", titulo: "Mapear as portas possíveis", desc: "Waiver de presença ilegal (I-601/I-601A), cancelamento de remoção, VAWA, U-visa, T-visa — cada uma exige fatos específicos." },
+        { num: "2", estado: "proximo", titulo: "Falar com um profissional verificado", desc: "Esses caminhos não se preenchem sozinhos — a avaliação certa evita fechar portas sem querer." },
+      ],
+      guardrails: [],
+      kitId:    "overstay-sem-vinculo",
+      kitLabel: "Ver as portas possíveis",
+    };
+  }
+
+  // ── DV Lottery ────────────────────────────────────────────────────────
+  if (visa_type === "dv-lottery") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "Diversity Visa Program · Loteria de Vistos",
+      situacao:  "Programa anual do governo americano para países com baixa imigração para os EUA — até 55.000 vistos de imigrante por ano, sorteados entre quem se inscreveu. Inscrição eletrônica e gratuita.",
+      destaque: { tipo: "alerta", texto: "O Brasil foi excluído do programa nos últimos ciclos — confirme a elegibilidade do seu país de nascimento no ciclo atual antes de se inscrever." },
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar elegibilidade",   desc: "País de nascimento elegível no ciclo atual + educação ou experiência profissional." },
+        { num: "2", estado: "proximo", titulo: "Inscrever-se no período do ciclo", desc: "As datas mudam a cada ano — confirme sempre em dvprogram.state.gov.", linkExterno: { label: "Inscrição em dvprogram.state.gov", url: "https://dvprogram.state.gov/" } },
+        { num: "✓", estado: "futuro",  titulo: "Resultado do sorteio",      desc: "Selecionados seguem para DS-260 e processo consular." },
+      ],
+      guardrails: [],
+      kitId:    "dv-lottery",
+      kitLabel: "Kit DV Lottery",
+    };
+  }
+
+  // ── Extensão de dependente (F-2/H-4/L-2/J-2) ─────────────────────────────
+  if (visa_type === "dependente-cos") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "Extensão de status de dependente",
+      situacao:  "A extensão do dependente está sempre atrelada à extensão do titular principal (F-1, H-1B, L-1 ou J-1) — mesmo formulário I-539, mas o que cada categoria pode fazer enquanto espera varia.",
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Confirmar a extensão do titular",  desc: "F-2 depende do F-1, H-4 do H-1B, L-2 do L-1, J-2 do J-1 — o dependente não estende sozinho." },
+        { num: "2", estado: "proximo", titulo: "Protocolar o I-539",               desc: "Junto ou logo após o pedido do titular principal." },
+        { num: "✓", estado: "futuro",  titulo: "Extensão aprovada",                desc: "Status renovado, atrelado ao do titular." },
+      ],
+      guardrails: [],
+      kitId:    "dependente-cos",
+      kitLabel: "Kit de extensão de dependente",
+    };
+  }
+
   // ── Situação em definição ("outro") ───────────────────────────────────
   if (visa_type === "outro") {
     return {

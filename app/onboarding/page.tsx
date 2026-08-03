@@ -705,7 +705,7 @@ export const questionMap: Record<string, Question> = {
 const KIT_BY_PREFIX: Array<[RegExp, string]> = [
   [/^F-1/, "f1"], [/^M-1/, "m1"], [/^J-1/, "j1"], [/^H-1B/, "h1b"],
   [/^O-1/, "o1"], [/^L-1/, "l1"], [/^EB-2/, "eb2niw"], [/^B-1/, "b1"],
-  [/^E-2 /, "e2"], [/^E-2$/, "e2"],
+  [/^E-2 /, "e2"], [/^E-2$/, "e2"], [/^F-2/, "family-gc"],
 ];
 
 export function attachKitLinks(results: VisaResult[]): VisaResult[] {
@@ -2406,7 +2406,9 @@ export default function OnboardingPage() {
               {getFamilyTiesCard("spouse_citizen")?.links.map((link) => (
                 <button
                   key={link.href}
-                  onClick={() => saveProfileAndGoTo(link.href)}
+                  onClick={() =>
+                    saveProfileAndGoTo(link.href, { visa_type: link.href.replace("/documentos/", "") })
+                  }
                   disabled={savingProfile}
                   className="w-full bg-amber text-ink font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-200 hover:bg-amber-deep active:scale-95 shadow-sm disabled:opacity-60"
                   style={{ fontFamily: "var(--font-body)" }}
@@ -2423,7 +2425,7 @@ export default function OnboardingPage() {
                   : destino.kind === "documentos"
                     ? saveProfileAndGoTo(
                         `/documentos/${destino.vistoId}`,
-                        destino.vistoId === "asylee" ? { visa_type: "asylee" } : undefined
+                        { visa_type: destino.vistoId }
                       )
                     : goToVistos(destino.query)
               }
