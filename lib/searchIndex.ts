@@ -105,7 +105,22 @@ const SEMANTIC_WEIGHT = 50;
 // (e.g. K-1 for a spouse-related query) in or out between two runs of the
 // identical search. Guaranteeing a minimum count — not just "at least one"
 // — absorbs that jitter instead of being one score away from a dead end.
+//
+// BUT (Felipe, 2 ago 2026): this padding must not kick in when there's
+// already a clear winner — it was drowning out a single obviously-right
+// answer (e.g. "meus pdfs" → Cofre de Documentos) with unrelated filler
+// just to reach the count. Padding is now reserved for genuinely ambiguous
+// queries (no standout leader); see isConfidentLeader() below.
 const MIN_RESULTS = 6;
+
+// How far ahead the top result has to be, over the runner-up, to count as
+// a standout answer rather than "several plausible options." Roughly one
+// keyword-score tier (30/60/80/100) or half a semantic-weight unit.
+const CONFIDENT_MARGIN = 25;
+// Near-ties with the leader stay grouped together (e.g. two catalog entries
+// that are both legitimately "the answer"), instead of arbitrarily keeping
+// only one.
+const CONFIDENT_TIE_BAND = 5;
 
 /**
  * Server-only. `plan` decides which gated hits come back `locked: true`.
@@ -147,7 +162,23 @@ export function searchCatalogs(
     b.score - a.score || a.entry.title.localeCompare(b.entry.title, "pt-BR");
 
   const relevant = scored.filter((s) => s.kw > 0 || s.semantic >= SEMANTIC_INCLUDE_THRESHOLD).sort(byScore);
-  const pool = relevant.length >= MIN_RESULTS ? relevant : [...scored].sort(byScore).slice(0, MIN_RESULTS);
+  const allSorted = [...scored].sort(byScore);
+
+  let pool: typeof scored;
+  if (relevant.length === 0) {
+    // Nothing matched at all — never a dead end, show the closest guesses.
+    pool = allSorted.slice(0, MIN_RESULTS);
+  } else {
+    const top = relevant[0];
+    const runnerUp = allSorted[1];
+    const isConfidentLeader = !runnerUp || top.score - runnerUp.score >= CONFIDENT_MARGIN;
+
+    pool = isConfidentLeader
+      ? relevant.filter((s) => top.score - s.score <= CONFIDENT_TIE_BAND)
+      : relevant.length >= MIN_RESULTS
+        ? relevant
+        : allSorted.slice(0, MIN_RESULTS);
+  }
 
   return pool.slice(0, limit).map(({ entry }) => ({
     type: entry.type,
