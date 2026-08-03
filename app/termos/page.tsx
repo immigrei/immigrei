@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "../components/Logo";
 import Footer from "../components/Footer";
+import LanguageToggle from "../components/LanguageToggle";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://immigrei.com"),
   title: "Termos de Uso — immigrei",
   description: "Termos de uso da plataforma immigrei.",
-  alternates: { canonical: "/termos" },
+  alternates: {
+    canonical: "/termos",
+    languages: { "pt-BR": "/termos", en: "/termos/en" },
+  },
 };
 
 // Minuta para revisão do advogado parceiro antes do lançamento pago.
@@ -98,10 +102,11 @@ const sections: { title: string; body: string[] }[] = [
 export default function TermosPage() {
   return (
     <main className="min-h-screen bg-cream">
-      <header className="flex items-center px-6 py-6 max-w-3xl mx-auto">
+      <header className="flex items-center justify-between px-6 py-6 max-w-3xl mx-auto">
         <Link href="/" aria-label="immigrei — início">
           <Logo variant="lockup" className="text-4xl" />
         </Link>
+        <LanguageToggle ptHref="/termos" enHref="/termos/en" lang="pt" />
       </header>
       <article className="max-w-2xl mx-auto px-6 pb-20">
         <h1

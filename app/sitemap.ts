@@ -24,7 +24,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     { url: "https://immigrei.com/termos", changeFrequency: "yearly", priority: 0.3 },
+    { url: "https://immigrei.com/termos/en", changeFrequency: "yearly", priority: 0.2 },
     { url: "https://immigrei.com/privacidade", changeFrequency: "yearly", priority: 0.3 },
+    { url: "https://immigrei.com/privacidade/en", changeFrequency: "yearly", priority: 0.2 },
+    { url: "https://immigrei.com/seguranca", changeFrequency: "yearly", priority: 0.3 },
+    { url: "https://immigrei.com/seguranca/en", changeFrequency: "yearly", priority: 0.2 },
     ...vistoEntries,
   ];
 }
