@@ -7,9 +7,12 @@ import { useRouter } from "next/navigation";
 export default function PlanButton({
   plan,
   highlight,
+  label = "Assinar",
 }: {
   plan: "monthly" | "annual";
   highlight?: boolean;
+  /** CTA text — diz o que a pessoa leva, não só a ação. */
+  label?: string;
 }) {
   const { isSignedIn } = useAuth();
   const router = useRouter();
@@ -45,7 +48,7 @@ export default function PlanButton({
           : "bg-pine hover:bg-pine-deep text-cream-2"
       }`}
     >
-      {loading ? "Redirecionando..." : "Assinar"}
+      {loading ? "Redirecionando..." : label}
     </button>
   );
 }
