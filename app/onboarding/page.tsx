@@ -2423,10 +2423,7 @@ export default function OnboardingPage() {
                 destino.kind === "profissionais"
                   ? saveProfileAndGoTo("/profissionais")
                   : destino.kind === "documentos"
-                    ? saveProfileAndGoTo(
-                        `/documentos/${destino.vistoId}`,
-                        { visa_type: destino.vistoId }
-                      )
+                    ? saveProfileAndGoTo("/dashboard", { visa_type: destino.vistoId })
                     : goToVistos(destino.query)
               }
               disabled={destino.kind !== "vistos" && savingProfile}
@@ -2438,7 +2435,7 @@ export default function OnboardingPage() {
                 : destino.kind === "profissionais"
                   ? "Encontrar ajuda profissional →"
                   : destino.kind === "documentos"
-                    ? "Começar meu processo →"
+                    ? "Ir para o meu painel →"
                     : "Ver minha jornada em detalhe →"}
             </button>
           )}
