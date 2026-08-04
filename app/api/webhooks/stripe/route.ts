@@ -53,6 +53,20 @@ export async function POST(req: NextRequest) {
             `:wave: Assinatura cancelada — customer ${sub.customer as string}`,
             process.env.SLACK_STRIPE_WEBHOOK_URL,
           );
+        } else {
+          // The billing portal's default "cancel" doesn't delete the subscription —
+          // it flips cancel_at_period_end and the sub keeps running until the
+          // period ends. That's the moment the team actually wants to know about,
+          // since customer.subscription.deleted won't fire until later (or never,
+          // if the customer changes their mind). previous_attributes lets us alert
+          // only on the flip, not on every unrelated update to the subscription.
+          const previous = event.data.previous_attributes as Partial<Stripe.Subscription> | undefined;
+          if (sub.cancel_at_period_end && previous && "cancel_at_period_end" in previous) {
+            await notifySlackAlert(
+              `:hourglass_flowing_sand: Cancelamento agendado — customer ${sub.customer as string}, vigente até ${new Date(sub.items.data[0]?.current_period_end * 1000).toLocaleDateString("pt-BR")}`,
+              process.env.SLACK_STRIPE_WEBHOOK_URL,
+            );
+          }
         }
         break;
       }
