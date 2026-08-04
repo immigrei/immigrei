@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
         const plan = planFromPriceId(sub.items.data[0]?.price.id ?? "");
         await notifySlackAlert(
           `:moneybag: Nova assinatura — ${plan ? PLANS[plan].name + " (" + plan + ")" : "plano desconhecido"}${session.customer_details?.email ? ` — ${session.customer_details.email}` : ""}`,
+          process.env.SLACK_STRIPE_WEBHOOK_URL,
         );
         break;
       }
@@ -48,7 +49,10 @@ export async function POST(req: NextRequest) {
         const userId = sub.metadata?.clerk_user_id;
         if (userId) await upsertSubscription(userId, sub);
         if (event.type === "customer.subscription.deleted") {
-          await notifySlackAlert(`:wave: Assinatura cancelada — customer ${sub.customer as string}`);
+          await notifySlackAlert(
+            `:wave: Assinatura cancelada — customer ${sub.customer as string}`,
+            process.env.SLACK_STRIPE_WEBHOOK_URL,
+          );
         }
         break;
       }
@@ -56,6 +60,7 @@ export async function POST(req: NextRequest) {
         const invoice = event.data.object;
         await notifySlackAlert(
           `:x: Falha de cobrança — customer ${invoice.customer as string}${invoice.customer_email ? ` (${invoice.customer_email})` : ""}, valor ${(invoice.amount_due / 100).toFixed(2)}`,
+          process.env.SLACK_STRIPE_WEBHOOK_URL,
         );
         break;
       }
