@@ -29,6 +29,9 @@ export default function Footer() {
             <Link href="/seguranca" className="text-ink-soft hover:text-pine transition-colors">
               Segurança
             </Link>
+            <Link href="/suporte" className="text-ink-soft hover:text-pine transition-colors">
+              Suporte
+            </Link>
           </nav>
 
           <nav aria-label="Empresa" className="flex flex-col gap-2 text-sm">
