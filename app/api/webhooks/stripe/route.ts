@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getStripe, planFromPriceId, PLANS } from "@/lib/stripe";
+import { notifySlackAlert } from "@/lib/slack-alert";
 
 /**
  * Stripe webhook — keeps the subscriptions table in sync.
  * Register in the Stripe dashboard:
  *   endpoint: https://immigrei.vercel.app/api/webhooks/stripe
  *   events:   checkout.session.completed,
- *             customer.subscription.updated, customer.subscription.deleted
+ *             customer.subscription.updated, customer.subscription.deleted,
+ *             invoice.payment_failed
  * Then set STRIPE_WEBHOOK_SECRET (whsec_...) in Vercel.
  */
 export async function POST(req: NextRequest) {
@@ -34,6 +36,10 @@ export async function POST(req: NextRequest) {
         if (!userId || session.mode !== "subscription") break;
         const sub = await stripe.subscriptions.retrieve(session.subscription as string);
         await upsertSubscription(userId, sub);
+        const plan = planFromPriceId(sub.items.data[0]?.price.id ?? "");
+        await notifySlackAlert(
+          `:moneybag: Nova assinatura — ${plan ? PLANS[plan].name + " (" + plan + ")" : "plano desconhecido"}${session.customer_details?.email ? ` — ${session.customer_details.email}` : ""}`,
+        );
         break;
       }
       case "customer.subscription.updated":
@@ -41,6 +47,16 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object;
         const userId = sub.metadata?.clerk_user_id;
         if (userId) await upsertSubscription(userId, sub);
+        if (event.type === "customer.subscription.deleted") {
+          await notifySlackAlert(`:wave: Assinatura cancelada — customer ${sub.customer as string}`);
+        }
+        break;
+      }
+      case "invoice.payment_failed": {
+        const invoice = event.data.object;
+        await notifySlackAlert(
+          `:x: Falha de cobrança — customer ${invoice.customer as string}${invoice.customer_email ? ` (${invoice.customer_email})` : ""}, valor ${(invoice.amount_due / 100).toFixed(2)}`,
+        );
         break;
       }
     }
