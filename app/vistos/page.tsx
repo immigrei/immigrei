@@ -252,11 +252,12 @@ export default function VistosPage() {
 
   useEffect(() => {
     // Reading window.location requires deferring to an effect (SSR has no
-    // window); the values below can only ever be set once, on mount.
+    // window); the values below can only ever be set once, on mount — not a
+    // sync loop, so the whole block is exempt from set-state-in-effect.
+    /* eslint-disable react-hooks/set-state-in-effect */
     const params = new URLSearchParams(window.location.search);
     if (params.get("from") === "dashboard") setCameFromApp(true);
     const nat = params.get("nationality");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (nat === "brazilian" || nat === "other") setNationality("brazilian");
     else if (nat === "treaty") setNationality("treaty");
     if (nat === "brazilian" || nat === "treaty" || nat === "other") {
@@ -272,6 +273,7 @@ export default function VistosPage() {
     }
     const extFocus = params.get("extFocus");
     if (extFocus) setExtensionId(extFocus);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   useEffect(() => {

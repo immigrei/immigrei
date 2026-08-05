@@ -59,17 +59,16 @@ export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
       .catch(() => setItems([]));
   }, [hasAccess]);
 
-  // Default: o visto do perfil, se ele tiver taxas mapeadas; senão o primeiro disponível.
-  useEffect(() => {
-    if (vistoId !== null) return;
-    if (profileVistoId && VISTOS_COM_TAXAS.some((v) => v.vistoId === profileVistoId)) {
-      setVistoId(profileVistoId);
-    } else if (VISTOS_COM_TAXAS.length > 0) {
-      setVistoId(VISTOS_COM_TAXAS[0].vistoId);
-    }
-  }, [profileVistoId, vistoId]);
+  // Default: o visto do perfil, se ele tiver taxas mapeadas; senão o primeiro
+  // disponível. Derivado no render (não em efeito) — `vistoId` só é setado
+  // quando o usuário troca manualmente no seletor.
+  const vistoIdEfetivo =
+    vistoId ??
+    (profileVistoId && VISTOS_COM_TAXAS.some((v) => v.vistoId === profileVistoId)
+      ? profileVistoId
+      : (VISTOS_COM_TAXAS[0]?.vistoId ?? null));
 
-  const vistoAtual = VISTOS_COM_TAXAS.find((v) => v.vistoId === vistoId);
+  const vistoAtual = VISTOS_COM_TAXAS.find((v) => v.vistoId === vistoIdEfetivo);
 
   const itemsByKey = useMemo(() => {
     const map = new Map<string, CostItemRow>();
@@ -206,7 +205,7 @@ export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
                   Visto
                 </label>
                 <select
-                  value={vistoId ?? ""}
+                  value={vistoIdEfetivo ?? ""}
                   onChange={(e) => setVistoId(e.target.value)}
                   className="w-full rounded-lg border border-pine-tint bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:border-pine"
                 >
