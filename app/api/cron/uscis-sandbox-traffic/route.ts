@@ -35,7 +35,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!isUscisSandbox()) {
+  // =========================================================================
+  // PRODUCTION SWITCH-OVER CHECKLIST & INSTRUCTIONS (FOR CESAR, FELIPE & CLAUDE CODE)
+  // =========================================================================
+  //
+  // ACTION FOR CESAR IN VERCEL DASHBOARD (when USCIS grants Production access):
+  // 1. Go to Vercel Dashboard -> Project Settings -> Environment Variables
+  // 2. Add Key: ENABLE_PROD_USCIS_CRON
+  // 3. Set Value: true
+  // 4. Select Environments: Select "Production" ONLY (do NOT select Preview or Development)
+  // 5. Save and hit "Redeploy" on the latest Production deployment in Vercel.
+  //
+  // ACTION FOR FELIPE & CLAUDE CODE AUDITS:
+  // - This gate safely prevents accidental cron execution in production until
+  //   the Vercel environment variable is explicitly turned on.
+  // - No code changes or commits are required from Claude Code to go live.
+  // =========================================================================
+
+  const isProdEnabled = process.env.ENABLE_PROD_USCIS_CRON === "true";
+  if (!isUscisSandbox() && !isProdEnabled) {
     return NextResponse.json({ skipped: "production base — no sandbox traffic needed" });
   }
 
