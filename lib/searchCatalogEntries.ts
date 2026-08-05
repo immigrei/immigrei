@@ -8,8 +8,9 @@ import { todosVistos } from "@/lib/vistosCatalog";
 import { KITS } from "@/lib/kitsCatalog";
 import { MANUAIS } from "@/lib/manuais";
 import { FAQ_BANK } from "@/lib/faqBank";
+import guias from "@/app/documentos/guias/data";
 
-export type SearchResultType = "visto" | "kit" | "manual" | "atalho";
+export type SearchResultType = "visto" | "kit" | "manual" | "atalho" | "guia";
 
 export interface CatalogEntry {
   type: SearchResultType;
@@ -111,7 +112,21 @@ export function buildCatalogEntries(): CatalogEntry[] {
 
   const atalhoEntries: CatalogEntry[] = ATALHOS.map((a) => ({ type: "atalho", ...a }));
 
-  return [...vistoEntries, ...kitEntries, ...manualEntries, ...atalhoEntries];
+  // Guias de Integração (/documentos/guias/[id]) — public content, never
+  // gated. infoExtra.itens (e.g. the DMV state list) is folded into the
+  // embedded text so a query like "carteira sem status" or "california
+  // carteira de motorista" can match it semantically.
+  const guiaEntries: CatalogEntry[] = guias.map((g) => ({
+    type: "guia",
+    id: g.id,
+    title: g.titulo,
+    snippet: g.resumo,
+    href: `/documentos/guias/${g.id}`,
+    gated: false,
+    text: `${g.titulo} ${g.categoria} ${g.resumo} ${g.passos.join(" ")} ${g.dicaChave} ${g.infoExtra?.itens.join(" ") ?? ""}`,
+  }));
+
+  return [...vistoEntries, ...kitEntries, ...manualEntries, ...atalhoEntries, ...guiaEntries];
 }
 
 // A FAQ entry isn't a clickable card — no href/gated — it's the source of an
