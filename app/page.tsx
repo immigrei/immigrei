@@ -265,6 +265,16 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
+          <p className="text-ink-soft text-sm mt-6">
+            Já tem visto? Veja nossos{" "}
+            <Link
+              href="/documentos/guias"
+              className="text-pine font-semibold underline underline-offset-4 hover:text-pine-deep transition-colors"
+            >
+              guias de integração nos EUA
+            </Link>{" "}
+            — SSN, carteira de motorista, crédito, ITIN e mais.
+          </p>
         </div>
       </section>
 
