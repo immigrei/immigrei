@@ -38,7 +38,9 @@ function formatUsd(v: number) {
 export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
   const router = useRouter();
   const [profileVistoId, setProfileVistoId] = useState<string | null>(null);
-  const [vistoId, setVistoId] = useState<string | null>(null);
+  // null = ainda não veio da API nem foi escolhido manualmente. Depois disso
+  // é sempre um array — mesmo que vazio (usuário desmarcou tudo).
+  const [vistosAtivos, setVistosAtivosState] = useState<string[] | null>(null);
   const [items, setItems] = useState<CostItemRow[] | null>(null);
   const [cambioBrl, setCambioBrl] = useState(5.6);
   const [novoTitulo, setNovoTitulo] = useState("");
@@ -51,24 +53,38 @@ export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
       .then((d) => setProfileVistoId(d.profile?.visa_type ?? null))
       .catch(() => {});
     fetch("/api/user-costs")
-      .then((r) => (r.ok ? r.json() : { items: [], cambioBrl: 5.6 }))
+      .then((r) => (r.ok ? r.json() : { items: [], cambioBrl: 5.6, vistosAtivos: null }))
       .then((d) => {
         setItems(d.items ?? []);
         setCambioBrl(d.cambioBrl ?? 5.6);
+        setVistosAtivosState(d.vistosAtivos ?? null);
       })
       .catch(() => setItems([]));
   }, [hasAccess]);
 
-  // Default: o visto do perfil, se ele tiver taxas mapeadas; senão o primeiro
-  // disponível. Derivado no render (não em efeito) — `vistoId` só é setado
-  // quando o usuário troca manualmente no seletor.
-  const vistoIdEfetivo =
-    vistoId ??
+  // Default: só o visto do perfil (se ele tiver taxas mapeadas) até o
+  // usuário escolher explicitamente — nesse ponto passa a valer o que foi
+  // salvo (inclusive vazio, se ele desmarcou tudo). Derivado no render, não
+  // em efeito: nada aqui dispara setState.
+  const vistosAtivosEfetivo =
+    vistosAtivos ??
     (profileVistoId && VISTOS_COM_TAXAS.some((v) => v.vistoId === profileVistoId)
-      ? profileVistoId
-      : (VISTOS_COM_TAXAS[0]?.vistoId ?? null));
+      ? [profileVistoId]
+      : VISTOS_COM_TAXAS.slice(0, 1).map((v) => v.vistoId));
 
-  const vistoAtual = VISTOS_COM_TAXAS.find((v) => v.vistoId === vistoIdEfetivo);
+  const vistosComTaxasAtivos = VISTOS_COM_TAXAS.filter((v) => vistosAtivosEfetivo.includes(v.vistoId));
+
+  const toggleVisto = async (vistoId: string) => {
+    const novoSet = vistosAtivosEfetivo.includes(vistoId)
+      ? vistosAtivosEfetivo.filter((id) => id !== vistoId)
+      : [...vistosAtivosEfetivo, vistoId];
+    setVistosAtivosState(novoSet);
+    await fetch("/api/user-costs", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vistosAtivos: novoSet }),
+    }).catch(() => {});
+  };
 
   const itemsByKey = useMemo(() => {
     const map = new Map<string, CostItemRow>();
@@ -143,7 +159,8 @@ export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
     }).catch(() => {});
   };
 
-  const feesSelecionadas = (vistoAtual?.itens ?? []).filter((f) => feeItemState(f as FeeItem).selecionado);
+  const todosItensAtivos = vistosComTaxasAtivos.flatMap((v) => v.itens);
+  const feesSelecionadas = todosItensAtivos.filter((f) => feeItemState(f as FeeItem).selecionado);
   const totalTaxasUsd = feesSelecionadas.reduce((sum, f) => sum + feeItemState(f as FeeItem).valorUsd, 0);
   const totalManuaisUsd = manuais.filter((m) => m.selecionado).reduce((sum, m) => sum + m.valor_usd, 0);
   const totalUsd = totalTaxasUsd + totalManuaisUsd;
@@ -202,19 +219,28 @@ export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
             {VISTOS_COM_TAXAS.length > 1 && (
               <div className="mb-6">
                 <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-ink-faint">
-                  Visto
+                  Quais processos você tem em andamento?
                 </label>
-                <select
-                  value={vistoIdEfetivo ?? ""}
-                  onChange={(e) => setVistoId(e.target.value)}
-                  className="w-full rounded-lg border border-pine-tint bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:border-pine"
-                >
-                  {VISTOS_COM_TAXAS.map((v) => (
-                    <option key={v.vistoId} value={v.vistoId}>
-                      {v.codigo} · {v.nome}
-                    </option>
-                  ))}
-                </select>
+                <p className="mb-2 text-xs text-ink-soft">
+                  Marque todos — se você tem mais de um caso em paralelo, o total soma as taxas de todos.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {VISTOS_COM_TAXAS.map((v) => {
+                    const ativo = vistosAtivosEfetivo.includes(v.vistoId);
+                    return (
+                      <button
+                        key={v.vistoId}
+                        type="button"
+                        onClick={() => toggleVisto(v.vistoId)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
+                          ativo ? "border-pine bg-pine text-cream" : "border-pine-tint bg-white text-ink-soft"
+                        }`}
+                      >
+                        {v.codigo} · {v.nome}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -239,14 +265,14 @@ export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
               <p className="text-sm text-pine-tint">≈ R$ {totalBrl.toLocaleString("pt-BR")}</p>
             </div>
 
-            {/* Taxas oficiais do visto */}
-            {vistoAtual && (
-              <div className="mb-8">
+            {/* Taxas oficiais — um bloco por processo ativo */}
+            {vistosComTaxasAtivos.map((visto) => (
+              <div key={visto.vistoId} className="mb-8">
                 <p className="mb-3 text-xs font-bold uppercase tracking-widest text-ink-faint">
-                  Taxas oficiais — {vistoAtual.codigo}
+                  Taxas oficiais — {visto.codigo}
                 </p>
                 <div className="flex flex-col gap-2">
-                  {vistoAtual.itens.map((fee) => {
+                  {visto.itens.map((fee) => {
                     const state = feeItemState(fee as FeeItem);
                     return (
                       <div
@@ -273,6 +299,12 @@ export default function CustosClient({ hasAccess }: { hasAccess: boolean }) {
                     );
                   })}
                 </div>
+              </div>
+            ))}
+
+            {vistosComTaxasAtivos.length === 0 && (
+              <div className="mb-8 rounded-2xl border border-pine-tint bg-cream-2 p-5 text-center text-sm text-ink-soft">
+                Marque ao menos um processo acima pra ver as taxas oficiais dele.
               </div>
             )}
 

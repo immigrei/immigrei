@@ -16,7 +16,12 @@ const UpsertItemSchema = z.union([
   // Custo manual novo (tradução, advogado etc.).
   z.object({ titulo: z.string().min(1).max(200), valorUsd: z.number().positive() }),
 ]);
-const SettingsSchema = z.object({ cambioBrl: z.number().positive() });
+const SettingsSchema = z.object({
+  cambioBrl: z.number().positive().optional(),
+  vistosAtivos: z.array(z.string()).optional(),
+}).refine((v) => v.cambioBrl !== undefined || v.vistosAtivos !== undefined, {
+  message: "cambioBrl or vistosAtivos required",
+});
 const DeleteBodySchema = z.object({ id: z.string() });
 
 export async function GET() {
@@ -25,7 +30,7 @@ export async function GET() {
 
   const [itemsRes, settingsRes] = await Promise.all([
     supabaseAdmin.from("user_cost_items").select("*").eq("user_id", userId),
-    supabaseAdmin.from("user_cost_settings").select("cambio_brl").eq("user_id", userId).maybeSingle(),
+    supabaseAdmin.from("user_cost_settings").select("cambio_brl, vistos_ativos").eq("user_id", userId).maybeSingle(),
   ]);
 
   if (itemsRes.error) {
@@ -36,6 +41,9 @@ export async function GET() {
   return NextResponse.json({
     items: itemsRes.data ?? [],
     cambioBrl: settingsRes.data?.cambio_brl ?? 5.6,
+    // null = usuário ainda não escolheu explicitamente — o cliente cai de
+    // volta no default (visto do perfil) até a primeira escolha manual.
+    vistosAtivos: settingsRes.data?.vistos_ativos ?? null,
   });
 }
 
@@ -99,12 +107,13 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "cambioBrl required" }, { status: 400 });
   }
 
+  const patch: Record<string, unknown> = { user_id: userId, updated_at: new Date().toISOString() };
+  if (parsed.data.cambioBrl !== undefined) patch.cambio_brl = parsed.data.cambioBrl;
+  if (parsed.data.vistosAtivos !== undefined) patch.vistos_ativos = parsed.data.vistosAtivos;
+
   const { error } = await supabaseAdmin
     .from("user_cost_settings")
-    .upsert(
-      { user_id: userId, cambio_brl: parsed.data.cambioBrl, updated_at: new Date().toISOString() },
-      { onConflict: "user_id" },
-    );
+    .upsert(patch, { onConflict: "user_id" });
   if (error) {
     console.error("Update cost settings error:", error);
     return NextResponse.json({ error: "Failed to save" }, { status: 500 });
