@@ -6,6 +6,7 @@ import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import CofreLink from "@/app/components/CofreLink";
 import CustosLink from "@/app/components/CustosLink";
+import GuiasLink from "@/app/components/GuiasLink";
 import I94Card from "@/app/components/I94Card";
 import type { UserProcess } from "@/app/components/ParallelProcessesCard";
 import { KITS, type Kit, caminhoLabel, caminhoColor } from "@/lib/kitsCatalog";
@@ -151,6 +152,7 @@ export default function DocumentosPage() {
               Kits de protocolo
             </p>
             <div className="flex flex-wrap gap-2">
+              <GuiasLink />
               <CustosLink />
               <CofreLink />
             </div>
