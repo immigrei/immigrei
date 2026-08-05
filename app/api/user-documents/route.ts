@@ -5,12 +5,19 @@ import { supabaseAdmin } from "@/lib/supabase";
 import checklists from "@/app/documentos/[vistoId]/data";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getUserPlan } from "@/lib/plan";
+import { CATEGORIAS } from "@/lib/document-category";
 
 // File itself keeps its own manual checks below (size/MIME) — Zod only
 // covers the text fields FormData hands us alongside it.
 const UploadTargetSchema = z.object({
   vistoId: z.string(),
   documentoId: z.string(),
+});
+// Documento avulso: adicionado direto numa aba de categoria do cofre, sem
+// vir de um clip de checklist (visto_id/documento_id ficam nulos).
+const StandaloneTargetSchema = z.object({
+  categoria: z.enum(CATEGORIAS as [string, ...string[]]),
+  titulo: z.string().min(1).max(200),
 });
 const DeleteBodySchema = z.object({ id: z.string() });
 
@@ -64,7 +71,7 @@ export async function GET(req: NextRequest) {
   const vistoId = req.nextUrl.searchParams.get("vistoId");
   let query = supabaseAdmin
     .from("user_documents")
-    .select("id, documento_id, visto_id, file_name, mime_type, size_bytes, created_at")
+    .select("id, documento_id, visto_id, categoria, titulo, file_name, mime_type, size_bytes, created_at")
     .eq("user_id", userId);
   if (vistoId) query = query.eq("visto_id", vistoId);
 
@@ -99,18 +106,42 @@ export async function POST(req: NextRequest) {
 
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");
+  if (!(file instanceof File)) {
+    return NextResponse.json({ error: "file required" }, { status: 400 });
+  }
+
+  // Duas origens possíveis: um clip de checklist (vistoId+documentoId) ou um
+  // documento avulso adicionado direto numa aba de categoria do cofre.
   const parsedTarget = UploadTargetSchema.safeParse({
     vistoId: form?.get("vistoId"),
     documentoId: form?.get("documentoId"),
   });
+  const parsedStandalone = StandaloneTargetSchema.safeParse({
+    categoria: form?.get("categoria"),
+    titulo: form?.get("titulo"),
+  });
 
-  if (!(file instanceof File) || !parsedTarget.success) {
-    return NextResponse.json({ error: "file, vistoId and documentoId required" }, { status: 400 });
+  let vistoId: string | null = null;
+  let documentoId: string | null = null;
+  let categoria: string | null = null;
+  let titulo: string | null = null;
+
+  if (parsedTarget.success) {
+    if (!isValidTarget(parsedTarget.data.vistoId, parsedTarget.data.documentoId)) {
+      return NextResponse.json({ error: "Unknown checklist item" }, { status: 400 });
+    }
+    vistoId = parsedTarget.data.vistoId;
+    documentoId = parsedTarget.data.documentoId;
+  } else if (parsedStandalone.success) {
+    categoria = parsedStandalone.data.categoria;
+    titulo = parsedStandalone.data.titulo;
+  } else {
+    return NextResponse.json(
+      { error: "Envie vistoId+documentoId ou categoria+titulo" },
+      { status: 400 },
+    );
   }
-  const { vistoId, documentoId } = parsedTarget.data;
-  if (!isValidTarget(vistoId, documentoId)) {
-    return NextResponse.json({ error: "Unknown checklist item" }, { status: 400 });
-  }
+
   if (file.size === 0 || file.size > MAX_BYTES) {
     return NextResponse.json(
       { error: "O arquivo precisa ter até 10 MB." },
@@ -137,7 +168,9 @@ export async function POST(req: NextRequest) {
   );
 
   const safeName = file.name.replace(/[^\w.\-()\s]/g, "_").slice(-100);
-  const storagePath = `${userId}/${vistoId}/${documentoId}/${crypto.randomUUID()}-${safeName}`;
+  const storagePath = vistoId
+    ? `${userId}/${vistoId}/${documentoId}/${crypto.randomUUID()}-${safeName}`
+    : `${userId}/_avulsos/${crypto.randomUUID()}-${safeName}`;
 
   const { error: uploadError } = await supabaseAdmin.storage
     .from(BUCKET)
@@ -155,12 +188,14 @@ export async function POST(req: NextRequest) {
       user_id: userId,
       visto_id: vistoId,
       documento_id: documentoId,
+      categoria,
+      titulo,
       file_name: file.name,
       storage_path: storagePath,
       mime_type: file.type,
       size_bytes: file.size,
     })
-    .select("id, documento_id, file_name, size_bytes, created_at")
+    .select("id, documento_id, categoria, titulo, file_name, size_bytes, created_at")
     .single();
 
   if (insertError || !row) {

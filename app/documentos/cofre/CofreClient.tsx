@@ -1,20 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import PaywallGate from "@/app/components/PaywallGate";
 import checklists from "../[vistoId]/data";
+import { CATEGORIAS, inferCategoria, precisaTraducao, type Categoria } from "@/lib/document-category";
 
 interface DocumentoVault {
   id:           string;
-  documento_id: string;
-  visto_id:     string;
+  documento_id: string | null;
+  visto_id:     string | null;
+  categoria:    Categoria | null;
+  titulo:       string | null;
   file_name:    string;
   mime_type:    string | null;
   size_bytes:   number;
   created_at:   string;
 }
+
+// Chave de agrupamento para documentos avulsos (sem visto_id).
+const AVULSOS_KEY = "_avulsos";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -87,9 +93,39 @@ function CofreDemo() {
   );
 }
 
+interface ChecklistInfo {
+  nome: string;
+  categoria: Categoria;
+  precisaTraducao: boolean;
+}
+
 export default function CofreClient({ hasAccess }: { hasAccess: boolean }) {
   const [documentos, setDocumentos] = useState<DocumentoVault[] | null>(null);
   const [excluindo, setExcluindo] = useState<Set<string>>(new Set());
+  const [categoriaAtiva, setCategoriaAtiva] = useState<Categoria | "Todos">("Todos");
+  const [modalAberto, setModalAberto] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState<string | null>(null);
+  const [tituloNovo, setTituloNovo] = useState("");
+  const [arquivoNovo, setArquivoNovo] = useState<File | null>(null);
+
+  // Chave `${vistoId}:${documentoId}` porque o mesmo documento_id pode existir
+  // em checklists diferentes (ex: "passaporte" aparece em vários vistos).
+  const checklistInfoByKey = useMemo(() => {
+    const map = new Map<string, ChecklistInfo>();
+    for (const checklist of Object.values(checklists)) {
+      for (const grupo of checklist.grupos) {
+        for (const doc of grupo.documentos) {
+          map.set(`${checklist.vistoId}:${doc.id}`, {
+            nome: doc.nome,
+            categoria: inferCategoria(doc),
+            precisaTraducao: precisaTraducao(doc),
+          });
+        }
+      }
+    }
+    return map;
+  }, []);
 
   useEffect(() => {
     if (!hasAccess) return;
@@ -123,11 +159,52 @@ export default function CofreClient({ hasAccess }: { hasAccess: boolean }) {
     setDocumentos((prev) => (prev ?? []).filter((d) => d.id !== doc.id));
   };
 
-  const grupos = new Map<string, DocumentoVault[]>();
-  for (const doc of documentos ?? []) {
-    const lista = grupos.get(doc.visto_id) ?? [];
-    lista.push(doc);
-    grupos.set(doc.visto_id, lista);
+  const adicionarAvulso = async () => {
+    if (!arquivoNovo || !tituloNovo.trim() || categoriaAtiva === "Todos") return;
+    setEnviando(true);
+    setErroEnvio(null);
+    const form = new FormData();
+    form.set("file", arquivoNovo);
+    form.set("categoria", categoriaAtiva);
+    form.set("titulo", tituloNovo.trim());
+    const res = await fetch("/api/user-documents", { method: "POST", body: form });
+    setEnviando(false);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setErroEnvio(body.error ?? "Não foi possível enviar o documento.");
+      return;
+    }
+    const { document } = await res.json();
+    setDocumentos((prev) => [
+      { ...document, visto_id: null, mime_type: arquivoNovo.type },
+      ...(prev ?? []),
+    ]);
+    setModalAberto(false);
+    setTituloNovo("");
+    setArquivoNovo(null);
+  };
+
+  const todos = documentos ?? [];
+  const docsComInfo = todos.map((doc) => ({
+    doc,
+    info: doc.categoria
+      ? { nome: doc.titulo ?? doc.file_name, categoria: doc.categoria, precisaTraducao: false }
+      : checklistInfoByKey.get(`${doc.visto_id}:${doc.documento_id}`),
+  }));
+
+  const pendentesTraducao = docsComInfo.filter((d) => d.info?.precisaTraducao).length;
+
+  const docsFiltrados =
+    categoriaAtiva === "Todos"
+      ? docsComInfo
+      : docsComInfo.filter((d) => (d.info?.categoria ?? "Identidade") === categoriaAtiva);
+
+  const grupos = new Map<string, typeof docsFiltrados>();
+  for (const item of docsFiltrados) {
+    const key = item.doc.visto_id ?? AVULSOS_KEY;
+    const lista = grupos.get(key) ?? [];
+    lista.push(item);
+    grupos.set(key, lista);
   }
 
   return (
@@ -178,58 +255,165 @@ export default function CofreClient({ hasAccess }: { hasAccess: boolean }) {
           </div>
         )}
 
-        {hasAccess && documentos !== null && documentos.length > 0 && [...grupos.entries()].map(([vistoId, docs]) => {
-          const checklist = checklists[vistoId];
-          const docsById = new Map(
-            checklist?.grupos.flatMap((g) => g.documentos).map((d) => [d.id, d.nome]) ?? [],
-          );
-          return (
-            <div key={vistoId} className="mb-8">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.1em" }}>
-                  {checklist ? `${checklist.codigo} · ${checklist.nome}` : vistoId}
-                </p>
-                <Link
-                  href={`/documentos/${vistoId}`}
-                  className="text-xs font-semibold text-pine hover:underline underline-offset-2"
-                >
-                  Ver checklist →
-                </Link>
+        {hasAccess && documentos !== null && documentos.length > 0 && (
+          <>
+            {pendentesTraducao > 0 && (
+              <div className="mb-6 flex items-center gap-2 rounded-2xl border-l-4 border-amber bg-amber-tint p-4 text-sm text-ink">
+                <span>
+                  Você tem <strong className="text-amber-deep">{pendentesTraducao} documento(s)</strong> que
+                  costumam exigir tradução juramentada para o inglês.
+                </span>
               </div>
-              <div className="flex flex-col gap-2">
-                {docs.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center gap-3 rounded-2xl border border-pine-tint bg-cream-2 p-3"
+            )}
+
+            <div className="mb-6 flex items-center justify-between gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {(["Todos", ...CATEGORIAS] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setCategoriaAtiva(cat)}
+                    className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                      categoriaAtiva === cat
+                        ? "bg-pine text-cream"
+                        : "bg-pine-tint text-ink-soft hover:bg-pine-tint/70"
+                    }`}
                   >
-                    <FileIcon mimeType={doc.mime_type} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-ink truncate">
-                        {docsById.get(doc.documento_id) ?? doc.file_name}
-                      </p>
-                      <p className="text-xs text-ink-faint">
-                        {doc.file_name} · {formatBytes(doc.size_bytes)} · {formatDate(doc.created_at)}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => verAnexo(doc)}
-                      className="flex-shrink-0 text-xs font-semibold text-pine hover:underline underline-offset-2"
-                    >
-                      Abrir
-                    </button>
-                    <button
-                      onClick={() => excluirAnexo(doc)}
-                      disabled={excluindo.has(doc.id)}
-                      className="flex-shrink-0 text-xs font-semibold text-clay hover:underline underline-offset-2 disabled:opacity-40"
-                    >
-                      {excluindo.has(doc.id) ? "..." : "Excluir"}
-                    </button>
-                  </div>
+                    {cat}
+                  </button>
                 ))}
               </div>
+              {categoriaAtiva !== "Todos" && (
+                <button
+                  onClick={() => setModalAberto(true)}
+                  className="flex-shrink-0 rounded-full bg-amber px-3.5 py-1.5 text-xs font-bold text-ink hover:bg-amber-deep transition-colors"
+                >
+                  + Adicionar
+                </button>
+              )}
             </div>
-          );
-        })}
+
+            {docsFiltrados.length === 0 && (
+              <div className="rounded-2xl border border-pine-tint bg-cream-2 p-6 text-center text-sm text-ink-soft">
+                Nenhum documento nessa categoria ainda.
+              </div>
+            )}
+
+            {[...grupos.entries()].map(([vistoId, docs]) => {
+              const checklist = vistoId === AVULSOS_KEY ? null : checklists[vistoId];
+              return (
+                <div key={vistoId} className="mb-8">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-bold uppercase tracking-widest text-ink-faint" style={{ letterSpacing: "0.1em" }}>
+                      {vistoId === AVULSOS_KEY ? "Adicionados por você" : checklist ? `${checklist.codigo} · ${checklist.nome}` : vistoId}
+                    </p>
+                    {vistoId !== AVULSOS_KEY && (
+                      <Link
+                        href={`/documentos/${vistoId}`}
+                        className="text-xs font-semibold text-pine hover:underline underline-offset-2"
+                      >
+                        Ver checklist →
+                      </Link>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {docs.map(({ doc, info }) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center gap-3 rounded-2xl border border-pine-tint bg-cream-2 p-3"
+                      >
+                        <FileIcon mimeType={doc.mime_type} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-ink truncate">
+                              {info?.nome ?? doc.file_name}
+                            </p>
+                            {info && (
+                              <span className="flex-shrink-0 rounded-md bg-pine-tint px-1.5 py-0.5 text-[10px] font-bold text-pine">
+                                {info.categoria}
+                              </span>
+                            )}
+                            {info?.precisaTraducao && (
+                              <span className="flex-shrink-0 rounded-md bg-amber-tint px-1.5 py-0.5 text-[10px] font-bold text-amber-deep">
+                                Tradução
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-ink-faint">
+                            {doc.file_name} · {formatBytes(doc.size_bytes)} · {formatDate(doc.created_at)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => verAnexo(doc)}
+                          className="flex-shrink-0 text-xs font-semibold text-pine hover:underline underline-offset-2"
+                        >
+                          Abrir
+                        </button>
+                        <button
+                          onClick={() => excluirAnexo(doc)}
+                          disabled={excluindo.has(doc.id)}
+                          className="flex-shrink-0 text-xs font-semibold text-clay hover:underline underline-offset-2 disabled:opacity-40"
+                        >
+                          {excluindo.has(doc.id) ? "..." : "Excluir"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
+
+        {modalAberto && categoriaAtiva !== "Todos" && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4">
+            <div className="w-full max-w-sm rounded-2xl bg-cream-2 p-6 shadow-xl">
+              <h2 className="mb-1 text-lg font-semibold text-ink" style={{ fontFamily: "var(--font-display)" }}>
+                Adicionar em {categoriaAtiva}
+              </h2>
+              <p className="mb-4 text-xs text-ink-faint">
+                Para documentos que não vieram de um checklist de visto específico.
+              </p>
+
+              <label className="mb-1 block text-xs font-bold text-ink-soft">Nome do documento</label>
+              <input
+                type="text"
+                value={tituloNovo}
+                onChange={(e) => setTituloNovo(e.target.value)}
+                placeholder="Ex: Certidão de casamento com averbação"
+                className="mb-3 w-full rounded-lg border border-pine-tint bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:border-pine"
+              />
+
+              <label className="mb-1 block text-xs font-bold text-ink-soft">Arquivo (PDF, JPG, PNG, WEBP, HEIC — até 10 MB)</label>
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.heic"
+                onChange={(e) => setArquivoNovo(e.target.files?.[0] ?? null)}
+                className="mb-3 w-full text-xs text-ink-soft"
+              />
+
+              {erroEnvio && <p className="mb-3 text-xs text-clay">{erroEnvio}</p>}
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  onClick={() => {
+                    setModalAberto(false);
+                    setErroEnvio(null);
+                  }}
+                  className="rounded-full px-4 py-2 text-xs font-bold text-ink-soft hover:bg-pine-tint/50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={adicionarAvulso}
+                  disabled={enviando || !arquivoNovo || !tituloNovo.trim()}
+                  className="rounded-full bg-pine px-4 py-2 text-xs font-bold text-cream hover:bg-pine-deep disabled:opacity-40"
+                >
+                  {enviando ? "Enviando..." : "Adicionar"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );
