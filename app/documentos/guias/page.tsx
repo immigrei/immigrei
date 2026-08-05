@@ -1,15 +1,17 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { getUserPlan } from "@/lib/plan";
-import GuiasClient from "./GuiasClient";
+import type { Metadata } from "next";
+import guias from "./data";
+import GuiasIndexClient from "./GuiasIndexClient";
 
-// Guias de integração nos EUA: conteúdo editorial (SSN, DMV, crédito, saúde)
-// — sem status pessoal, sem API, só texto curado com fonte oficial.
-export default async function GuiasPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+// Public index — see [id]/page.tsx and proxy.ts for the same reasoning.
+// No auth() check here; never add gated-feature data to this route.
+export const metadata: Metadata = {
+  metadataBase: new URL("https://immigrei.com"),
+  title: "Guias de Integração nos EUA | immigrei",
+  description:
+    "SSN, carteira de motorista, crédito, plano de saúde, ITIN e abertura de empresa — guias práticos em português para os primeiros passos depois do visto.",
+  alternates: { canonical: "/documentos/guias" },
+};
 
-  const plan = await getUserPlan(userId);
-
-  return <GuiasClient hasAccess={plan !== "free"} />;
+export default function GuiasIndexPage() {
+  return <GuiasIndexClient guias={guias} />;
 }

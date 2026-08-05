@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { VISTO_PAGES } from "@/lib/vistoPages";
+import guias from "@/app/documentos/guias/data";
 
 // Pre-launch sitemap: the public pages behind the immigrei.com gate, plus
 // catalog-driven routes generated from their source of truth (never
@@ -8,6 +9,12 @@ import { VISTO_PAGES } from "@/lib/vistoPages";
 export default function sitemap(): MetadataRoute.Sitemap {
   const vistoEntries: MetadataRoute.Sitemap = Object.keys(VISTO_PAGES).map((id) => ({
     url: `https://immigrei.com/vistos/${id}`,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  const guiaEntries: MetadataRoute.Sitemap = guias.map((g) => ({
+    url: `https://immigrei.com/documentos/guias/${g.id}`,
     changeFrequency: "monthly",
     priority: 0.6,
   }));
@@ -25,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     { url: "https://immigrei.com/termos", changeFrequency: "yearly", priority: 0.3 },
     { url: "https://immigrei.com/privacidade", changeFrequency: "yearly", priority: 0.3 },
+    {
+      url: "https://immigrei.com/documentos/guias",
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
     ...vistoEntries,
+    ...guiaEntries,
   ];
 }
