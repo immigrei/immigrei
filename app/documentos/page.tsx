@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
 import CofreLink from "@/app/components/CofreLink";
+import CustosLink from "@/app/components/CustosLink";
 import I94Card from "@/app/components/I94Card";
 import type { UserProcess } from "@/app/components/ParallelProcessesCard";
 import { KITS, type Kit, caminhoLabel, caminhoColor } from "@/lib/kitsCatalog";
@@ -149,7 +150,10 @@ export default function DocumentosPage() {
             <p className="text-xs font-bold uppercase tracking-widest text-pine" style={{ letterSpacing: "0.12em" }}>
               Kits de protocolo
             </p>
-            <CofreLink />
+            <div className="flex flex-wrap gap-2">
+              <CustosLink />
+              <CofreLink />
+            </div>
           </div>
           <h1 className="text-3xl font-semibold text-ink mb-2" style={{ fontFamily: "var(--font-display)" }}>
             Documente e protocole

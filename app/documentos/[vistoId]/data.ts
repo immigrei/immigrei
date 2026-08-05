@@ -19,6 +19,11 @@ export interface Documento {
   // /documentos/[vistoId]/formulario/[formId].
   formId?: string;
   obrigatorio: boolean;
+  // Taxa oficial do governo (USCIS/DOS/NVC), em USD, quando o valor é fixo e
+  // conhecido. Quando há mais de um valor possível (online vs. papel, faixa
+  // de renda), usamos o valor mais comum — a nuance completa já está na
+  // descricao. Alimenta a Calculadora de Custos (/documentos/custos).
+  taxaUsd?: number;
 }
 
 export interface GrupoDocumentos {
@@ -66,6 +71,7 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-901",
             obrigatorio: true,
+            taxaUsd: 350,
           },
         ],
       },
@@ -169,6 +175,7 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-901",
             obrigatorio: true,
+            taxaUsd: 350,
           },
         ],
       },
@@ -264,6 +271,7 @@ const checklists: Record<string, ChecklistVisto> = {
               "Taxa de US$220 (programas Work and Travel) ou US$35 (outros programas) em fmjfee.com.",
             agencia: "USCIS",
             obrigatorio: true,
+            taxaUsd: 220,
           },
         ],
       },
@@ -689,6 +697,7 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-140",
             obrigatorio: true,
+            taxaUsd: 715,
           },
           {
             id: "carta-niw",
@@ -853,6 +862,7 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-901",
             obrigatorio: true,
+            taxaUsd: 350,
           },
           {
             id: "i539",
@@ -862,6 +872,7 @@ const checklists: Record<string, ChecklistVisto> = {
             formulario: "I-539",
             formId: "i-539",
             obrigatorio: true,
+            taxaUsd: 370,
           },
         ],
       },
@@ -1146,6 +1157,7 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-901",
             obrigatorio: true,
+            taxaUsd: 350,
           },
           {
             id: "i539-m1",
@@ -1154,6 +1166,7 @@ const checklists: Record<string, ChecklistVisto> = {
             agencia: "USCIS",
             formulario: "I-539",
             obrigatorio: true,
+            taxaUsd: 370,
           },
         ],
       },
@@ -1781,6 +1794,7 @@ const checklists: Record<string, ChecklistVisto> = {
               "Taxa de processamento do formulário IV (US$325) e taxa do Affidavit of Support (US$120), pagas no portal CEAC.",
             agencia: "NVC",
             obrigatorio: true,
+            taxaUsd: 445,
           },
         ],
       },
@@ -2325,6 +2339,7 @@ const checklists: Record<string, ChecklistVisto> = {
             formulario: "I-130",
             formId: "i-130",
             obrigatorio: true,
+            taxaUsd: 625,
           },
           {
             id: "i130a",
@@ -2462,6 +2477,7 @@ const checklists: Record<string, ChecklistVisto> = {
               "Paga online após o visto aprovado e ANTES de viajar — é ela que gera o Green Card físico depois da entrada.",
             agencia: "USCIS",
             obrigatorio: true,
+            taxaUsd: 235,
           },
         ],
       },
@@ -2525,6 +2541,7 @@ const checklists: Record<string, ChecklistVisto> = {
             formulario: "I-129F",
             formId: "i-129f",
             obrigatorio: true,
+            taxaUsd: 675,
           },
           {
             id: "g1145",
@@ -3203,6 +3220,7 @@ const checklists: Record<string, ChecklistVisto> = {
             formulario: "N-400",
             formId: "n-400",
             obrigatorio: true,
+            taxaUsd: 710,
           },
         ],
       },
@@ -3269,6 +3287,7 @@ const checklists: Record<string, ChecklistVisto> = {
             formulario: "I-90",
             formId: "i-90",
             obrigatorio: true,
+            taxaUsd: 415,
           },
         ],
       },
@@ -3398,6 +3417,7 @@ const checklists: Record<string, ChecklistVisto> = {
             formulario: "I-539",
             formId: "i-539",
             obrigatorio: true,
+            taxaUsd: 370,
           },
         ],
       },

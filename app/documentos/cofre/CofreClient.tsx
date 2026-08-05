@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AppShell from "@/app/components/AppShell";
 import PaywallGate from "@/app/components/PaywallGate";
 import checklists from "../[vistoId]/data";
@@ -100,6 +101,7 @@ interface ChecklistInfo {
 }
 
 export default function CofreClient({ hasAccess }: { hasAccess: boolean }) {
+  const router = useRouter();
   const [documentos, setDocumentos] = useState<DocumentoVault[] | null>(null);
   const [excluindo, setExcluindo] = useState<Set<string>>(new Set());
   const [categoriaAtiva, setCategoriaAtiva] = useState<Categoria | "Todos">("Todos");
@@ -210,6 +212,19 @@ export default function CofreClient({ hasAccess }: { hasAccess: boolean }) {
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto px-4 py-8">
+        <button
+          onClick={() => {
+            if (window.history.length > 1) router.back();
+            else router.push("/documentos");
+          }}
+          className="flex items-center gap-1.5 text-ink-soft text-sm mb-6 hover:text-pine transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Voltar
+        </button>
+
         <div className="mb-7">
           <p className="text-xs font-bold uppercase tracking-widest text-pine mb-1" style={{ letterSpacing: "0.12em" }}>
             Sempre à mão
