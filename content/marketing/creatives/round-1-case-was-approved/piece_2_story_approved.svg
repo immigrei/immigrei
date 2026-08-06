@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap');
+      .font-fraunces { font-family: 'Fraunces', serif; font-weight: 600; }
+      .font-hanken { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#1B2520" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background: Deep Pine Green #1E5E4E -->
+  <rect width="1080" height="1920" fill="#1E5E4E"/>
+
+  <!-- Subtle Ambient Organic Shapes -->
+  <circle cx="980" cy="200" r="450" fill="#E8A33D" opacity="0.08"/>
+  <circle cx="100" cy="1700" r="400" fill="#F4EEE2" opacity="0.05"/>
+
+  <!-- Brand Header -->
+  <text x="540" y="240" class="font-hanken" font-size="28" font-weight="700" fill="#F4EEE2" letter-spacing="3" text-anchor="middle">IMMIGREI</text>
+
+  <!-- Main Card Container: Cream #F4EEE2 -->
+  <rect x="90" y="320" width="900" height="1340" rx="40" fill="#F4EEE2" filter="url(#shadow)"/>
+
+  <!-- Status Pill Badge verbatim: Case Was Approved -->
+  <g transform="translate(160, 420)">
+    <rect x="0" y="0" width="380" height="64" rx="32" fill="#1E5E4E"/>
+    <circle cx="32" cy="32" r="12" fill="#E8A33D"/>
+    <text x="64" y="40" class="font-hanken" font-size="24" font-weight="700" fill="#F4EEE2">Case Was Approved</text>
+  </g>
+
+  <!-- Main Headline in Fraunces: Aprovou... e agora? -->
+  <text x="160" y="580" class="font-fraunces" font-size="72" fill="#1B2520">Aprovou... e agora?</text>
+
+  <!-- Subheadline -->
+  <text x="160" y="650" class="font-hanken" font-size="30" font-weight="600" fill="#1E5E4E">O que significa este status e os próximos passos</text>
+
+  <line x1="160" y1="710" x2="820" y2="710" stroke="#E8A33D" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Content Points -->
+  <g transform="translate(160, 770)">
+    <!-- Box 1 -->
+    <rect x="0" y="0" width="760" height="170" rx="20" fill="#FFFFFF"/>
+    <text x="40" y="55" class="font-hanken" font-size="24" font-weight="700" fill="#1E5E4E">01. Confirmação Oficial (I-797)</text>
+    <text x="40" y="100" class="font-hanken" font-size="22" fill="#1B2520">
+      <tspan x="40" dy="0">O I-797 (Notice of Action) é o documento oficial que</tspan>
+      <tspan x="40" dy="32">confirma a aprovação da petição pelo USCIS.</tspan>
+    </text>
+
+    <!-- Box 2 -->
+    <rect x="0" y="200" width="760" height="190" rx="20" fill="#FFFFFF"/>
+    <text x="40" y="55" class="font-hanken" font-size="24" font-weight="700" fill="#1E5E4E">02. Aprovação da Petição ≠ Green Card</text>
+    <text x="40" y="100" class="font-hanken" font-size="22" fill="#1B2520">
+      <tspan x="40" dy="0">Após o I-130 aprovado, a etapa seguinte envolve</tspan>
+      <tspan x="40" dy="32">NVC + consulado ou ajuste de status (I-485).</tspan>
+    </text>
+
+    <!-- Box 3 -->
+    <rect x="0" y="420" width="760" height="170" rx="20" fill="#FFFFFF"/>
+    <text x="40" y="55" class="font-hanken" font-size="24" font-weight="700" fill="#1E5E4E">03. Green Card em Produção</text>
+    <text x="40" y="100" class="font-hanken" font-size="22" fill="#1B2520">
+      <tspan x="40" dy="0">O green card entra em produção especificamente</tspan>
+      <tspan x="40" dy="32">após a aprovação do formulário I-485.</tspan>
+    </text>
+  </g>
+
+  <!-- Discrete CTA Button -->
+  <g transform="translate(160, 1490)">
+    <rect x="0" y="0" width="760" height="72" rx="36" fill="#E8A33D"/>
+    <text x="380" y="44" class="font-hanken" font-size="24" font-weight="700" fill="#1B2520" text-anchor="middle">Acompanhe sua jornada no Immigrei</text>
+  </g>
+
+  <!-- Mandatory Footer Disclaimer -->
+  <text x="540" y="1740" class="font-hanken" font-size="18" fill="#F4EEE2" opacity="0.75" text-anchor="middle">Conteúdo informativo, não é aconselhamento jurídico.</text>
+</svg>
