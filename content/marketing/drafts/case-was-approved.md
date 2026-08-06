@@ -4,7 +4,7 @@ slug: case-was-approved
 type: status
 query_target: "Case Was Approved"
 status: draft
-compliance_check: PASS
+compliance_check: PASS (re-verified 2026-08-05, product-feature line confirmed against lib/forms/registry.ts)
 reviewed_by: pending
 byline: Equipe Immigrei
 sources:
@@ -37,6 +37,10 @@ Exemplos de como a aprovação se encaixa na jornada:
   status costumam ser *"New Card Is Being Produced"* e *"Card Was Mailed To Me"*.
 - **Extensão/mudança de status (I-539) aprovada**: o novo status e a nova data
   de validade constam no I-797 aprovado — ele é o seu comprovante.
+
+Em cada um desses casos, o formulário da etapa seguinte (I-485, I-130A,
+I-765, entre outros) já pode ser preenchido dentro do Immigrei, ligado ao kit
+do seu caminho — sem começar do zero.
 
 ## O que acontece depois?
 
@@ -93,4 +97,18 @@ distinguished (I-797 = receipt/approval, I-797C = receipt/rejection/transfer/
 appointments), no contradiction between the two drafts.
 VERIFIED CLAIMS: "aprovação do I-130 ≠ green card" traced to content/leis/formularios/i-130.md; status names consistent with lib/uscis-status-pt.ts; I-797 quote verified live.
 UPL: none — "o que ela habilita varia caso a caso" defers to professional
+
+UPDATE 2026-08-05: added one line noting the next-step form (I-485, I-130A,
+I-765) is fillable in-app, reflecting lib/forms/registry.ts (I-130, I-130A,
+I-485, I-131, I-765, I-765-AOS, I-864, I-90, N-400, I-539, I-129F, G-1145,
+EOIR-29 all live).
+
+RE-VERIFIED 2026-08-05 (full subagent run): VERDICT PASS, 8/8 claims verified
+including the new line — traced to lib/forms/registry.ts, cross-checked
+attachTo.vistoId in i-130.ts/i-130a.ts/i-485.ts (all "familia-ir", matching
+the I-130/I-485 bullets) and i-539.ts ("f1-cos", matching the I-539 bullet);
+route app/documentos/[vistoId]/formulario/[formId]/page.tsx confirmed;
+kit-linkage claim is enforced by an existing test (lib/forms/upl-guard.test.ts),
+not just asserted in copy. No UPL risk — product-feature statement, not
+case-specific direction.
 -->
