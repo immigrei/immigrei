@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap');
+      .font-fraunces { font-family: 'Fraunces', serif; font-weight: 600; }
+      .font-hanken { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1B2520" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background: Cream #F4EEE2 -->
+  <rect width="1080" height="1080" fill="#F4EEE2"/>
+
+  <!-- Subtle Ambient Decor -->
+  <circle cx="980" cy="100" r="300" fill="#1E5E4E" opacity="0.04"/>
+  <circle cx="100" cy="980" r="250" fill="#E8A33D" opacity="0.06"/>
+
+  <!-- Card Container: Pine Green #1E5E4E -->
+  <rect x="90" y="90" width="900" height="900" rx="32" fill="#FFFFFF" filter="url(#shadow)"/>
+
+  <!-- Top Accent Bar: Pine #1E5E4E -->
+  <rect x="90" y="90" width="900" height="16" rx="8" fill="#1E5E4E"/>
+
+  <!-- Brand Identifier -->
+  <text x="140" y="170" class="font-hanken" font-size="24" font-weight="700" fill="#1E5E4E" letter-spacing="2">IMMIGREI</text>
+  
+  <!-- Status Badge verbatim: Case Was Approved -->
+  <g transform="translate(140, 220)">
+    <rect x="0" y="0" width="340" height="56" rx="28" fill="#1E5E4E"/>
+    <circle cx="28" cy="28" r="10" fill="#E8A33D"/>
+    <text x="52" y="35" class="font-hanken" font-size="22" font-weight="700" fill="#F4EEE2">Case Was Approved</text>
+  </g>
+
+  <!-- Main Headline in Fraunces: Aprovou... e agora? -->
+  <text x="140" y="370" class="font-fraunces" font-size="64" fill="#1B2520">Aprovou... e agora?</text>
+
+  <!-- Body Content Card -->
+  <rect x="140" y="420" width="800" height="280" rx="20" fill="#F4EEE2"/>
+  
+  <text x="180" y="480" class="font-hanken" font-size="26" font-weight="600" fill="#1E5E4E">O que este status significa na sua jornada:</text>
+  
+  <text x="180" y="535" class="font-hanken" font-size="24" fill="#1B2520">
+    <tspan x="180" dy="0">• A petição referente àquele recibo foi aprovada pelo USCIS.</tspan>
+    <tspan x="180" dy="40">• O documento oficial de confirmação é o formulário <tspan font-weight="700" fill="#1E5E4E">I-797</tspan>.</tspan>
+    <tspan x="180" dy="40">• É um marco importante, mas a jornada continua até o green card.</tspan>
+  </text>
+
+  <!-- Highlight Pill: I-797 Notice of Action -->
+  <g transform="translate(140, 730)">
+    <rect x="0" y="0" width="400" height="48" rx="12" fill="#E8A33D" opacity="0.15"/>
+    <text x="20" y="31" class="font-hanken" font-size="20" font-weight="700" fill="#1E5E4E">Documento oficial: I-797 (Notice of Action)</text>
+  </g>
+
+  <!-- Discrete CTA Button -->
+  <g transform="translate(140, 810)">
+    <rect x="0" y="0" width="460" height="60" rx="30" fill="#E8A33D"/>
+    <text x="230" y="37" class="font-hanken" font-size="22" font-weight="700" fill="#1B2520" text-anchor="middle">Acompanhe sua jornada no Immigrei</text>
+  </g>
+
+  <!-- Mandatory Footer Disclaimer -->
+  <text x="540" y="955" class="font-hanken" font-size="18" fill="#1B2520" opacity="0.6" text-anchor="middle">Conteúdo informativo, não é aconselhamento jurídico.</text>
+</svg>

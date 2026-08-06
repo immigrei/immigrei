@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap');
+      .font-fraunces { font-family: 'Fraunces', serif; font-weight: 600; }
+      .font-hanken { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1B2520" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background: Cream #F4EEE2 -->
+  <rect width="1080" height="1080" fill="#F4EEE2"/>
+
+  <!-- Card Container -->
+  <rect x="80" y="80" width="920" height="920" rx="32" fill="#FFFFFF" filter="url(#shadow)"/>
+
+  <!-- Top Bar: Slide Indicator & Brand -->
+  <text x="140" y="160" class="font-hanken" font-size="22" font-weight="700" fill="#1E5E4E" letter-spacing="2">IMMIGREI</text>
+  
+  <g transform="translate(860, 130)">
+    <rect x="0" y="0" width="80" height="36" rx="18" fill="#F4EEE2"/>
+    <text x="40" y="24" class="font-hanken" font-size="18" font-weight="700" fill="#1E5E4E" text-anchor="middle">1 / 5</text>
+  </g>
+
+  <!-- Status pill badge verbatim: Case Was Approved -->
+  <g transform="translate(140, 220)">
+    <rect x="0" y="0" width="320" height="52" rx="26" fill="#1E5E4E"/>
+    <circle cx="26" cy="26" r="8" fill="#E8A33D"/>
+    <text x="48" y="33" class="font-hanken" font-size="20" font-weight="700" fill="#F4EEE2">Case Was Approved</text>
+  </g>
+
+  <!-- Carousel Slide Hook Question in Fraunces -->
+  <text x="140" y="360" class="font-fraunces" font-size="52" fill="#1B2520">
+    <tspan x="140" dy="0">Meu caso apareceu</tspan>
+    <tspan x="140" dy="70" fill="#1E5E4E">"Case Was Approved".</tspan>
+    <tspan x="140" dy="70">Já acabou?</tspan>
+  </text>
+
+  <!-- Explanation box -->
+  <rect x="140" y="560" width="800" height="200" rx="20" fill="#F4EEE2"/>
+  <text x="180" y="620" class="font-hanken" font-size="24" fill="#1B2520">
+    <tspan x="180" dy="0">Deslize para entender o que significa o I-797,</tspan>
+    <tspan x="180" dy="36">a diferença entre petição aprovada e green card,</tspan>
+    <tspan x="180" dy="36">e o que falta na próxima etapa da jornada.</tspan>
+  </text>
+
+  <!-- Swipe prompt indicator -->
+  <g transform="translate(740, 800)">
+    <rect x="0" y="0" width="200" height="52" rx="26" fill="#E8A33D"/>
+    <text x="85" y="33" class="font-hanken" font-size="20" font-weight="700" fill="#1B2520">Deslize</text>
+    <path d="M145 26 L155 26 M150 21 L155 26 L150 31" stroke="#1B2520" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Mandatory Footer Disclaimer -->
+  <text x="540" y="955" class="font-hanken" font-size="18" fill="#1B2520" opacity="0.6" text-anchor="middle">Conteúdo informativo, não é aconselhamento jurídico.</text>
+</svg>
