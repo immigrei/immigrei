@@ -127,16 +127,17 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 | Language | TypeScript |
 | Styling | Tailwind CSS |
 | Database | Supabase (PostgreSQL) — East US, North Virginia |
-| Auth | Clerk — Email, Google, Apple, Facebook |
+| Auth | Clerk — Email, Google (see note below) |
 | Payments | Stripe (live) |
-| Deploy | Vercel — immigrei.vercel.app |
+| Deploy | Vercel — immigrei.vercel.app, primary domain immigrei.app (Aug 7, 2026) |
 | Repo | github.com/immigrei/immigrei |
 
 ### Auth login methods (end users):
 - Email ✅
 - Google ✅
-- Apple ✅
-- Facebook ✅
+- Apple ❌ — toggled on in Clerk but no Services ID/Private Key/Team ID/Key ID ever entered ("Setup required"); needs an Apple Developer Program account (paid, $99/yr) to generate real credentials — not done as of Aug 7, 2026
+- Facebook ❌ — disabled deliberately (no App ID/Secret configured, and not a priority)
+- Passkey ❌ — requires Clerk Pro plan; staying on Free, so not enabled
 - Phone number: disabled for now (add as optional 2FA later)
 
 ### Stripe products (live, created Jul 28, 2026):
@@ -225,7 +226,8 @@ VOYAGE_API_KEY=
 **MVP foundation — all delivered:**
 
 - [x] Next.js project scaffolded, deployed to Vercel (immigrei.vercel.app)
-- [x] Supabase (East US) + Clerk (Email/Google/Apple/Facebook) + Stripe (live) — configured, packages installed, .env.local set
+- [x] Supabase (East US) + Clerk (Email/Google live; Apple/Facebook/Passkey not configured — see Auth login methods above) + Stripe (live) — configured, packages installed, .env.local set
+- [x] Primary domain migrated immigrei.com → immigrei.app — Vercel domain, Cloudflare DNS/DNSSEC, and Clerk's primary domain (custom Frontend API `clerk.immigrei.app` / Account Portal `accounts.immigrei.app`) all cut over (Aug 7, 2026)
 - [x] Auth flow (sign up / sign in) — /vistos and /caminhos gated behind login
 - [x] User onboarding flow — branching questionnaire, single best-match result card
 - [x] Dashboard / immigration status view — /painel with data-driven journey progress
@@ -247,3 +249,5 @@ VOYAGE_API_KEY=
 - [ ] **USCIS Case-Status still on sandbox** — the cron/API hit `api-int.uscis.gov`, not production. Blocks the core "where does my case stand" promise. Waiting on USCIS to grant prod access (requires 5 consecutive days of sandbox traffic, per `uscis-sandbox-traffic` cron).
 - [ ] **No real-time error alerting** — Sentry has no Slack alert rule; none of the 5 Vercel cron jobs alert on failure. Needs native Sentry→Slack and Vercel monitoring setup (account-level, not code).
 - [ ] Confirm the `user_processes` 42P10 fix (commit a4424c5, Jul 30) actually stopped the errors seen into the morning of Jul 31.
+- [ ] **`immigrei.com` → `immigrei.app` 301 redirect not yet configured** — `.app` is now the canonical/primary domain everywhere (Vercel, Cloudflare, Clerk), but `.com` still serves independently instead of redirecting. Do this last, after confirming login end-to-end on `.app`.
+- [ ] Email deliverability (SPF/DKIM/MX/Resend) is still only configured for `immigrei.com` — intentional, mail domain is independent of the web app domain and wasn't part of this migration.
