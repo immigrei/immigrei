@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
+import { BrandIcon } from "@/app/components/Logo";
 import OptionsList from "@/app/components/OptionsList";
 import PaywallGate from "@/app/components/PaywallGate";
 import I94Card from "@/app/components/I94Card";
@@ -112,8 +113,9 @@ export default function PainelClient({ hasAccess }: { hasAccess: boolean }) {
   // borrada, como prévia da própria jornada da pessoa, com CTA para /planos.
   const timeline = (
     <div className="relative">
-      {/* linha vertical */}
-      <div className="absolute left-4 top-5 bottom-5 w-px bg-pine-tint" />
+      {/* linha vertical — some ao alcançar a etapa "agora", como se o
+          caminho percorrido já tivesse sido trilhado */}
+      <div className="absolute left-4 top-5 bottom-5 w-px bg-gradient-to-b from-pine via-pine-tint to-pine-tint" />
 
       <div className="flex flex-col gap-4">
         {etapas.map((etapa, i) => {
@@ -157,8 +159,13 @@ export default function PainelClient({ hasAccess }: { hasAccess: boolean }) {
           );
           return (
             <div key={i} className="flex gap-4 relative">
-              {/* dot */}
-              <div className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center text-[11px] font-bold z-10 ${st.dot}`}>
+              {/* dot — a etapa "agora" pulsa em âmbar, como a seta do logo
+                  apontando para o próximo passo */}
+              <div
+                className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center text-[11px] font-bold z-10 transition-transform ${st.dot} ${
+                  etapa.estado === "agora" ? "animate-jornada-pulso scale-110" : ""
+                }`}
+              >
                 {etapa.estado === "feito" ? "✓" : etapa.num}
               </div>
               {/* card */}
@@ -185,23 +192,29 @@ export default function PainelClient({ hasAccess }: { hasAccess: boolean }) {
     <AppShell>
       <div className="max-w-2xl mx-auto px-4 py-8">
 
-        {/* Header */}
-        <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-pine mb-1" style={{ letterSpacing: "0.12em" }}>
+        {/* Header — banner verde arredondado, mesmo raio dos cards, com o
+            ícone da marca centralizado verticalmente à direita */}
+        <div className="relative overflow-hidden bg-pine-deep rounded-2xl px-5 py-8 mb-6">
+          <BrandIcon
+            dot="var(--cream)"
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-[118px] w-[118px] opacity-95"
+          />
+          <p className="relative max-w-[62%] text-xs font-bold uppercase tracking-widest text-amber mb-1" style={{ letterSpacing: "0.12em" }}>
             Painel estratégico
           </p>
-          <h1 className="text-3xl font-semibold text-ink leading-tight mb-1" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="relative max-w-[62%] text-3xl font-semibold text-cream leading-tight mb-1" style={{ fontFamily: "var(--font-display)" }}>
             {s.titulo}
           </h1>
-          <p className="text-sm text-ink-faint font-medium">{s.subtitulo}</p>
+          <p className="relative max-w-[62%] text-sm text-pine-tint font-medium">{s.subtitulo}</p>
         </div>
 
-        {/* Situação atual */}
-        <div className="bg-cream-2 border border-pine-tint rounded-2xl px-5 py-4 mb-5">
-          <p className="text-xs font-bold uppercase tracking-widest text-ink-faint mb-2" style={{ letterSpacing: "0.1em" }}>
+        {/* Situação atual — fundo Forest escuro para dar peso emocional ao
+            resumo do caso, quebrando o tom-sobre-tom creme do resto da tela */}
+        <div className="bg-pine-deep rounded-2xl px-5 py-4 mb-5">
+          <p className="text-xs font-bold uppercase tracking-widest text-amber mb-2" style={{ letterSpacing: "0.1em" }}>
             Sua situação
           </p>
-          <p className="text-sm text-ink leading-relaxed">{s.situacao}</p>
+          <p className="text-sm text-cream leading-relaxed">{s.situacao}</p>
         </div>
 
         {/* Prazo do I-94 — mesmo dado da Início, só visualização aqui */}

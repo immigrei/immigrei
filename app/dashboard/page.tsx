@@ -16,6 +16,7 @@ import ParallelProcessesCard from "@/app/components/ParallelProcessesCard";
 import ConsuladosWidget from "./ConsuladosWidget";
 import AppShell from "@/app/components/AppShell";
 import PaywallGate from "@/app/components/PaywallGate";
+import { BrandIcon } from "@/app/components/Logo";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
@@ -107,15 +108,23 @@ export default async function DashboardPage() {
   return (
     <AppShell>
       <div className="max-w-2xl mx-auto px-6 py-10">
-        <h1
-          className="text-3xl font-semibold text-ink mb-1"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Olá, {firstName} 👋
-        </h1>
-        <p className="text-ink-soft text-base mb-8">
-          Aqui está um resumo da sua jornada migratória.
-        </p>
+        {/* Header — banner verde arredondado, mesmo raio dos cards, com o
+            ícone da marca centralizado verticalmente à direita */}
+        <div className="relative overflow-hidden bg-pine-deep rounded-2xl px-5 py-8 mb-8">
+          <BrandIcon
+            dot="var(--cream)"
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-[118px] w-[118px] opacity-95"
+          />
+          <h1
+            className="relative max-w-[62%] text-3xl font-semibold text-cream mb-1"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Olá, {firstName} 👋
+          </h1>
+          <p className="relative max-w-[62%] text-pine-tint text-base">
+            Aqui está um resumo da sua jornada.
+          </p>
+        </div>
 
         {/* Journey card */}
         <div className="bg-cream-2 rounded-2xl border border-pine-tint overflow-hidden mb-5">
@@ -246,7 +255,7 @@ function InfoRow({ label, value, href }: { label: string; value: string; href?: 
           {value} →
         </Link>
       ) : (
-        <span className="text-ink text-base font-medium">{value}</span>
+        <span className="text-ink text-base font-bold">{value}</span>
       )}
     </div>
   );

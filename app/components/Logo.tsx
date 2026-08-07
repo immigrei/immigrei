@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 // Immigrei brand mark — the single source of truth for the logo.
 // Follows the Manual de Identidade Visual (V1.0):
 //   - Wordmark is always lowercase "immigrei" in Fraunces.
@@ -16,13 +18,14 @@ const TONE: Record<LogoTone, string> = {
   cream: "var(--cream)", // inverted: dots on dark surfaces (pine)
 };
 
-function BrandIcon({ dot, className }: { dot: string; className?: string }) {
+export function BrandIcon({ dot, className, style }: { dot: string; className?: string; style?: CSSProperties }) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
       className={className}
+      style={style}
     >
       {/* Trajectory tilted a fixed 12° — do not rotate beyond this. */}
       <g transform="translate(1.549 1.423) rotate(12 12 12)">

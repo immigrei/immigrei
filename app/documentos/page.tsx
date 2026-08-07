@@ -8,6 +8,7 @@ import CofreLink from "@/app/components/CofreLink";
 import CustosLink from "@/app/components/CustosLink";
 import GuiasLink from "@/app/components/GuiasLink";
 import I94Card from "@/app/components/I94Card";
+import { BrandIcon } from "@/app/components/Logo";
 import type { UserProcess } from "@/app/components/ParallelProcessesCard";
 import { KITS, type Kit, caminhoLabel, caminhoColor } from "@/lib/kitsCatalog";
 
@@ -146,9 +147,17 @@ export default function DocumentosPage() {
     <AppShell>
       <div className="max-w-2xl mx-auto px-4 py-8">
 
-        <div className="mb-7">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-            <p className="text-xs font-bold uppercase tracking-widest text-pine" style={{ letterSpacing: "0.12em" }}>
+        {/* Header — banner verde arredondado, mesmo raio dos cards, com o
+            ícone da marca na diagonal: começa perto do rodapé (sob os
+            acessos) e sobe até perto do topo, respeitando o padding */}
+        <div className="relative overflow-hidden bg-pine-deep rounded-2xl px-5 py-7 mb-7">
+          <BrandIcon
+            dot="var(--cream)"
+            className="absolute opacity-90"
+            style={{ left: "68%", right: "4%", top: "44px", bottom: "16px" }}
+          />
+          <div className="relative flex flex-wrap items-center justify-between gap-2 mb-1">
+            <p className="text-xs font-bold uppercase tracking-widest text-amber" style={{ letterSpacing: "0.12em" }}>
               Kits de protocolo
             </p>
             <div className="flex flex-wrap gap-2">
@@ -157,10 +166,10 @@ export default function DocumentosPage() {
               <CofreLink />
             </div>
           </div>
-          <h1 className="text-3xl font-semibold text-ink mb-2" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="relative max-w-[66%] text-3xl font-semibold text-cream mb-2" style={{ fontFamily: "var(--font-display)" }}>
             Documente e protocole
           </h1>
-          <p className="text-ink-soft text-sm leading-relaxed">
+          <p className="relative max-w-[66%] text-pine-tint text-sm leading-relaxed">
             Guias passo a passo em português para você protocolar com confiança — sem depender de traduções automáticas.
           </p>
         </div>
