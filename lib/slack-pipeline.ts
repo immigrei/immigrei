@@ -72,9 +72,10 @@ export function validateSlackSignature(
   const requestAge = now - parseInt(timestamp, 10);
   if (requestAge > 5 * 60) return false; // 5 minutes
 
-  // Verify signature
+  // Verify signature — Slack's spec requires a HEX digest, not base64:
+  // https://docs.slack.dev/authentication/verifying-requests-from-slack
   const baseString = `v0:${timestamp}:${body}`;
-  const hash = createHmac("sha256", secret).update(baseString).digest("base64");
+  const hash = createHmac("sha256", secret).update(baseString).digest("hex");
   const expectedSignature = `v0=${hash}`;
 
   return constantTimeCompare(signature, expectedSignature);
