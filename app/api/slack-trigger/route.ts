@@ -9,6 +9,7 @@ import {
   reactionToStatus,
   type SlackPayload,
 } from "@/lib/slack-pipeline";
+import { runComplianceCheck, formatComplianceForSlack } from "@/lib/compliance-check";
 
 /**
  * Slack event & command handler for the content pipeline.
@@ -73,32 +74,64 @@ async function handleSlashCommand(payload: SlackPayload, botToken: string) {
       // 1. Acknowledge receipt
       await postToSlack(response_url!, { text: ":hourglass_flowing_sand: Gerando rascunho..." });
 
-      // 2. Generate content via Anthropic API
+      // 2. Generate content via Anthropic API (content-agent)
       const draft = await generateContentDraft(text!, apiKey);
 
-      // 3. Save to Supabase for tracking
-      const { error } = await supabaseAdmin.from("content_pipeline").insert([
+      // 3. Save draft, pending compliance check — no approval buttons yet.
+      // A FAIL must never reach a human with an "approve" button next to it.
+      const { error: insertError } = await supabaseAdmin.from("content_pipeline").insert([
         {
           trigger_id,
           user_id,
           channel_id,
           topic: text,
           draft_content: draft,
-          status: "pending_approval",
+          status: "pending_compliance",
           created_at: new Date().toISOString(),
         },
       ]);
+      if (insertError) throw new Error(`Falha ao salvar: ${insertError.message}`);
 
-      if (error) throw new Error(`Falha ao salvar: ${error.message}`);
+      // 4. Compliance-fact-check gate (mandatory — see .claude/agents/compliance-fact-check.md)
+      await postToSlack(response_url!, {
+        text: ":mag: Rodando compliance-fact-check (YMYL/UPL)...",
+      });
 
-      // 4. Post draft with approval buttons
-      const blocks = buildApprovalBlocks(draft, trigger_id!, user_id);
+      const compliance = await runComplianceCheck(draft, text!, apiKey);
+
+      const passed = compliance.verdict !== "FAIL";
+      await supabaseAdmin
+        .from("content_pipeline")
+        .update({
+          status: passed ? "pending_approval" : "compliance_failed",
+          compliance_verdict: compliance.verdict,
+          compliance_report: compliance.raw,
+          compliance_checked_at: new Date().toISOString(),
+        })
+        .eq("trigger_id", trigger_id);
+
+      const complianceSummary = formatComplianceForSlack(compliance);
+
+      if (!passed) {
+        // FAIL: never show approval buttons. Content-agent has to fix and re-run.
+        await postToSlack(response_url!, {
+          text: `:rotating_light: *Compliance FAIL — rascunho bloqueado*\n\n${complianceSummary}`,
+        });
+        return;
+      }
+
+      // 5. PASS / PASS_WITH_FLAGS: show draft + compliance summary + approval buttons
+      const blocks = [
+        ...buildApprovalBlocks(draft, trigger_id!, user_id),
+        { type: "divider" },
+        { type: "section", text: { type: "mrkdwn", text: complianceSummary } },
+      ];
       await postToSlack(response_url!, { blocks });
 
-      // 5. Reply in channel
+      // 6. Reply in channel
       await postToSlack(botToken, {
         channel: channel_id,
-        text: `:white_check_mark: Rascunho pronto para aprovação.`,
+        text: `:white_check_mark: Rascunho pronto para aprovação (compliance: ${compliance.verdict}).`,
         thread_ts: trigger_id,
       });
     } catch (err) {
@@ -132,6 +165,30 @@ async function handleEvent(payload: SlackPayload, botToken: string) {
     try {
       const status = reactionToStatus(reaction);
       if (!status) return;
+
+      // Defense in depth: even though a FAIL never gets approval buttons,
+      // refuse an "approved" reaction on a row that failed compliance —
+      // someone could still react ✅ on the FAIL message manually.
+      if (status === "approved") {
+        const { data: row, error: fetchError } = await supabaseAdmin
+          .from("content_pipeline")
+          .select("compliance_verdict")
+          .eq("trigger_id", item.ts)
+          .single();
+
+        if (fetchError) {
+          console.error("[slack-trigger] Failed to fetch pipeline row:", fetchError.message);
+          return;
+        }
+        if (row?.compliance_verdict === "FAIL") {
+          await postToSlack(botToken, {
+            channel: item.channel,
+            thread_ts: item.ts,
+            text: `:no_entry: Este rascunho falhou no compliance-fact-check e não pode ser aprovado. Peça uma nova versão ao content-agent.`,
+          });
+          return;
+        }
+      }
 
       // Update Supabase
       const { error } = await supabaseAdmin

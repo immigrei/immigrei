@@ -1,35 +1,61 @@
 # Slack Content Pipeline — Implementation Summary
 
-**Status:** Skeleton complete, ready for setup & testing  
+**Status:** Skeleton complete (content-agent + compliance-fact-check gate wired in), ready for setup & testing  
 **Last updated:** 2026-08-07
+
+## Which of the 6 marketing skills are in this pipeline
+
+| Skill | In Slack pipeline? | Why |
+|-------|--------------------|-----|
+| `content-agent` | ✅ Yes | Generates the draft — the core of the flow |
+| `compliance-fact-check` | ✅ Yes (mandatory gate) | YMYL/UPL risk — every draft must pass before a human sees an approve button |
+| `distribution-assist` | ❌ No | Its own rule: "NEVER posts anywhere; the human presses post." It repurposes an *already-published* post into founder-led community assets (Reels, carousel, comment drafts for FB groups/WhatsApp/Reddit) — a separate, manual, downstream workflow, not part of automated approval→publish |
+| `seo-geo-agent` | ❌ No | Optimizes blog/landing-page content for Google ranking — doesn't apply to social posts |
+| `lifecycle-email` | ❌ No | Different channel (email), different trigger (user lifecycle events, not a topic) |
+| `paid-experiment` | ❌ No | Ads strategy — a separate, deliberate spend decision, not something to auto-run off a Slack command |
 
 ## What was built
 
-The skeleton of the Slack → Content Agent → Approval → Postiz pipeline.
+Slack → Content Agent → **Compliance-Fact-Check gate** → Approval → Postiz.
 
 ```
 Slack /content-agent "topic"
   ↓
 POST /api/slack-trigger
   ├─ Validate signature (HMAC-SHA256)
-  ├─ Generate draft (Anthropic API)
-  ├─ Save state (Supabase)
-  ├─ Post approval buttons (Block Kit)
+  ├─ Generate draft (content-agent, Anthropic API)
+  ├─ Save state (Supabase, status=pending_compliance)
+  ├─ Run compliance-fact-check (real tool-use loop: read_file/grep/glob
+  │  against content/leis/, web_fetch restricted to official-source whitelist)
+  ├─ FAIL  → post flags to thread, status=compliance_failed, NO approval buttons
+  ├─ PASS/PASS_WITH_FLAGS → post draft + compliance summary + approval buttons
   └─ Return 200 to Slack
       ↓
-  Human reviews & reacts
-  ✅ (approve) → Update status → Ready for Postiz
-  ❌ (reject) → Mark as rejected
-  ✏️ (edit) → Flag for revision
+  Human reviews & reacts (only reachable after a non-FAIL verdict)
+  ✅ (approve) → blocked again server-side if compliance_verdict=FAIL → else update status → ready for Postiz
+  ❌ (reject) → mark as rejected
+  ✏️ (edit) → flag for revision
 ```
+
+**Why compliance-fact-check runs as real tool use, not a second prompt:** the
+skill's whole job is tracing every factual claim to `content/leis/` and
+catching UPL language — that requires actually reading those files. A
+"compliance check" that just asks Claude to remember the rules from a system
+prompt isn't a check for a YMYL topic like immigration law; it's decoration.
+`lib/compliance-check.ts` implements the same read_file/grep/glob/web_fetch
+tools `.claude/agents/compliance-fact-check.md` specifies, scoped to the
+repo's bundled `content/leis/` directory (read-only, available at Vercel
+runtime) and to the domain whitelist in `content/leis/fontes.md`.
 
 ## Files created
 
 ### 1. **API Route:** `/app/api/slack-trigger/route.ts`
-- ~165 lines, dependency-injected from `lib/slack-pipeline.ts`
 - Handles slash commands (`/content-agent`)
 - Handles event subscriptions (reactions)
 - URL verification (Slack handshake)
+- Enforces the compliance gate before any approval UI is shown, and again
+  server-side before honoring a ✅ reaction (defense in depth — someone could
+  react on the FAIL message directly)
 
 **Entry points:**
 - `POST /api/slack-trigger` — receives all Slack events
@@ -38,37 +64,58 @@ POST /api/slack-trigger
 1. Validate Slack request signature (prevents spoofing)
 2. Parse payload type (URL verification, slash command, event)
 3. For slash commands:
-   - Generate draft via Anthropic API
-   - Save to Supabase (`content_pipeline` table)
-   - Post draft + approval buttons to Slack thread
+   - Generate draft via Anthropic API (content-agent)
+   - Save to Supabase, `status=pending_compliance`
+   - Run compliance-fact-check gate
+   - FAIL → post flags, stop (no approval UI)
+   - else → post draft + compliance summary + approval buttons to Slack thread
 4. For reactions:
+   - Refuse ✅ server-side if `compliance_verdict=FAIL`
    - Update status in Supabase
    - Post confirmation in thread
 
 ### 2. **Utilities:** `/lib/slack-pipeline.ts`
-- ~280 lines of reusable functions
+- Reusable functions for Slack + content-agent
 - Types: `SlackPayload`, `SlackEvent`, `ContentPipelineRecord`
 - Functions:
   - `validateSlackSignature()` — HMAC-SHA256 validation + replay protection
   - `postToSlack()` — send messages via bot token or response URL
-  - `generateContentDraft()` — call Anthropic API with system prompt
+  - `generateContentDraft()` — call Anthropic API with the content-agent system prompt
   - `buildApprovalBlocks()` — Block Kit buttons for thread
   - `reactionToStatus()` — map emoji to approval status
   - `buildApprovalNotification()` — confirmation messages
 
-### 3. **Database:** `/supabase/migrations/20260807_create_content_pipeline.sql`
-- `content_pipeline` table with columns:
+### 3. **Compliance gate:** `/lib/compliance-check.ts`
+- `runComplianceCheck(draft, topic, apiKey)` — real agentic tool-use loop
+  mirroring `.claude/agents/compliance-fact-check.md`
+- Tools implemented against the live repo (bundled read-only at Vercel runtime):
+  - `read_file` — reads a repo-relative file (capped to 8KB)
+  - `grep` — regex search across `content/leis/` + `lib/uscis-status-pt.ts`
+  - `glob` — lists files under `content/leis/` matching a pattern
+  - `web_fetch` — fetches a URL, **hard-refuses** any host not in the
+    `content/leis/fontes.md` whitelist (uscis.gov, ecfr.gov, travel.state.gov, etc.)
+- Loop caps at 10 tool-use iterations to bound cost/latency
+- `parseVerdict()` — extracts `VERDICT`, `FLAGS`, `VERIFIED CLAIMS`, `UNVERIFIED`
+  from the model's final text block
+- `formatComplianceForSlack()` — renders the verdict as a Slack mrkdwn block
+
+### 4. **Database:**
+- `/supabase/migrations/20260807_create_content_pipeline.sql` — `content_pipeline` table:
   - `trigger_id` — Slack message timestamp (unique identifier)
   - `user_id` — who triggered the command
   - `channel_id` — where it was triggered
   - `topic` — user's input
   - `draft_content` — generated text
-  - `status` — pending_approval | approved | rejected | edit_requested | published | failed
+  - `status` — pending_compliance | compliance_failed | pending_approval | approved | rejected | edit_requested | published | failed
   - `approved_by`, `approved_at` — approval metadata
   - `postiz_post_id` — for linking to published content
   - Indexes on status, user_id, created_at
+- `/supabase/migrations/20260807b_add_compliance_columns.sql` — adds:
+  - `compliance_verdict` — PASS | PASS_WITH_FLAGS | FAIL
+  - `compliance_report` — full raw verdict text (flags, unverified claims)
+  - `compliance_checked_at`
 
-### 4. **Setup Guide:** `/docs/SLACK_PIPELINE_SETUP.md`
+### 5. **Setup Guide:** `/docs/SLACK_PIPELINE_SETUP.md`
 - Step-by-step instructions for:
   - Creating Slack App
   - Configuring OAuth scopes
@@ -111,6 +158,14 @@ POSTIZ_API_KEY=...
 4. Click ✅ to approve
 5. Thread should update: ✅ Aprovado!
 
+**Also verify the compliance gate fires:**
+- Between draft and approval buttons, the thread should show
+  ":mag: Rodando compliance-fact-check..." then either the compliance summary
+  (PASS/PASS_WITH_FLAGS, buttons appear) or a 🚨 FAIL message with flags and
+  no buttons at all.
+- Try a topic likely to trigger a FAIL (e.g. one that invites "você deve
+  aplicar para X") to confirm the block actually works, not just the happy path.
+
 ### Phase 3: Test reactions (if using emoji instead of buttons)
 - Current implementation uses emoji reactions: `white_check_mark`, `x`, `pencil2`
 - Alternative: upgrade to Block Kit buttons (better UX, more reliable)
@@ -129,18 +184,29 @@ POSTIZ_API_KEY=...
 
 ## Current limitations
 
-1. **Content Agent** — currently calls Anthropic directly with a basic prompt
-   - Future: could integrate with the `content-agent` Claude Code skill (more sophisticated)
-   - Trade-off: direct API is simpler to deploy, skill-based would need async job handling
+1. **Content Agent** — currently calls Anthropic directly with a condensed
+   system prompt, not the full `.claude/skills/content-agent/SKILL.md` research
+   pipeline (it doesn't read `content/leis/` before drafting the way the real
+   skill does — only compliance-fact-check does real file access today)
+   - Future: give content-agent the same read_file/grep/glob tools compliance
+     already has, so it drafts from the knowledge base instead of general
+     model knowledge
+   - Trade-off: direct API is simpler to deploy; tool-using generation costs
+     more tokens and latency per draft
 
-2. **Approval flow** — uses emoji reactions (async, can miss reactions)
+2. **Compliance-fact-check** — implemented as a real tool-use loop (see above),
+   capped at 10 tool iterations. A draft needing more research than that will
+   hit the cap and fail to converge (throws, surfaces as an error in Slack) —
+   watch for this in testing; raise the cap if it happens often.
+
+3. **Approval flow** — uses emoji reactions (async, can miss reactions)
    - Better: Block Kit interactive buttons (already in code, just needs interactivity route)
    - To upgrade: enable Interactivity in Slack App, create `/api/slack-interactions/route.ts`
 
-3. **No undo/edit flow** — once rejected/approved, no re-do button
+4. **No undo/edit flow** — once rejected/approved, no re-do button
    - Future: add manual "reopen" workflow or queue for revision
 
-4. **No rate limiting** — any user can spam `/content-agent`
+5. **No rate limiting** — any user can spam `/content-agent`
    - Future: add per-user quota or require channel membership
 
 ## Security considerations
@@ -168,16 +234,25 @@ Before marking as complete:
 - [ ] Vercel logs show no 500 errors
 - [ ] `content_pipeline` table populated after first test
 - [ ] Anthropic API usage appears in console.anthropic.com
+- [ ] A FAIL-worthy topic actually gets blocked (no approval buttons, flags shown)
+- [ ] A PASS/PASS_WITH_FLAGS topic shows the compliance summary alongside buttons
+- [ ] Reacting ✅ on a `compliance_failed` row is refused (test by reacting on
+      the FAIL message directly, not just trusting the missing buttons)
 
 ## Cost estimate (monthly)
 
+Compliance-fact-check adds a second, tool-using API call per draft (multiple
+turns while it reads `content/leis/`), which costs more than the single-shot
+draft generation.
+
 | Service | Usage | Cost |
 |---------|-------|------|
-| Anthropic API | ~20 drafts × 500 words | ~$0.10–$0.50 |
+| Anthropic API — content-agent | ~20 drafts × 500 words | ~$0.10–$0.50 |
+| Anthropic API — compliance-fact-check | ~20 checks × up to 10 tool turns | ~$0.50–$2.00 |
 | Slack | Slash commands + events | $0 (free tier) |
 | Supabase | ~100 records | $0 (free tier) |
 | Vercel | ~20 function invocations | $0 (free tier) |
-| **Total** | | **<$1** |
+| **Total** | | **~$1–3** |
 
 ## Files not modified
 
