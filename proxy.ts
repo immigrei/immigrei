@@ -1,4 +1,12 @@
+import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+// immigrei.com is kept alive as a second domain (it's the one on file with
+// Instagram — immigrei.app wasn't available there) but immigrei.app is
+// canonical everywhere else (Vercel, Cloudflare, Clerk). Anyone landing on
+// .com gets bounced straight to the equivalent .app URL.
+const REDIRECT_HOSTS = new Set(["immigrei.com", "www.immigrei.com"]);
+const CANONICAL_HOST = "immigrei.app";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -32,6 +40,14 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  const host = req.headers.get("host") ?? "";
+  if (REDIRECT_HOSTS.has(host)) {
+    const url = new URL(req.url);
+    url.protocol = "https:";
+    url.host = CANONICAL_HOST;
+    url.port = "";
+    return NextResponse.redirect(url, 301);
+  }
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
