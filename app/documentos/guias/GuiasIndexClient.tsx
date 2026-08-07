@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Guia } from "./data";
+import GuiasIndexNav from "./GuiasIndexNav";
 
 const CATEGORIAS = ["Todos", "Documentos Iniciais", "Finanças & Crédito", "Mobilidade", "Saúde", "Empreendedorismo"] as const;
 
@@ -15,6 +16,7 @@ export default function GuiasIndexClient({ guias }: { guias: Guia[] }) {
   return (
     <main className="min-h-screen bg-cream px-6 py-8 pb-32" style={{ fontFamily: "var(--font-body)" }}>
       <div className="max-w-2xl mx-auto">
+        <GuiasIndexNav />
         <div className="mb-7">
           <p className="text-xs font-bold uppercase tracking-widest text-pine mb-1" style={{ letterSpacing: "0.12em" }}>
             Depois do visto
