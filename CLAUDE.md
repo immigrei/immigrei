@@ -71,6 +71,41 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 
 **Language priority:** Portuguese (PT-BR) first. Always. English copy must carry the same warmth — not translate corporate.
 
+### Regra do valor (toda interação, revisar sempre — 7 ago 2026)
+
+Nunca soar "salesy" ou vendedor barato — em nenhum e-mail, notificação ou
+tela que pede uma ação do usuário. Toda vez que a Immigrei pede algo
+(adicionar um caso, terminar onboarding, atualizar pagamento, não cancelar),
+a mensagem também **precisa entregar valor real**, não só o pedido. Valor
+tem três formas válidas — pelo menos uma precisa estar presente:
+
+1. **Ser direto** — às vezes o valor é cortar o enrolation e dizer o fato sem
+   rodeio (o que mudou, o que acontece, até quando).
+2. **Aprofundar um tema** — dar contexto real sobre a jornada da pessoa
+   (status do caso, o que falta, o que um prazo específico significa para
+   ela), não genérico.
+3. **Esclarecer um termo técnico ou sigla** — nunca assumir que "I-94",
+   "I-797", "RFE" etc. já são conhecidos. Nome em inglês + explicação em
+   português na primeira menção.
+
+**Antes de mandar qualquer e-mail/tela com um pedido, pergunte:** "isso soa
+vendedor, ou entrega algo de valor mesmo que a pessoa não clique?" Se a
+resposta for "só pede", reescreve.
+
+**Onde buscar o grounding para #2/#3** (nunca inventar fato):
+`content/leis/conceitos/` e `content/leis/formularios/` (a base curada,
+citada), `lib/formGlossary.ts` (definições de uma linha por código de
+formulário) e `lib/faqBank.ts` (perguntas já respondidas, com `fonte:`).
+**Se o termo não estiver em nenhum desses lugares:** siga a mesma regra da
+seção 6 abaixo — pesquisar só nas fontes oficiais de
+`content/leis/fontes.md` e propor o resultado como arquivo novo. É assim
+que se expande esse conhecimento — peça para o Claude fazer essa pesquisa
+quando notar a lacuna, em vez de aproximar o termo de memória.
+
+Ver `content/marketing/email-flows/README.md` §1 para a aplicação disso
+especificamente nos fluxos de e-mail (inclui a distinção entre e-mail de
+sinal, recibo e funil).
+
 ---
 
 ## 4. Design System

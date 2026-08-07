@@ -9,6 +9,12 @@ problema de produto por trás.
 
 Status: `RASCUNHO — aguardando revisão humana`
 
+> **Revisado em 7/8/2026:** a versão original soava de ultimato nos toques 2
+> e 3 ("último aviso", "recusadas") e nenhum dos três toques carregava valor
+> além de "atualize o cartão". Reescrito abaixo: tom mais parceiro, cada
+> toque com uma informação real (não só cobrança), e o toque 2 — que só
+> existia em prosa ("mesma estrutura") — ganhou corpo próprio.
+
 ---
 
 ## Gatilho
@@ -47,6 +53,11 @@ Três toques: dia 0, 3 e 7. A Stripe faz as próprias retentativas — alinhar o
 calendário com a config de Smart Retries no dashboard para não avisar num dia
 em que ela ainda vai tentar sozinha.
 
+Personalização em todos os três toques: `{{case_receipt}}` e
+`{{case_status_traduzido}}` vêm de `user_cases` (join por `user_id`) — já
+existem hoje, sem instrumentação nova. Se a pessoa não tem caso rastreado, o
+bloco de contexto do caso simplesmente não entra (checar `{{#if case_receipt}}`).
+
 ### Toque 1 — dia 0, tom neutro
 
 **Assunto A:** `💳 Não conseguimos processar seu pagamento` (42 char)
@@ -54,7 +65,8 @@ em que ela ainda vai tentar sozinha.
 **Preview:** `Seu acesso continua ativo. É só atualizar o cartão.`
 
 Princípio: presumir causa banal. A maioria é cartão expirado, não falta de
-dinheiro — tratar como acusação perde cliente que ia pagar.
+dinheiro — tratar como acusação perde cliente que ia pagar. Valor adicionado:
+o status do caso dela continua ali, provando que nada parou.
 
 ```html
 <h1 style="font-size:24px;font-weight:600;color:#1B2520;margin:0 0 14px;line-height:1.3;">
@@ -73,6 +85,13 @@ dinheiro — tratar como acusação perde cliente que ia pagar.
   </p>
 </div>
 
+{{#if case_receipt}}
+<div style="background:#F4EEE2;border-radius:10px;padding:14px 16px;margin:0 0 24px;">
+  <p style="font-size:12px;color:#8B958F;margin:0 0 4px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;">Seu caso, sem interrupção</p>
+  <p style="font-size:14px;color:#55615A;margin:0;"><strong style="color:#1B2520;">{{case_receipt}}</strong> — {{case_status_traduzido}}</p>
+</div>
+{{/if}}
+
 <a href="{{BILLING_PORTAL_URL}}"
    style="display:inline-block;background:#E8A33D;color:#1B2520;font-weight:700;font-size:16px;text-decoration:none;padding:15px 30px;border-radius:12px;">
   Atualizar forma de pagamento →
@@ -85,14 +104,54 @@ dinheiro — tratar como acusação perde cliente que ia pagar.
 **Assunto B:** `⏳ Faltam alguns dias do seu acesso` (35 char)
 **Preview:** `Ainda dá tempo de resolver sem perder nada.`
 
-Mesma estrutura, com a data concreta em que o acesso cai. Sem drama, mas com o
-prazo explícito — vagueza aqui reduz conversão.
+Mesma base do toque 1, com a data concreta em que o acesso pausa — vagueza
+aqui reduz conversão — e uma camada de valor diferente: em vez de repetir o
+aviso, mostra **uma coisa concreta que fica esperando** dentro da Jornada
+(kit ou checklist pendente), para lembrar o que está em jogo sem soar a
+segunda cobrança do mesmo aviso.
+
+> **Revisado de novo em 7/8** (reunião César/Felipe): a primeira versão
+> abria com "Ainda não conseguimos confirmar seu pagamento" — ainda soava
+> frio para um segundo toque. Reescrito para abrir pelo que continua
+> funcionando, não pelo problema.
+
+```html
+<h1 style="font-size:24px;font-weight:600;color:#1B2520;margin:0 0 14px;line-height:1.3;">
+  Sua Jornada segue com você — só o cartão que falta resolver
+</h1>
+
+<p style="font-size:16px;line-height:1.6;color:#55615A;margin:0 0 18px;">
+  Já se passaram 3 dias desde a primeira tentativa de cobrança, e o acesso
+  completo continua ativo normalmente. Só para não te pegar de surpresa: se
+  o cartão não for atualizado até
+  <strong style="color:#1B2520;">{{pause_date_formatted}}</strong>, aí sim o
+  acesso pausa — o rastreamento do seu caso, esse, nunca para.
+</p>
+
+{{#if pending_checklist_item}}
+<div style="background:#FBF7EF;border:1px solid #E4EFE9;border-radius:12px;padding:16px;margin:0 0 24px;">
+  <p style="font-size:12px;color:#8B958F;margin:0 0 6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;">Enquanto isso, um passo que ainda está aberto</p>
+  <p style="font-size:14px;line-height:1.6;color:#55615A;margin:0;">{{pending_checklist_item}} — é rápido de resolver e já fica marcado no seu painel.</p>
+</div>
+{{/if}}
+
+<a href="{{BILLING_PORTAL_URL}}"
+   style="display:inline-block;background:#E8A33D;color:#1B2520;font-weight:700;font-size:16px;text-decoration:none;padding:15px 30px;border-radius:12px;">
+  Atualizar forma de pagamento →
+</a>
+```
 
 ### Toque 3 — dia 7, último
 
-**Assunto A:** `⚠️ Último aviso sobre sua assinatura` (36 char)
-**Assunto B:** `⚠️ Sua Jornada será pausada amanhã` (35 char)
-**Preview:** `Depois disso seu acesso volta para o Retrato.`
+**Assunto A:** `Seu acesso completo pausa amanhã` (33 char)
+**Assunto B:** `Um lembrete final sobre sua Jornada` (36 char)
+**Preview:** `Nada é apagado — e você reativa quando quiser.`
+
+Tom revisado: tirado "último aviso" e "recusadas" (linguagem de ultimato).
+Informa o prazo real com a mesma clareza — a urgência é verdadeira e precisa
+continuar clara — mas descreve o que acontece em vez de cobrar. Mantém a
+tranquilização de que nada é apagado e acrescenta o que exatamente muda,
+para não deixar a ameaça vaga.
 
 ```html
 <h1 style="font-size:24px;font-weight:600;color:#1B2520;margin:0 0 14px;line-height:1.3;">
@@ -100,16 +159,27 @@ prazo explícito — vagueza aqui reduz conversão.
 </h1>
 
 <p style="font-size:16px;line-height:1.6;color:#55615A;margin:0 0 18px;">
-  Foram três tentativas de cobrança em sete dias, todas recusadas. Amanhã sua
-  assinatura é cancelada e sua conta volta para o Retrato.
+  Tentamos cobrar três vezes nos últimos sete dias e não conseguimos. Se o
+  cartão não for atualizado até amanhã, sua assinatura pausa e sua conta
+  volta para o Retrato.
 </p>
 
-<p style="font-size:16px;line-height:1.6;color:#55615A;margin:0 0 24px;">
-  <strong style="color:#1B2520;">Nada é apagado.</strong> Seu caso continua
-  rastreado, seus documentos continuam no cofre, e você recebe os alertas de
-  status normalmente. O que pausa é a jornada completa, os kits e o acesso ao
-  cofre — que voltam no instante em que você reativar.
-</p>
+<div style="background:#E4EFE9;border-radius:12px;padding:16px;margin:0 0 20px;">
+  <p style="font-size:15px;line-height:1.6;color:#164A3D;margin:0;">
+    <strong>Nada é apagado.</strong> Seu caso continua rastreado, seus
+    documentos continuam no cofre, e você recebe os alertas de status
+    normalmente — isso nunca depende da assinatura.
+  </p>
+</div>
+
+<div style="background:#F4EEE2;border-radius:10px;padding:14px 16px;margin:0 0 24px;">
+  <p style="font-size:12px;color:#8B958F;margin:0 0 6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;">O que pausa, especificamente</p>
+  <p style="font-size:14px;line-height:1.6;color:#55615A;margin:0;">
+    A jornada completa (o próximo passo interpretado, não só o status), os
+    kits de protocolo e o acesso ao cofre de documentos. Tudo volta no
+    instante em que você reativar — nada precisa ser refeito.
+  </p>
+</div>
 
 <a href="{{BILLING_PORTAL_URL}}"
    style="display:inline-block;background:#1E5E4E;color:#F4EEE2;font-weight:700;font-size:16px;text-decoration:none;padding:15px 30px;border-radius:12px;">

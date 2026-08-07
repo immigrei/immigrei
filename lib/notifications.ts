@@ -7,8 +7,8 @@ import { Resend } from "resend";
 import { traduzirStatus } from "./uscis-status-pt";
 
 // Resend sandbox sender until immigrei.com is verified — set EMAIL_FROM
-// in Vercel to "Immigrei <noreply@immigrei.com>" after domain verification.
-const FROM = process.env.EMAIL_FROM ?? "Immigrei <onboarding@resend.dev>";
+// in Vercel to "immigrei <noreply@immigrei.com>" after domain verification.
+const FROM = process.env.EMAIL_FROM ?? "immigrei <onboarding@resend.dev>";
 // Canonical app URL for email links — set NEXT_PUBLIC_APP_URL in Vercel to
 // https://immigrei.app once the domain is live.
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://immigrei.vercel.app";
@@ -45,7 +45,7 @@ export async function sendCaseStatusUpdate({
   const emoji    = isApproved ? "✅" : isDenied ? "❌" : "📋";
   const antigo   = traduzirStatus(oldStatus);
   const novo     = traduzirStatus(newStatus);
-  const subject  = `${emoji} ${novo.titulo} — caso ${caseName} | Immigrei`;
+  const subject  = `${emoji} ${novo.titulo} — caso ${caseName} | immigrei`;
 
   const statusColor = isApproved ? "#1E5E4E" : isDenied ? "#C2542F" : "#E8A33D";
   const statusBg    = isApproved ? "#E4EFE9" : isDenied ? "rgba(194,84,47,.08)" : "#FBEDD4";
@@ -59,7 +59,8 @@ export async function sendCaseStatusUpdate({
 
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
-      <span style="font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;">Immigrei</span>
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
     </div>
 
     <!-- Card -->
@@ -151,10 +152,10 @@ export async function sendI94DeadlineAlert({
 
   const emoji = vencido ? "🚨" : daysLeft <= 7 ? "⏰" : "📅";
   const subject = vencido
-    ? `${emoji} Seu I-94 venceu — Immigrei`
+    ? `${emoji} Seu I-94 venceu — immigrei`
     : hoje
-      ? `${emoji} Seu I-94 vence hoje — Immigrei`
-      : `${emoji} Faltam ${daysLeft} dia${daysLeft === 1 ? "" : "s"} para o seu I-94 vencer — Immigrei`;
+      ? `${emoji} Seu I-94 vence hoje — immigrei`
+      : `${emoji} Faltam ${daysLeft} dia${daysLeft === 1 ? "" : "s"} para o seu I-94 vencer — immigrei`;
 
   const statusColor = vencido ? "#C2542F" : daysLeft <= 7 ? "#E8A33D" : "#1E5E4E";
   const statusBg    = vencido ? "rgba(194,84,47,.08)" : daysLeft <= 7 ? "#FBEDD4" : "#E4EFE9";
@@ -162,10 +163,10 @@ export async function sendI94DeadlineAlert({
   const dataFormatada = `${d}/${m}/${y}`;
 
   const mensagem = vencido
-    ? `Seu I-94 venceu há ${Math.abs(daysLeft)} dia${Math.abs(daysLeft) === 1 ? "" : "s"} (${dataFormatada}). Isso já conta como presença irregular — quanto antes você agir, mais opções ficam abertas.`
+    ? `Seu I-94 (o comprovante da sua entrada nos EUA) venceu há ${Math.abs(daysLeft)} dia${Math.abs(daysLeft) === 1 ? "" : "s"} (${dataFormatada}). Isso já conta como presença irregular — quanto antes você agir, mais opções ficam abertas.`
     : hoje
-      ? `Seu I-94 vence hoje (${dataFormatada}). Se uma extensão ou mudança de status ainda não foi protocolada, este é o último dia para isso acontecer em status válido.`
-      : `Seu I-94 vence em ${dataFormatada} — faltam ${daysLeft} dia${daysLeft === 1 ? "" : "s"}. Extensão (I-539) ou mudança de status precisam ser protocoladas antes do vencimento, não depois.`;
+      ? `Seu I-94 (o comprovante da sua entrada nos EUA) vence hoje (${dataFormatada}). Se uma extensão ou mudança de status ainda não foi protocolada, este é o último dia para isso acontecer em status válido.`
+      : `Seu I-94 (o comprovante da sua entrada nos EUA) vence em ${dataFormatada} — faltam ${daysLeft} dia${daysLeft === 1 ? "" : "s"}. Extensão (I-539) ou mudança de status precisam ser protocoladas antes do vencimento, não depois.`;
 
   const html = `
 <!DOCTYPE html>
@@ -175,7 +176,8 @@ export async function sendI94DeadlineAlert({
   <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
 
     <div style="text-align:center;margin-bottom:32px;">
-      <span style="font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;">Immigrei</span>
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
     </div>
 
     <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
@@ -211,7 +213,7 @@ export async function sendI94DeadlineAlert({
     </div>
 
     <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
-      <p style="margin:0">A data do I-94 é a que você mesmo cadastrou no Immigrei — confirme em <strong>i94.cbp.dhs.gov</strong> se tiver dúvida.</p>
+      <p style="margin:0">A data do I-94 é a que você mesmo cadastrou no immigrei — confirme em <strong>i94.cbp.dhs.gov</strong> se tiver dúvida.</p>
       <p style="margin:6px 0 0">Não somos um escritório de advocacia. Para decisões, consulte um profissional.</p>
     </div>
 
@@ -231,7 +233,7 @@ export async function sendI94ReminderToFillIn({
   to:       string;
   userName: string;
 }) {
-  const subject = "📅 Adicione o prazo do seu I-94 — Immigrei";
+  const subject = "📅 Adicione o prazo do seu I-94 — immigrei";
 
   const html = `
 <!DOCTYPE html>
@@ -241,7 +243,8 @@ export async function sendI94ReminderToFillIn({
   <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
 
     <div style="text-align:center;margin-bottom:32px;">
-      <span style="font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;">Immigrei</span>
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
     </div>
 
     <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
@@ -257,7 +260,7 @@ export async function sendI94ReminderToFillIn({
 
       <div style="padding:14px 16px;background:#E4EFE9;border-radius:10px;border:1px solid #1E5E4E33;margin-bottom:24px;">
         <p style="font-size:15px;font-weight:600;color:#1E5E4E;margin:0;line-height:1.5;">
-          A data que realmente define até quando você pode ficar nos EUA é a do I-94 — não a validade do visto no passaporte. Sem ela, não conseguimos te avisar antes do vencimento.
+          A data que realmente define até quando você pode ficar nos EUA é a do I-94 (o comprovante da sua entrada no país) — não a validade do visto no passaporte. Sem ela, não conseguimos te avisar antes do vencimento.
         </p>
       </div>
 
@@ -303,7 +306,8 @@ export async function sendBulletinUpdate({
 <body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <span style="font-size:24px;font-weight:700;color:#1E5E4E;">Immigrei</span>
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
     </div>
     <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
       <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8B958F;margin:0 0 12px;">
@@ -366,7 +370,7 @@ export async function sendConsuladoAlert({
   userName:  string;
   events:    ConsuladoEventBasic[];
 }) {
-  const subject = `🇧🇷 Novos atendimentos consulares — Immigrei`;
+  const subject = `🇧🇷 Novos atendimentos consulares — immigrei`;
 
   const eventsHtml = events.map(e => {
     const consuladoNome = CONSULADO_NAMES[e.consulado] ?? e.consulado;
@@ -402,7 +406,8 @@ export async function sendConsuladoAlert({
 <body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <span style="font-size:24px;font-weight:700;color:#1E5E4E;">Immigrei</span>
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
     </div>
     <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
       <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#8B958F;margin:0 0 12px;">
@@ -424,7 +429,7 @@ export async function sendConsuladoAlert({
       <p style="margin:0">Dados extraídos dos sites oficiais dos Consulados-Gerais do Brasil.</p>
       <p style="margin:6px 0 0">
         Para cancelar os alertas, acesse suas
-        <a href="${APP_URL}/dashboard" style="color:#8B958F;">preferências no Immigrei</a>.
+        <a href="${APP_URL}/dashboard" style="color:#8B958F;">preferências no immigrei</a>.
       </p>
     </div>
   </div>
@@ -440,7 +445,7 @@ export async function sendWaitlistWelcome(to: string) {
   const shareText = encodeURIComponent(
     "Achei um app que vai mostrar a jornada de imigração nos EUA inteira em português — feito por brasileiros. Entra na lista de espera: https://immigrei.app",
   );
-  const subject = "Você está na lista 💚 — Immigrei";
+  const subject = "Você está na lista 💚 — immigrei";
 
   const item = (emoji: string, title: string, text: string) =>
     `<p style="font-size:15px;color:#55615A;line-height:1.7;margin:0 0 6px;">${emoji}&nbsp; <strong style="color:#1B2520;">${title}</strong> — ${text}</p>`;
@@ -453,7 +458,8 @@ export async function sendWaitlistWelcome(to: string) {
   <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
 
     <div style="text-align:center;margin-bottom:32px;">
-      <span style="font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;">Immigrei</span>
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
     </div>
 
     <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
@@ -468,14 +474,14 @@ export async function sendWaitlistWelcome(to: string) {
         com advogado — que muitas vezes termina com mais dúvidas do que começou.
       </p>
       <p style="font-size:15px;color:#1B2520;font-weight:600;margin:0 0 12px;">
-        A Immigrei está sendo construída para acabar com isso. No app, você vai ter:
+        A immigrei está sendo construída para acabar com isso. No app, você vai ter:
       </p>
       ${item("🔔", "Seu caso monitorado dia e noite", "a gente fica de olho no USCIS e te avisa na hora que algo mudar. Chega de abrir o site toda manhã para ver a mesma tela.")}
       ${item("🧭", "Os caminhos possíveis a partir de onde você está", "com os requisitos claros de cada um. Mesmo que ainda não dê para avançar hoje, você sai sabendo exatamente o que construir para chegar lá.")}
       ${item("📋", "Kits passo a passo do seu visto", "documentos, prazos, taxas e cada formulário explicado em português. Inclusive os detalhes que ninguém conta e que causam negação.")}
       ${item("🗂️", "Seus documentos em um lugar só", "passaporte, recibos, formulários: guardados, organizados e à mão quando pedirem")}
       ${item("📅", "Radar de datas e eventos", "o visa bulletin do mês explicado e os consulados itinerantes perto de você")}
-      <p style="font-size:15px;color:#55615A;line-height:1.7;margin:0 0 16px;">🤝&nbsp; <strong style="color:#1B2520;">E quando o caso pedir julgamento humano</strong> — aquelas decisões com subjetividade que só um especialista pode avaliar — conectamos você a profissionais verificados, sem sair do app. A Immigrei segue organizando tudo; o especialista entra na hora certa.</p>
+      <p style="font-size:15px;color:#55615A;line-height:1.7;margin:0 0 16px;">🤝&nbsp; <strong style="color:#1B2520;">E quando o caso pedir julgamento humano</strong> — aquelas decisões com subjetividade que só um especialista pode avaliar — conectamos você a profissionais verificados, sem sair do app. A immigrei segue organizando tudo; o especialista entra na hora certa.</p>
       <p style="font-size:15px;color:#55615A;margin:0 0 24px;line-height:1.65;">
         Quem constrói somos nós: dois amigos brasileiros — um imigrou para a
         Austrália, o outro para os EUA. Vivemos essa incerteza na pele — por

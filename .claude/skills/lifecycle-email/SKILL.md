@@ -23,6 +23,33 @@ the lifecycle layer around it.
   confirm columns in `supabase/schema.sql` + `supabase/migrations/` before
   writing SQL.
 
+## Categorize every flow before writing it
+Three buckets, decided by what the email actually does — not the same split
+as transactional/marketing below (that's about consent; this is about tone):
+- **Sinal** — reports a fact, asks nothing (case status, I-94 milestone,
+  visa bulletin, consulado). No aggressiveness risk here.
+- **Recibo** — confirms something the user already decided (checkout,
+  cancellation, plan switch, reactivation). No ask, so no grounding needed —
+  just don't bury the confirmation under upsell.
+- **Funil** — asks the user to act (add a case, finish onboarding, pay,
+  don't cancel). **This is where "regra do valor" (CLAUDE.md §3) applies
+  hardest** — every one of these needs real value, not just the ask.
+
+## Grounding (regra do valor — CLAUDE.md §3)
+For funil emails, before writing the "value" part, check for existing,
+citable content — never invent a fact:
+1. `content/leis/conceitos/*.md` and `content/leis/formularios/*.md` — the
+   curated, sourced knowledge base. `status-vs-visto.md` already covers why
+   the I-94 date matters, for example.
+2. `lib/formGlossary.ts` — one-line definitions per official form code
+   (I-797, DS-160, etc.), used by the documentos checklist's info badge.
+3. `lib/faqBank.ts` — already-answered questions, each with a `fonte:` back
+   to `content/leis/`.
+4. **If the term isn't in any of those**, follow `content/leis/fontes.md`'s
+   own process: search only the official sources listed there, propose the
+   result as a new file in `content/leis/`. Ask to do this research
+   explicitly rather than approximating a legal/procedural fact from memory.
+
 ## Hard rules
 1. **Transactional ≠ marketing.** Status alerts, receipts, password resets carry
    zero marketing content. Lifecycle/marketing mail requires consent + working
