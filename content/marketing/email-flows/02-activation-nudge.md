@@ -15,7 +15,13 @@ Status: `RASCUNHO — aguardando revisão humana`
 Cron diário. Três segmentos mutuamente exclusivos — a pessoa entra em **um** só,
 na ordem abaixo.
 
-### Segmento A — onboarding incompleto, ≥3 dias
+### Segmento A — onboarding incompleto, ≥7 dias
+
+> **Janela ajustada em 7/8/2026:** era 3 dias; como ainda estamos no início
+> (poucos dados de comportamento real), decidimos dar mais tempo antes de
+> qualquer nudge — 7 dias virou o padrão para todo gate de "esperar antes de
+> agir" early-stage, não só este. Revisitar quando houver volume para
+> validar o número certo.
 
 ```sql
 -- Criou conta, nunca terminou o onboarding. Sem onboarding não há jornada,
@@ -24,8 +30,8 @@ select p.clerk_user_id, p.email, p.full_name
 from profiles p
 where p.email is not null
   and coalesce(p.onboarding_completed, false) = false
-  and p.created_at between now() - interval '4 days'
-                       and now() - interval '3 days';
+  and p.created_at between now() - interval '8 days'
+                       and now() - interval '7 days';
 ```
 
 ### Segmento B — onboarding feito, sem caso, ≥7 dias
