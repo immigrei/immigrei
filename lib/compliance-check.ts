@@ -165,22 +165,43 @@ const TOOLS = [
   },
 ];
 
-/** Resolve a repo-relative path and guard against escaping the repo root. */
-function safeResolve(relativePath: string): string {
-  const resolved = path.resolve(REPO_ROOT, relativePath);
-  if (!resolved.startsWith(REPO_ROOT)) {
-    throw new Error("path escapes repo root");
+const USCIS_STATUS_FILE = path.join(REPO_ROOT, "lib", "uscis-status-pt.ts");
+
+/**
+ * Resolve a path relative to `root` and guard against escaping it.
+ * Checks for an exact match or a proper `root + separator` prefix — a plain
+ * `startsWith(root)` is bypassable by a sibling directory that happens to
+ * share `root`'s name as a prefix (e.g. root "/var/task" vs "/var/task-evil").
+ */
+function safeResolve(root: string, relativePath: string): string {
+  const resolved = path.resolve(root, relativePath);
+  if (resolved !== root && !resolved.startsWith(root + path.sep)) {
+    throw new Error("path escapes allowed directory");
   }
   return resolved;
 }
 
+/**
+ * Confined to content/leis/ (the actual knowledge base) plus the one
+ * explicitly-canonical file outside it (lib/uscis-status-pt.ts) — matching
+ * what grep/glob already enforce. The system prompt *asking* the model to
+ * stay in content/leis/ isn't access control; this is.
+ */
 async function toolReadFile(relativePath: string): Promise<string> {
   try {
-    const resolved = safeResolve(relativePath);
+    const resolved = safeResolve(LEIS_DIR, relativePath);
     const content = await readFile(resolved, "utf-8");
     return content.slice(0, 8000); // cap to keep tool results cheap
-  } catch (err) {
-    return `ERROR: could not read ${relativePath}: ${err instanceof Error ? err.message : String(err)}`;
+  } catch {
+    if (path.resolve(REPO_ROOT, relativePath) === USCIS_STATUS_FILE) {
+      try {
+        const content = await readFile(USCIS_STATUS_FILE, "utf-8");
+        return content.slice(0, 8000);
+      } catch (err) {
+        return `ERROR: could not read ${relativePath}: ${err instanceof Error ? err.message : String(err)}`;
+      }
+    }
+    return `ERROR: could not read ${relativePath}: path is outside content/leis/ (only content/leis/ and lib/uscis-status-pt.ts are readable)`;
   }
 }
 
