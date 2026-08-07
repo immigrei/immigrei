@@ -90,6 +90,7 @@ Add these to Vercel → Project Settings → Environment Variables:
 SLACK_BOT_TOKEN=xoxb-...
 SLACK_SIGNING_SECRET=sig_...
 ANTHROPIC_API_KEY=sk-ant-...
+SLACK_REQUIRED_APPROVERS=U01CESAR_ID,U02FELIPE_ID
 ```
 
 ### `SLACK_BOT_TOKEN`
@@ -104,7 +105,24 @@ ANTHROPIC_API_KEY=sk-ant-...
 - Source: [console.anthropic.com](https://console.anthropic.com) → API Keys
 - Create a new project called `immigrei-automation` to isolate this usage
 - Create an API key in that project
-- Cost: ~$5–10/month estimated for this volume
+- Cost: ~$5–10/month estimated for this volume, plus compliance-fact-check
+  overhead (see cost table in `docs/SLACK_PIPELINE_IMPLEMENTATION.md`)
+
+### `SLACK_REQUIRED_APPROVERS`
+- Comma-separated Slack **user IDs** (not usernames/emails) of everyone who
+  must approve before a draft is considered approved — currently César + Felipe.
+- **Publishing requires BOTH.** A single ✅ moves the draft to "1/2 approved"
+  and posts who's still pending; the draft only flips to `approved` (ready for
+  Postiz) once every listed ID has reacted. Either one can unilaterally reject
+  or request an edit — no need to wait for both to say "no" or "change this."
+- Anyone whose Slack ID isn't in this list gets a "you can't approve this" reply
+  if they react ✅/❌/✏️ — the reaction is otherwise ignored.
+- **How to find a Slack user ID:**
+  1. Open the person's profile in Slack (click their name/avatar)
+  2. Click the **"..."** (more) button
+  3. Click **"Copy member ID"** — looks like `U01AB2CDEFG`
+- If this var has fewer than 2 IDs, dual approval can never complete — the
+  webhook logs an error on every request until it's fixed.
 
 ## Step 7: Apply Supabase Migration
 
@@ -118,11 +136,26 @@ ANTHROPIC_API_KEY=sk-ant-...
 1. In Slack, go to a channel where the Immigrei bot is installed
 2. Type: `/content-agent "test: visa bulletin status message"`
 3. Expect:
-   - Immediate ack: ⏳ Disparando Content Agent...
-   - Draft posted in thread within 5 seconds
-   - Buttons for ✅ Approve, ❌ Reject, ✏️ Edit
-4. Click ✅ to approve
-5. Thread should update with confirmation
+   - Immediate ack: ⏳ Gerando rascunho...
+   - :mag: Rodando compliance-fact-check...
+   - Draft posted in thread with a compliance summary and buttons ✅ ❌ ✏️,
+     plus a line stating who must approve (both founders)
+4. As **César**, react ✅ on the message
+   - Expect: "✅ César aprovou (1/2). Aguardando também: Felipe."
+   - Status in Supabase should still be `pending_approval`, not `approved`
+5. As **Felipe**, react ✅ on the same message
+   - Expect: "✅ Aprovado por César e Felipe! Enviando para Postiz..."
+   - Status in Supabase should now be `approved`
+6. Have a **third person** (not in `SLACK_REQUIRED_APPROVERS`) react ✅
+   - Expect: a reply that only the two founders can approve — no state change
+
+### Testing without two real accounts
+
+If you're testing solo, temporarily set `SLACK_REQUIRED_APPROVERS` to two
+Slack IDs you control (e.g. your main account + a test/sandbox account), or
+have Felipe react from his own account when you get to that step. Don't
+permanently reduce this to one ID just to make local testing easier — that
+defeats the whole point of the gate.
 
 ### Debugging
 

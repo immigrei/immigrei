@@ -1,7 +1,27 @@
 # Slack Content Pipeline — Implementation Summary
 
-**Status:** Skeleton complete (content-agent + compliance-fact-check gate wired in), ready for setup & testing  
+**Status:** Skeleton complete — content-agent, compliance-fact-check gate, and dual-founder approval wired in — ready for setup & testing  
 **Last updated:** 2026-08-07
+
+## Dual-founder approval
+
+Publishing now requires **both** César and Felipe to react ✅ — a single
+approval is not enough. Configure with `SLACK_REQUIRED_APPROVERS` (comma-
+separated Slack user IDs). Mechanics:
+
+- 1st ✅ → status stays `pending_approval`, thread shows "X aprovou (1/2).
+  Aguardando também: Y"
+- 2nd ✅ (from the *other* required approver) → status flips to `approved`,
+  thread shows "Aprovado por X e Y! Enviando para Postiz..."
+- ❌ or ✏️ from **either** founder is unilateral — no need for both to agree
+  to stop or revise something
+- Anyone not in `SLACK_REQUIRED_APPROVERS` who reacts gets told they can't
+  approve; the reaction is otherwise a no-op
+- A reaction on an already-terminal draft (`approved` / `rejected` /
+  `published`) is ignored with a note, so a late reaction can't reopen a
+  decided item
+- Approving is still blocked outright if `compliance_verdict = FAIL`,
+  regardless of who reacts
 
 ## Which of the 6 marketing skills are in this pipeline
 
@@ -114,6 +134,8 @@ runtime) and to the domain whitelist in `content/leis/fontes.md`.
   - `compliance_verdict` — PASS | PASS_WITH_FLAGS | FAIL
   - `compliance_report` — full raw verdict text (flags, unverified claims)
   - `compliance_checked_at`
+- `/supabase/migrations/20260807c_add_dual_approval.sql` — adds:
+  - `approved_by_users` — text array; source of truth for "has everyone approved"
 
 ### 5. **Setup Guide:** `/docs/SLACK_PIPELINE_SETUP.md`
 - Step-by-step instructions for:
@@ -238,6 +260,11 @@ Before marking as complete:
 - [ ] A PASS/PASS_WITH_FLAGS topic shows the compliance summary alongside buttons
 - [ ] Reacting ✅ on a `compliance_failed` row is refused (test by reacting on
       the FAIL message directly, not just trusting the missing buttons)
+- [ ] A single founder's ✅ leaves status at `pending_approval` and posts "1/2"
+- [ ] The second founder's ✅ flips status to `approved` and posts the full notice
+- [ ] A non-founder's ✅/❌/✏️ is refused and does not change status
+- [ ] ❌ or ✏️ from one founder alone takes effect immediately (no waiting for both)
+- [ ] Reacting again on an already-`approved`/`rejected` row is ignored with a note
 
 ## Cost estimate (monthly)
 

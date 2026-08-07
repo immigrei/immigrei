@@ -35,9 +35,18 @@ export interface ContentPipelineRecord {
   channel_id: string;
   topic: string;
   draft_content?: string;
-  status: "pending_approval" | "approved" | "rejected" | "edit_requested" | "published" | "failed";
+  status:
+    | "pending_compliance"
+    | "compliance_failed"
+    | "pending_approval"
+    | "approved"
+    | "rejected"
+    | "edit_requested"
+    | "published"
+    | "failed";
   approved_by?: string;
   approved_at?: string;
+  approved_by_users?: string[];
   published_by?: string;
   published_at?: string;
   postiz_post_id?: string;
@@ -256,11 +265,69 @@ Siga estas regras rigorosamente:
 }
 
 /**
+ * Dual-founder approval
+ * Publishing requires BOTH César and Felipe to react ✅ — a single approver
+ * is not enough. Configure via SLACK_REQUIRED_APPROVERS (comma-separated
+ * Slack user IDs, e.g. "U01ABCDEF,U02GHIJKL"). Find a user's ID in Slack:
+ * profile → "..." → Copy member ID.
+ */
+export function getRequiredApprovers(): string[] {
+  const raw = process.env.SLACK_REQUIRED_APPROVERS ?? "";
+  return raw
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
+
+export function isAuthorizedApprover(userId: string): boolean {
+  const required = getRequiredApprovers();
+  return required.length > 0 && required.includes(userId);
+}
+
+/** Slack IDs of required approvers who have not yet approved. */
+export function pendingApprovers(approvedByUsers: string[]): string[] {
+  return getRequiredApprovers().filter((id) => !approvedByUsers.includes(id));
+}
+
+export function allApproversDone(approvedByUsers: string[]): boolean {
+  const required = getRequiredApprovers();
+  return required.length > 0 && required.every((id) => approvedByUsers.includes(id));
+}
+
+/** Static notice shown alongside approval buttons stating who must approve. */
+export function buildApprovalRequirementNotice(): string {
+  const required = getRequiredApprovers();
+  const mentions = required.map(formatUserMention).join(" e ");
+  return `_Requer aprovação de ambos: ${mentions || "(SLACK_REQUIRED_APPROVERS não configurado)"}_`;
+}
+
+/** Message shown when a non-approver reacts on an approval-gated draft. */
+export function buildUnauthorizedApproverNotice(): string {
+  const required = getRequiredApprovers();
+  const mentions = required.map(formatUserMention).join(" e ");
+  return `:no_entry: Só ${mentions || "os aprovadores configurados"} podem aprovar, rejeitar ou pedir edição neste rascunho.`;
+}
+
+/** Message shown after one of two required approvals lands. */
+export function buildPartialApprovalNotice(userId: string, approvedByUsers: string[]): string {
+  const required = getRequiredApprovers();
+  const remaining = pendingApprovers(approvedByUsers);
+  const remainingMentions = remaining.map(formatUserMention).join(", ");
+  return `:white_check_mark: ${formatUserMention(userId)} aprovou (${approvedByUsers.length}/${required.length}). Aguardando também: ${remainingMentions}.`;
+}
+
+/** Message shown once every required approver has approved. */
+export function buildFullApprovalNotice(approvedByUsers: string[]): string {
+  const mentions = approvedByUsers.map(formatUserMention).join(" e ");
+  return `:white_check_mark: Aprovado por ${mentions}! Enviando para Postiz...`;
+}
+
+/**
  * Map emoji reactions to approval status
  */
 export function reactionToStatus(
   reaction: string
-): ContentPipelineRecord["status"] | null {
+): "approved" | "rejected" | "edit_requested" | null {
   switch (reaction) {
     case "white_check_mark":
     case "✅":
@@ -285,22 +352,20 @@ export function formatUserMention(userId: string): string {
 }
 
 /**
- * Build notification message for approval decision
+ * Build notification message for a unilateral decision (reject / edit-request).
+ * "approved" is NOT handled here — dual approval uses buildPartialApprovalNotice
+ * / buildFullApprovalNotice instead, since a single ✅ is never the whole story.
  */
 export function buildApprovalNotification(
-  status: ContentPipelineRecord["status"],
+  status: "rejected" | "edit_requested",
   userId: string
 ): string {
   const user = formatUserMention(userId);
 
-  const messages: Record<ContentPipelineRecord["status"], string> = {
-    approved: `:white_check_mark: Aprovado por ${user}! Enviando para Postiz...`,
+  const messages: Record<"rejected" | "edit_requested", string> = {
     rejected: `:x: Rejeitado por ${user}. Este rascunho será descartado.`,
     edit_requested: `:pencil2: Edição solicitada por ${user}. Aguardando revisão...`,
-    pending_approval: `:hourglass_flowing_sand: Pendente de aprovação...`,
-    published: `:rocket: Publicado com sucesso!`,
-    failed: `:x: Falha ao processar. Verifique os logs.`,
   };
 
-  return messages[status] || "Status desconhecido";
+  return messages[status];
 }
