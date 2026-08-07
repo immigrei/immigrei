@@ -30,6 +30,11 @@ const USCIS_API_BASE =
 const USCIS_CLIENT_ID = process.env.USCIS_CLIENT_ID;
 const USCIS_CLIENT_SECRET = process.env.USCIS_CLIENT_SECRET;
 
+// USCIS Torch API Developer Support assigned this on Aug 2, 2026 so they can
+// identify our demo traffic ahead of scheduling — required on every
+// case-status request until they confirm it and send the scheduler link.
+const USCIS_DEMO_ID = process.env.USCIS_DEMO_ID ?? "4020";
+
 // True while we run against the Torch sandbox (api-int). The sandbox only
 // answers the official staging receipt numbers — every real receipt is a 404
 // — and only operates M-F 7AM-8PM EST. Production (api.uscis.gov) flips this
@@ -170,7 +175,7 @@ async function fetchCaseStatusViaApi(
   }
 
   let res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, demo_id: USCIS_DEMO_ID },
     signal: AbortSignal.timeout(10_000),
   });
 
@@ -186,7 +191,7 @@ async function fetchCaseStatusViaApi(
       throw err;
     }
     res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, demo_id: USCIS_DEMO_ID },
       signal: AbortSignal.timeout(10_000),
     });
   }
