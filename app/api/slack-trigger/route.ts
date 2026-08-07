@@ -7,8 +7,16 @@ import {
   buildApprovalBlocks,
   buildApprovalNotification,
   reactionToStatus,
+  isAuthorizedApprover,
+  allApproversDone,
+  buildUnauthorizedApproverNotice,
+  buildPartialApprovalNotice,
+  buildFullApprovalNotice,
+  buildApprovalRequirementNotice,
+  getRequiredApprovers,
   type SlackPayload,
 } from "@/lib/slack-pipeline";
+import { runComplianceCheck, formatComplianceForSlack } from "@/lib/compliance-check";
 
 /**
  * Slack event & command handler for the content pipeline.
@@ -24,6 +32,14 @@ export async function POST(req: NextRequest) {
   if (!secret || !botToken) {
     console.error("[slack-trigger] Missing SLACK_SIGNING_SECRET or SLACK_BOT_TOKEN");
     return NextResponse.json({ error: "not configured" }, { status: 500 });
+  }
+
+  if (getRequiredApprovers().length < 2) {
+    // Not a hard failure — lets the draft/compliance flow still be testable —
+    // but approval can never complete like this, so make it loud.
+    console.error(
+      "[slack-trigger] SLACK_REQUIRED_APPROVERS has fewer than 2 IDs — dual approval cannot complete. Set it to both founders' Slack user IDs."
+    );
   }
 
   const timestamp = req.headers.get("x-slack-request-timestamp");
@@ -73,32 +89,65 @@ async function handleSlashCommand(payload: SlackPayload, botToken: string) {
       // 1. Acknowledge receipt
       await postToSlack(response_url!, { text: ":hourglass_flowing_sand: Gerando rascunho..." });
 
-      // 2. Generate content via Anthropic API
+      // 2. Generate content via Anthropic API (content-agent)
       const draft = await generateContentDraft(text!, apiKey);
 
-      // 3. Save to Supabase for tracking
-      const { error } = await supabaseAdmin.from("content_pipeline").insert([
+      // 3. Save draft, pending compliance check — no approval buttons yet.
+      // A FAIL must never reach a human with an "approve" button next to it.
+      const { error: insertError } = await supabaseAdmin.from("content_pipeline").insert([
         {
           trigger_id,
           user_id,
           channel_id,
           topic: text,
           draft_content: draft,
-          status: "pending_approval",
+          status: "pending_compliance",
           created_at: new Date().toISOString(),
         },
       ]);
+      if (insertError) throw new Error(`Falha ao salvar: ${insertError.message}`);
 
-      if (error) throw new Error(`Falha ao salvar: ${error.message}`);
+      // 4. Compliance-fact-check gate (mandatory — see .claude/agents/compliance-fact-check.md)
+      await postToSlack(response_url!, {
+        text: ":mag: Rodando compliance-fact-check (YMYL/UPL)...",
+      });
 
-      // 4. Post draft with approval buttons
-      const blocks = buildApprovalBlocks(draft, trigger_id!, user_id);
+      const compliance = await runComplianceCheck(draft, text!, apiKey);
+
+      const passed = compliance.verdict !== "FAIL";
+      await supabaseAdmin
+        .from("content_pipeline")
+        .update({
+          status: passed ? "pending_approval" : "compliance_failed",
+          compliance_verdict: compliance.verdict,
+          compliance_report: compliance.raw,
+          compliance_checked_at: new Date().toISOString(),
+        })
+        .eq("trigger_id", trigger_id);
+
+      const complianceSummary = formatComplianceForSlack(compliance);
+
+      if (!passed) {
+        // FAIL: never show approval buttons. Content-agent has to fix and re-run.
+        await postToSlack(response_url!, {
+          text: `:rotating_light: *Compliance FAIL — rascunho bloqueado*\n\n${complianceSummary}`,
+        });
+        return;
+      }
+
+      // 5. PASS / PASS_WITH_FLAGS: show draft + compliance summary + approval buttons
+      const blocks = [
+        ...buildApprovalBlocks(draft, trigger_id!, user_id),
+        { type: "context", elements: [{ type: "mrkdwn", text: buildApprovalRequirementNotice() }] },
+        { type: "divider" },
+        { type: "section", text: { type: "mrkdwn", text: complianceSummary } },
+      ];
       await postToSlack(response_url!, { blocks });
 
-      // 5. Reply in channel
+      // 6. Reply in channel
       await postToSlack(botToken, {
         channel: channel_id,
-        text: `:white_check_mark: Rascunho pronto para aprovação.`,
+        text: `:white_check_mark: Rascunho pronto para aprovação (compliance: ${compliance.verdict}).`,
         thread_ts: trigger_id,
       });
     } catch (err) {
@@ -133,7 +182,92 @@ async function handleEvent(payload: SlackPayload, botToken: string) {
       const status = reactionToStatus(reaction);
       if (!status) return;
 
-      // Update Supabase
+      // Publishing decisions (approve/reject/edit) are restricted to the two
+      // founders. Anyone else reacting is a no-op, not an error.
+      if (!isAuthorizedApprover(user)) {
+        if (status === "approved" || status === "rejected" || status === "edit_requested") {
+          await postToSlack(botToken, {
+            channel: item.channel,
+            thread_ts: item.ts,
+            text: buildUnauthorizedApproverNotice(),
+          });
+        }
+        return;
+      }
+
+      const { data: row, error: fetchError } = await supabaseAdmin
+        .from("content_pipeline")
+        .select("compliance_verdict, approved_by_users, status")
+        .eq("trigger_id", item.ts)
+        .single();
+
+      if (fetchError || !row) {
+        console.error("[slack-trigger] Failed to fetch pipeline row:", fetchError?.message);
+        return;
+      }
+
+      const TERMINAL_STATUSES = ["approved", "rejected", "published"];
+      if (TERMINAL_STATUSES.includes(row.status)) {
+        // Already decided — a late reaction (e.g. someone approving after a
+        // rejection, or re-approving a published draft) shouldn't reopen it.
+        await postToSlack(botToken, {
+          channel: item.channel,
+          thread_ts: item.ts,
+          text: `:information_source: Este rascunho já está em estado final (${row.status}) — reação ignorada.`,
+        });
+        return;
+      }
+
+      // Defense in depth: even though a FAIL never gets approval buttons,
+      // refuse an "approved" reaction on a row that failed compliance —
+      // someone could still react ✅ on the FAIL message manually.
+      if (status === "approved" && row.compliance_verdict === "FAIL") {
+        await postToSlack(botToken, {
+          channel: item.channel,
+          thread_ts: item.ts,
+          text: `:no_entry: Este rascunho falhou no compliance-fact-check e não pode ser aprovado. Peça uma nova versão ao content-agent.`,
+        });
+        return;
+      }
+
+      if (status === "approved") {
+        // Dual-founder approval: a single ✅ is not enough — both required
+        // approvers (SLACK_REQUIRED_APPROVERS) must react before publishing.
+        const existing: string[] = row.approved_by_users ?? [];
+        if (existing.includes(user)) return; // already counted, avoid duplicate notification
+
+        const approvedByUsers = [...existing, user];
+        const complete = allApproversDone(approvedByUsers);
+
+        const { error } = await supabaseAdmin
+          .from("content_pipeline")
+          .update({
+            approved_by_users: approvedByUsers,
+            approved_by: user,
+            approved_at: new Date().toISOString(),
+            status: complete ? "approved" : "pending_approval",
+          })
+          .eq("trigger_id", item.ts);
+
+        if (error) {
+          console.error("[slack-trigger] Failed to update pipeline:", error.message);
+          return;
+        }
+
+        const notification = complete
+          ? buildFullApprovalNotice(approvedByUsers)
+          : buildPartialApprovalNotice(user, approvedByUsers);
+
+        await postToSlack(botToken, {
+          channel: item.channel,
+          thread_ts: item.ts,
+          text: notification,
+        });
+        return;
+      }
+
+      // Reject / edit-requested: either founder can act unilaterally —
+      // no need to wait for both when the answer is "stop" or "change this".
       const { error } = await supabaseAdmin
         .from("content_pipeline")
         .update({
@@ -148,7 +282,6 @@ async function handleEvent(payload: SlackPayload, botToken: string) {
         return;
       }
 
-      // Notify in thread
       const notification = buildApprovalNotification(status, user);
       await postToSlack(botToken, {
         channel: item.channel,
