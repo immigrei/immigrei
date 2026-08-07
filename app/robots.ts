@@ -6,11 +6,11 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // App routes are gated on immigrei.com and shouldn't be crawled on
+        // App routes are gated on immigrei.app and shouldn't be crawled on
         // the vercel.app host either.
         disallow: ["/dashboard", "/api/", "/sign-in", "/sign-up", "/perfil"],
       },
     ],
-    sitemap: "https://immigrei.com/sitemap.xml",
+    sitemap: "https://immigrei.app/sitemap.xml",
   };
 }

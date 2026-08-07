@@ -4,7 +4,7 @@ import Logo from "../components/Logo";
 import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://immigrei.com"),
+  metadataBase: new URL("https://immigrei.app"),
   title: "Segurança — immigrei",
   description: "Como a immigrei protege seus dados e o status do seu caso.",
   alternates: { canonical: "/seguranca" },

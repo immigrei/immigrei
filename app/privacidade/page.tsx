@@ -4,7 +4,7 @@ import Logo from "../components/Logo";
 import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://immigrei.com"),
+  metadataBase: new URL("https://immigrei.app"),
   title: "Política de Privacidade — immigrei",
   description: "Como a immigrei coleta, usa e protege os seus dados.",
   alternates: { canonical: "/privacidade" },

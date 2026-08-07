@@ -248,7 +248,7 @@ export async function fetchCaseStatus(receiptNumber: string): Promise<CaseStatus
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         // Use a standard browser UA to avoid blocks
-        "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.com)",
+        "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.app)",
         "Referer":    "https://egov.uscis.gov/casestatus/landing.do",
       },
       body: body.toString(),

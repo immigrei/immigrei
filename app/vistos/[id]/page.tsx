@@ -28,9 +28,9 @@ export async function generateMetadata({
   const visto = todosVistos.find((v) => v.id === id);
   if (!visto) return {};
   const title = `${visto.codigo} — ${visto.nome} | immigrei`;
-  const url = `https://immigrei.com/vistos/${id}`;
+  const url = `https://immigrei.app/vistos/${id}`;
   return {
-    metadataBase: new URL("https://immigrei.com"),
+    metadataBase: new URL("https://immigrei.app"),
     title,
     description: visto.descricao,
     alternates: { canonical: `/vistos/${id}` },
@@ -127,13 +127,13 @@ export default async function VistoPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "immigrei", item: "https://immigrei.com/" },
-      { "@type": "ListItem", position: 2, name: "Vistos", item: "https://immigrei.com/vistos" },
+      { "@type": "ListItem", position: 1, name: "immigrei", item: "https://immigrei.app/" },
+      { "@type": "ListItem", position: 2, name: "Vistos", item: "https://immigrei.app/vistos" },
       {
         "@type": "ListItem",
         position: 3,
         name: visto.nome,
-        item: `https://immigrei.com/vistos/${id}`,
+        item: `https://immigrei.app/vistos/${id}`,
       },
     ],
   };
