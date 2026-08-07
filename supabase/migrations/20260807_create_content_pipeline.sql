@@ -34,8 +34,8 @@ ALTER TABLE content_pipeline ENABLE ROW LEVEL SECURITY;
 
 -- Allow service role full access (for backend)
 CREATE POLICY "Service role has full access" ON content_pipeline
-  FOR ALL USING (true) WITH CHECK (true)
-  AS PERMISSIVE FOR ALL TO service_role;
+  AS PERMISSIVE FOR ALL TO service_role
+  USING (true) WITH CHECK (true);
 
 -- Optional: Allow authenticated users to read their own records
 CREATE POLICY "Users can read their own records" ON content_pipeline
