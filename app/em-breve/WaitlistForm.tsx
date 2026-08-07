@@ -35,7 +35,7 @@ export default function WaitlistForm() {
 
   if (status === "done") {
     const shareText = encodeURIComponent(
-      "Achei um app que vai mostrar a jornada de imigração nos EUA inteira em português — feito por brasileiros. Entra na lista de espera: https://immigrei.com",
+      "Achei um app que vai mostrar a jornada de imigração nos EUA inteira em português — feito por brasileiros. Entra na lista de espera: https://immigrei.app",
     );
     return (
       <div className="flex flex-col items-center gap-4 max-w-md w-full">

@@ -4,7 +4,7 @@ import Logo from "../components/Logo";
 import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://immigrei.com"),
+  metadataBase: new URL("https://immigrei.app"),
   title: "Suporte — immigrei",
   description: "Como falar com a immigrei, gerenciar sua assinatura e tirar dúvidas sobre o app.",
   alternates: { canonical: "/suporte" },

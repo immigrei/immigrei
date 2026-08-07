@@ -2,38 +2,38 @@ import type { MetadataRoute } from "next";
 import { VISTO_PAGES } from "@/lib/vistoPages";
 import guias from "@/app/documentos/guias/data";
 
-// Pre-launch sitemap: the public pages behind the immigrei.com gate, plus
+// Pre-launch sitemap: the public pages behind the immigrei.app gate, plus
 // catalog-driven routes generated from their source of truth (never
 // hand-list a whole catalog — see .claude/skills/seo-geo-agent/SKILL.md).
 // Add more hand-listed content routes here as they open up (radar, kits, etc.).
 export default function sitemap(): MetadataRoute.Sitemap {
   const vistoEntries: MetadataRoute.Sitemap = Object.keys(VISTO_PAGES).map((id) => ({
-    url: `https://immigrei.com/vistos/${id}`,
+    url: `https://immigrei.app/vistos/${id}`,
     changeFrequency: "monthly",
     priority: 0.6,
   }));
 
   const guiaEntries: MetadataRoute.Sitemap = guias.map((g) => ({
-    url: `https://immigrei.com/documentos/guias/${g.id}`,
+    url: `https://immigrei.app/documentos/guias/${g.id}`,
     changeFrequency: "monthly",
     priority: 0.6,
   }));
 
   return [
     {
-      url: "https://immigrei.com",
+      url: "https://immigrei.app",
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: "https://immigrei.com/nossa-historia",
+      url: "https://immigrei.app/nossa-historia",
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    { url: "https://immigrei.com/termos", changeFrequency: "yearly", priority: 0.3 },
-    { url: "https://immigrei.com/privacidade", changeFrequency: "yearly", priority: 0.3 },
+    { url: "https://immigrei.app/termos", changeFrequency: "yearly", priority: 0.3 },
+    { url: "https://immigrei.app/privacidade", changeFrequency: "yearly", priority: 0.3 },
     {
-      url: "https://immigrei.com/documentos/guias",
+      url: "https://immigrei.app/documentos/guias",
       changeFrequency: "monthly",
       priority: 0.7,
     },

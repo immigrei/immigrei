@@ -20,9 +20,9 @@ export async function generateMetadata({
   const guia = guias.find((g) => g.id === id);
   if (!guia) return {};
   const title = `${guia.titulo} | immigrei`;
-  const url = `https://immigrei.com/documentos/guias/${id}`;
+  const url = `https://immigrei.app/documentos/guias/${id}`;
   return {
-    metadataBase: new URL("https://immigrei.com"),
+    metadataBase: new URL("https://immigrei.app"),
     title,
     description: guia.resumo,
     alternates: { canonical: `/documentos/guias/${id}` },
@@ -62,9 +62,9 @@ export default async function GuiaPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "immigrei", item: "https://immigrei.com/" },
-      { "@type": "ListItem", position: 2, name: "Guias de Integração", item: "https://immigrei.com/documentos/guias" },
-      { "@type": "ListItem", position: 3, name: guia.titulo, item: `https://immigrei.com/documentos/guias/${id}` },
+      { "@type": "ListItem", position: 1, name: "immigrei", item: "https://immigrei.app/" },
+      { "@type": "ListItem", position: 2, name: "Guias de Integração", item: "https://immigrei.app/documentos/guias" },
+      { "@type": "ListItem", position: 3, name: guia.titulo, item: `https://immigrei.app/documentos/guias/${id}` },
     ],
   };
 

@@ -4,7 +4,7 @@ import WaitlistForm from "./WaitlistForm";
 import Logo from "../components/Logo";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://immigrei.com"),
+  metadataBase: new URL("https://immigrei.app"),
   title: "immigrei — Sua jornada migratória nos EUA, com clareza.",
   description:
     "O companheiro completo da sua jornada de imigração nos EUA. Em português, construído por imigrantes, para imigrantes. Em breve.",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: "immigrei — Sua jornada migratória nos EUA, com clareza.",
     description:
       "Não só onde seu caso está — mas para onde você vai. Em português, feito por quem já viveu isso. Entre na lista de espera.",
-    url: "https://immigrei.com",
+    url: "https://immigrei.app",
     siteName: "immigrei",
     locale: "pt_BR",
     type: "website",

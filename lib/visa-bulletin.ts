@@ -21,7 +21,7 @@ export type BulletinSnapshot = {
 // Fetch the index page and find the latest bulletin URL
 async function getLatestBulletinUrl(): Promise<string> {
   const res  = await fetch(BULLETIN_INDEX_URL, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.com)" },
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.app)" },
     signal:  AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new Error(`Bulletin index HTTP ${res.status}`);
@@ -91,7 +91,7 @@ export async function fetchLatestBulletin(): Promise<BulletinSnapshot> {
   const bulletinMonth = parseBulletinMonth(bulletinUrl);
 
   const res = await fetch(bulletinUrl, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.com)" },
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.app)" },
     signal:  AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new Error(`Bulletin page HTTP ${res.status}`);

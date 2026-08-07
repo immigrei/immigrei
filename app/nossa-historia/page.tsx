@@ -6,7 +6,7 @@ import Card from "../components/Card";
 import CtaButton from "../components/CtaButton";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://immigrei.com"),
+  metadataBase: new URL("https://immigrei.app"),
   title: "Nossa história — immigrei",
   description:
     "Dois brasileiros, dois países, a mesma pergunta: qual é o meu próximo passo? A história de por que a immigrei existe.",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     title: "Nossa história — immigrei",
     description:
       "Dois brasileiros, dois países, a mesma pergunta: qual é o meu próximo passo?",
-    url: "https://immigrei.com/nossa-historia",
+    url: "https://immigrei.app/nossa-historia",
     siteName: "immigrei",
     locale: "pt_BR",
     type: "article",

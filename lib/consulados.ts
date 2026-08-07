@@ -93,7 +93,7 @@ async function scrapeUrl(
 ): Promise<ConsuladoEvent[]> {
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.com)",
+      "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.app)",
       "Accept":     "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
     },

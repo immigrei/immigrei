@@ -10,7 +10,7 @@ import { traduzirStatus } from "./uscis-status-pt";
 // in Vercel to "Immigrei <noreply@immigrei.com>" after domain verification.
 const FROM = process.env.EMAIL_FROM ?? "Immigrei <onboarding@resend.dev>";
 // Canonical app URL for email links — set NEXT_PUBLIC_APP_URL in Vercel to
-// https://immigrei.com once the domain is live.
+// https://immigrei.app once the domain is live.
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://immigrei.vercel.app";
 function getResend() { return new Resend(process.env.RESEND_API_KEY); }
 
@@ -438,7 +438,7 @@ export async function sendConsuladoAlert({
 
 export async function sendWaitlistWelcome(to: string) {
   const shareText = encodeURIComponent(
-    "Achei um app que vai mostrar a jornada de imigração nos EUA inteira em português — feito por brasileiros. Entra na lista de espera: https://immigrei.com",
+    "Achei um app que vai mostrar a jornada de imigração nos EUA inteira em português — feito por brasileiros. Entra na lista de espera: https://immigrei.app",
   );
   const subject = "Você está na lista 💚 — Immigrei";
 
@@ -482,7 +482,7 @@ export async function sendWaitlistWelcome(to: string) {
         isso quem está na lista entra primeiro, com acesso antecipado.
       </p>
 
-      <a href="https://immigrei.com/nossa-historia"
+      <a href="https://immigrei.app/nossa-historia"
          style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;margin-bottom:10px;">
         Conhecer a nossa história →
       </a>
@@ -494,7 +494,7 @@ export async function sendWaitlistWelcome(to: string) {
 
     <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
       <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
-      <p style="margin:6px 0 0"><a href="https://immigrei.com/nossa-historia" style="color:#8B958F;">Leia a nossa história</a></p>
+      <p style="margin:6px 0 0"><a href="https://immigrei.app/nossa-historia" style="color:#8B958F;">Leia a nossa história</a></p>
     </div>
 
   </div>
