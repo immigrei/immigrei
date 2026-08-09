@@ -121,14 +121,24 @@ export async function POST(req: NextRequest) {
           }
         } else {
           // The billing portal's default "cancel" doesn't delete the subscription —
-          // it flips cancel_at_period_end and the sub keeps running until the
+          // it schedules the cancellation and the sub keeps running until the
           // period ends. That's the moment the team actually wants to know about,
           // since customer.subscription.deleted won't fire until later (or never,
           // if the customer changes their mind). previous_attributes lets us alert
           // only on the flip, not on every unrelated update to the subscription.
+          //
+          // Confirmed against a real portal-cancel event on this account's API
+          // version (2026-04-22.dahlia, Aug 10 2026): the portal sets `cancel_at`
+          // to the period-end timestamp and leaves `cancel_at_period_end` at
+          // false — the older flag this used to key off of. Checking both keeps
+          // this working regardless of which field a given API version uses.
           const previous = event.data.previous_attributes as Partial<Stripe.Subscription> | undefined;
-          const cancelJustScheduled = sub.cancel_at_period_end && previous && "cancel_at_period_end" in previous;
-          const justReactivated = !sub.cancel_at_period_end && previous?.cancel_at_period_end === true;
+          const cancelJustScheduled =
+            (sub.cancel_at_period_end && previous && "cancel_at_period_end" in previous) ||
+            (!!sub.cancel_at && previous && "cancel_at" in previous && !previous.cancel_at);
+          const justReactivated =
+            (!sub.cancel_at_period_end && previous?.cancel_at_period_end === true) ||
+            (!sub.cancel_at && previous && "cancel_at" in previous && !!previous.cancel_at);
 
           if (cancelJustScheduled) {
             await notifySlackAlert(
