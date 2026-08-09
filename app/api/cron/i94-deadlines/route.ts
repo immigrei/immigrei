@@ -84,6 +84,14 @@ export async function GET(req: NextRequest) {
   // recurring nag. Separate from the milestone loop above because it scans
   // the opposite condition (date IS null) and writes back a marker instead
   // of just reading.
+  //
+  // Gated by onboarding_completed + account age so this doesn't reach
+  // someone who just signed up and hasn't even chosen a visa type yet —
+  // same 7-day early-stage window as flow 02's activation nudge (see
+  // content/marketing/email-flows/02-activation-nudge.md and
+  // 11-prazo-i94.md, adjusted from 3 to 7 days on 2026-08-07).
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
   let remindScanned = 0, remindSent = 0, remindErrors = 0;
   from = 0;
   while (true) {
@@ -92,6 +100,8 @@ export async function GET(req: NextRequest) {
       .select("clerk_user_id, full_name")
       .is("i94_expiry_date", null)
       .is("i94_reminder_sent_at", null)
+      .eq("onboarding_completed", true)
+      .lte("created_at", sevenDaysAgo)
       .range(from, from + PAGE - 1);
 
     if (error) {

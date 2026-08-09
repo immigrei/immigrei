@@ -87,7 +87,7 @@ falta". O valor precisa estar no corpo do e-mail, não atrás de um clique.
 </h1>
 
 <p style="font-size:16px;line-height:1.6;color:#55615A;margin:0 0 20px;">
-  Faz um tempo que você não abre a Immigrei — mas a gente continuou
+  Faz um tempo que você não abre a immigrei — mas a gente continuou
   acompanhando seu caso.
 </p>
 
@@ -113,7 +113,7 @@ falta". O valor precisa estar no corpo do e-mail, não atrás de um clique.
 </a>
 
 <p style="font-size:13px;line-height:1.6;color:#8B958F;margin:26px 0 0;">
-  Se a sua jornada mudou de rumo e a Immigrei não faz mais sentido, você pode
+  Se a sua jornada mudou de rumo e a immigrei não faz mais sentido, você pode
   <a href="{{UNSUBSCRIBE_URL}}" style="color:#8B958F;">sair da lista aqui</a>.
   Sem ressentimento — boa sorte de verdade.
 </p>

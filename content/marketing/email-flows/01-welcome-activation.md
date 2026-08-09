@@ -8,6 +8,12 @@ súbita do funil.
 
 Status: `RASCUNHO — aguardando revisão humana`
 
+> **Revisado em 7/8/2026 (reunião César/Felipe):** a instrução "onde achar
+> seu número" não estava clara o bastante, o e-mail não usava nenhum dado
+> que já temos da pessoa (visto, objetivo declarado no onboarding), e
+> ficou definido que o I-94 entra aqui — mas só quando o visto dela
+> realmente depende dele, não em todo envio.
+
 ---
 
 ## Gatilho
@@ -44,7 +50,7 @@ group by p.clerk_user_id, p.email, p.full_name, p.visa_type, p.main_goal;
 
 ### E-mail 1 — imediato, no cadastro
 
-**Assunto A:** `👋 Bem-vindo à Immigrei` (25 char)
+**Assunto A:** `👋 Bem-vindo à immigrei` (25 char)
 **Assunto B:** `👋 Seu primeiro passo leva 2 minutos` (36 char)
 
 **Preview:** `Adicione seu número de recibo e a gente cuida do resto.`
@@ -63,7 +69,7 @@ group by p.clerk_user_id, p.email, p.full_name, p.visa_type, p.main_goal;
 </p>
 
 <p style="font-size:16px;line-height:1.6;color:#55615A;margin:0 0 26px;">
-  A Immigrei existe para você não precisar adivinhar. E começa com um passo só:
+  A immigrei existe para você não precisar adivinhar. E começa com um passo só:
   <strong style="color:#1B2520;">adicionar o número do seu recibo.</strong>
   A partir daí, toda vez que o USCIS mexer no seu caso, você fica sabendo —
   em português, no seu e-mail, sem precisar entrar em site nenhum.
@@ -73,9 +79,19 @@ group by p.clerk_user_id, p.email, p.full_name, p.visa_type, p.main_goal;
   <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#8B958F;margin:0 0 8px;">
     Onde achar seu número
   </p>
+  <p style="font-size:15px;line-height:1.6;color:#55615A;margin:0 0 10px;">
+    Ele fica no seu <strong style="color:#1B2520;">Notice of Action</strong>
+    (formulário <strong style="color:#1B2520;">I-797</strong> — o recibo
+    oficial que o USCIS manda por correio ou e-mail depois que você
+    protocola algo). Procure o campo escrito
+    <strong style="color:#1B2520;">"USCIS Receipt Number"</strong>, no canto
+    superior esquerdo da página, logo abaixo da data.
+  </p>
   <p style="font-size:15px;line-height:1.6;color:#55615A;margin:0;">
-    Está no seu Notice of Action (formulário I-797), no canto superior esquerdo.
-    São 3 letras seguidas de 10 números — algo como <strong style="color:#1B2520;">IOE0912345678</strong>.
+    São sempre 3 letras seguidas de 10 números — por exemplo,
+    <strong style="color:#1B2520;">IOE0912345678</strong>. Não confunda com
+    o "Case ID" ou com qualquer número impresso no topo da página: é
+    especificamente o campo com esse nome.
   </p>
 </div>
 
@@ -99,18 +115,28 @@ A gente sabe como é: o sistema americano não foi feito para ser entendido.
 Site em inglês, prazo que ninguém explica, advogado cobrando US$ 300 por
 uma ligação de 15 minutos.
 
-A Immigrei existe para você não precisar adivinhar. E começa com um passo só:
+A immigrei existe para você não precisar adivinhar. E começa com um passo só:
 adicionar o número do seu recibo. A partir daí, toda vez que o USCIS mexer no
 seu caso, você fica sabendo — em português, no seu e-mail.
 
-Onde achar: no seu Notice of Action (I-797), canto superior esquerdo.
-3 letras + 10 números, tipo IOE0912345678.
+Onde achar: no seu Notice of Action (I-797, o recibo oficial do USCIS).
+Procure o campo "USCIS Receipt Number", canto superior esquerdo, abaixo da
+data. 3 letras + 10 números, tipo IOE0912345678 — não confundir com o
+"Case ID" nem com o número no topo da página.
 
 Adicionar meu caso: {{APP_URL}}/dashboard
 
 Ainda não protocolou nada? Seu mapa de jornada já está montado:
 {{APP_URL}}/onboarding
 ```
+
+> **Sobre personalizar o e-mail 1 com visto/objetivo:** discutido na reunião
+> de 7/8, mas **não dá para fazer neste e-mail especificamente** — ele
+> dispara no `user.created` do Clerk, antes da pessoa passar pelo
+> onboarding (`/onboarding`), então `profiles.visa_type` e `main_goal`
+> ainda não existem nesse momento. A personalização (e a menção
+> condicional ao I-94, também discutida) entra no **e-mail 2** abaixo, que
+> já dispara depois da janela de onboarding e já teria esse dado.
 
 ---
 
@@ -122,11 +148,16 @@ Ainda não protocolou nada? Seu mapa de jornada já está montado:
 **Preview:** `Sem ele, a gente não consegue te avisar quando algo mudar.`
 
 **Miolo:** versão curta — reconhece o obstáculo mais provável em vez de repetir
-o pedido.
+o pedido. Já personalizada: se `visa_type`/`main_goal` existirem (onboarding
+concluído), a abertura cita o visto pelo nome em vez de ficar genérica, e o
+aviso sobre o I-94 só entra quando `profiles.location = 'eua'` — quem ainda
+está no Brasil não tem I-94 para rastrear, então a menção correta é omitida,
+não adaptada. Esse é o campo já existente que resolve o "nem todo processo
+depende do I-94" da reunião de 7/8.
 
 ```html
 <h1 style="font-size:24px;font-weight:600;color:#1B2520;margin:0 0 14px;line-height:1.3;">
-  Travou em algum ponto?
+  Travou em algum ponto{{#if visaTypeLabel}} com o {{visaTypeLabel}}{{/if}}?
 </h1>
 
 <p style="font-size:16px;line-height:1.6;color:#55615A;margin:0 0 18px;">
@@ -136,22 +167,40 @@ o pedido.
 
 <p style="font-size:15px;line-height:1.6;color:#55615A;margin:0 0 12px;">
   <strong style="color:#1B2520;">Não achou o número.</strong><br>
-  Ele fica no I-797, canto superior esquerdo — 3 letras e 10 números.
-  Se você protocolou por advogado, peça a ele o "receipt number".
+  Ele fica no I-797 (o Notice of Action do USCIS), no campo "USCIS Receipt
+  Number" — 3 letras e 10 números. Se você protocolou por advogado, peça a
+  ele o "receipt number".
 </p>
 
 <p style="font-size:15px;line-height:1.6;color:#55615A;margin:0 0 24px;">
   <strong style="color:#1B2520;">Ainda não protocolou nada.</strong><br>
   Aí o rastreamento não se aplica por enquanto — mas
   <a href="{{APP_URL}}/painel" style="color:#1E5E4E;">seu painel</a>
-  já mostra o que precisa acontecer antes.
+  já mostra o que precisa acontecer antes{{#if mainGoalLabel}}, rumo a
+  {{mainGoalLabel}}{{/if}}.
 </p>
+
+{{#if showI94Note}}
+<div style="background:#E4EFE9;border-radius:12px;padding:16px;margin:0 0 24px;">
+  <p style="font-size:14px;line-height:1.6;color:#164A3D;margin:0;">
+    <strong>Já que você está nos EUA:</strong> vale conferir também o prazo
+    do seu I-94 (o comprovante da sua entrada no país) — é uma data
+    diferente da validade do visto, e a gente só consegue te avisar do
+    vencimento se você cadastrar ela no painel.
+  </p>
+</div>
+{{/if}}
 
 <a href="{{APP_URL}}/dashboard"
    style="display:inline-block;background:#1E5E4E;color:#F4EEE2;font-weight:700;font-size:15px;text-decoration:none;padding:14px 28px;border-radius:12px;">
   Tentar de novo →
 </a>
 ```
+
+`visaTypeLabel`/`mainGoalLabel` vêm do `profiles` já lido no SQL do
+segmento acima — omitir o `{{#if}}` inteiro quando vazio, nunca mostrar
+"Travou em algum ponto com o null?". `showI94Note` = `location === 'eua'`,
+calculado no código do envio, não no template.
 
 ---
 
@@ -187,5 +236,5 @@ de onde achar), não copy.
 
 > **Nota de consentimento:** este fluxo é serviço (a pessoa criou conta e o
 > e-mail é sobre usar a conta), então não exige opt-in de marketing. Mas o
-> texto de cadastro precisa deixar claro que a Immigrei manda avisos por
+> texto de cadastro precisa deixar claro que a immigrei manda avisos por
 > e-mail — César precisa aprovar essa frase antes do go-live.
