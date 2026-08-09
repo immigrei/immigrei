@@ -510,6 +510,353 @@ export async function sendWaitlistWelcome(to: string) {
   await getResend().emails.send({ from: FROM, to, subject, html });
 }
 
+// ── Subscription confirmed (checkout completed) ─────────────────────────────
+
+export async function sendSubscriptionConfirmed({
+  to,
+  userName,
+  planName,
+  isAnnual,
+  amountFormatted,
+  currentPeriodEndFormatted,
+  invoiceUrl,
+}: {
+  to:                        string;
+  userName:                  string;
+  planName:                  string;
+  isAnnual:                  boolean;
+  amountFormatted:           string;
+  currentPeriodEndFormatted: string;
+  invoiceUrl?:               string;
+}) {
+  const subject = "✅ Sua Jornada está ativa";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        Sua Jornada está ativa
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;">
+        Olá${userName ? ", " + userName : ""}! A cobrança da sua assinatura foi aprovada — a partir de agora você tem acesso completo.
+      </p>
+
+      <div style="background:#E4EFE9;border-radius:12px;padding:16px 20px;margin:0 0 20px;">
+        <p style="font-size:15px;font-weight:700;color:#164A3D;margin:0 0 4px;">
+          immigrei ${planName} — ${isAnnual ? "anual" : "mensal"}
+        </p>
+        <p style="font-size:14px;color:#55615A;margin:0;">
+          ${amountFormatted} · próxima cobrança em ${currentPeriodEndFormatted}
+        </p>
+      </div>
+
+      <p style="font-size:14px;color:#55615A;line-height:1.6;margin:0 0 24px;">
+        A partir de agora sua jornada mostra não só onde você está, mas o que vem depois e o que fazer em cada passo — kits completos, documentos organizados num só lugar e alertas automáticos do seu caso.
+      </p>
+
+      <a href="${APP_URL}/dashboard"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;margin-bottom:12px;">
+        Ver minha jornada →
+      </a>
+      ${invoiceUrl ? `
+      <a href="${invoiceUrl}" target="_blank"
+         style="display:block;background:transparent;color:#8B958F;text-align:center;padding:8px;text-decoration:underline;font-size:13px;">
+        Ver recibo desta cobrança
+      </a>` : ""}
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
+// ── Subscription cancellation confirmed (cancel_at_period_end flip) ────────
+
+export async function sendSubscriptionCancelled({
+  to,
+  userName,
+  accessUntilFormatted,
+}: {
+  to:                    string;
+  userName:              string;
+  accessUntilFormatted:  string;
+}) {
+  const subject = "Cancelamento confirmado — immigrei";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        Cancelamento recebido
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;">
+        Olá${userName ? ", " + userName : ""}. Confirmamos o cancelamento da sua assinatura — não vai haver nenhuma nova cobrança.
+      </p>
+
+      <div style="padding:14px 16px;background:#FBEDD4;border-radius:10px;border:1px solid #E8A33D33;margin-bottom:20px;">
+        <p style="font-size:15px;font-weight:700;color:#164A3D;margin:0 0 4px;">
+          Seu acesso continua até ${accessUntilFormatted}
+        </p>
+        <p style="font-size:14px;color:#55615A;margin:0;line-height:1.5;">
+          Até lá, sua jornada, seus kits e seu cofre de documentos seguem funcionando normalmente.
+        </p>
+      </div>
+
+      <p style="font-size:14px;color:#55615A;line-height:1.6;margin:0 0 24px;">
+        Mudou de ideia? Você pode reativar a qualquer momento antes de ${accessUntilFormatted} sem perder nada do que já organizou.
+      </p>
+
+      <a href="${APP_URL}/perfil"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
+        Gerenciar minha assinatura →
+      </a>
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
+// ── Billing cycle changed (monthly ↔ annual) ────────────────────────────────
+
+export async function sendPlanCycleChanged({
+  to,
+  userName,
+  fromCycleLabel,
+  toCycleLabel,
+  newAmountFormatted,
+  currentPeriodEndFormatted,
+  switchedToAnnual,
+  invoiceUrl,
+}: {
+  to:                         string;
+  userName:                   string;
+  fromCycleLabel:             string;
+  toCycleLabel:               string;
+  newAmountFormatted:         string;
+  currentPeriodEndFormatted:  string;
+  switchedToAnnual:           boolean;
+  invoiceUrl?:                string;
+}) {
+  const subject = switchedToAnnual
+    ? "✅ Você trocou para o plano anual"
+    : "Sua assinatura agora é mensal";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        Troca de ciclo confirmada
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;">
+        Olá${userName ? ", " + userName : ""}! Sua assinatura da Jornada mudou de ${fromCycleLabel} para ${toCycleLabel}. Nada muda no acesso — só a forma de cobrança.
+      </p>
+
+      <div style="background:#E4EFE9;border-radius:12px;padding:16px 20px;margin:0 0 20px;">
+        <p style="font-size:15px;font-weight:700;color:#164A3D;margin:0 0 4px;">
+          immigrei Jornada — ${toCycleLabel}
+        </p>
+        <p style="font-size:14px;color:#55615A;margin:0;">
+          ${newAmountFormatted} · próxima cobrança em ${currentPeriodEndFormatted}
+        </p>
+      </div>
+
+      ${switchedToAnnual ? `
+      <div style="background:#FBEDD4;border-radius:10px;padding:14px 16px;margin:0 0 24px;">
+        <p style="font-size:14px;line-height:1.6;color:#55615A;margin:0;">
+          No anual, os US$ 269 equivalem a 9 meses do preço mensal — a economia já está aplicada na cobrança acima, nenhuma ação extra necessária.
+        </p>
+      </div>` : ""}
+
+      <a href="${APP_URL}/dashboard"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;margin-bottom:12px;">
+        Ver minha jornada →
+      </a>
+      ${invoiceUrl ? `
+      <a href="${invoiceUrl}" target="_blank"
+         style="display:block;background:transparent;color:#8B958F;text-align:center;padding:8px;text-decoration:underline;font-size:13px;">
+        Ver detalhes da cobrança
+      </a>` : ""}
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
+// ── Access ended (customer.subscription.deleted) ────────────────────────────
+
+export async function sendAccessEnded({
+  to,
+  userName,
+  caseReceipt,
+}: {
+  to:           string;
+  userName:     string;
+  caseReceipt?: string;
+}) {
+  const subject = "Você voltou para o Retrato";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        Você está no Retrato agora
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;">
+        Olá${userName ? ", " + userName : ""}. Sua assinatura da Jornada terminou — mas sua conta continua ativa, no plano gratuito.
+      </p>
+
+      <div style="background:#E4EFE9;border-radius:12px;padding:16px 20px;margin:0 0 20px;">
+        <p style="font-size:15px;font-weight:700;color:#164A3D;margin:0 0 4px;">
+          O que continua com você, sem custo
+        </p>
+        <p style="font-size:14px;line-height:1.6;color:#55615A;margin:0;">
+          Seu caso ${caseReceipt ? `<strong style="color:#1B2520;">${caseReceipt}</strong>` : ""} segue sendo acompanhado e você continua recebendo os alertas de status. Seus documentos continuam guardados no cofre — só o upload de novos é que fica pausado.
+        </p>
+      </div>
+
+      <div style="background:#F4EEE2;border-radius:10px;padding:14px 16px;margin:0 0 24px;">
+        <p style="font-size:12px;color:#8B958F;margin:0 0 6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;">O que fica para trás</p>
+        <p style="font-size:14px;line-height:1.6;color:#55615A;margin:0;">
+          A leitura do que cada mudança de status significa, os kits de protocolo passo a passo e o acesso completo ao cofre de documentos.
+        </p>
+      </div>
+
+      <a href="${APP_URL}/planos"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
+        Ver a Jornada de novo →
+      </a>
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
+// ── Subscription reactivated (cancel_at_period_end true → false) ───────────
+
+export async function sendSubscriptionReactivated({
+  to,
+  userName,
+  currentPeriodEndFormatted,
+}: {
+  to:                        string;
+  userName:                  string;
+  currentPeriodEndFormatted: string;
+}) {
+  const subject = "Bem-vinda de volta à Jornada";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <h1 style="font-size:26px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        Que bom que você ficou
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 24px;">
+        Olá${userName ? ", " + userName : ""}! Sua assinatura da Jornada foi reativada — o cancelamento não vai mais acontecer.
+      </p>
+
+      <div style="background:#E4EFE9;border-radius:12px;padding:16px 20px;margin:0 0 24px;">
+        <p style="font-size:15px;font-weight:700;color:#164A3D;margin:0 0 4px;">
+          Nada foi perdido
+        </p>
+        <p style="font-size:14px;color:#55615A;margin:0;line-height:1.5;">
+          Seu histórico, seus documentos e seu progresso no checklist continuam exatamente do jeito que você deixou. Próxima cobrança em ${currentPeriodEndFormatted}.
+        </p>
+      </div>
+
+      <a href="${APP_URL}/dashboard"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;">
+        Ver minha jornada →
+      </a>
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
 function formatDatePT(iso: string): string {
   const [y, m, d] = iso.split("-");
   const months = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];

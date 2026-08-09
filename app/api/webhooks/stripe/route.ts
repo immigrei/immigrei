@@ -3,6 +3,32 @@ import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getStripe, planFromPriceId, PLANS } from "@/lib/stripe";
 import { notifySlackAlert } from "@/lib/slack-alert";
+import {
+  sendSubscriptionConfirmed,
+  sendSubscriptionCancelled,
+  sendPlanCycleChanged,
+  sendAccessEnded,
+  sendSubscriptionReactivated,
+} from "@/lib/notifications";
+
+const CYCLE_LABEL: Record<string, string> = { monthly: "mensal", annual: "anual" };
+
+function formatUSD(amount: number) {
+  return `US$ ${amount.toFixed(2).replace(".", ",")}`;
+}
+
+function formatDatePT(date: Date) {
+  return date.toLocaleDateString("pt-BR");
+}
+
+async function getProfile(userId: string) {
+  const { data } = await supabaseAdmin
+    .from("profiles")
+    .select("email, full_name")
+    .eq("clerk_user_id", userId)
+    .maybeSingle();
+  return data as { email: string | null; full_name: string | null } | null;
+}
 
 /**
  * Stripe webhook — keeps the subscriptions table in sync.
@@ -41,6 +67,33 @@ export async function POST(req: NextRequest) {
           `:moneybag: Nova assinatura — ${plan ? PLANS[plan].name + " (" + plan + ")" : "plano desconhecido"}${session.customer_details?.email ? ` — ${session.customer_details.email}` : ""}`,
           process.env.SLACK_STRIPE_WEBHOOK_URL,
         );
+
+        // Flow 06 — subscription confirmation email (see
+        // content/marketing/email-flows/06-confirmacao-assinatura.md).
+        // session.customer_details.email is already on the event payload, but
+        // the display name only lives in profiles — one lookup to personalize
+        // the greeting, same pattern the other templates use.
+        const to = session.customer_details?.email;
+        if (to && plan) {
+          const profile = await getProfile(userId);
+          const item = sub.items.data[0];
+          let invoiceUrl: string | undefined;
+          if (session.invoice) {
+            const invoice = await stripe.invoices.retrieve(session.invoice as string);
+            invoiceUrl = invoice.hosted_invoice_url ?? undefined;
+          }
+          await sendSubscriptionConfirmed({
+            to,
+            userName: profile?.full_name ?? "",
+            planName: PLANS[plan].name,
+            isAnnual: plan === "annual",
+            amountFormatted: formatUSD(PLANS[plan].amount),
+            currentPeriodEndFormatted: item?.current_period_end
+              ? formatDatePT(new Date(item.current_period_end * 1000))
+              : "",
+            invoiceUrl,
+          });
+        }
         break;
       }
       case "customer.subscription.updated":
@@ -48,11 +101,24 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object;
         const userId = sub.metadata?.clerk_user_id;
         if (userId) await upsertSubscription(userId, sub);
+
         if (event.type === "customer.subscription.deleted") {
           await notifySlackAlert(
             `:wave: Assinatura cancelada — customer ${sub.customer as string}`,
             process.env.SLACK_STRIPE_WEBHOOK_URL,
           );
+
+          // Flow 10 — access ended (see
+          // content/marketing/email-flows/10-acesso-encerrado.md). Fires for
+          // both a voluntary cancellation reaching its period end and a
+          // dunning-exhausted involuntary cancellation — same event either
+          // way, spec says one email covers both.
+          if (userId) {
+            const profile = await getProfile(userId);
+            if (profile?.email) {
+              await sendAccessEnded({ to: profile.email, userName: profile.full_name ?? "" });
+            }
+          }
         } else {
           // The billing portal's default "cancel" doesn't delete the subscription —
           // it flips cancel_at_period_end and the sub keeps running until the
@@ -61,11 +127,82 @@ export async function POST(req: NextRequest) {
           // if the customer changes their mind). previous_attributes lets us alert
           // only on the flip, not on every unrelated update to the subscription.
           const previous = event.data.previous_attributes as Partial<Stripe.Subscription> | undefined;
-          if (sub.cancel_at_period_end && previous && "cancel_at_period_end" in previous) {
+          const cancelJustScheduled = sub.cancel_at_period_end && previous && "cancel_at_period_end" in previous;
+          const justReactivated = !sub.cancel_at_period_end && previous?.cancel_at_period_end === true;
+
+          if (cancelJustScheduled) {
             await notifySlackAlert(
               `:hourglass_flowing_sand: Cancelamento agendado — customer ${sub.customer as string}, vigente até ${new Date(sub.items.data[0]?.current_period_end * 1000).toLocaleDateString("pt-BR")}`,
               process.env.SLACK_STRIPE_WEBHOOK_URL,
             );
+
+            // Flow 08 — cancellation confirmed (see
+            // content/marketing/email-flows/08-cancelamento-confirmado.md).
+            if (userId) {
+              const profile = await getProfile(userId);
+              const periodEnd = sub.items.data[0]?.current_period_end;
+              if (profile?.email && periodEnd) {
+                await sendSubscriptionCancelled({
+                  to: profile.email,
+                  userName: profile.full_name ?? "",
+                  accessUntilFormatted: formatDatePT(new Date(periodEnd * 1000)),
+                });
+              }
+            }
+          } else if (justReactivated) {
+            await notifySlackAlert(
+              `:tada: Assinatura reativada — customer ${sub.customer as string}`,
+              process.env.SLACK_STRIPE_WEBHOOK_URL,
+            );
+
+            // Flow 12 — subscription reactivated (see
+            // content/marketing/email-flows/12-reativacao-de-assinatura.md).
+            if (userId) {
+              const profile = await getProfile(userId);
+              const periodEnd = sub.items.data[0]?.current_period_end;
+              if (profile?.email && periodEnd) {
+                await sendSubscriptionReactivated({
+                  to: profile.email,
+                  userName: profile.full_name ?? "",
+                  currentPeriodEndFormatted: formatDatePT(new Date(periodEnd * 1000)),
+                });
+              }
+            }
+          } else {
+            // Flow 09 — billing cycle changed (see
+            // content/marketing/email-flows/09-troca-de-ciclo.md). Stripe's
+            // previous_attributes ships the *entire* previous items array
+            // when a subscription item changes (not a partial diff), per the
+            // spec's own caveat to verify against a real test-mode event —
+            // reading items.data[0].price.id off it here matches that shape.
+            const previousItems = (event.data.previous_attributes as Partial<Stripe.Subscription>)?.items?.data;
+            const previousPriceId = previousItems?.[0]?.price?.id;
+            const currentPriceId = sub.items.data[0]?.price.id;
+            if (previousPriceId && currentPriceId && previousPriceId !== currentPriceId) {
+              const fromPlan = planFromPriceId(previousPriceId);
+              const toPlan = planFromPriceId(currentPriceId);
+              if (fromPlan && toPlan && fromPlan !== toPlan) {
+                await notifySlackAlert(
+                  `:repeat: Troca de ciclo — customer ${sub.customer as string}, ${fromPlan} → ${toPlan}`,
+                  process.env.SLACK_STRIPE_WEBHOOK_URL,
+                );
+                if (userId) {
+                  const profile = await getProfile(userId);
+                  const periodEnd = sub.items.data[0]?.current_period_end;
+                  if (profile?.email && periodEnd) {
+                    await sendPlanCycleChanged({
+                      to: profile.email,
+                      userName: profile.full_name ?? "",
+                      fromCycleLabel: CYCLE_LABEL[fromPlan] ?? fromPlan,
+                      toCycleLabel: CYCLE_LABEL[toPlan] ?? toPlan,
+                      newAmountFormatted: formatUSD(PLANS[toPlan].amount),
+                      currentPeriodEndFormatted: formatDatePT(new Date(periodEnd * 1000)),
+                      switchedToAnnual: toPlan === "annual",
+                    });
+                  }
+                }
+              }
+            }
           }
         }
         break;
