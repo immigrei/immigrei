@@ -5,6 +5,8 @@
 
 import { Resend } from "resend";
 import { traduzirStatus } from "./uscis-status-pt";
+import { todosVistos } from "./vistosCatalog";
+import { PLANS } from "./stripe";
 
 // Resend sandbox sender until immigrei.com is verified — set EMAIL_FROM
 // in Vercel to "immigrei <noreply@immigrei.com>" after domain verification.
@@ -573,6 +575,92 @@ export async function sendSubscriptionConfirmed({
          style="display:block;background:transparent;color:#8B958F;text-align:center;padding:8px;text-decoration:underline;font-size:13px;">
         Ver recibo desta cobrança
       </a>` : ""}
+    </div>
+
+    <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">
+      <p style="margin:0">Não somos um escritório de advocacia. Não compartilhamos seus dados com terceiros.</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  await getResend().emails.send({ from: FROM, to, subject, html });
+}
+
+// ── Retention nudge (sent alongside the cancellation-confirmed receipt) ────
+// Not the full flow 07 (no discount, no in-app screen, no DB record) — just
+// the two value-adds that don't need a "Gate humano" approval per
+// content/marketing/email-flows/07-retencao-cancelamento.md: the public
+// annual-price math (motive "price", rota a) and a concrete reminder of
+// what's tied to the account (motive "resolved"/"not_using"). Kept as its
+// own email, not folded into flow 08, because 08 is a "recibo" (README.md
+// §1.2) and stuffing an offer under a confirmation is the exact risk that
+// bucket calls out.
+
+export async function sendRetentionNudge({
+  to,
+  userName,
+  accessUntilFormatted,
+  planId,
+  visaType,
+}: {
+  to:                    string;
+  userName:              string;
+  accessUntilFormatted:  string;
+  planId:                "monthly" | "annual";
+  visaType?:             string | null;
+}) {
+  const subject = "Antes de você ir — uma coisa que pode ajudar";
+
+  const vistoNome = visaType ? todosVistos.find((v) => v.id === visaType)?.nome : null;
+
+  const annualBlock = planId === "monthly" ? `
+      <div style="padding:16px;background:#E4EFE9;border-radius:10px;border:1px solid #1E5E4E33;margin-bottom:20px;">
+        <p style="font-size:15px;font-weight:700;color:#164A3D;margin:0 0 4px;">
+          Se o motivo foi o preço: o plano anual sai ~25% mais barato
+        </p>
+        <p style="font-size:14px;color:#55615A;margin:0;line-height:1.6;">
+          $${PLANS.monthly.amount.toFixed(2)}/mês × 12 = $${(PLANS.monthly.amount * 12).toFixed(2)}/ano no mensal,
+          contra $${PLANS.annual.amount.toFixed(2)}/ano no anual — sem cupom, é o preço que já está no ar.
+          Dá pra trocar de ciclo em vez de cancelar, e sua assinatura não é interrompida em nenhum momento.
+        </p>
+      </div>` : "";
+
+  const contextLine = vistoNome
+    ? `O caminho do seu visto (${vistoNome}) e os documentos que você já organizou continuam exatamente onde você parou.`
+    : "Sua jornada e os documentos que você já organizou continuam exatamente onde você parou.";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#F4EEE2;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="${APP_URL}/brand/immigrei-icone-verde.svg" width="26" height="26" alt="" style="vertical-align:middle;margin-right:8px;">
+      <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1E5E4E;letter-spacing:-.5px;vertical-align:middle;">immigrei</span>
+    </div>
+
+    <div style="background:#FBF7EF;border-radius:20px;padding:32px;border:1px solid #E4EFE9;">
+      <h1 style="font-size:24px;font-weight:600;color:#1B2520;margin:0 0 8px;line-height:1.2;">
+        Antes de você ir
+      </h1>
+      <p style="font-size:15px;color:#55615A;margin:0 0 20px;line-height:1.6;">
+        Olá${userName ? ", " + userName : ""}. ${contextLine} Você ainda tem acesso até ${accessUntilFormatted} — dá tempo de mudar de ideia sem perder nada.
+      </p>
+
+      ${annualBlock}
+
+      <a href="${APP_URL}/perfil"
+         style="display:block;background:#1E5E4E;color:#FBF7EF;text-align:center;padding:16px;border-radius:14px;text-decoration:none;font-size:16px;font-weight:700;margin-bottom:12px;">
+        Reativar ou trocar de plano →
+      </a>
+      <a href="${APP_URL}/profissionais"
+         style="display:block;text-align:center;padding:4px;color:#55615A;text-decoration:underline;font-size:13px;">
+        Prefere seguir com um profissional? Veja a rede verificada
+      </a>
     </div>
 
     <div style="text-align:center;padding:24px 0 0;font-size:12px;color:#8B958F;line-height:1.6;">

@@ -6,6 +6,7 @@ import { notifySlackAlert } from "@/lib/slack-alert";
 import {
   sendSubscriptionConfirmed,
   sendSubscriptionCancelled,
+  sendRetentionNudge,
   sendPlanCycleChanged,
   sendAccessEnded,
   sendSubscriptionReactivated,
@@ -24,10 +25,10 @@ function formatDatePT(date: Date) {
 async function getProfile(userId: string) {
   const { data } = await supabaseAdmin
     .from("profiles")
-    .select("email, full_name")
+    .select("email, full_name, visa_type")
     .eq("clerk_user_id", userId)
     .maybeSingle();
-  return data as { email: string | null; full_name: string | null } | null;
+  return data as { email: string | null; full_name: string | null; visa_type: string | null } | null;
 }
 
 /**
@@ -152,11 +153,26 @@ export async function POST(req: NextRequest) {
               const profile = await getProfile(userId);
               const periodEnd = sub.items.data[0]?.current_period_end;
               if (profile?.email && periodEnd) {
+                const accessUntilFormatted = formatDatePT(new Date(periodEnd * 1000));
                 await sendSubscriptionCancelled({
                   to: profile.email,
                   userName: profile.full_name ?? "",
-                  accessUntilFormatted: formatDatePT(new Date(periodEnd * 1000)),
+                  accessUntilFormatted,
                 });
+
+                // Retention nudge — separate email, sent right after the
+                // receipt above (kept apart from flow 08 on purpose, see
+                // sendRetentionNudge's comment in lib/notifications.ts).
+                const planId = planFromPriceId(sub.items.data[0]?.price.id ?? "");
+                if (planId) {
+                  await sendRetentionNudge({
+                    to: profile.email,
+                    userName: profile.full_name ?? "",
+                    accessUntilFormatted,
+                    planId,
+                    visaType: profile.visa_type,
+                  });
+                }
               }
             }
           } else if (justReactivated) {
