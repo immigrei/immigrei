@@ -2,7 +2,6 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
-import { getUserPlan } from "@/lib/plan";
 import { vistosEstudo, vistosNegocios } from "@/lib/vistosCatalog";
 import {
   AUTHOR_STATES,
@@ -15,10 +14,9 @@ import {
   findContactInfo,
 } from "@/lib/community";
 
-// Closed community: reading AND publishing require an active subscription
-// (free plan sees a locked teaser, no report content in the payload). Every
-// report enters as "pending" and only shows up in the feed after manual
-// approval.
+// Community is free for any logged-in user (reading, publishing, reacting).
+// Every report enters as "pending" and only shows up in the feed after
+// manual approval.
 
 const VALID_VISAS = new Set(
   [...vistosEstudo, ...vistosNegocios].map((v) => v.id)
@@ -68,13 +66,6 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const plan = await getUserPlan(userId);
-  if (plan === "free") {
-    // Locked, not an error: the client renders a paywall teaser from this.
-    // No report content ever reaches a free-plan browser.
-    return NextResponse.json({ reports: [], plan, locked: true });
-  }
-
   const vistoId = req.nextUrl.searchParams.get("vistoId");
 
   let query = supabaseAdmin
@@ -92,7 +83,7 @@ export async function GET(req: NextRequest) {
       .select("report_id")
       .eq("visto_id", vistoId);
     const reportIds = (ids ?? []).map((r) => r.report_id);
-    if (reportIds.length === 0) return NextResponse.json({ reports: [], plan });
+    if (reportIds.length === 0) return NextResponse.json({ reports: [] });
     query = query.in("id", reportIds);
   }
 
@@ -111,21 +102,13 @@ export async function GET(req: NextRequest) {
     toPublicReport(row, userId, myReactions)
   );
 
-  return NextResponse.json({ reports, plan });
+  return NextResponse.json({ reports });
 }
 
 // POST { title, body, visas: string[], isAnonymous, authorState }
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const plan = await getUserPlan(userId);
-  if (plan === "free") {
-    return NextResponse.json(
-      { error: "Publicar relatos é exclusivo para assinantes." },
-      { status: 403 }
-    );
-  }
 
   const payload = await req.json().catch(() => null);
   const isAnonymous = payload?.isAnonymous !== false; // default true
@@ -211,6 +194,7 @@ export async function POST(req: NextRequest) {
       is_anonymous: isAnonymous,
       author_name: authorName || fullName || null,
       author_state: authorState,
+      status: "approved",
     })
     .select("id")
     .single();

@@ -45,3 +45,23 @@ export function findContactInfo(text: string): ContactViolation | null {
 
 export const CONTACT_BLOCKED_MESSAGE =
   "Para proteger a comunidade, relatos não podem conter telefone, e-mail, links ou contatos de redes sociais.";
+
+// UPL (unauthorized practice of law) signals for the twice-weekly review
+// cron (app/api/cron/community-review). Cheap regex pass, not a legal
+// judgment — it only flags for a human to read, never auto-removes. Catches
+// posters giving other members personalized legal instructions/guarantees,
+// which is what turns a personal story into practicing law without a
+// license.
+const UPL_PATTERNS: RegExp[] = [
+  /\bsou\s+advogad[oa]\b/i,
+  /\bsou\s+consultor(a)?\s+de\s+imigra[çc][ãa]o\b/i,
+  /\b(eu\s+)?garanto\s+(que\s+)?(vai|sua|seu)\b/i,
+  /\bn[ãa]o\s+precisa\s+de\s+advogado\b/i,
+  /\bpode\s+confiar\s+em\s+mim,?\s+(no\s+seu\s+caso|sobre\s+o\s+seu\s+caso)\b/i,
+  /\bno\s+seu\s+caso,?\s+(voc[êe]\s+deve|entra\s+com|preencha|use\s+o\s+formul[áa]rio)\b/i,
+];
+
+/** Returns the UPL patterns a report's text matched, or [] if clean. */
+export function findUplSignals(text: string): string[] {
+  return UPL_PATTERNS.filter((re) => re.test(text)).map((re) => re.source);
+}

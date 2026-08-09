@@ -149,9 +149,9 @@ const faq: FaqItem[] = [
     a: (
       <>
         O plano <strong className="text-ink">Retrato</strong> é gratuito para
-        sempre: rastreamento do seu caso em tempo real, alertas de status e
-        prazos — sem pagar nada. Se quiser ver para onde a sua jornada vai
-        (kits por tipo de visto, cofre de documentos, comunidade), isso é a{" "}
+        sempre: rastreamento do seu caso em tempo real, alertas de status,
+        prazos e a comunidade — sem pagar nada. Se quiser ver para onde a sua
+        jornada vai (kits por tipo de visto, cofre de documentos), isso é a{" "}
         <strong className="text-ink">Jornada</strong>, nosso único plano
         pago.{" "}
         <Link href="/planos" className="text-pine underline underline-offset-4">
@@ -160,7 +160,7 @@ const faq: FaqItem[] = [
       </>
     ),
     aText:
-      "O plano Retrato é gratuito para sempre: rastreamento do seu caso em tempo real, alertas de status e prazos — sem pagar nada. Se quiser ver para onde a sua jornada vai (kits por tipo de visto, cofre de documentos, comunidade), isso é a Jornada, nosso único plano pago.",
+      "O plano Retrato é gratuito para sempre: rastreamento do seu caso em tempo real, alertas de status, prazos e a comunidade — sem pagar nada. Se quiser ver para onde a sua jornada vai (kits por tipo de visto, cofre de documentos), isso é a Jornada, nosso único plano pago.",
   },
   {
     q: "Já uso um app de acompanhamento de caso. Qual é a diferença?",

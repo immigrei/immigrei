@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import AppShell from "@/app/components/AppShell";
-import PaywallGate from "@/app/components/PaywallGate";
 import { vistosEstudo, vistosNegocios } from "@/lib/vistosCatalog";
 import {
   AUTHOR_STATES,
@@ -57,8 +55,6 @@ function tempoRelativo(iso: string): string {
 
 export default function ComunidadePage() {
   const [reports, setReports] = useState<Report[]>([]);
-  const [plan, setPlan] = useState<string>("free");
-  const [locked, setLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
@@ -68,14 +64,11 @@ export default function ComunidadePage() {
       .then((r) => r.json())
       .then((d) => {
         setReports(d.reports ?? []);
-        setPlan(d.plan ?? "free");
-        setLocked(Boolean(d.locked));
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
-  const assinante = plan !== "free";
   const buscaNorm = normalize(busca.trim());
   const visiveis = reports.filter((r) => {
     if (filtro && !r.visas.includes(filtro)) return false;
@@ -96,7 +89,6 @@ export default function ComunidadePage() {
   }
 
   async function toggleHelped(id: string) {
-    if (!assinante) return;
     setReports((prev) =>
       prev.map((r) =>
         r.id === id
@@ -125,14 +117,9 @@ export default function ComunidadePage() {
     <AppShell>
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <div className="flex items-center justify-between gap-3 mb-1">
-            <p className="text-xs font-bold uppercase tracking-widest text-pine" style={{ letterSpacing: "0.12em" }}>
-              Comunidade
-            </p>
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide bg-amber text-pine-deep px-2.5 py-1 rounded-full">
-              <LockIcon /> Membros
-            </span>
-          </div>
+          <p className="text-xs font-bold uppercase tracking-widest text-pine mb-1" style={{ letterSpacing: "0.12em" }}>
+            Comunidade
+          </p>
           <h1 className="text-3xl font-semibold text-ink mb-2" style={{ fontFamily: "var(--font-display)" }}>
             Histórias de quem já viveu
           </h1>
@@ -142,7 +129,7 @@ export default function ComunidadePage() {
           </p>
         </div>
 
-        {!loading && !locked && reports.length > 0 && (
+        {!loading && reports.length > 0 && (
           <div className="relative mb-3">
             <input
               type="text"
@@ -184,38 +171,8 @@ export default function ComunidadePage() {
           </div>
         )}
 
-        {!loading && locked && (
-          <PaywallGate
-            titulo="Histórias reais de quem já passou pelo que você está vivendo"
-            descricao="Relatos de outros imigrantes brasileiros, com o que ninguém conta antes. Assine para ler e participar da comunidade."
-          >
-            <PlaceholderFeed />
-          </PaywallGate>
-        )}
-
-        {!locked && (
-          <>
-            {assinante ? (
-              <Composer onPublished={onPublished} />
-            ) : (
-              !loading && (
-                <div className="rounded-2xl bg-pine p-5 mb-6">
-                  <h2 className="text-lg font-semibold text-cream-2 mb-1" style={{ fontFamily: "var(--font-display)" }}>
-                    Quer contar a sua história?
-                  </h2>
-                  <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(244,238,226,0.85)" }}>
-                    Publicar relatos e reagir às histórias é exclusivo para assinantes.
-                    Assinando, você também apoia a comunidade a continuar sem anúncios.
-                  </p>
-                  <Link
-                    href="/planos"
-                    className="block w-full text-center bg-amber hover:bg-amber-deep text-ink font-bold rounded-xl px-4 py-3 text-sm transition-colors"
-                  >
-                    Conhecer os planos
-                  </Link>
-                </div>
-              )
-            )}
+        <>
+            <Composer onPublished={onPublished} />
 
             {meusPendentes.map((r) => (
               <PendingCard key={r.id} report={r} />
@@ -244,37 +201,12 @@ export default function ComunidadePage() {
 
             <div className="flex flex-col gap-4">
               {aprovados.map((r) => (
-                <ReportCard key={r.id} report={r} assinante={assinante} onHelped={() => toggleHelped(r.id)} />
+                <ReportCard key={r.id} report={r} onHelped={() => toggleHelped(r.id)} />
               ))}
             </div>
-          </>
-        )}
+        </>
       </div>
     </AppShell>
-  );
-}
-
-// Skeleton de relato — nenhum dado real chega ao navegador no plano grátis
-// (a API já devolve reports: [] quando locked), então a prévia borrada do
-// PaywallGate usa só esta silhueta estática.
-function PlaceholderFeed() {
-  return (
-    <div className="flex flex-col gap-4">
-      {[0, 1, 2].map((i) => (
-        <article key={i} className="rounded-2xl border border-pine-tint bg-cream-2 p-4">
-          <div className="flex items-center gap-2.5 mb-3">
-            <span className="w-9 h-9 rounded-full bg-pine-tint flex-shrink-0" />
-            <div className="min-w-0 flex-1">
-              <div className="h-3 w-28 bg-pine-tint rounded mb-1.5" />
-              <div className="h-2.5 w-16 bg-pine-tint rounded" />
-            </div>
-          </div>
-          <div className="h-4 w-3/4 bg-pine-tint rounded mb-2" />
-          <div className="h-3 w-full bg-pine-tint rounded mb-1.5" />
-          <div className="h-3 w-5/6 bg-pine-tint rounded" />
-        </article>
-      ))}
-    </div>
   );
 }
 
@@ -323,11 +255,9 @@ function PendingCard({ report }: { report: Report }) {
 
 function ReportCard({
   report,
-  assinante,
   onHelped,
 }: {
   report: Report;
-  assinante: boolean;
   onHelped: () => void;
 }) {
   const [expandido, setExpandido] = useState(false);
@@ -376,26 +306,18 @@ function ReportCard({
 
       <div className="flex items-center justify-between gap-3 border-t border-pine-tint mt-3 pt-3">
         <span className="text-xs text-ink-faint">{tempoRelativo(report.createdAt)}</span>
-        {assinante ? (
-          <button
-            onClick={onHelped}
-            aria-pressed={report.helpedByMe}
-            className={[
-              "inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border transition-colors",
-              report.helpedByMe
-                ? "bg-pine border-pine text-cream-2"
-                : "border-pine/30 text-pine hover:border-pine",
-            ].join(" ")}
-          >
-            <HeartIcon /> Me ajudou{report.helpedCount > 0 ? ` · ${report.helpedCount}` : ""}
-          </button>
-        ) : (
-          report.helpedCount > 0 && (
-            <span className="text-xs text-ink-faint font-medium">
-              {report.helpedCount} {report.helpedCount === 1 ? "pessoa achou útil" : "pessoas acharam útil"}
-            </span>
-          )
-        )}
+        <button
+          onClick={onHelped}
+          aria-pressed={report.helpedByMe}
+          className={[
+            "inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border transition-colors",
+            report.helpedByMe
+              ? "bg-pine border-pine text-cream-2"
+              : "border-pine/30 text-pine hover:border-pine",
+          ].join(" ")}
+        >
+          <HeartIcon /> Me ajudou{report.helpedCount > 0 ? ` · ${report.helpedCount}` : ""}
+        </button>
       </div>
     </article>
   );
@@ -459,7 +381,7 @@ function Composer({ onPublished }: { onPublished: (r: Report) => void }) {
       author: anonimo ? "Membro immigrei" : "Você",
       isAnonymous: anonimo,
       authorState: estado,
-      status: "pending",
+      status: "approved",
       isMine: true,
       createdAt: new Date().toISOString(),
       visas: vistos,
@@ -479,8 +401,8 @@ function Composer({ onPublished }: { onPublished: (r: Report) => void }) {
         </h2>
         <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(244,238,226,0.85)" }}>
           {sucesso
-            ? "Revisamos cada história antes de publicar — leva até 2 dias. Você acompanha o status aqui."
-            : "Compartilhe o que você viveu, de forma anônima se preferir. Revisamos tudo antes de publicar."}
+            ? "Seu relato já está no ar. A comunidade passa por revisões periódicas de conformidade."
+            : "Compartilhe o que você viveu, de forma anônima se preferir. Fica no ar assim que você envia."}
         </p>
         <button
           onClick={() => { setAberto(true); setSucesso(false); }}
@@ -612,15 +534,6 @@ function Composer({ onPublished }: { onPublished: (r: Report) => void }) {
         Todo relato passa pela nossa revisão antes de aparecer aqui. Sem contatos, links ou autopromoção.
       </p>
     </div>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg width="9" height="11" viewBox="0 0 10 12" fill="none" aria-hidden="true">
-      <path d="M2 5V3.5C2 1.8 3.3 0.5 5 0.5S8 1.8 8 3.5V5" stroke="currentColor" strokeWidth="1.4" />
-      <rect x="1" y="5" width="8" height="6" rx="1.5" fill="currentColor" />
-    </svg>
   );
 }
 

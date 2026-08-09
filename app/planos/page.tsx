@@ -12,9 +12,9 @@ export const metadata: Metadata = {
  * Três cards: Retrato (grátis) e Jornada em duas cadências.
  *
  * A divisão segue a tese da marca — o grátis mostra ONDE VOCÊ ESTÁ
- * (rastreamento e alertas, que hoje não têm gate nenhum no código), e o pago
- * mostra PARA ONDE VOCÊ VAI (jornada, kits, cofre, comunidade — o que está
- * de fato bloqueado por getUserPlan).
+ * (rastreamento, alertas e comunidade, que hoje não têm gate nenhum no
+ * código), e o pago mostra PARA ONDE VOCÊ VAI (jornada, kits, cofre — o que
+ * está de fato bloqueado por getUserPlan).
  */
 
 const retrato = [
@@ -22,6 +22,7 @@ const retrato = [
   "Alertas por e-mail a cada mudança de status",
   "Aviso dos prazos do seu I-94",
   "Visa Bulletin acompanhado por você",
+  "Comunidade: publique e participe dos relatos",
   "Prévia da sua jornada completa",
 ];
 
@@ -31,7 +32,6 @@ const jornada = [
   "Kits e manuais passo a passo, por tipo de visto",
   "Preencha em português, exporte pronto em inglês — sem traduzir nada",
   "Cofre de documentos, ligado a cada checklist",
-  "Comunidade: publique e participe dos relatos",
 ];
 
 // Só o plano anual tem itens próprios; o resto do card repete a lista da

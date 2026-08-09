@@ -2,24 +2,15 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
-import { getUserPlan } from "@/lib/plan";
 
 const ReportIdSchema = z.string();
 
-// "Me ajudou" toggle. Reacting, like publishing, is a subscriber action.
+// "Me ajudou" toggle — available to any logged-in user.
 
 // POST { reportId } → toggles the viewer's reaction, returns the new state.
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const plan = await getUserPlan(userId);
-  if (plan === "free") {
-    return NextResponse.json(
-      { error: "Reagir aos relatos é exclusivo para assinantes." },
-      { status: 403 }
-    );
-  }
 
   const body = await req.json().catch(() => ({}));
   const parsedReportId = ReportIdSchema.safeParse(body?.reportId);
