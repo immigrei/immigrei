@@ -120,6 +120,14 @@ function keywordScore(entry: IndexEntry, nq: string): number {
 
 const SEMANTIC_INCLUDE_THRESHOLD = 0.35;
 const SEMANTIC_WEIGHT = 50;
+// FAQ answers are shown as a single confident paragraph, not a ranked
+// list — a weak semantic match there reads as a wrong answer, not just a
+// low-ranked card. True FAQ matches score ~0.55-0.73 (checked against the
+// live Voyage API, 9 ago 2026); a near-miss like "carteira de motorista"
+// scoring 0.36 against the DV-lottery FAQ passed SEMANTIC_INCLUDE_THRESHOLD
+// and got surfaced as if it answered the query. Keep the bar meaningfully
+// higher here than the catalog-card inclusion bar.
+const FAQ_SEMANTIC_THRESHOLD = 0.45;
 // Product rule (Felipe, 1 ago 2026): never a dead end — same "always offer
 // a parallel path" principle used elsewhere in the app. Voyage's similarity
 // score has real run-to-run jitter for the same query (~0.9998 cosine
@@ -243,7 +251,7 @@ function matchFaq(nq: string, queryEmbedding: number[] | null): FaqSearchEntry |
   }
 
   if (!best) return null;
-  const qualifies = best.kw > 0 || best.semantic >= SEMANTIC_INCLUDE_THRESHOLD;
+  const qualifies = best.kw > 0 || best.semantic >= FAQ_SEMANTIC_THRESHOLD;
   return qualifies ? best.entry : null;
 }
 
