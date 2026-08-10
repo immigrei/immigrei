@@ -89,7 +89,7 @@ export function getDeniedCaseStrategies(statusDate?: string | null): StrategyOpt
       tone: "clay",
       title: "Pedido de reabertura ou reconsideração (I-290B)",
       description:
-        "Você tem 33 dias a partir da data da decisão (30 dias + 3 quando ela chega por correio) para pedir que o USCIS reveja o caso. Seja honesto consigo: na maioria dos casos a decisão original é mantida, e muitos advogados recomendam guardar tempo e dinheiro para um caminho melhor. Mas o prazo é curto — decida com orientação profissional antes que ele expire.",
+        "Você tem 33 dias a partir da data da decisão (30 dias + 3 quando ela chega por correio) para pedir que o USCIS reveja o caso. É um pedido revisado pelo mesmo oficial que decidiu originalmente, com base nos mesmos fatos. O prazo é curto — decida com orientação profissional antes que ele expire.",
       deadline,
       doesNot: [
         "Não devolve seu status enquanto está pendente",

@@ -274,7 +274,7 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Mapear evidências de habilidade extraordinária", desc: "Prêmios, cobertura de mídia, salário, publicações, membros em associações. O kit lista as categorias USCIS.", doneWhen: { algum: cos ? ["premios-cos", "midia-cos", "salario-alto-cos", "contribuicoes-cos", "membros-cos"] : ["premios", "midia", "salario", "contribuicoes", "membro-associacoes"] } },
         { num: "2", estado: "proximo", titulo: "Advisory Opinion da associação da área",         desc: "Carta de uma associação profissional ou sindicato reconhecido.", doneWhen: { itens: cos ? ["advisory-opinion"] : ["consulta"] } },
-        { num: "3", estado: "proximo", titulo: "Empregador ou agente protocola o I-129",         desc: "Com toda a documentação de suporte. Advogado de imigração é altamente recomendado.", tag: "I-129", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" }, doneWhen: cos ? undefined : { itens: ["i129o"] } },
+        { num: "3", estado: "proximo", titulo: "Empregador ou agente protocola o I-129",         desc: "Com toda a documentação de suporte reunida nas etapas anteriores.", tag: "I-129", linkExterno: { label: "Formulário em uscis.gov/i-129", url: "https://www.uscis.gov/i-129" }, doneWhen: cos ? undefined : { itens: ["i129o"] } },
         { num: "4", estado: "futuro",  titulo: "I-797 aprovado",                                 desc: "Aprovação em 2–4 meses (padrão) ou 15 dias úteis (Premium Processing).", doneWhen: { itens: cos ? ["i797-o1-cos"] : ["i797"] } },
         { num: "5", estado: "futuro",  titulo: "Entrevista consular ou COS",                     desc: "Se fora dos EUA: entrevista. Se já nos EUA: COS com o mesmo I-129.", linkExterno: cos ? undefined : { label: "DS-160 em ceac.state.gov", url: "https://ceac.state.gov/genniv/" } },
         { num: "✓", estado: "futuro",  titulo: "O-1 ativo",                                     desc: "Válido por até 3 anos, renovável." },
@@ -767,7 +767,7 @@ export function getStrategy(profile: Profile): Strategy {
       situacao:  "Seu familiar residente permanente já pode peticionar você agora — o protocolo garante seu lugar na fila F2A. Mas com overstay, o ajuste de status por dentro dessa categoria, em regra, não é permitido.",
       destaque: { tipo: "alerta", texto: "Não saia dos EUA sem análise individual — as barras de 3/10 anos disparam na saída (INA §212(a)(9)(B))." },
       etapas: [
-        { num: "1", estado: "agora",   titulo: "Protocolar o I-130 agora",         desc: "Vale a pena independente do próximo passo — a data de protocolo é sua posição na fila.", linkExterno: { label: "Formulário em uscis.gov/i-130", url: "https://www.uscis.gov/i-130" } },
+        { num: "1", estado: "agora",   titulo: "Protocolar o I-130 agora",         desc: "A data de protocolo do I-130 define sua posição na fila F2A, independente de qual cenário do próximo passo se confirmar.", linkExterno: { label: "Formulário em uscis.gov/i-130", url: "https://www.uscis.gov/i-130" } },
         { num: "2", estado: "proximo", titulo: "Acompanhar dois cenários em paralelo", desc: "Seu familiar se naturalizar (você passa a parente imediato, sem fila) ou sua vez na fila F2A chegar — o que vier primeiro." },
         { num: "✓", estado: "futuro",  titulo: "Caminho se define",                desc: "O cenário que se confirmar define o próximo passo — o Immigrei acompanha." },
       ],
@@ -860,7 +860,7 @@ export function getStrategy(profile: Profile): Strategy {
       etapas: [
         { num: "1", estado: "agora",   titulo: "Reunir seus documentos",       desc: "I-94, vistos anteriores, petições e prazos — tudo o que mostra onde você está hoje." },
         { num: "2", estado: "proximo", titulo: "Mapear os caminhos possíveis", desc: "Estudo, trabalho, família ou investimento — cada porta tem requisitos próprios." },
-        { num: "✓", estado: "futuro",  titulo: "Caminho definido",             desc: "Com a situação mapeada, o Immigrei mostra o próximo passo certo." },
+        { num: "✓", estado: "futuro",  titulo: "Caminho definido",             desc: "Com a situação mapeada, o Immigrei organiza as opções para você decidir o próximo passo." },
       ],
       guardrails: [],
       kitId:    "",

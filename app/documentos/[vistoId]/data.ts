@@ -2314,7 +2314,13 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao:
               "Cônjuge, pai/mãe ou filho(a) solteiro(a) menor de 21 de cidadão americano que entrou nos EUA com inspeção pode ajustar o status por dentro (I-130 + I-485 concorrentes), mesmo com overstay. Como você não sai do país, as barras de 3/10 anos (INA §212(a)(9)(B)) nunca disparam. A forma de entrada e as provas do vínculo genuíno decidem o caso — vale reunir isso com um profissional antes de protocolar.",
             agencia: "USCIS",
-            obrigatorio: false,
+            // obrigatorio: true de propósito — descreve uma condição/cenário
+            // (você está em overstay ou não), não um documento opcional. Ver
+            // comentário equivalente em "family-gc-overstay" e PDF de risco
+            // legal, seção 17: obrigatorio:false aciona o badge genérico
+            // "Recomendado", que aqui soaria como recomendar esse cenário
+            // sobre o do item seguinte (entrada por ESTA/VWP).
+            obrigatorio: true,
           },
           {
             id: "familiair-esta",
@@ -2322,7 +2328,8 @@ const checklists: Record<string, ChecklistVisto> = {
             descricao:
               "Quem entra com ESTA/Visa Waiver Program e decide ajustar o status por casamento com cidadão precisa cuidar da aparência de intenção imigratória na entrada — ajustar rápido demais (nos primeiros 90 dias) pode levantar suspeita de má-fé na entrada. Documentar quando o relacionamento e a decisão de casar realmente começaram é essencial.",
             agencia: "CBP",
-            obrigatorio: false,
+            // obrigatorio: true — mesmo motivo do item acima.
+            obrigatorio: true,
           },
         ],
       },
@@ -2522,9 +2529,12 @@ const checklists: Record<string, ChecklistVisto> = {
             id: "k1-ja-nos-eua",
             nome: "Já está nos EUA com o prazo vencido ou entrou pelo ESTA/VWP?",
             descricao:
-              "O K-1 pressupõe entrada consular vindo de fora — não é possível 'trocar' pra K-1 estando já nos EUA. Se você já está aqui e é noivo(a) de cidadão americano, casar agora e ajustar o status por dentro (I-130 + I-485 concorrentes) costuma ser o caminho mais realista — mesma exceção de parente imediato do INA §245(a) que já vale para cônjuges. Veja o kit Família de Cidadão Americano (IR-1/IR-2) e avalie com um profissional qual dos dois se aplica ao seu caso.",
+              "O K-1 pressupõe entrada consular vindo de fora — não é possível 'trocar' pra K-1 estando já nos EUA. Se você já está aqui e é noivo(a) de cidadão americano, é a exceção de parente imediato do INA §245(a) que se aplica (mesma exceção que já vale para cônjuges) — casar e ajustar o status por dentro (I-130 + I-485 concorrentes) passa a ser a rota disponível, não o K-1. Veja o kit Família de Cidadão Americano (IR-1/IR-2) e avalie com um profissional qual dos dois se aplica ao seu caso.",
             agencia: "USCIS",
-            obrigatorio: false,
+            // obrigatorio: true de propósito — descreve uma condição (já
+            // está nos EUA vs. entrada consular), não documento opcional.
+            // Ver PDF de risco legal, seção 17.
+            obrigatorio: true,
           },
         ],
       },
@@ -3713,12 +3723,12 @@ const checklists: Record<string, ChecklistVisto> = {
     kit: {
       caminho: "manutencao",
       preco: "R$ 147",
-      alertaCritico: "Protocolar o I-130 agora sempre vale a pena — garante a data de prioridade — mesmo que o próximo passo ainda dependa de qual cenário se confirmar.",
+      alertaCritico: "O protocolo do I-130 define a data de prioridade, independente de qual cenário abaixo se confirmar depois.",
     },
     grupos: [
       {
         titulo: "Fase 1 — Protocolar a petição agora",
-        descricao: "Vale a pena independente de qual cenário abaixo vai se confirmar — a data de protocolo é sua posição na fila",
+        descricao: "A data de protocolo define sua posição na fila F2A, independente de qual cenário abaixo vai se confirmar",
         documentos: [
           {
             id: "fgcov-i130",
@@ -3739,7 +3749,14 @@ const checklists: Record<string, ChecklistVisto> = {
             nome: "Familiar se naturaliza (N-400) antes da sua data ficar current",
             descricao: "Nesse caso, você deixa a categoria F2A e vira parente imediato — o ajuste por dentro (I-485) abre, e as barras de 3/10 anos nunca disparam porque você não sai do país.",
             agencia: "USCIS",
-            obrigatorio: false,
+            // obrigatorio: true (não false) de propósito — este item representa um
+            // CENÁRIO possível, não um documento opcional. obrigatorio: false aciona
+            // o badge genérico "Recomendado" (pensado para documento opcional/
+            // sugerido), o que aqui soaria como a Immigrei recomendando um cenário
+            // sobre o outro — UPL. Nenhum dos dois cenários é "mais recomendado":
+            // depende de fatos fora do controle do usuário. Ver PDF de risco legal,
+            // seção 17.
+            obrigatorio: true,
           },
         ],
       },
