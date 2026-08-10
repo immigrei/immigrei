@@ -126,7 +126,7 @@ export const questionMap: Record<string, Question> = {
         label: "Graduação ou pós-graduação em universidade",
         icon: "🏛️",
         info:
-          "Leva ao F-1, o visto de estudante acadêmico. Emitido com o I-20 da instituição, permite estudar em tempo integral e trabalhar no campus e via OPT/CPT ligado ao curso.",
+          "Leva ao F-1, o visto de estudante acadêmico. Emitido com o I-20 da instituição, permite estudar em tempo integral e trabalhar no campus e via OPT (autorização de trabalho pós-formatura) ou CPT (autorização de trabalho ligada ao currículo) ligado ao curso.",
       },
       {
         value: "language",
@@ -140,7 +140,7 @@ export const questionMap: Record<string, Question> = {
         label: "Curso técnico / vocacional",
         icon: "🔧",
         info:
-          "Leva ao M-1, o visto para cursos técnicos e profissionalizantes credenciados pelo SEVP. Tem regras mais rígidas que o F-1 — inclusive para mudar de status depois.",
+          "Leva ao M-1, o visto para cursos técnicos e profissionalizantes credenciados pelo SEVP (programa federal que credencia escolas para receber estudantes estrangeiros). Tem regras mais rígidas que o F-1 — inclusive para mudar de status depois.",
       },
       {
         value: "exchange",
@@ -390,7 +390,7 @@ export const questionMap: Record<string, Question> = {
     id: "q_i94_check",
     text: "Confira seu I-94 e volte para continuar",
     subtitle:
-      "Abra o site oficial do CBP, confira a data com o passaporte em mãos e responda abaixo o que você encontrou — sem sair da sua jornada.",
+      "Abra o site oficial do CBP (agência que controla a entrada nos EUA), confira a data com o passaporte em mãos e responda abaixo o que você encontrou — sem sair da sua jornada.",
     externalLink: {
       label: "Conferir meu I-94 no site oficial →",
       href: "https://i94.cbp.dhs.gov/",
