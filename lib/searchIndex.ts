@@ -153,20 +153,23 @@ const CONFIDENT_MARGIN = 25;
 // only one.
 const CONFIDENT_TIE_BAND = 5;
 
-/**
- * Server-only. `plan` decides which gated hits come back `locked: true`.
- * `queryEmbedding` is the result of `embedQuery()` (lib/voyage.ts) — pass
- * `null` when that call failed/timed out/wasn't configured, and matching
- * degrades gracefully to keyword-only.
- */
-export function searchCatalogs(
+interface CatalogMatch {
+  hits: SearchHit[];
+  // False when nothing cleared kw>0 or the semantic threshold — the pool
+  // shown is the "never a dead end" fallback (closest guesses), not an
+  // actual match. Used by searchWithAnswer to flag the query for
+  // search_query_log (see app/api/search/route.ts) as a content gap.
+  matched: boolean;
+}
+
+function matchCatalog(
   query: string,
   plan: UserPlan,
   queryEmbedding: number[] | null,
-  limit = 20
-): SearchHit[] {
+  limit: number
+): CatalogMatch {
   const nq = normalize(query.trim());
-  if (!nq) return [];
+  if (!nq) return { hits: [], matched: true };
 
   const scored = INDEX.map((entry) => {
     const kw = keywordScore(entry, nq);
@@ -211,14 +214,32 @@ export function searchCatalogs(
         : allSorted.slice(0, MIN_RESULTS);
   }
 
-  return pool.slice(0, limit).map(({ entry }) => ({
-    type: entry.type,
-    id: entry.id,
-    title: entry.title,
-    snippet: entry.snippet,
-    href: entry.href,
-    locked: entry.gated && plan === "free",
-  }));
+  return {
+    matched: relevant.length > 0,
+    hits: pool.slice(0, limit).map(({ entry }) => ({
+      type: entry.type,
+      id: entry.id,
+      title: entry.title,
+      snippet: entry.snippet,
+      href: entry.href,
+      locked: entry.gated && plan === "free",
+    })),
+  };
+}
+
+/**
+ * Server-only. `plan` decides which gated hits come back `locked: true`.
+ * `queryEmbedding` is the result of `embedQuery()` (lib/voyage.ts) — pass
+ * `null` when that call failed/timed out/wasn't configured, and matching
+ * degrades gracefully to keyword-only.
+ */
+export function searchCatalogs(
+  query: string,
+  plan: UserPlan,
+  queryEmbedding: number[] | null,
+  limit = 20
+): SearchHit[] {
+  return matchCatalog(query, plan, queryEmbedding, limit).hits;
 }
 
 /**
@@ -258,6 +279,10 @@ function matchFaq(nq: string, queryEmbedding: number[] | null): FaqSearchEntry |
 export interface SearchWithAnswer {
   answer: string | null;
   results: SearchHit[];
+  // True when neither the catalog nor the FAQ bank cleared their match bar
+  // — the caller (app/api/search/route.ts) uses this to log the query as a
+  // content gap. Not part of what's shown to the user.
+  weakMatch: boolean;
 }
 
 /**
@@ -274,11 +299,11 @@ export function searchWithAnswer(
   queryEmbedding: number[] | null,
   limit = 20
 ): SearchWithAnswer {
-  const results = searchCatalogs(query, plan, queryEmbedding, limit);
+  const { hits: results, matched } = matchCatalog(query, plan, queryEmbedding, limit);
 
   const nq = normalize(query.trim());
   const faqHit = matchFaq(nq, queryEmbedding);
-  if (!faqHit) return { answer: null, results };
+  if (!faqHit) return { answer: null, results, weakMatch: !matched };
 
   const boostedIds = new Set(faqHit.vistosRelacionados);
   const reordered = [...results].sort((a, b) => {
@@ -287,5 +312,5 @@ export function searchWithAnswer(
     return aBoost - bBoost; // stable sort — preserves relative order within each group
   });
 
-  return { answer: faqHit.resposta, results: reordered };
+  return { answer: faqHit.resposta, results: reordered, weakMatch: false };
 }

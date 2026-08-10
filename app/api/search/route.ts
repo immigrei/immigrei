@@ -5,6 +5,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getUserPlan } from "@/lib/plan";
 import { searchWithAnswer } from "@/lib/searchIndex";
 import { embedQuery } from "@/lib/voyage";
+import { logWeakSearchQuery } from "@/lib/searchQueryLog";
 
 // In-app search — vistos, kits de protocolo e caminhos (v1 scope), plus a
 // curated FAQ-bank answer (lib/faqBank.ts) when the query matches one.
@@ -34,5 +35,11 @@ export async function GET(req: NextRequest) {
     embedQuery(parsed.data.q), // null if Voyage isn't configured or the call failed — searchCatalogs degrades to keyword-only
   ]);
 
-  return NextResponse.json(searchWithAnswer(parsed.data.q, plan, queryEmbedding));
+  const { weakMatch, ...body } = searchWithAnswer(parsed.data.q, plan, queryEmbedding);
+  if (weakMatch) {
+    // Fire-and-forget — a logging failure must never affect the search response.
+    logWeakSearchQuery({ userId, query: parsed.data.q, resultsCount: body.results.length, hadFaqAnswer: body.answer !== null });
+  }
+
+  return NextResponse.json(body);
 }
