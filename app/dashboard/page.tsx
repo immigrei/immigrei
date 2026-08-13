@@ -20,20 +20,28 @@ import { BrandIcon } from "@/app/components/Logo";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
-  m1: "M-1 — Estudante técnico",
+  m1: "M-1 — Estudante Técnico",
   j1: "J-1 — Intercâmbio",
-  h1b: "H-1B — Trabalho especializado",
-  o1: "O-1 — Talento extraordinário",
-  l1: "L-1 — Transferência intraempresarial",
-  b1: "B-1 — Visitante de negócios",
-  b1b2: "B-1/B-2 — Turismo ou negócios",
-  e1: "E-1 — Comércio por tratado",
-  e2: "E-2 — Investidor por tratado",
-  eb2niw: "EB-2 NIW — Green Card por mérito",
+  h1b: "H-1B — Trabalho Especializado",
+  o1: "O-1 — Talento Extraordinário",
+  l1: "L-1 — Transferência Intraempresarial",
+  b1: "B-1 — Visitante de Negócios",
+  b1b2: "B-1/B-2 — Turismo ou Negócios",
+  e1: "E-1 — Comércio por Tratado",
+  e2: "E-2 — Investidor por Tratado",
+  eb2niw: "EB-2 NIW — Green Card por Mérito",
   green_card: "Green Card",
-  citizen: "Cidadão americano",
-  asylee: "Asilo ou refugiado",
+  citizen: "Cidadão Americano",
+  asylee: "Asilo ou Refugiado",
   outro: "Outro",
+  // Destinos gerados por deriveDestination (app/onboarding/page.tsx) —
+  // não são códigos de visto, mas caem nesta mesma coluna do painel.
+  "familia-ir": "Green Card via Família",
+  "family-gc": "Green Card via Família",
+  "family-gc-overstay": "Green Card via Família (Overstay)",
+  "overstay-sem-vinculo": "Situação Irregular sem Vínculo Familiar",
+  "dv-lottery": "Loteria de Vistos (DV Lottery)",
+  "dependente-cos": "Mudança de Status como Dependente",
 };
 
 const GOAL_LABELS: Record<string, string> = {
