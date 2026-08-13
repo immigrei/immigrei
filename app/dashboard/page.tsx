@@ -41,7 +41,7 @@ const VISA_LABELS: Record<string, string> = {
   "family-gc-overstay": "Green Card via Família (Overstay)",
   "overstay-sem-vinculo": "Situação Irregular sem Vínculo Familiar",
   "dv-lottery": "Loteria de Vistos (DV Lottery)",
-  "dependente-cos": "Mudança de Status como Dependente",
+  "dependente-cos": "Mudança de Status (Change of Status) como Dependente",
 };
 
 const GOAL_LABELS: Record<string, string> = {
