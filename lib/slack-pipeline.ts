@@ -107,8 +107,9 @@ export async function postToSlack(
 ): Promise<void> {
   let url: string;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const isResponseUrl = targetOrUrl.startsWith("https://hooks.slack.com");
 
-  if (targetOrUrl.startsWith("https://hooks.slack.com")) {
+  if (isResponseUrl) {
     // Response URL from slash command
     url = targetOrUrl;
   } else {
@@ -128,6 +129,10 @@ export async function postToSlack(
     console.error("[slack-pipeline] postToSlack error:", response.status, error);
     throw new Error(`Slack API error: ${response.status}`);
   }
+
+  // response_url replies with a plain-text body ("ok"), not JSON — only
+  // chat.postMessage (bot token) returns a JSON payload with an `ok` field.
+  if (isResponseUrl) return;
 
   const data = (await response.json()) as Record<string, unknown>;
   if (!(data.ok ?? false)) {
