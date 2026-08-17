@@ -17,6 +17,7 @@ import {
   type SlackPayload,
 } from "@/lib/slack-pipeline";
 import { runComplianceCheck, formatComplianceForSlack } from "@/lib/compliance-check";
+import { publishToPostiz, getPostizIntegrationIds } from "@/lib/postiz";
 
 /**
  * Slack event & command handler for the content pipeline.
@@ -181,6 +182,63 @@ async function handleSlashCommand(payload: SlackPayload, botToken: string) {
   return NextResponse.json({ ok: true });
 }
 
+/**
+ * Publishes a fully-approved draft to Postiz and records the outcome.
+ * Called once both required approvers have reacted ✅ — never before.
+ */
+async function publishApprovedDraft(
+  draftContent: string | null,
+  channel: string,
+  triggerId: string,
+  botToken: string
+) {
+  const postizApiKey = process.env.POSTIZ_API_KEY;
+
+  try {
+    if (!postizApiKey) throw new Error("POSTIZ_API_KEY not configured");
+    if (!draftContent) throw new Error("Rascunho vazio — nada para publicar");
+
+    const integrationIds = getPostizIntegrationIds();
+    const postId = await publishToPostiz(draftContent, integrationIds, postizApiKey);
+
+    const { error } = await supabaseAdmin
+      .from("content_pipeline")
+      .update({
+        status: "published",
+        postiz_post_id: postId,
+        published_by: "postiz-integration",
+        published_at: new Date().toISOString(),
+      })
+      .eq("trigger_id", triggerId);
+
+    if (error) {
+      console.error("[slack-trigger] Failed to record publish:", error.message);
+    }
+
+    await postToSlack(botToken, {
+      channel,
+      thread_ts: triggerId,
+      text: `:rocket: Publicado via Postiz (post ${postId}).`,
+    });
+  } catch (err) {
+    console.error("[slack-trigger] Postiz publish error:", err);
+    const message = err instanceof Error ? err.message : "erro desconhecido";
+
+    await supabaseAdmin
+      .from("content_pipeline")
+      .update({ status: "failed", error_message: message })
+      .eq("trigger_id", triggerId);
+
+    await postToSlack(botToken, {
+      channel,
+      thread_ts: triggerId,
+      text: `:x: Aprovado, mas falhou ao publicar no Postiz: ${message}`,
+    }).catch(() => {
+      // Silent fail if channel/thread is no longer reachable
+    });
+  }
+}
+
 async function handleEvent(payload: SlackPayload, botToken: string) {
   const event = payload.event;
 
@@ -214,7 +272,7 @@ async function handleEvent(payload: SlackPayload, botToken: string) {
 
       const { data: row, error: fetchError } = await supabaseAdmin
         .from("content_pipeline")
-        .select("compliance_verdict, approved_by_users, status")
+        .select("compliance_verdict, approved_by_users, status, draft_content")
         .eq("trigger_id", item.ts)
         .single();
 
@@ -280,6 +338,11 @@ async function handleEvent(payload: SlackPayload, botToken: string) {
           thread_ts: item.ts,
           text: notification,
         });
+
+        // Both founders approved — publish to the connected social accounts.
+        if (complete) {
+          await publishApprovedDraft(row.draft_content, item.channel!, item.ts!, botToken);
+        }
         return;
       }
 
