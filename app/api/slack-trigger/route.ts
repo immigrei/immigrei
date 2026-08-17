@@ -25,6 +25,23 @@ import { runComplianceCheck, formatComplianceForSlack } from "@/lib/compliance-c
  * Setup docs: /docs/SLACK_PIPELINE_SETUP.md
  */
 
+// Slash commands arrive as application/x-www-form-urlencoded (e.g. "token=...&command=...");
+// only the Events API (url_verification, reaction_added) sends JSON.
+function parseSlackBody(contentType: string | null, body: string): SlackPayload {
+  if (contentType?.includes("application/x-www-form-urlencoded")) {
+    const params = new URLSearchParams(body);
+    return {
+      command: params.get("command") ?? undefined,
+      text: params.get("text") ?? undefined,
+      user_id: params.get("user_id") ?? undefined,
+      channel_id: params.get("channel_id") ?? undefined,
+      response_url: params.get("response_url") ?? undefined,
+      trigger_id: params.get("trigger_id") ?? undefined,
+    };
+  }
+  return JSON.parse(body) as SlackPayload;
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.SLACK_SIGNING_SECRET;
   const botToken = process.env.SLACK_BOT_TOKEN;
@@ -52,7 +69,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid signature" }, { status: 401 });
   }
 
-  const payload = JSON.parse(body) as SlackPayload;
+  const payload = parseSlackBody(req.headers.get("content-type"), body);
 
   // Handle Slack URL verification (handshake)
   if (payload.type === "url_verification") {
