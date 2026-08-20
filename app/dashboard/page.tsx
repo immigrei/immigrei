@@ -17,6 +17,7 @@ import ConsuladosWidget from "./ConsuladosWidget";
 import AppShell from "@/app/components/AppShell";
 import PaywallGate from "@/app/components/PaywallGate";
 import { BrandIcon } from "@/app/components/Logo";
+import CaseTrackerComingSoonBanner from "@/app/components/CaseTrackerComingSoonBanner";
 
 const VISA_LABELS: Record<string, string> = {
   f1: "F-1 — Estudante",
@@ -164,6 +165,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* USCIS case tracking */}
+        <CaseTrackerComingSoonBanner />
         <CaseStatusCard
           initialCases={(userCases ?? []) as UserCase[]}
           sandboxMode={isUscisSandbox()}

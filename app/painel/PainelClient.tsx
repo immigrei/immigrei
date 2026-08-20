@@ -9,6 +9,7 @@ import OptionsList from "@/app/components/OptionsList";
 import PaywallGate from "@/app/components/PaywallGate";
 import I94Card from "@/app/components/I94Card";
 import ParallelProcessesCard from "@/app/components/ParallelProcessesCard";
+import CaseTrackerComingSoonBanner from "@/app/components/CaseTrackerComingSoonBanner";
 import { getAlternativePaths, getVisaSpecificPaths } from "@/lib/strategies";
 import { applyProgress, type ProgressSignals } from "@/lib/journey-progress";
 import { traduzirStatus } from "@/lib/uscis-status-pt";
@@ -240,6 +241,7 @@ export default function PainelClient({ hasAccess }: { hasAccess: boolean }) {
         )}
 
         {/* Meu caso no USCIS — alimentado pela última busca feita no início */}
+        <CaseTrackerComingSoonBanner />
         {cases.length > 0 && (
           <Link
             href="/dashboard"
