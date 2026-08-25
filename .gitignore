@@ -53,3 +53,8 @@ next-48h.html
 
 # Clickable mockup (Jun 2026) — local only, outdated vs live onboarding
 public/demo.html
+
+.reels-preview/
+
+# Social media assets (Stories, carousels) — local only, not versioned
+immigrei-midias/
