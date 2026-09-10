@@ -17,7 +17,9 @@ export const metadata: Metadata = {
 // feat/uscis-compliance-landing-page, commit 8f00ff8) — vazamento de
 // dados, mudança de dono, consentimento ativo em vez de aviso passivo,
 // exclusão por inatividade e menção à CCPA.
-const LAST_UPDATED = "31 de julho de 2026";
+// 10 set 2026: nova seção 4 "Integração com Facebook e Instagram" para o
+// App Review da Meta (pipeline comentário→DM); seções 4–13 renumeradas 5–14.
+const LAST_UPDATED = "10 de setembro de 2026";
 
 const sections: { title: string; body: string[] }[] = [
   {
@@ -45,61 +47,69 @@ const sections: { title: string; body: string[] }[] = [
     ],
   },
   {
-    title: "4. Cookies e rastreamento",
+    title: "4. Integração com Facebook e Instagram (plataforma Meta)",
+    body: [
+      "Se você conectar uma Página do Facebook ou uma conta do Instagram Business à immigrei, usamos a API da Meta apenas para dois fins: (a) ler comentários públicos nas SUAS próprias publicações, para identificar quando alguém pede ajuda com um tema migratório; e (b) enviar, em seu nome e a partir da sua própria conta, uma resposta privada ou mensagem direta para essa pessoa.",
+      "Não coletamos sua lista de amigos ou seguidores, não publicamos conteúdo sem uma ação sua, não usamos esses dados para publicidade e não os compartilhamos com terceiros. Você pode desconectar a conta a qualquer momento — isso interrompe todo o acesso e apaga os tokens que guardamos.",
+      "Permissões da Meta usadas: instagram_business_basic, instagram_business_manage_comments, instagram_business_manage_messages, pages_messaging, pages_manage_metadata, além do recurso Human Agent. O uso desses dados segue as Políticas da Plataforma da Meta.",
+    ],
+  },
+  {
+    title: "5. Cookies e rastreamento",
     body: [
       "Usamos cookies essenciais para manter você logado e um cookie de analytics para entender como as pessoas usam o produto — não usamos cookies de publicidade nem vendemos esse dado a ninguém. Ao visitar a immigrei pela primeira vez, um banner pede seu consentimento antes de qualquer cookie não essencial ser ativado.",
     ],
   },
   {
-    title: "5. Segurança",
+    title: "6. Segurança",
     body: [
       "Seus dados trafegam criptografados em trânsito (TLS) e são armazenados criptografados em repouso. O acesso ao banco é protegido por regras de acesso por usuário (RLS) — cada usuário só acessa os próprios dados.",
     ],
   },
   {
-    title: "6. Transferência internacional de dados",
+    title: "7. Transferência internacional de dados",
     body: [
       "Seus dados são armazenados nos Estados Unidos (infraestrutura AWS, região Norte da Virgínia) e processados pelos parceiros listados acima, a maioria também baseada nos EUA. Isso significa que, independentemente de onde você estiver, seus dados não saem dos Estados Unidos.",
     ],
   },
   {
-    title: "7. Retenção e exclusão",
+    title: "8. Retenção e exclusão",
     body: [
       "Mantemos seus dados enquanto sua conta existir. Se sua conta ficar inativa por mais de 24 meses sem uso, podemos excluir automaticamente os dados não essenciais, avisando você por e-mail antes.",
       "Você pode pedir a exclusão completa a qualquer momento pelo e-mail abaixo — removemos seus dados dos nossos sistemas em até 30 dias, exceto o que a lei exigir manter (ex.: registros fiscais de pagamento).",
     ],
   },
   {
-    title: "8. Seus direitos e a base legal de cada uso",
+    title: "9. Seus direitos e a base legal de cada uso",
     body: [
       "Você pode acessar, corrigir, exportar ou excluir seus dados. Atendemos os direitos previstos na LGPD (Brasil) e nas leis de privacidade aplicáveis dos EUA, incluindo a California Consumer Privacy Act (CCPA) para residentes da Califórnia. Basta escrever para o e-mail de contato.",
       "Cada uso que fazemos dos seus dados tem uma base legal: operar sua conta e mostrar sua jornada (execução de contrato), cobrar sua assinatura (execução de contrato), enviar os alertas que você ativou (execução de contrato/consentimento), manter logs de segurança (obrigação legal/legítimo interesse) e analytics de produto (legítimo interesse, sempre com opção de você pedir exclusão).",
     ],
   },
   {
-    title: "9. Se houver um vazamento de dados",
+    title: "10. Se houver um vazamento de dados",
     body: [
       "Se identificarmos um incidente de segurança que exponha seus dados pessoais, vamos avisar você por e-mail assim que possível, explicando o que aconteceu, quais dados foram afetados e o que fazer a respeito. Também cumpriremos qualquer obrigação legal de notificação aplicável.",
     ],
   },
   {
-    title: "10. Se a immigrei mudar de dono",
+    title: "11. Se a immigrei mudar de dono",
     body: [
       "Se a immigrei for vendida, incorporada ou encerrar as atividades, seus dados podem ser transferidos como parte desse processo. Vamos avisar você antes disso acontecer, e a nova empresa (se houver) precisará seguir uma política de privacidade pelo menos tão protetiva quanto esta — ou te dar a opção de exportar ou excluir seus dados antes da transferência.",
     ],
   },
   {
-    title: "11. Crianças",
+    title: "12. Crianças",
     body: ["A immigrei não é destinada a menores de 18 anos."],
   },
   {
-    title: "12. Mudanças nesta política",
+    title: "13. Mudanças nesta política",
     body: [
       "Se mudarmos esta política de forma relevante, pedimos seu consentimento ativo antes de você continuar usando a immigrei — não é só um aviso passivo. Junto com o pedido, mostramos um resumo em linguagem simples do que mudou, pra você não precisar reler o documento inteiro.",
     ],
   },
   {
-    title: "13. Contato",
+    title: "14. Contato",
     body: ["Dúvidas sobre esta política: ola@immigrei.com."],
   },
 ];
