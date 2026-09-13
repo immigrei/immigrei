@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap');
+      .font-fraunces { font-family: 'Fraunces', serif; font-weight: 600; }
+      .font-hanken { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#1B2520" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1920" fill="#1E5E4E"/>
+  <circle cx="980" cy="200" r="450" fill="#E8A33D" opacity="0.08"/>
+  <circle cx="100" cy="1700" r="400" fill="#F4EEE2" opacity="0.05"/>
+
+  <text x="540" y="200" class="font-hanken" font-size="28" font-weight="700" fill="#F4EEE2" letter-spacing="3" text-anchor="middle">IMMIGREI</text>
+
+  <g transform="translate(340, 260)">
+    <rect x="0" y="0" width="400" height="60" rx="30" fill="#C2542F"/>
+    <circle cx="30" cy="30" r="11" fill="#F4EEE2"/>
+    <text x="56" y="38" class="font-hanken" font-size="24" font-weight="700" fill="#F4EEE2">ATENÇÃO — 15/09</text>
+  </g>
+
+  <rect x="90" y="380" width="900" height="1180" rx="40" fill="#F4EEE2" filter="url(#shadow)"/>
+
+  <text x="160" y="500" class="font-fraunces" font-size="60" fill="#1B2520">
+    <tspan x="160" dy="0">Vai protocolar</tspan>
+    <tspan x="160" dy="76" fill="#1E5E4E">I-539 ou</tspan>
+    <tspan x="160" dy="76" fill="#1E5E4E">I-765?</tspan>
+  </text>
+
+  <line x1="160" y1="740" x2="820" y2="740" stroke="#E8A33D" stroke-width="4" stroke-linecap="round"/>
+
+  <g transform="translate(160, 790)">
+    <rect x="0" y="0" width="760" height="150" rx="20" fill="#FFFFFF"/>
+    <text x="40" y="55" class="font-hanken" font-size="24" font-weight="700" fill="#1E5E4E">Amanhã (15/09) muda a edição</text>
+    <text x="40" y="100" class="font-hanken" font-size="22" fill="#1B2520">Sem período de transição.</text>
+
+    <rect x="0" y="180" width="760" height="150" rx="20" fill="#FFFFFF"/>
+    <text x="40" y="235" class="font-hanken" font-size="24" font-weight="700" fill="#1E5E4E">Edição errada = rejeitado</text>
+    <text x="40" y="280" class="font-hanken" font-size="22" fill="#1B2520">Confira o rodapé do PDF antes de enviar.</text>
+  </g>
+
+  <g transform="translate(160, 1400)">
+    <rect x="0" y="0" width="760" height="72" rx="36" fill="#E8A33D"/>
+    <text x="380" y="44" class="font-hanken" font-size="24" font-weight="700" fill="#1B2520" text-anchor="middle">Acompanhe sua jornada no Immigrei</text>
+  </g>
+
+  <text x="540" y="1740" class="font-hanken" font-size="18" fill="#1B2520" opacity="0.6" text-anchor="middle">Conteúdo informativo, não é aconselhamento jurídico.</text>
+</svg>
