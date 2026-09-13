@@ -81,7 +81,7 @@ formulários foram protocolados juntos.
 
 O Immigrei mostra cada aprovação no contexto da sua jornada inteira — o que já
 foi, o que falta e qual é o próximo passo.
-[Acompanhe sua jornada →](https://immigrei.com)
+[Acompanhe sua jornada →](https://immigrei.app)
 
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*

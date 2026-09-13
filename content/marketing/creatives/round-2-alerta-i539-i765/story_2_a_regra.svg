@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap');
+      .font-fraunces { font-family: 'Fraunces', serif; font-weight: 600; }
+      .font-hanken { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#1B2520" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1920" fill="#F4EEE2"/>
+  <circle cx="980" cy="200" r="400" fill="#1E5E4E" opacity="0.05"/>
+
+  <text x="540" y="200" class="font-hanken" font-size="26" font-weight="700" fill="#1E5E4E" letter-spacing="3" text-anchor="middle">IMMIGREI</text>
+
+  <text x="540" y="340" class="font-fraunces" font-size="48" fill="#1B2520" text-anchor="middle">Sem período de transição:</text>
+
+  <rect x="90" y="440" width="900" height="280" rx="32" fill="#E4EFE9" filter="url(#shadow)"/>
+  <text x="130" y="530" class="font-hanken" font-size="28" font-weight="700" fill="#1E5E4E">Até 14/09</text>
+  <text x="130" y="580" class="font-hanken" font-size="30" font-weight="700" fill="#1B2520">só edição 08/21/25</text>
+
+  <rect x="90" y="760" width="900" height="280" rx="32" fill="#FBEDD4" filter="url(#shadow)"/>
+  <text x="130" y="850" class="font-hanken" font-size="28" font-weight="700" fill="#1E5E4E">Desde 15/09</text>
+  <text x="130" y="900" class="font-hanken" font-size="30" font-weight="700" fill="#1B2520">só edição 09/15/26</text>
+
+  <text x="540" y="1150" class="font-hanken" font-size="22" fill="#1B2520" opacity="0.7" text-anchor="middle">Fonte: USCIS</text>
+
+  <text x="540" y="1800" class="font-hanken" font-size="22" fill="#1B2520" opacity="0.6" text-anchor="middle">Vê o próximo story →</text>
+</svg>

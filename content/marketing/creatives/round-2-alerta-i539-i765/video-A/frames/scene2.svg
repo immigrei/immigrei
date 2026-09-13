@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <style>
+      .font-fraunces { font-family: 'Georgia', serif; font-weight: 700; }
+      .font-hanken { font-family: 'Avenir Next', 'Helvetica', sans-serif; }
+    </style>
+  </defs>
+  <rect width="1080" height="1920" fill="#F4EEE2"/>
+  <text x="115" y="140" class="font-hanken" font-size="26" font-weight="700" fill="#1E5E4E" letter-spacing="3">IMMIGREI</text>
+
+  <text x="115" y="260" class="font-hanken" font-size="28" font-weight="700" fill="#E8A33D" letter-spacing="2">SEM TOLERÂNCIA</text>
+
+  <g transform="translate(115, 340)">
+    <rect x="0" y="0" width="850" height="130" rx="20" fill="#1E5E4E"/>
+    <text x="40" y="80" class="font-hanken" font-size="34" font-weight="700" fill="#F4EEE2">Até 14/09 → edição antiga</text>
+  </g>
+  <g transform="translate(115, 500)">
+    <rect x="0" y="0" width="850" height="130" rx="20" fill="#E8A33D"/>
+    <text x="40" y="80" class="font-hanken" font-size="34" font-weight="700" fill="#1B2520">Desde 15/09 → edição nova</text>
+  </g>
+
+  <text x="115" y="780" class="font-fraunces" font-size="60" fill="#1B2520">
+    <tspan x="115" dy="0">Edição errada =</tspan>
+    <tspan x="115" dy="72" fill="#C2542F">pacote rejeitado.</tspan>
+  </text>
+</svg>

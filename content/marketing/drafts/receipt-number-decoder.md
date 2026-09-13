@@ -85,7 +85,7 @@ ou no Immigrei, que acompanha por você e explica cada mudança em português.
 
 Cole seu número de recibo no Immigrei e receba cada mudança de status
 explicada em português, na hora.
-[Acompanhe sua jornada →](https://immigrei.com)
+[Acompanhe sua jornada →](https://immigrei.app)
 
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*

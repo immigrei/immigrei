@@ -84,7 +84,7 @@ decisão ainda em aberto.
 
 O Immigrei avisa em português no momento em que seu status mudar — inclusive
 quando um RFE for emitido, para você não perder um dia sequer do prazo.
-[Acompanhe sua jornada →](https://immigrei.com)
+[Acompanhe sua jornada →](https://immigrei.app)
 
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*

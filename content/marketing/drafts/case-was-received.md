@@ -82,7 +82,7 @@ tipo de decisão que merece a avaliação de um profissional licenciado.
 
 O Immigrei acompanha seu caso no USCIS dia e noite e avisa em português quando
 o status mudar — com a explicação do que muda para você.
-[Acompanhe sua jornada →](https://immigrei.com)
+[Acompanhe sua jornada →](https://immigrei.app)
 
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*
