@@ -39,6 +39,9 @@ das cenas seguintes, ela nunca chega em quem não clicou. Por isso:
 - **Disclaimer UPL sempre na última cena**, fine print, sobe por último:
   *"Este conteúdo é informativo e não constitui aconselhamento jurídico;
   consulte um advogado de imigração licenciado para o seu caso."*
+- **"Link na bio" sempre presente** — botão CTA âmbar na Cena 4, texto
+  literal "Link na bio" (ou "Acompanhe sua jornada no Immigrei" + "Link na
+  bio" junto). Nunca sobe um Reel sem esse CTA escrito na tela.
 
 ## Tokens (nunca hardcodar outro valor)
 
@@ -53,6 +56,16 @@ das cenas seguintes, ela nunca chega em quem não clicou. Por isso:
 
 Tipografia: **Fraunces** (600) nas headlines e frases de efeito · **Hanken
 Grotesk** em label, checklist, botão e disclaimer. Nunca Fraunces em label/botão.
+
+**Arquivos de fonte oficiais** (mesmos em `app/globals.css`/Google Fonts):
+`reel-template/fonts/Fraunces-Variable.ttf` e
+`reel-template/fonts/HankenGrotesk-Variable.ttf` (licença SIL OFL, via
+google/fonts no GitHub). Instale localmente antes de renderizar qualquer
+peça fora do browser (ex.: `rsvg-convert`, After Effects, Figma sem acesso à
+internet) — sem isso, o renderizador cai num fallback do sistema (Georgia,
+Avenir Next etc.) e a fonte diverge silenciosamente do resto da marca. Já
+aconteceu uma vez nos frames dos Reels do alerta I-539/I-765 (set/2026) —
+corrigido, mas é o tipo de erro que só aparece olhando o resultado final.
 
 ## As 4 cenas
 
