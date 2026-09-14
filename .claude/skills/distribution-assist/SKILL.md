@@ -38,12 +38,20 @@ plus optionally a target channel.
   prova / fecho+CTA) so every Reel looks like ours — spec, tokens, and the
   allowed transition vocabulary are in
   `content/marketing/creatives/reel-template/README.md`.
+- Hashtags follow the same rule as the carousel below: first-comment block,
+  consistent ~10-tag set, not inline in the caption.
 
 ### 2. `carousel.md` — Instagram carousel
 - 6–8 slides: slide 1 = the question as hook; middle = the answer broken into
   steps with the official source named; last = disclaimer + CTA.
-- Per-slide: headline (≤8 words) + support line + caption for the post itself
-  with 3–5 PT-BR hashtags.
+- Per-slide: headline (≤8 words) + support line + caption for the post itself.
+- **Hashtags go in the first comment, not the caption** — write them as a
+  separate "PRIMEIRO COMENTÁRIO" block at the bottom of the file, clearly
+  marked as posted separately right after the post goes up. Use a
+  **consistent ~10-hashtag set** across every post on a given day (not 3–5
+  ad hoc per piece) so the profile reads coherent — reuse the same core set
+  (`#imigração #USCIS #brasileirosnoseua #vistoamericano #greencard`
+  + 1–2 topic-specific tags) rather than inventing a new short list each time.
 - **Readable-thumbnail rule (non-negotiable):** slide 1 is the only one shown
   in the feed before someone taps — the headline + support line on slide 1
   alone must communicate the whole hook, not just a dangling question that

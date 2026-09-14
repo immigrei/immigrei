@@ -61,4 +61,7 @@ Fonte oficial: USCIS (link nos comentários/bio).
 Este conteúdo é informativo e não substitui orientação de um advogado de
 imigração licenciado.
 
-#imigração #USCIS #brasileirosnoseua #I539 #I765 #vistoamericano
+---
+PRIMEIRO COMENTÁRIO (não vai na legenda — poste separado, logo após o post):
+
+#imigração #USCIS #brasileirosnoseua #vistoamericano #greencard #I539 #I765 #imigracaoeua #brasileirosnosEUA #advogadodeimigracao

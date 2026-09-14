@@ -49,4 +49,7 @@ confira a edição no rodapé do PDF antes de enviar.
 
 Fonte oficial: USCIS.
 
-#imigração #USCIS #brasileirosnoseua #I539 #I765
+---
+PRIMEIRO COMENTÁRIO (não vai na legenda — poste separado, logo após o post):
+
+#imigração #USCIS #brasileirosnoseua #vistoamericano #greencard #I539 #I765 #imigracaoeua #brasileirosnosEUA #advogadodeimigracao
