@@ -54,20 +54,8 @@ next-48h.html
 # Clickable mockup (Jun 2026) — local only, outdated vs live onboarding
 public/demo.html
 
-# Marketing/social media generated binaries — heavy, non-diffable, and
-# regenerated on demand. Keep only the source .md (copy) and .svg (image
-# source) in git; final renders (mp4/png/aiff/mp3/wav) live in Supabase
-# Storage instead — see content/marketing/creatives/README.md.
-content/marketing/creatives/**/*.mp4
-content/marketing/creatives/**/*.mov
-content/marketing/creatives/**/*.png
-content/marketing/creatives/**/*.aiff
-content/marketing/creatives/**/*.mp3
-content/marketing/creatives/**/*.wav
-immigrei-midias/**/*.mp4
-immigrei-midias/**/*.mov
-immigrei-midias/**/*.png
-immigrei-midias/**/*.aiff
-immigrei-midias/**/*.mp3
-immigrei-midias/**/*.wav
-!content/marketing/creatives/reel-template/reference-contact-sheet.png
+# Marketing/social media working folders — scripts, images, videos, audio.
+# Lives on the founders' local machines (Desktop/immigrei-midias), not in
+# this repo. Never commit any of it, in any format.
+/content/marketing/creatives/
+/immigrei-midias/
