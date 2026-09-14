@@ -40,8 +40,45 @@ das cenas seguintes, ela nunca chega em quem não clicou. Por isso:
   *"Este conteúdo é informativo e não constitui aconselhamento jurídico;
   consulte um advogado de imigração licenciado para o seu caso."*
 - **"Link na bio" sempre presente** — botão CTA âmbar na Cena 4, texto
-  literal "Link na bio" (ou "Acompanhe sua jornada no Immigrei" + "Link na
+  literal "Link na bio" (ou "Acompanhe sua jornada no immigrei" + "Link na
   bio" junto). Nunca sobe um Reel sem esse CTA escrito na tela.
+
+## "immigrei" sempre minúsculo (não-negociável)
+
+Em qualquer texto que aparece **na tela** de uma peça — wordmark, CTA, corpo
+de texto, legenda de slide — o nome da marca é `immigrei`, sempre minúsculo,
+nunca "Immigrei". Isso vale para SVG, roteiro de Reel, carrossel, story.
+(Nos documentos internos do repositório — este README, `CLAUDE.md`, drafts de
+blog — "Immigrei" maiúsculo no início de frase continua correto: é uma regra
+só do que vira arte final, não da escrita interna.)
+
+## O wordmark oficial (não inventar de novo)
+
+Fonte da verdade: `app/components/Logo.tsx` (comentário cita o **Manual de
+Identidade Visual V1.0**, em `docs/brand/Identidade Visual/`). Regras que já
+causaram erro uma vez — não repetir:
+
+- **Fonte é Fraunces 600**, não Hanken Grotesk. O wordmark nunca é caixa-alta
+  nem tracking largo tipo logotipo corporativo — é `immigrei` normal, em
+  itálico serifado.
+- **Nunca o ícone (6 pontinhos + seta âmbar) junto do wordmark em tamanhos
+  pequenos** — abaixo de ~40px os pontinhos "viram lama" (cabeçalho de Reel/
+  carrossel/story é sempre pequeno → **só o texto**, sem ícone). O ícone só
+  aparece sozinho, em tamanho grande (app icon, favicon, carimbo, fechos
+  grandes) — nunca ao lado do wordmark nesse caso.
+- Ícone: trajetória inclinada **12° fixo** — nunca rotacionar além disso nem
+  espelhar. Seta sempre âmbar, nunca recolorida.
+- Cor do wordmark: pine sobre cream, cream sobre pine — nunca fora da
+  paleta, nunca sobre fundo de baixo contraste.
+
+## Datas sempre em formato brasileiro (DD/MM/AAAA)
+
+Nunca copiar uma data direto de uma fonte americana (MM/DD/AA, como aparece
+no rodapé de formulários do USCIS) para uma peça em português. Converta
+sempre para DD/MM/AAAA. Se o número exato como impresso no formulário for
+relevante (ex.: "a edição impressa diz 09/15/26"), explique entre parênteses
+que é o formato americano — nunca deixe o número cru sem contexto, porque em
+DD/MM ele lê errado.
 
 ## Tokens (nunca hardcodar outro valor)
 
