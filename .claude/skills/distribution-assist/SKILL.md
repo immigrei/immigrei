@@ -34,12 +34,22 @@ plus optionally a target channel.
 - 30–45s, hook in the first 2s (the pain: "Seu caso diz 'Case Was Received' há
   6 meses?"), 3–4 beats, one concrete takeaway, soft CTA ("link na bio").
 - Include: spoken lines, on-screen text per beat, suggested b-roll.
+- Map the beats onto the house 4-scene visual skeleton (gancho / reenquadre /
+  prova / fecho+CTA) so every Reel looks like ours — spec, tokens, and the
+  allowed transition vocabulary are in
+  `content/marketing/creatives/reel-template/README.md`.
 
 ### 2. `carousel.md` — Instagram carousel
 - 6–8 slides: slide 1 = the question as hook; middle = the answer broken into
   steps with the official source named; last = disclaimer + CTA.
 - Per-slide: headline (≤8 words) + support line + caption for the post itself
   with 3–5 PT-BR hashtags.
+- **Readable-thumbnail rule (non-negotiable):** slide 1 is the only one shown
+  in the feed before someone taps — the headline + support line on slide 1
+  alone must communicate the whole hook, not just a dangling question that
+  only pays off after swiping. Same rule applies to a Reel's cover frame
+  (Cena 1) — see `content/marketing/creatives/reel-template/README.md`.
+  Before finishing, check: does slide 1 alone, with no swipe, make sense?
 
 ### 3. `comments.md` — helpful-comment drafts
 - 2–3 variants each for: Facebook group thread, WhatsApp/Telegram group,

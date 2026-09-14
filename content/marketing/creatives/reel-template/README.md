@@ -15,6 +15,21 @@ esse roteiro vira imagem e movimento** — para o Reel sair reconhecível toda v
 | Estrutura | 4 cenas + fade-to-black. 1 ideia por cena, ~4–5s cada. |
 | Áudio | trilha suave, sem locução obrigatória (texto carrega a mensagem) |
 
+## Regra do thumbnail legível (não-negociável)
+
+O Instagram mostra a **Cena 1 parada** como capa — no feed, no story tray, e
+antes de a pessoa apertar play. Se a ideia só existe no áudio ou no movimento
+das cenas seguintes, ela nunca chega em quem não clicou. Por isso:
+
+- A Cena 1 sozinha, sem áudio e sem avançar quadro, precisa comunicar o
+  **gancho inteiro** — não só uma pergunta solta esperando resposta na Cena 2.
+- Teste antes de exportar: **tire um print só da Cena 1 (ou o frame no tempo
+  0) e leia sem tocar em nada.** Se não dá pra entender do que se trata, a
+  cena falhou — reescreve o texto da Cena 1, não conta com o resto do vídeo
+  pra compensar.
+- Vale para carrossel também: o Slide 1 é o único que aparece no feed antes
+  do toque — ver a mesma regra em `distribution-assist/SKILL.md`.
+
 ## Grid e elementos fixos
 
 - Tudo **alinhado à esquerda**. Margem lateral ~8% (115px em 1440).
