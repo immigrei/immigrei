@@ -4,7 +4,7 @@ slug: card-was-mailed-to-me
 type: status
 query_target: "Card Was Mailed To Me"
 status: draft
-compliance_check: PASS_WITH_FLAGS (2026-09-13 — two unsourced claims softened: I-90 correction fee, I-797 issuance note)
+compliance_check: "PASS_WITH_FLAGS (2026-09-13 — two unsourced claims softened: I-90 correction fee, I-797 issuance note)"
 reviewed_by: pending
 byline: Equipe Immigrei
 sources:

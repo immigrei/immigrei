@@ -352,8 +352,12 @@ export async function runComplianceCheck(
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 2048,
+        // claude-3-5-sonnet-20241022 was retired Oct 28, 2025; Sonnet 5 is its
+        // drop-in replacement. It thinks by default (thinking blocks are
+        // echoed back unchanged via `messages.push` below) and thinking
+        // tokens count against max_tokens, so leave room for the verdict.
+        model: "claude-sonnet-5",
+        max_tokens: 16000,
         system: SYSTEM_PROMPT,
         tools: TOOLS,
         messages,
@@ -366,6 +370,9 @@ export async function runComplianceCheck(
     }
 
     const data = (await response.json()) as AnthropicResponse;
+    if (data.stop_reason === "refusal") {
+      throw new Error("Compliance check declined by the API (stop_reason: refusal)");
+    }
     messages.push({ role: "assistant", content: data.content });
 
     const toolUses = data.content.filter((b) => b.type === "tool_use");

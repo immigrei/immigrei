@@ -17,9 +17,43 @@ const hankenGrotesk = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
+  // Resolves every relative canonical/OG URL in the app against the real
+  // domain (the build otherwise falls back to http://localhost:3000).
+  metadataBase: new URL("https://immigrei.app"),
   title: "immigrei — Sua jornada migratória nos EUA, com clareza",
   description:
     "O companheiro completo para sua jornada de imigração nos EUA. Construído por imigrantes, para imigrantes.",
+};
+
+// Site-wide Organization + WebSite nodes — declared once here, never per page
+// (.claude/skills/seo-geo-agent/SKILL.md §2). Every page's JSON-LD author
+// points at this @id, so answer engines tie all our content to one entity
+// and its social profiles.
+const siteJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://immigrei.app/#organization",
+      name: "immigrei",
+      url: "https://immigrei.app",
+      logo: "https://immigrei.app/apple-icon.png",
+      description:
+        "Companheiro da jornada migratória de brasileiros nos EUA, em português. Construído por imigrantes, para imigrantes.",
+      sameAs: [
+        "https://www.instagram.com/immigrei.app/",
+        "https://www.facebook.com/1222392010966088",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://immigrei.app/#website",
+      name: "immigrei",
+      url: "https://immigrei.app",
+      inLanguage: "pt-BR",
+      publisher: { "@id": "https://immigrei.app/#organization" },
+    },
+  ],
 };
 
 // viewport-fit=cover is required for env(safe-area-inset-*) to resolve to
@@ -38,6 +72,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="pt-BR" className={`${fraunces.variable} ${hankenGrotesk.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col bg-cream text-ink">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+          />
           <a
             href="#conteudo-principal"
             className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-3 focus:left-3 focus:bg-pine focus:text-cream focus:px-4 focus:py-2 focus:rounded-lg"
