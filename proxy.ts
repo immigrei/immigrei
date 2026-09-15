@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { INDEXNOW_KEY_PATH } from "@/lib/indexnow";
 
 // immigrei.com is kept alive as a second domain (it's the one on file with
 // Instagram — immigrei.app wasn't available there) but immigrei.app is
@@ -33,6 +34,17 @@ const isPublicRoute = createRouteMatcher([
   // Scoped to this one subpath only; /documentos/cofre and /documentos/custos
   // stay behind auth.protect() as normal — do not widen this to /documentos(.*).
   "/documentos/guias(.*)",
+  // Explainer pages (USCIS status messages, form lifecycles, decoders):
+  // public, source-cited editorial content. Only drafts that cleared the
+  // human review gate are ever built (lib/contentPages.ts, dynamicParams off).
+  "/status(.*)",
+  "/entenda(.*)",
+  // llms.txt maps of the public site for LLM agents / answer engines, and
+  // the IndexNow ownership key. .txt isn't excluded by the matcher below, so
+  // without these entries crawlers would hit auth.protect() instead.
+  "/llms.txt",
+  "/llms-full.txt",
+  INDEXNOW_KEY_PATH,
   // API routes authenticate themselves (CRON_SECRET or Clerk auth() in the
   // handler). auth.protect() returns an HTML 404 for unauthenticated API
   // calls, which blocks Vercel Cron and breaks JSON error responses.
