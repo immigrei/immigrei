@@ -3,10 +3,10 @@ title: "\"Notice Of Intent To Deny Was Sent\" — o que significa (NOID) em port
 slug: notice-of-intent-to-deny-was-sent
 type: status
 query_target: "Notice Of Intent To Deny Was Sent"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — grounded against new content/leis/conceitos/noid.md, added below)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/policy-manual
@@ -82,7 +82,7 @@ traz as instruções aplicáveis ao seu caso.
 
 ---
 
-O Immigrei ajuda você a entender o que um status como este significa na sua
+O immigrei ajuda você a entender o que um status como este significa na sua
 jornada — e a agir a tempo, com clareza.
 [Acompanhe sua jornada →](https://immigrei.app)
 

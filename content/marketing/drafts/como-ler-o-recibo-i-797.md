@@ -3,10 +3,10 @@ title: "Como ler o recibo I-797 (Notice of Action) do USCIS"
 slug: como-ler-o-recibo-i-797
 type: decoder
 query_target: "I-797 notice of action como ler"
-status: draft
+status: approved
 compliance_check: PASS (2026-09-13)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions
   - content/leis/formularios/i-797.md
@@ -82,7 +82,7 @@ mesmo que um visto consular. O que ele comprova varia por caso e formulário.
 
 ---
 
-O Immigrei te ajuda a entender cada carta do USCIS no contexto da sua
+O immigrei te ajuda a entender cada carta do USCIS no contexto da sua
 jornada — sem você precisar decifrar sozinho.
 [Acompanhe sua jornada →](https://immigrei.app)
 

@@ -3,10 +3,10 @@ title: "O que acontece depois de protocolar o I-539 (extensão ou mudança de st
 slug: o-que-acontece-depois-de-protocolar-i-539
 type: form-lifecycle
 query_target: "I-539 o que acontece depois de protocolar"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — unlawful-presence claim hedged for D/S vs fixed-date I-94, status string corrected to full "By USCIS")
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://www.uscis.gov/i-539
   - content/leis/formularios/i-539.md
@@ -96,7 +96,7 @@ atualizada.
 
 ---
 
-O Immigrei explica cada etapa do I-539 dentro da sua jornada completa — para
+O immigrei explica cada etapa do I-539 dentro da sua jornada completa — para
 você entender o que já passou e o que normalmente vem a seguir.
 [Acompanhe sua jornada →](https://immigrei.app)
 

@@ -3,10 +3,10 @@ title: "\"Case Was Transferred And A New Office Has Jurisdiction\" — o que sig
 slug: case-was-transferred-and-a-new-office-has-jurisdiction
 type: status
 query_target: "Case Was Transferred And A New Office Has Jurisdiction"
-status: draft
+status: approved
 compliance_check: PASS (2026-09-13)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/policy-manual
@@ -75,7 +75,7 @@ contexto.
 
 ---
 
-O Immigrei explica cada status do USCIS no contexto da sua jornada — para
+O immigrei explica cada status do USCIS no contexto da sua jornada — para
 você não precisar decifrar sozinho o que uma transferência de escritório
 significa.
 [Acompanhe sua jornada →](https://immigrei.app)

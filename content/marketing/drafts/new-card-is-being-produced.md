@@ -3,10 +3,10 @@ title: "\"New Card Is Being Produced\" — o que significa em português"
 slug: new-card-is-being-produced
 type: status
 query_target: "New Card Is Being Produced"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — AR-11 cited inline, CTA softened to avoid implying live prod USCIS tracking per known sandbox gap)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions
@@ -70,7 +70,7 @@ por isso, atualizar via AR-11 antes dessa etapa evita atrasos.
 
 ---
 
-O Immigrei explica cada status do seu caso em português, para você entender
+O immigrei explica cada status do seu caso em português, para você entender
 exatamente em que etapa o seu documento está.
 [Acompanhe sua jornada →](https://immigrei.app)
 

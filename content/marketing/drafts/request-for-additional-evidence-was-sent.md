@@ -3,15 +3,15 @@ title: "\"Request for Additional Evidence Was Sent\" (RFE) — o que significa e
 slug: request-for-additional-evidence-was-sent
 type: status
 query_target: "Request for Additional Evidence Was Sent"
-status: draft
-compliance_check: PASS_WITH_FLAGS
-reviewed_by: pending
-byline: Equipe Immigrei
+status: approved
+compliance_check: "PASS (2026-09-16 — citação do Policy Manual Vol. 1 Part E Ch. 6 conferida verbatim e ampliada para a frase completa)"
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://www.uscis.gov/policy-manual/volume-1-part-e-chapter-6
   - https://www.ecfr.gov/current/title-8/chapter-I/subchapter-B/part-103/subpart-A/section-103.2
   - https://egov.uscis.gov/casestatus/landing.do
-verificado_em: pendente
+verificado_em: 2026-09-16
 ---
 
 **"Request for Additional Evidence Was Sent"** significa que o oficial do USCIS
@@ -23,11 +23,12 @@ carta, é a informação mais importante do seu caso agora.
 ## O que é um RFE?
 
 É o instrumento formal que o USCIS usa quando o pacote enviado não basta para
-uma decisão. O Manual de Políticas do USCIS descreve que um RFE é emitido
-quando a evidência apresentada *"does not establish eligibility"* e evidência
-adicional pode resolver ([USCIS Policy Manual, Vol. 1, Part E, Ch.
-6](https://www.uscis.gov/policy-manual/volume-1-part-e-chapter-6)).
-<!-- VERIFY: confirmar citação verbatim no capítulo atual -->
+uma decisão. O Manual de Políticas do USCIS é explícito sobre o momento em que
+isso acontece: *"If the benefit requestor does not establish eligibility under
+the applicable standard of proof, the officer either denies the request because
+he or she failed to meet his or her burden of proof, or issues an RFE or NOID"*
+([USCIS Policy Manual, Vol. 1, Part E, Ch. 6 —
+Evidence](https://www.uscis.gov/policy-manual/volume-1-part-e-chapter-6)).
 
 Receber um RFE **não significa que o caso vai ser negado** — significa que a
 decisão está em aberto e depende da resposta.
@@ -82,17 +83,10 @@ decisão ainda em aberto.
 
 ---
 
-O Immigrei avisa em português no momento em que seu status mudar — inclusive
+O immigrei avisa em português no momento em que seu status mudar — inclusive
 quando um RFE for emitido, para você não perder um dia sequer do prazo.
 [Acompanhe sua jornada →](https://immigrei.app)
 
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*
 
-<!-- COMPLIANCE (inline pass, 2026-07-28 — full subagent run pending):
-FLAGS:
-- [FACT] Policy Manual quote — confirm verbatim wording in current Vol.1 Part E Ch.6
-- [FACT] "resposta é única / sem segunda chance" — general practice; confirm framing against Policy Manual before publish
-VERIFIED CLAIMS: consistent with lib/uscis-status-pt.ts ("request for additional evidence was sent", "response to uscis request for evidence was received", NOID entry); 8 CFR §103.2(b)(8) is the correct cite for decision-on-record
-UPL: steps are general process guidance, no case-specific directives; professional referral present
--->

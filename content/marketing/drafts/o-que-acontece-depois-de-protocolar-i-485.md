@@ -3,10 +3,10 @@ title: "O que acontece depois de protocolar o I-485 (ajuste de status)"
 slug: o-que-acontece-depois-de-protocolar-i-485
 type: form-lifecycle
 query_target: "I-485 o que acontece depois de protocolar"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — Advance Parole abandonment claim now sourced in new content/leis/formularios/i-131.md, sources list completed)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://www.uscis.gov/i-485
   - content/leis/vistos/family-gc.md
@@ -95,7 +95,7 @@ admissibilidade, antecedentes e demais requisitos.
 
 ---
 
-O Immigrei explica cada etapa do ajuste de status dentro da sua jornada
+O immigrei explica cada etapa do ajuste de status dentro da sua jornada
 completa — em português, sem enrolação.
 [Acompanhe sua jornada →](https://immigrei.app)
 
