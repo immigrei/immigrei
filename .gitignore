@@ -60,6 +60,9 @@ public/demo.html
 # — is NEVER committed; final exports live only on the founders' local
 # machines (Desktop/immigrei-midias), organized by hand.
 content/marketing/creatives/**/*.svg
+# Exception: reusable background motifs (line-art, brand tokens, meant to be
+# shared across future Reels/carousels) — not a one-off export.
+!content/marketing/creatives/reel-template/motifs/*.svg
 content/marketing/creatives/**/*.png
 content/marketing/creatives/**/*.jpg
 content/marketing/creatives/**/*.jpeg
