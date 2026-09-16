@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { PDFDocument } from "pdf-lib";
 import { I539 } from "./i-539";
 import { fillPdf } from "./fillPdf";
@@ -74,7 +74,26 @@ async function fillAndReload(answers: Answers) {
   return doc.getForm();
 }
 
-describe("I-539 fill", () => {
+// USCIS rejects the 08/28/24 edition starting 09/15/26 with no grace period
+// (lib/forms/editionSwitch.ts). Real wall-clock time is already past that
+// date, so every test below pins the system clock explicitly — relying on
+// "today" would silently stop exercising the old edition at all, and is
+// exactly how the 09/15/26 asset shipped un-decrypted without a failing test
+// catching it (see the file header of i-539.ts for the full incident).
+describe("I-539 fill — edição 08/28/24 (antes do corte)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-01T12:00:00-04:00"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("usa a edição e o asset antigos", () => {
+    expect(I539.edition).toBe("08/28/24");
+    expect(I539.pdfAssetPath).toBe("forms/i-539.pdf");
+  });
+
   it("writes the applicant's name on page 1 and the Part 8 header", async () => {
     const form = await fillAndReload(ANSWERS);
     expect(form.getTextField("form1[0].#subform[0].P1Line1a_FamilyName[0]").getText()).toBe("Silva");
@@ -137,12 +156,18 @@ describe("I-539 fill", () => {
     expect(form.getTextField("form1[0].#subform[1].SupA_Line1p_DateExpires[0]").getText()).toBeFalsy();
   });
 
-  it("answers the Part 4 battery on the right yes/no boxes", async () => {
+  it("answers the Part 4 battery on the right yes/no boxes (items 3-5 on page 3)", async () => {
     const form = await fillAndReload({ ...ANSWERS, q15_j_visitor: "yes" });
     expect(form.getCheckBox("form1[0].#subform[2].P4_checkbox3_No[0]").isChecked()).toBe(true); // item 3
     expect(form.getCheckBox("form1[0].#subform[3].P4_checkbox19_No[0]").isChecked()).toBe(true); // item 14
     expect(form.getCheckBox("form1[0].#subform[3].P4_checkbox20_Yes[0]").isChecked()).toBe(true); // item 15
     expect(form.getCheckBox("form1[0].#subform[3].P4_checkbox20_No[0]").isChecked()).toBe(false);
+  });
+
+  it("checks based_on_family_grant and separate_petition on their old-edition boxes", async () => {
+    const form = await fillAndReload({ ...ANSWERS, based_on_family_grant: "yes", separate_petition: "with_this" });
+    expect(form.getCheckBox("form1[0].#subform[1].P3_checkbox2a[1]").isChecked()).toBe(true);
+    expect(form.getCheckBox("form1[0].#subform[2].P3_checkbox1[1]").isChecked()).toBe(true);
   });
 
   it("omits current-passport fields when the passport hasn't changed", async () => {
@@ -152,6 +177,69 @@ describe("I-539 fill", () => {
 
   it("fills the address abroad and additional info", async () => {
     const form = await fillAndReload(ANSWERS);
+    expect(form.getTextField("form1[0].#subform[2].P2_Line10_Country[0]").getText()).toBe("Brazil");
+    expect(form.getTextField("form1[0].#subform[6].P8_Line3_D_AdditionalInfo[0]").getText()).toContain(
+      "personal savings"
+    );
+  });
+});
+
+// The 09/15/26 edition reflows: a new Item 8 (SEVIS ID list) pushed Items 1
+// and 2.a from page 2 to page 3, and Items 4-5 of the Part 4 battery from
+// page 3 to page 4 (joining 6-20, already there). "separate_petition" kept
+// its page and index order but USCIS renamed the field itself. Verified by
+// widget position (page + rect) against the printed labels in both editions
+// — see the file header of i-539.ts.
+describe("I-539 fill — edição 09/15/26 (a partir do corte, sem período de tolerância)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-20T12:00:00-04:00"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("usa a nova edição e o novo asset", () => {
+    expect(I539.edition).toBe("09/15/26");
+    expect(I539.pdfAssetPath).toBe("forms/i-539-09-15-26.pdf");
+  });
+
+  it("fills extend_until on its page-3 field (moved from page 2)", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getTextField("form1[0].#subform[2].P3_Line1a_DateExtended[0]").getText()).toBe("06/30/2028");
+  });
+
+  it("checks based_on_family_grant on its page-3 field, same Yes/No index", async () => {
+    const form = await fillAndReload({ ...ANSWERS, based_on_family_grant: "yes" });
+    expect(form.getCheckBox("form1[0].#subform[2].P3_checkbox2a[1]").isChecked()).toBe(true);
+    expect(form.getCheckBox("form1[0].#subform[2].P3_checkbox2a[0]").isChecked()).toBe(false);
+  });
+
+  it("checks separate_petition on the renamed checkbox3 field, same index order", async () => {
+    const form = await fillAndReload({ ...ANSWERS, separate_petition: "with_this" });
+    expect(form.getCheckBox("form1[0].#subform[2].P3_checkbox3[1]").isChecked()).toBe(true);
+    expect(form.getCheckBox("form1[0].#subform[2].P3_checkbox3[0]").isChecked()).toBe(false);
+  });
+
+  it("keeps item 3 on page 3 but moves items 4-5 of the Part 4 battery to page 4", async () => {
+    const form = await fillAndReload({ ...ANSWERS, q4_immigrant_petition: "yes", q5_i485: "yes" });
+    expect(form.getCheckBox("form1[0].#subform[2].P4_checkbox3_No[0]").isChecked()).toBe(true); // item 3 unmoved
+    expect(form.getCheckBox("form1[0].#subform[3].P4_checkbox4_Yes[0]").isChecked()).toBe(true); // item 4 moved
+    expect(form.getCheckBox("form1[0].#subform[3].P4_checkbox5_Yes[0]").isChecked()).toBe(true); // item 5 moved
+  });
+
+  it("still answers items 6-20 correctly (unmoved, unaffected by the reflow)", async () => {
+    const form = await fillAndReload({ ...ANSWERS, q15_j_visitor: "yes" });
+    expect(form.getCheckBox("form1[0].#subform[3].P4_checkbox19_No[0]").isChecked()).toBe(true); // item 14
+    expect(form.getCheckBox("form1[0].#subform[3].P4_checkbox20_Yes[0]").isChecked()).toBe(true); // item 15
+  });
+
+  it("still fills every other unaffected field correctly on the new asset", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getTextField("form1[0].#subform[0].P1Line1a_FamilyName[0]").getText()).toBe("Silva");
+    expect(form.getDropdown("form1[0].#subform[1].Pt2Line2a_NewStatus[0]").getSelected()).toEqual([
+      " F1 - STUDENT - ACADEMIC",
+    ]);
     expect(form.getTextField("form1[0].#subform[2].P2_Line10_Country[0]").getText()).toBe("Brazil");
     expect(form.getTextField("form1[0].#subform[6].P8_Line3_D_AdditionalInfo[0]").getText()).toContain(
       "personal savings"
