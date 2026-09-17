@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { fetchCaseStatus } from "@/lib/uscis";
+import { fetchCaseStatus, isRealStatusChange } from "@/lib/uscis";
 import { sendCaseStatusUpdate } from "@/lib/notifications";
 import { clerkClient } from "@clerk/nextjs/server";
 import { notifySlackAlert } from "@/lib/slack-alert";
@@ -35,6 +35,13 @@ export async function GET(req: NextRequest) {
   const startedAt = new Date().toISOString();
   let checked = 0, updated = 0, errors = 0;
   let supabaseError: string | null = null;
+
+  // `errors` only ever counted thrown exceptions. A 404/429/503 from USCIS
+  // comes back as a resolved CaseStatusResult carrying `error`, so a run where
+  // every single case failed could still report `errors: 0`. Count those by
+  // code — by type only, never by receipt number, so the summary carries no
+  // user data.
+  const errorsByType: Record<string, number> = {};
 
   // Fetch all active cases — paginate in batches of 100
   let from = 0;
@@ -61,11 +68,11 @@ export async function GET(req: NextRequest) {
 
         const result = await fetchCaseStatus(c.receipt_number);
         checked++;
+        if (result.error) {
+          errorsByType[result.error] = (errorsByType[result.error] ?? 0) + 1;
+        }
 
-        const statusChanged = result.status &&
-          result.status !== c.last_status &&
-          result.status !== "Verificação indisponível" &&
-          result.status !== "Status não encontrado";
+        const statusChanged = isRealStatusChange(result, c.last_status);
 
         // Always update last_checked_at; update last_status only if it changed
         await supabaseAdmin
@@ -120,19 +127,22 @@ export async function GET(req: NextRequest) {
     from += PAGE;
   }
 
+  const failed = Object.values(errorsByType).reduce((a, b) => a + b, 0);
   const summary = {
     startedAt,
     finishedAt: new Date().toISOString(),
     checked,
     updated,
-    errors,
+    errors,        // cases that threw
+    failed,        // cases USCIS answered with an error code
+    errorsByType,
   };
 
   console.log("[check-cases] Completed:", summary);
   if (supabaseError) {
     await notifySlackAlert(`🔴 [check-cases] Erro no Supabase, cron pode ter parado cedo: ${supabaseError}`);
-  } else if (errors > 0) {
-    await notifySlackAlert(`⚠️ [check-cases] Rodou com ${errors} erro(s) — ver logs da Vercel. Resumo: ${JSON.stringify(summary)}`);
+  } else if (errors > 0 || failed > 0) {
+    await notifySlackAlert(`⚠️ [check-cases] Rodou com ${errors} exceção(ões) e ${failed} resposta(s) de erro do USCIS — ver logs da Vercel. Resumo: ${JSON.stringify(summary)}`);
   }
   return NextResponse.json(summary);
 }

@@ -1,9 +1,9 @@
 /**
  * USCIS Case Status
- * Source: egov.uscis.gov (official public endpoint — same used by the website)
+ * Source: the official Torch API (developer.uscis.gov) — nothing else.
  *
- * No unofficial APIs, no Reddit, no forums.
- * Data comes exclusively from uscis.gov.
+ * No unofficial APIs, no scraping, no Reddit, no forums.
+ * Data comes exclusively from uscis.gov, over the credentialed API.
  */
 
 export type CaseStatusResult = {
@@ -18,13 +18,9 @@ export type CaseStatusResult = {
   error?:        string;
 };
 
-const USCIS_STATUS_URL = "https://egov.uscis.gov/casestatus/mycasestatus.do";
-
 // ── Official Torch API (developer.uscis.gov) ────────────────────────────────
-// Preferred path. Sandbox: https://api-int.uscis.gov (test receipts only);
+// The only path. Sandbox: https://api-int.uscis.gov (test receipts only);
 // production: https://api.uscis.gov (granted after the USCIS demo).
-// Legacy egov scraping now returns 403 (Akamai bot protection) and only
-// remains as a fallback while credentials are not configured.
 const USCIS_API_BASE =
   process.env.USCIS_API_BASE ?? "https://api-int.uscis.gov";
 const USCIS_CLIENT_ID = process.env.USCIS_CLIENT_ID;
@@ -54,11 +50,37 @@ class UscisOauthError extends Error {
   }
 }
 
+// Structured request logging for the two outbound USCIS calls.
+//
+// Vercel's function logs only cover the *incoming* invocation — an outbound
+// fetch is invisible unless we log it ourselves. These lines are what makes
+// the backend↔USCIS hop demonstrable (the browser network tab only ever sees
+// browser↔our-own-route).
+//
+// Never log a credential value. The token is reduced to a length, the client
+// secret is never referenced, and the client id is reported as present/absent.
+function logUscisRequest(method: string, url: string, headers: Record<string, string>) {
+  console.log(`[uscis] → ${method} ${url} ${JSON.stringify(headers)}`);
+}
+function logUscisResponse(method: string, url: string, status: number, startedAt: number) {
+  console.log(`[uscis] ← ${status} ${method} ${url} (${Date.now() - startedAt}ms)`);
+}
+
 async function getUscisApiToken(): Promise<string> {
   if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
     return cachedToken.token;
   }
-  const res = await fetch(`${USCIS_API_BASE}/oauth/accesstoken`, {
+
+  const url = `${USCIS_API_BASE}/oauth/accesstoken`;
+  const startedAt = Date.now();
+  logUscisRequest("POST", url, {
+    "content-type": "application/x-www-form-urlencoded",
+    grant_type: "client_credentials",
+    client_id: USCIS_CLIENT_ID ? "[set, redacted]" : "[MISSING]",
+    client_secret: USCIS_CLIENT_SECRET ? "[set, redacted]" : "[MISSING]",
+  });
+
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -68,6 +90,8 @@ async function getUscisApiToken(): Promise<string> {
     }).toString(),
     signal: AbortSignal.timeout(10_000),
   });
+  logUscisResponse("POST", url, res.status, startedAt);
+
   if (!res.ok) throw new UscisOauthError(res.status);
   const data = await res.json();
   const expiresIn = Number(data.expires_in ?? 1800);
@@ -75,6 +99,7 @@ async function getUscisApiToken(): Promise<string> {
     token: data.access_token,
     expiresAt: Date.now() + expiresIn * 1000,
   };
+  console.log(`[uscis] token cached, expires_in=${expiresIn}s (reused until 60s before expiry)`);
   return cachedToken.token;
 }
 
@@ -156,6 +181,27 @@ export function mapCaseStatusPayload(
   };
 }
 
+// One case-status request, logged on the way out and on the way back.
+async function callCaseStatus(
+  normalized: string,
+  token: string,
+  attempt?: string,
+): Promise<Response> {
+  const url = `${USCIS_API_BASE}/case-status/${normalized}`;
+  const startedAt = Date.now();
+  logUscisRequest("GET", url, {
+    authorization: `Bearer [redacted, ${token.length} chars]`,
+    demo_id: USCIS_DEMO_ID,
+    ...(attempt ? { attempt } : {}),
+  });
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, demo_id: USCIS_DEMO_ID },
+    signal: AbortSignal.timeout(10_000),
+  });
+  logUscisResponse("GET", url, res.status, startedAt);
+  return res;
+}
+
 async function fetchCaseStatusViaApi(
   normalized: string,
   fetchedAt: string,
@@ -174,13 +220,11 @@ async function fetchCaseStatusViaApi(
     throw err;
   }
 
-  let res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
-    headers: { Authorization: `Bearer ${token}`, demo_id: USCIS_DEMO_ID },
-    signal: AbortSignal.timeout(10_000),
-  });
+  let res = await callCaseStatus(normalized, token);
 
   // 401 once: the cached token may have just expired — refresh and retry.
   if (res.status === 401 && cachedToken) {
+    console.log("[uscis] 401 with a cached token — clearing cache, one retry then give up");
     cachedToken = null;
     try {
       token = await getUscisApiToken();
@@ -190,10 +234,7 @@ async function fetchCaseStatusViaApi(
       }
       throw err;
     }
-    res = await fetch(`${USCIS_API_BASE}/case-status/${normalized}`, {
-      headers: { Authorization: `Bearer ${token}`, demo_id: USCIS_DEMO_ID },
-      signal: AbortSignal.timeout(10_000),
-    });
+    res = await callCaseStatus(normalized, token, "retry-after-401");
   }
 
   if (!res.ok) return describeApiFailure(res.status, normalized, fetchedAt);
@@ -211,6 +252,31 @@ export function isDeniedStatus(status: string): boolean {
 export function isApprovedStatus(status: string): boolean {
   const s = status.toLowerCase();
   return s.includes("approved") || s.includes("accepted");
+}
+
+/**
+ * Is this a genuine status change — one worth storing and emailing about?
+ *
+ * Anything carrying `error` is a failure to *read* the status, not a new
+ * status. A 404, 429, 503 or auth failure must never overwrite the stored
+ * status or trigger a "seu caso mudou" email: describeApiFailure() puts a
+ * human-readable Portuguese string in `status` precisely so the UI can show
+ * it, and that string is not a case status.
+ *
+ * This matters most in the sandbox, where every real user receipt returns
+ * 404 — without this gate the weekly cron would email every user to say their
+ * case was not found.
+ */
+export function isRealStatusChange(
+  result: CaseStatusResult,
+  lastStatus: string | null,
+): boolean {
+  if (result.error) return false;
+  if (!result.status) return false;
+  // mapCaseStatusPayload's empty-payload fallback — a successful HTTP call
+  // that carried no usable status, so there is nothing to report.
+  if (result.status === "Status não encontrado") return false;
+  return result.status !== lastStatus;
 }
 
 // Normalize receipt number: remove spaces/dashes, uppercase
@@ -238,38 +304,31 @@ export async function fetchCaseStatus(receiptNumber: string): Promise<CaseStatus
     };
   }
 
+  // Fail loudly rather than degrade silently. Without credentials there is no
+  // legitimate way to reach USCIS — the old egov fallback scraped the public
+  // site with a spoofed User-Agent, which is exactly what we should not do to
+  // the agency granting us API access. A misconfigured deploy should be
+  // obvious in the logs, not hidden behind a generic "try again later".
+  if (!USCIS_CLIENT_ID || !USCIS_CLIENT_SECRET) {
+    console.error(
+      "[uscis] USCIS_CLIENT_ID/USCIS_CLIENT_SECRET not configured — refusing to call USCIS",
+    );
+    return {
+      receiptNumber: normalized,
+      status: "Verificação temporariamente indisponível",
+      statusDate: "",
+      description:
+        "Nossa credencial junto ao USCIS não está configurada. Já fomos avisados — tente novamente em alguns minutos.",
+      isApproved: false, isPending: false, isDenied: false,
+      fetchedAt, error: "missing_credentials",
+    };
+  }
+
   try {
-    if (USCIS_CLIENT_ID && USCIS_CLIENT_SECRET) {
-      return await fetchCaseStatusViaApi(normalized, fetchedAt);
-    }
-
-    const body = new URLSearchParams({
-      appReceiptNum: normalized,
-      caseStatusSearchBtn: "CHECK STATUS",
-    });
-
-    const res = await fetch(USCIS_STATUS_URL, {
-      method:  "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        // Use a standard browser UA to avoid blocks
-        "User-Agent": "Mozilla/5.0 (compatible; Immigrei/1.0; +https://immigrei.app)",
-        "Referer":    "https://egov.uscis.gov/casestatus/landing.do",
-      },
-      body: body.toString(),
-      // Respect a 10s timeout — don't hang the cron
-      signal: AbortSignal.timeout(10_000),
-    });
-
-    if (!res.ok) {
-      throw new Error(`USCIS returned HTTP ${res.status}`);
-    }
-
-    const html = await res.text();
-    return parseCaseStatusHtml(normalized, html, fetchedAt);
-
+    return await fetchCaseStatusViaApi(normalized, fetchedAt);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    console.error(`[uscis] unexpected failure for ${normalized}: ${message}`);
     return {
       receiptNumber: normalized,
       status: "Verificação indisponível",
@@ -281,33 +340,8 @@ export async function fetchCaseStatus(receiptNumber: string): Promise<CaseStatus
   }
 }
 
-function parseCaseStatusHtml(
-  receiptNumber: string,
-  html: string,
-  fetchedAt: string,
-): CaseStatusResult {
-  // USCIS returns the status inside:
-  //   <div class="rows text-center"> <h1>Case Was Received</h1> <p>On July 10...</p> </div>
-  // We parse with regex (no DOM parser in edge runtime)
-
-  const statusMatch = html.match(/<h1[^>]*>\s*([\s\S]*?)\s*<\/h1>/i);
-  const descMatch   = html.match(/<p[^>]*class="[^"]*appointment-sec[^"]*"[^>]*>([\s\S]*?)<\/p>/i)
-                   ?? html.match(/<div[^>]*class="[^"]*rows[^"]*text-center[^"]*"[^>]*>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>/i);
-
-  const status      = statusMatch ? cleanHtml(statusMatch[1]) : "Status não encontrado";
-  const description = descMatch   ? cleanHtml(descMatch[1])   : "";
-
-  // Extract date from description (e.g. "On July 10, 2025, we ...")
-  const dateMatch = description.match(/(?:On\s+)?([A-Z][a-z]+ \d{1,2},\s*\d{4})/);
-  const statusDate = dateMatch ? dateMatch[1] : "";
-
-  const isApproved  = isApprovedStatus(status);
-  const isDenied    = isDeniedStatus(status);
-  const isPending   = !isApproved && !isDenied;
-
-  return { receiptNumber, status, statusDate, description, isApproved, isPending, isDenied, fetchedAt };
-}
-
+// The Torch API returns HTML entities inside its description text, so this
+// stays even though the HTML-scraping path is gone.
 function cleanHtml(raw: string): string {
   return raw
     .replace(/<[^>]+>/g, " ")   // strip tags
