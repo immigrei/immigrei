@@ -54,6 +54,8 @@ next-48h.html
 # Clickable mockup (Jun 2026) — local only, outdated vs live onboarding
 public/demo.html
 
+.reels-preview/
+
 # Marketing/social media creative folders (content/marketing/creatives/,
 # immigrei-midias/) — text (.md scripts/copy, .txt narration) IS committed,
 # same as any other content. Art in any form — .svg, .png, .mp4, .mov, audio
