@@ -7,6 +7,26 @@
  * asset at public/forms/i-539.pdf — never guessed; ambiguous names were
  * resolved by widget position against the printed labels).
  *
+ * USCIS is replacing this with a 09/15/26 edition (no grace period — the
+ * 08/28/24 edition is rejected if submitted on/after that date). Verified the
+ * two editions field-for-field by widget position (page + rect) against the
+ * printed labels in public/forms/i-539-09-15-26.pdf — unlike the I-765, this
+ * edition genuinely reflows: a new Item 8 (SEVIS ID list) was inserted on
+ * page 3, pushing content below it down. What changed, confirmed positionally:
+ *   - Item 1 (`P3_Line1a_DateExtended`) and Item 2.a (`P3_checkbox2a`) keep the
+ *     same field name and Yes/No index, only moving subform 1 -> 2 (byte-
+ *     identical rect, just renumbered).
+ *   - Item 2.b/3 ("separate petition...") keeps the same subform (2), same
+ *     rect, same [0]/[1]/[2] index order, but USCIS renamed the field from
+ *     `P3_checkbox1` to `P3_checkbox3`.
+ *   - The Part 4 yes/no battery: Item 3 stays on page 3 (subform 2); Items 4
+ *     and 5 move to page 4 (subform 3), joining items 6-20 (unchanged).
+ *   - New Item 8 (`P3_Line8_SEVISID`, a list of SEVIS ID numbers + education
+ *     level) has no mapping yet — it's genuinely new content, not a rename of
+ *     anything we already ask, and a list-type answer needs its own UX. Left
+ *     blank for the user to fill by hand, same as the signature/interpreter/
+ *     preparer blocks below always have been.
+ *
  * Scope (MVP): a single applicant filing for themselves — extension of stay or
  * change of status (the B-2 -> F-1 kit's core form). Co-applicants (Form
  * I-539A) are additive later. The engine is ministerial: it transcribes what
@@ -25,12 +45,17 @@
  *     items 3, 4, 5, 6, 7a-7e, 8a-8b, 9, 10, 11, 12, 13, 14, 15 in order.
  */
 
-import type { FormSpec, Option } from "./types";
+import type { FormSection, FormSpec, Option } from "./types";
+import { isOnOrAfter } from "./editionSwitch";
 
-// AcroForm subform prefixes (one per page of the I-539).
+// USCIS rejects the 08/28/24 edition starting 09/15/26 (no grace period).
+const usesNewEdition = () => isOnOrAfter("2026-09-15");
+
+// AcroForm subform prefixes (one per page of the I-539). Stable across both
+// editions except S1/S2, threaded explicitly below where they differ.
 const F = "form1[0].";
 const S0 = `${F}#subform[0].`; // page 1
-const S1 = `${F}#subform[1].`; // page 2
+const S1 = `${F}#subform[1].`; // page 2 (08/28/24 edition only)
 const S2 = `${F}#subform[2].`; // page 3
 const S3 = `${F}#subform[3].`; // page 4
 const S4 = `${F}#subform[4].`; // page 5
@@ -85,8 +110,12 @@ const NEW_STATUS_OPTIONS: Option[] = [
 ];
 
 // One yes/no question of the Part 4 battery, mapped to its checkbox pair.
-function yesNo(id: string, n: number, labelPt: string, helpPt?: string) {
-  const page = n <= 5 ? S2 : S3; // items 3-5 sit on page 3, the rest on page 4
+// Page placement of items 4-5 moved between editions (see file header): the
+// 08/28/24 edition has items 3-5 on page 3 and 6-20 on page 4; the 09/15/26
+// edition keeps only item 3 on page 3, moving 4-20 onto page 4.
+function yesNo(isNew: boolean, id: string, n: number, labelPt: string, helpPt?: string) {
+  const threshold = isNew ? 3 : 5;
+  const page = n <= threshold ? S2 : S3;
   return {
     id,
     labelPt,
@@ -107,23 +136,16 @@ function yesNo(id: string, n: number, labelPt: string, helpPt?: string) {
   };
 }
 
-export const I539: FormSpec = {
-  id: "i-539",
-  code: "I-539",
-  officialName: "Application to Extend/Change Nonimmigrant Status",
-  namePt: "Extensão ou Mudança de Status (dentro dos EUA)",
-  agency: "USCIS",
-  officialUrl: "https://www.uscis.gov/i-539",
-  edition: "08/28/24",
-  exportKind: "pdf",
-  pdfAssetPath: "forms/i-539.pdf",
-  attachTo: { vistoId: "f1-cos", documentoId: "i539" },
-  disclaimerPt:
-    "Este formulário foi preenchido por você com as informações que você forneceu. " +
-    "A Immigrei é uma ferramenta de preenchimento — não presta serviços jurídicos " +
-    "e não revisa o mérito do seu caso. Confira cada campo e assine à mão antes de enviar ao USCIS.",
+function buildSections(isNew: boolean): FormSection[] {
+  // Item 1 and Item 2.a live on page 2 (subform 1) in 08/28/24, page 3
+  // (subform 2) in 09/15/26 — byte-identical rect and Yes/No index, only the
+  // subform number shifted (a new Item 8 was inserted ahead of them).
+  const partThree = isNew ? S2 : S1;
+  // Item 2.b/3 ("separate petition...") — same subform (2) and index order in
+  // both editions; only the field name changed, `checkbox1` -> `checkbox3`.
+  const separatePetitionField = isNew ? "P3_checkbox3" : "P3_checkbox1";
 
-  sections: [
+  return [
     // ── 1. O que você está pedindo (Part 2 + Part 3 item 1) ─────────────────
     {
       id: "pedido",
@@ -174,7 +196,7 @@ export const I539: FormSpec = {
           helpPt: "Item 1 da Parte 3. Para mudança para F-1/M-1, normalmente a data de término do I-20.",
           type: "date",
           required: true,
-          pdf: { kind: "text", field: `${S1}P3_Line1a_DateExtended[0]`, transform: isoToUsDate },
+          pdf: { kind: "text", field: `${partThree}P3_Line1a_DateExtended[0]`, transform: isoToUsDate },
         },
         {
           id: "applicants",
@@ -583,8 +605,8 @@ export const I539: FormSpec = {
           pdf: {
             kind: "checkboxChoice",
             fieldByValue: {
-              yes: `${S1}P3_checkbox2a[1]`,
-              no: `${S1}P3_checkbox2a[0]`,
+              yes: `${partThree}P3_checkbox2a[1]`,
+              no: `${partThree}P3_checkbox2a[0]`,
             },
           },
         },
@@ -603,9 +625,9 @@ export const I539: FormSpec = {
           pdf: {
             kind: "checkboxChoice",
             fieldByValue: {
-              no: `${S2}P3_checkbox1[0]`,
-              with_this: `${S2}P3_checkbox1[1]`,
-              pending: `${S2}P3_checkbox1[2]`,
+              no: `${S2}${separatePetitionField}[0]`,
+              with_this: `${S2}${separatePetitionField}[1]`,
+              pending: `${S2}${separatePetitionField}[2]`,
             },
           },
         },
@@ -777,57 +799,66 @@ export const I539: FormSpec = {
       descriptionPt:
         "O USCIS exige que TODAS sejam respondidas. Se responder \"Sim\" a qualquer uma, explique no campo final desta seção — e considere falar com um profissional antes de enviar.",
       questions: [
-        yesNo("q3_immigrant_visa", 3, "Você é requerente de um visto de imigrante?"),
-        yesNo("q4_immigrant_petition", 4, "Alguma petição de imigrante já foi protocolada em seu favor?"),
+        yesNo(isNew, "q3_immigrant_visa", 3, "Você é requerente de um visto de imigrante?"),
+        yesNo(isNew, "q4_immigrant_petition", 4, "Alguma petição de imigrante já foi protocolada em seu favor?"),
         yesNo(
+          isNew,
           "q5_i485",
           5,
           "Você JÁ protocolou o Formulário I-485 (registro de residência permanente / ajuste de status)?"
         ),
-        yesNo("q6_arrested", 6, "Você foi preso ou condenado por algum crime desde a última entrada nos EUA?"),
-        yesNo("q7a_torture", 7, "Você JÁ participou, ajudou ou incitou atos de tortura ou genocídio?"),
-        yesNo("q7b_killing", 8, "Você JÁ participou, ajudou ou incitou o assassinato de qualquer pessoa?"),
-        yesNo("q7c_injuring", 9, "Você JÁ feriu intencional e gravemente alguém?"),
+        yesNo(isNew, "q6_arrested", 6, "Você foi preso ou condenado por algum crime desde a última entrada nos EUA?"),
+        yesNo(isNew, "q7a_torture", 7, "Você JÁ participou, ajudou ou incitou atos de tortura ou genocídio?"),
+        yesNo(isNew, "q7b_killing", 8, "Você JÁ participou, ajudou ou incitou o assassinato de qualquer pessoa?"),
+        yesNo(isNew, "q7c_injuring", 9, "Você JÁ feriu intencional e gravemente alguém?"),
         yesNo(
+          isNew,
           "q7d_sexual_contact",
           10,
           "Você JÁ teve contato sexual com alguém sem consentimento ou sob força/ameaça?"
         ),
         yesNo(
+          isNew,
           "q7e_religious_freedom",
           11,
           "Você JÁ limitou ou negou a alguém o exercício de crenças religiosas?"
         ),
         yesNo(
+          isNew,
           "q8a_armed_group",
           12,
           "Você JÁ serviu ou participou de unidade militar, paramilitar, policial, milícia, guerrilha ou grupo armado?"
         ),
         yesNo(
+          isNew,
           "q8b_detention_facility",
           13,
           "Você JÁ trabalhou ou serviu em prisão, campo de detenção, campo de trabalho ou situação de detenção de pessoas?"
         ),
         yesNo(
+          isNew,
           "q9_weapons_group",
           14,
           "Você JÁ foi membro ou ajudou grupo/organização que usou ou ameaçou usar armas contra pessoas?"
         ),
         yesNo(
+          isNew,
           "q10_weapons_transport",
           15,
           "Você JÁ vendeu, forneceu ou transportou armas sabendo que seriam usadas contra alguém?"
         ),
-        yesNo("q11_weapons_training", 16, "Você JÁ recebeu treinamento com armas, paramilitar ou de tipo militar?"),
-        yesNo("q12_removal", 17, "Você está atualmente em processo de remoção (removal proceedings)?"),
-        yesNo("q13_violated_status", 18, "Você JÁ violou os termos do status que possui agora?"),
+        yesNo(isNew, "q11_weapons_training", 16, "Você JÁ recebeu treinamento com armas, paramilitar ou de tipo militar?"),
+        yesNo(isNew, "q12_removal", 17, "Você está atualmente em processo de remoção (removal proceedings)?"),
+        yesNo(isNew, "q13_violated_status", 18, "Você JÁ violou os termos do status que possui agora?"),
         yesNo(
+          isNew,
           "q14_employed",
           19,
           "Você trabalhou nos EUA desde a última admissão ou extensão/mudança de status?",
           "Se \"Não\", descreva no campo final como você se sustenta. Se \"Sim\", descreva os períodos de trabalho e se havia autorização do USCIS."
         ),
         yesNo(
+          isNew,
           "q15_j_visitor",
           20,
           "Você é ou já foi intercambista J-1 ou dependente J-2?",
@@ -874,5 +905,33 @@ export const I539: FormSpec = {
         },
       ],
     },
-  ],
+  ];
+}
+
+export const I539: FormSpec = {
+  id: "i-539",
+  code: "I-539",
+  officialName: "Application to Extend/Change Nonimmigrant Status",
+  namePt: "Extensão ou Mudança de Status (dentro dos EUA)",
+  agency: "USCIS",
+  officialUrl: "https://www.uscis.gov/i-539",
+  // Getters (not baked-in values) so the switch takes effect without a
+  // same-day redeploy, even on a long-lived serverless instance — same
+  // pattern as lib/forms/i-765.ts.
+  get edition() {
+    return usesNewEdition() ? "09/15/26" : "08/28/24";
+  },
+  exportKind: "pdf",
+  get pdfAssetPath() {
+    return usesNewEdition() ? "forms/i-539-09-15-26.pdf" : "forms/i-539.pdf";
+  },
+  attachTo: { vistoId: "f1-cos", documentoId: "i539" },
+  disclaimerPt:
+    "Este formulário foi preenchido por você com as informações que você forneceu. " +
+    "A Immigrei é uma ferramenta de preenchimento — não presta serviços jurídicos " +
+    "e não revisa o mérito do seu caso. Confira cada campo e assine à mão antes de enviar ao USCIS.",
+
+  get sections() {
+    return buildSections(usesNewEdition());
+  },
 };

@@ -32,7 +32,12 @@
  * interpreter and preparer blocks stay blank.
  */
 
-import type { FormSpec, PdfMapping, Question } from "./types";
+import type { FormSection, FormSpec, PdfMapping, Question } from "./types";
+import { isOnOrAfter } from "./editionSwitch";
+
+// USCIS rejects the 01/20/25 edition starting 09/18/26 with no grace period
+// (content/leis/formularios/i-485.md).
+const usesNewEdition = () => isOnOrAfter("2026-09-18");
 
 // AcroForm subform prefixes (#subform[N] is page N+1; page 20 is skipped —
 // subform indexes jump from [18] (page 19) to [20] (page 20)).
@@ -64,13 +69,24 @@ function isoToUsDate(value: unknown): string {
   return `${m}/${d}/${y}`;
 }
 
-// The page-header A-Number repeats on all 24 pages as AlienNumber[0..23],
-// spread across subforms 0-18 and 20-24 (indexes follow page order).
+// The page-header A-Number repeats on all 24 pages, spread across subforms
+// 0-18 and 20-24 (indexes follow page order). 01/20/25 names it AlienNumber
+// (a plain running index [0..23]); 09/18/26 renamed it to Pt1Line4_AlienNumber
+// AND folded the real Part 1 Item 4 field into the same name — pushing every
+// header index from subform 2 onward up by one to make room for it. Verified
+// by widget rect: subform[1]'s AlienNumber[1] (rect [454,36,576,54], the
+// small header box) is byte-identical to the new Pt1Line4_AlienNumber[1];
+// subform[1]'s Pt1Line4_AlienNumber[0] (rect [168,126,300,144], the real
+// Item 4 answer box) is byte-identical to the new Pt1Line4_AlienNumber[2].
 const HEADER_SUBFORMS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 24];
-const headerANumberMappings: PdfMapping[] = HEADER_SUBFORMS.map((sub, i) => ({
-  kind: "text",
-  field: `${F}#subform[${sub}].AlienNumber[${i}]`,
-}));
+function buildHeaderANumberMappings(isNew: boolean): PdfMapping[] {
+  return HEADER_SUBFORMS.map((sub, i) => ({
+    kind: "text",
+    field: isNew
+      ? `${F}#subform[${sub}].Pt1Line4_AlienNumber[${i <= 1 ? i : i + 1}]`
+      : `${F}#subform[${sub}].AlienNumber[${i}]`,
+  }));
+}
 
 // One Part 9 Yes/No item. `yes`/`no` are the exact checkbox fields — their
 // [0]/[1] indexes vary PER ITEM on this PDF (verified one by one against the
@@ -98,6 +114,49 @@ function p9(
   };
 }
 
+// Items 63-64 (means-tested benefits / long-term institutionalization) merged
+// into a single, broader item 63 in the 09/18/26 edition ("Public Charge
+// Ground of Inadmissibility" rule) — confirmed by widget position: the new
+// PDF's Pt9Line63_YesNo sits next to "Have you ever received ANY means-tested
+// public benefit?" (page 19), and Pt9Line64_YesNo no longer exists anywhere
+// on the form. The old edition still asks them as two separate items — never
+// collapse the two answers into one field there, and never invent a merge
+// for the new one either: mirror exactly what each edition's form asks.
+function publicChargeBenefitsQuestions(isNew: boolean): Question[] {
+  if (isNew) {
+    return [
+      p9(
+        "p9_63",
+        "Você JÁ recebeu qualquer benefício público baseado em renda (means-tested) — dinheiro, moradia, saúde ou outro?",
+        `${S18}Pt9Line63_YesNo[0]`,
+        `${S18}Pt9Line63_YesNo[1]`,
+        {
+          helpPt:
+            "A edição atual do formulário juntou os antigos itens 63 e 64 (benefício em dinheiro e " +
+            "internação de longo prazo às custas do governo) numa pergunta só, mais ampla. Se sim, " +
+            "descreva os detalhes à mão na Parte 14.",
+        }
+      ),
+    ];
+  }
+  return [
+    p9(
+      "p9_63",
+      "Você JÁ recebeu SSI, TANF ou outro benefício governamental em dinheiro para sustento?",
+      `${S18}Pt9Line63_YesNo[0]`,
+      `${S18}Pt9Line63_YesNo[1]`,
+      { helpPt: "Se sim, liste os detalhes (benefício, datas, valores) à mão na tabela do item 65." }
+    ),
+    p9(
+      "p9_64",
+      "Você JÁ ficou internado(a) em instituição de longo prazo às custas do governo?",
+      `${S18}Pt9Line64_YesNo[0]`,
+      `${S18}Pt9Line64_YesNo[1]`,
+      { helpPt: "Se sim, preencha a tabela do item 66 à mão na versão impressa." }
+    ),
+  ];
+}
+
 export const I485: FormSpec = {
   id: "i-485",
   code: "I-485",
@@ -105,9 +164,16 @@ export const I485: FormSpec = {
   namePt: "Ajuste de Status (preenchido por quem vai receber o green card)",
   agency: "USCIS",
   officialUrl: "https://www.uscis.gov/i-485",
-  edition: "01/20/25",
+  // Getters (not baked-in values) so the switch takes effect without a
+  // same-day redeploy, even on a long-lived serverless instance — same
+  // pattern as lib/forms/i-765.ts and lib/forms/i-539.ts.
+  get edition() {
+    return usesNewEdition() ? "09/18/26" : "01/20/25";
+  },
   exportKind: "pdf",
-  pdfAssetPath: "forms/i-485.pdf",
+  get pdfAssetPath() {
+    return usesNewEdition() ? "forms/i-485-09-18-26.pdf" : "forms/i-485.pdf";
+  },
   attachTo: { vistoId: "familia-ir", documentoId: "i485" },
   disclaimerPt:
     "Este formulário é preenchido e assinado por VOCÊ, o requerente — quem vai receber o green card " +
@@ -116,7 +182,14 @@ export const I485: FormSpec = {
     "Nas perguntas de elegibilidade (Parte 9), responda com total sinceridade; qualquer \"Sim\" merece " +
     "orientação profissional antes do protocolo. Confira cada campo e assine à mão antes de enviar ao USCIS.",
 
-  sections: [
+  // A getter (not a static array) so every template-literal field name below
+  // re-evaluates against `isNew` on each access — required for the three
+  // spots that differ between editions (a_number's header mappings, the
+  // public-charge section, and p9_76's subform). Everything else in this
+  // 20+-section array is byte-identical to before; only those three changed.
+  get sections(): FormSection[] {
+    const isNew = usesNewEdition();
+    return [
     // ── 1. Quem preenche + identificação (Part 1, itens 1–9) ────────────────
     {
       id: "identificacao",
@@ -131,7 +204,10 @@ export const I485: FormSpec = {
           labelPt: "Seu A-Number (se tiver)",
           helpPt: "Aparece em notificações do USCIS. Sem processos anteriores, você provavelmente não tem — deixe em branco.",
           type: "text",
-          pdf: [...headerANumberMappings, { kind: "text", field: `${S1}Pt1Line4_AlienNumber[0]` }],
+          pdf: [
+            ...buildHeaderANumberMappings(isNew),
+            { kind: "text", field: `${S1}Pt1Line4_AlienNumber[${isNew ? 2 : 0}]` },
+          ],
         },
         {
           id: "has_a_number",
@@ -1845,20 +1921,7 @@ export const I485: FormSpec = {
           default: "None",
           pdf: { kind: "text", field: `${S18}Table1[0].Row1[0].TextField1[0]` },
         },
-        p9(
-          "p9_63",
-          "Você JÁ recebeu SSI, TANF ou outro benefício governamental em dinheiro para sustento?",
-          `${S18}Pt9Line63_YesNo[0]`,
-          `${S18}Pt9Line63_YesNo[1]`,
-          { helpPt: "Se sim, liste os detalhes (benefício, datas, valores) à mão na tabela do item 65." }
-        ),
-        p9(
-          "p9_64",
-          "Você JÁ ficou internado(a) em instituição de longo prazo às custas do governo?",
-          `${S18}Pt9Line64_YesNo[0]`,
-          `${S18}Pt9Line64_YesNo[1]`,
-          { helpPt: "Se sim, preencha a tabela do item 66 à mão na versão impressa." }
-        ),
+        ...publicChargeBenefitsQuestions(isNew),
       ],
     },
 
@@ -1879,11 +1942,16 @@ export const I485: FormSpec = {
         p9("p9_73", "Você está sob ordem final de multa civil por uso de documentos fraudulentos (INA 274C)?", `${S20}Pt9Line73_YesNo[1]`, `${S20}Pt9Line73_YesNo[0]`),
         p9("p9_74", "Você JÁ foi excluído(a), deportado(a) ou removido(a) dos EUA (ou saiu por conta após ordem)?", `${S20}Pt9Line74_YesNo[1]`, `${S20}Pt9Line74_YesNo[0]`),
         p9("p9_75", "Você JÁ entrou nos EUA sem ser inspecionado(a) e admitido(a)/parolado(a)?", `${S20}Pt9Line75_YesNo[0]`, `${S20}Pt9Line75_YesNo[1]`),
+        // Same field name in both editions, but the reflow (fewer public-
+        // charge rows above it — see publicChargeBenefitsQuestions) pulled it
+        // from page 22 (subform 21) up onto page 21 (subform 20). Verified by
+        // rect: [498/540,589,...,599] in the new PDF, byte-identical to the
+        // old edition's row shape, just on the earlier page.
         p9(
           "p9_76",
           "Desde 1/abr/1997, você esteve em permanência irregular nos EUA (além do prazo autorizado)?",
-          `${S21}Pt9Line76_YesNo[1]`,
-          `${S21}Pt9Line76_YesNo[0]`,
+          `${isNew ? S20 : S21}Pt9Line76_YesNo[1]`,
+          `${isNew ? S20 : S21}Pt9Line76_YesNo[0]`,
           { helpPt: "Se sim, liste as datas de permanência irregular à mão na Parte 14." }
         ),
         p9("p9_77", "Se sim: o tráfico severo de pessoas foi uma razão central dessa permanência?", `${S21}Pt9Line77_YesNo[0]`, `${S21}Pt9Line77_YesNo[1]`, { showWhen: { questionId: "p9_76", equals: "yes" }, required: false }),
@@ -1945,5 +2013,6 @@ export const I485: FormSpec = {
         },
       ],
     },
-  ],
+  ];
+  },
 };

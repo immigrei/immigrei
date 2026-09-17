@@ -1,0 +1,31 @@
+<!--
+  Golden Gate Bridge — placeholder vector motif, immigrei brand line-art style.
+  Used as a subtle background silhouette (not a literal icon). Vector because no
+  real photo/stock asset was available when this was first drawn — swap for a
+  licensed photo/AI-stock plate before a piece goes final, or keep as-is for a
+  lightweight vector treatment. Strokes use var(--pine-deep) on a --pine
+  background (see Reel Cena 1 in reel-template/README.md). viewBox matches a
+  1440-wide frame at native scale — position/opacity per placement.
+  First used: Reel "De Turista (B1/B2) para Estudante (F1)" (out/2026).
+-->
+<svg viewBox="0 0 1440 980" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="760" x2="1440" y2="760" stroke="var(--pine-deep)" stroke-width="10"/>
+  <rect x="330" y="260" width="34" height="520" fill="var(--pine-deep)"/>
+  <rect x="1076" y="260" width="34" height="520" fill="var(--pine-deep)"/>
+  <line x1="330" y1="300" x2="364" y2="300" stroke="var(--pine-deep)" stroke-width="18"/>
+  <line x1="330" y1="420" x2="364" y2="420" stroke="var(--pine-deep)" stroke-width="18"/>
+  <line x1="1076" y1="300" x2="1110" y2="300" stroke="var(--pine-deep)" stroke-width="18"/>
+  <line x1="1076" y1="420" x2="1110" y2="420" stroke="var(--pine-deep)" stroke-width="18"/>
+  <path d="M 0 620 Q 347 260 694 620" stroke="var(--pine-deep)" stroke-width="7"/>
+  <path d="M 694 620 Q 1093 260 1440 620" stroke="var(--pine-deep)" stroke-width="7"/>
+  <g stroke="var(--pine-deep)" stroke-width="4" opacity=".7">
+    <line x1="120" y1="571" x2="120" y2="760"/>
+    <line x1="220" y1="500" x2="220" y2="760"/>
+    <line x1="440" y1="330" x2="440" y2="760"/>
+    <line x1="590" y1="278" x2="590" y2="760"/>
+    <line x1="800" y1="278" x2="800" y2="760"/>
+    <line x1="950" y1="330" x2="950" y2="760"/>
+    <line x1="1220" y1="500" x2="1220" y2="760"/>
+    <line x1="1320" y1="571" x2="1320" y2="760"/>
+  </g>
+</svg>

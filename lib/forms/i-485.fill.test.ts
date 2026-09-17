@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { PDFDocument } from "pdf-lib";
 import { I485 } from "./i-485";
 import { fillPdf } from "./fillPdf";
-import type { Answers } from "./types";
+import { allQuestions, type Answers } from "./types";
 
 // Ana, the Brazilian spouse of a US citizen, adjusting status from inside the
 // US after a B-2 entry (the overstay-with-family-ties path).
@@ -281,5 +281,68 @@ describe("I-485 fill", { timeout: 30_000 }, () => {
     expect(form.getTextField("form1[0].#subform[22].Pt3Line7a_Signature[0]").getText()).toBeFalsy();
     expect(form.getTextField("form1[0].#subform[22].Pt11Line1a_FamilyName[0]").getText()).toBeFalsy();
     expect(form.getTextField("form1[0].#subform[23].Pt12Line1_PreparerFamilyName[0]").getText()).toBeFalsy();
+  });
+});
+
+// USCIS rejects the 01/20/25 edition starting 09/18/26 with no grace period
+// (content/leis/formularios/i-485.md). Today's wall clock is still before
+// that date, so the suite above never exercises the new edition at all —
+// pin the clock explicitly here, the same lesson learned from the I-539/
+// I-765 incident (see the file header of lib/forms/i-539.ts).
+describe("I-485 fill — edição 09/18/26 (a partir do corte, sem período de tolerância)", { timeout: 30_000 }, () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-20T12:00:00-04:00"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("usa a nova edição e o novo asset", () => {
+    expect(I485.edition).toBe("09/18/26");
+    expect(I485.pdfAssetPath).toBe("forms/i-485-09-18-26.pdf");
+  });
+
+  it("replicates the A-Number into every page header under its renamed/reindexed field", async () => {
+    const form = await fillAndReload(ANSWERS);
+    // subform[0] and subform[1]'s header keep index 0/1; everything from
+    // subform[2] onward shifts +1 to make room for the real Item 4 field
+    // folded into the same name at subform[1] index 2 (see i-485.ts header).
+    expect(form.getTextField("form1[0].#subform[0].Pt1Line4_AlienNumber[0]").getText()).toBe("123456789");
+    expect(form.getTextField("form1[0].#subform[1].Pt1Line4_AlienNumber[1]").getText()).toBe("123456789");
+    expect(form.getTextField("form1[0].#subform[12].Pt1Line4_AlienNumber[13]").getText()).toBe("123456789");
+    expect(form.getTextField("form1[0].#subform[20].Pt1Line4_AlienNumber[20]").getText()).toBe("123456789");
+    expect(form.getTextField("form1[0].#subform[24].Pt1Line4_AlienNumber[24]").getText()).toBe("123456789");
+  });
+
+  it("fills the real Part 1 Item 4 A-Number field, folded into the header field's name", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getTextField("form1[0].#subform[1].Pt1Line4_AlienNumber[2]").getText()).toBe("123456789");
+  });
+
+  it("still fills every other unaffected field correctly on the new asset", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getTextField("form1[0].#subform[0].Pt1Line1_FamilyName[0]").getText()).toBe("Silva");
+    expect(form.getCheckBox("form1[0].#subform[4].Pt2Line2_CB[0]").isChecked()).toBe(true);
+    expect(form.getTextField("form1[0].#subform[22].Pt3Line5_Email[0]").getText()).toBe("ana@example.com");
+  });
+
+  it("merges items 63/64 into the single, broader item 63 question", async () => {
+    // p9_64 no longer exists as a question at all — the form itself dropped
+    // it (folded into item 63's now-broader wording). Never re-invent a merge
+    // of two answers into one field; mirror what the current form asks.
+    const ids = allQuestions(I485).map((q) => q.id);
+    expect(ids).toContain("p9_63");
+    expect(ids).not.toContain("p9_64");
+
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getCheckBox("form1[0].#subform[18].Pt9Line63_YesNo[1]").isChecked()).toBe(true); // no (unchanged field)
+  });
+
+  it("answers item 76 on its new page (moved up from subform 21 to 20)", async () => {
+    const form = await fillAndReload(ANSWERS);
+    expect(form.getCheckBox("form1[0].#subform[20].Pt9Line76_YesNo[1]").isChecked()).toBe(true); // 76 yes
+    // Item 77 didn't move — still subform 21, unaffected by the reflow.
+    expect(form.getCheckBox("form1[0].#subform[21].Pt9Line77_YesNo[1]").isChecked()).toBe(true); // 77 no
   });
 });
