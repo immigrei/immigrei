@@ -6,7 +6,7 @@ query_target: "perguntas de intenção sobre F-1, H-1B, K-1, green card por casa
 status: draft
 compliance_check: PASS_WITH_FLAGS (flags resolved 2026-08-02 — see nota de processo abaixo)
 reviewed_by: pending
-byline: Equipe Immigrei
+byline: Equipe immigrei
 sources:
   - https://studyinthestates.dhs.gov/students
   - https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors

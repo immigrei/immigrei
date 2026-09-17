@@ -3,10 +3,10 @@ title: "Processing times do USCIS: como consultar e interpretar"
 slug: processing-times-como-consultar-e-interpretar
 type: decoder
 query_target: "USCIS processing times como consultar"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — CTA softened, was overstating live USCIS case-status capability per known sandbox gap)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/processing-times/
   - https://www.uscis.gov/forms/all-forms/check-case-processing-times
@@ -81,7 +81,7 @@ adicional — ambos com critérios próprios definidos pelo USCIS.
 
 ---
 
-O Immigrei te ajuda a entender o prazo esperado para o seu formulário e
+O immigrei te ajuda a entender o prazo esperado para o seu formulário e
 centro — sem você precisar ficar recalculando sozinho.
 [Acompanhe sua jornada →](https://immigrei.app)
 

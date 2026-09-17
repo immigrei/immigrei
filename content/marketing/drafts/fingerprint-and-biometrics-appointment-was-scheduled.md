@@ -3,10 +3,10 @@ title: "\"Fingerprint And Biometrics Appointment Was Scheduled\" — o que signi
 slug: fingerprint-and-biometrics-appointment-was-scheduled
 type: status
 query_target: "Fingerprint And Biometrics Appointment Was Scheduled"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — dead source link replaced, I-797C/no-show claims softened pending a curated content/leis/conceitos/biometria.md source)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions
@@ -76,7 +76,7 @@ sendo a referência mais atualizada disponível.
 
 ---
 
-O Immigrei explica cada status do USCIS em português, no contexto da sua
+O immigrei explica cada status do USCIS em português, no contexto da sua
 jornada — sem você precisar traduzir sozinho.
 [Acompanhe sua jornada →](https://immigrei.app)
 

@@ -69,6 +69,10 @@ Brazilian immigrants in the US, 25–40 years old, with active immigration cases
 | "entendemos" | "nossa plataforma capacita" |
 | Show, don't announce | "game-changer" / "disruptivo" |
 
+**Wordmark:** always lowercase **immigrei** — never "Immigrei", including at the
+start of a sentence and in bylines ("Equipe immigrei"). If a sentence would force
+the capital, rewrite it ("A immigrei explica…" / "O immigrei acompanha…").
+
 **Language priority:** Portuguese (PT-BR) first. Always. English copy must carry the same warmth — not translate corporate.
 
 ### Regra do valor (toda interação, revisar sempre — 7 ago 2026)

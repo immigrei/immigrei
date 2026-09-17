@@ -3,10 +3,10 @@ title: "\"Case Was Denied\" — o que significa (e quais são as saídas) em por
 slug: case-was-denied
 type: status
 query_target: "Case Was Denied"
-status: draft
+status: approved
 compliance_check: PASS (2026-09-13)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/policy-manual
@@ -89,7 +89,7 @@ aplicável ao seu caso.
 
 ---
 
-O Immigrei mostra as saídas possíveis para o seu tipo de caso depois de uma
+O immigrei mostra as saídas possíveis para o seu tipo de caso depois de uma
 negativa — para você não navegar esse momento sozinho.
 [Acompanhe sua jornada →](https://immigrei.app)
 

@@ -3,15 +3,15 @@ title: "\"Case Is Being Actively Reviewed By USCIS\" — o que significa em port
 slug: case-is-being-actively-reviewed-by-uscis
 type: status
 query_target: "Case Is Being Actively Reviewed By USCIS"
-status: draft
-compliance_check: PASS_WITH_FLAGS (2026-09-13 — processing-times link needs live-source re-check before publish)
-reviewed_by: pending
-byline: Equipe Immigrei
+status: approved
+compliance_check: "PASS (2026-09-16 — link do Case Processing Times mantido: ferramenta oficial, bloqueia checagem automatizada (403) mas responde a usuários)"
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/policy-manual
   - https://egov.uscis.gov/processing-times/
-verificado_em: 2026-09-13
+verificado_em: 2026-09-16
 ---
 
 **"Case Is Being Actively Reviewed By USCIS"** significa que um oficial de
@@ -39,8 +39,8 @@ e entra de fato na mesa de um oficial para análise de mérito. O resultado
 Varia por formulário, categoria e escritório responsável — não existe um prazo
 único. Os tempos de processamento por formulário e centro de serviço ficam
 publicados no [Case Processing Times do USCIS](https://egov.uscis.gov/processing-times/),
-que é a referência oficial para estimativas <!-- VERIFY: link direto ao
-processing-times tool, confirmar disponibilidade em produção -->.
+que é a referência oficial para estimativas: você escolhe o formulário, a
+categoria e o centro responsável, e vê o prazo atual para aquele tipo de caso.
 
 ## O que pode acontecer depois desse status?
 
@@ -80,7 +80,7 @@ possíveis, que variam por formulário e categoria.
 
 ---
 
-O Immigrei explica o que cada status do USCIS significa e o que normalmente
+O immigrei explica o que cada status do USCIS significa e o que normalmente
 vem depois — sem enrolação, na sua língua.
 [Acompanhe sua jornada →](https://immigrei.app)
 

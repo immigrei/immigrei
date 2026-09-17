@@ -3,10 +3,10 @@ title: "\"Card Was Mailed To Me\" — o que significa em português"
 slug: card-was-mailed-to-me
 type: status
 query_target: "Card Was Mailed To Me"
-status: draft
-compliance_check: PASS_WITH_FLAGS (2026-09-13 — two unsourced claims softened: I-90 correction fee, I-797 issuance note)
-reviewed_by: pending
-byline: Equipe Immigrei
+status: approved
+compliance_check: "PASS_WITH_FLAGS (2026-09-13 — two unsourced claims softened: I-90 correction fee, I-797 issuance note)"
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions
@@ -78,7 +78,7 @@ um reenvio depois da atualização.
 
 ---
 
-O Immigrei explica cada status do USCIS no contexto da sua jornada — para
+O immigrei explica cada status do USCIS no contexto da sua jornada — para
 você saber não só que o cartão saiu, mas o que ele significa para o seu caso.
 [Acompanhe sua jornada →](https://immigrei.app)
 

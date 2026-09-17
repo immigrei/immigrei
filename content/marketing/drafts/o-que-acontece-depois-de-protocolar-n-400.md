@@ -3,10 +3,10 @@ title: "O que acontece depois de protocolar o N-400 (naturalização)"
 slug: o-que-acontece-depois-de-protocolar-n-400
 type: form-lifecycle
 query_target: "N-400 o que acontece depois de protocolar"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — CTA domain corrected to immigrei.app)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://www.uscis.gov/n-400
   - https://www.uscis.gov/policy-manual/volume-12-part-d-chapter-6
@@ -97,7 +97,7 @@ notificação do USCIS depois da aprovação.
 
 ---
 
-O Immigrei explica cada etapa da naturalização dentro da sua jornada — em
+O immigrei explica cada etapa da naturalização dentro da sua jornada — em
 português, sem enrolação.
 [Acompanhe sua jornada →](https://immigrei.app)
 

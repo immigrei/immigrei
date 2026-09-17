@@ -3,10 +3,10 @@ title: "O que acontece depois de protocolar o I-130 (petição familiar)"
 slug: o-que-acontece-depois-de-protocolar-i-130
 type: form-lifecycle
 query_target: "I-130 o que acontece depois de protocolar"
-status: draft
+status: approved
 compliance_check: PASS (2026-09-13 — CTA softened to avoid live-tracking overstatement, consistent with other drafts)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://www.uscis.gov/i-130
   - content/leis/formularios/i-130.md
@@ -92,7 +92,7 @@ não o I-130.
 
 ---
 
-O Immigrei explica cada etapa da sua petição familiar e o que normalmente
+O immigrei explica cada etapa da sua petição familiar e o que normalmente
 vem em seguida — em português, sem você precisar decifrar sozinho.
 [Acompanhe sua jornada →](https://immigrei.app)
 

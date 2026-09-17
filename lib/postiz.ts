@@ -5,7 +5,10 @@
  * Docs: https://docs.postiz.com/public-api
  */
 
-const POSTIZ_API_BASE = "https://api.postiz.com/public/v1";
+// Defaults to Postiz Cloud. Our instance is self-hosted
+// (postiz.immigrei.app), which serves the same public API under
+// /api/public/v1 — point POSTIZ_API_BASE there in Vercel.
+const POSTIZ_API_BASE = process.env.POSTIZ_API_BASE ?? "https://api.postiz.com/public/v1";
 
 interface PostizIntegration {
   id: string;

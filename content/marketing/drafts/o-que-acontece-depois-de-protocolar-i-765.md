@@ -3,10 +3,10 @@ title: "O que acontece depois de protocolar o I-765 (autorização de trabalho)"
 slug: o-que-acontece-depois-de-protocolar-i-765
 type: form-lifecycle
 query_target: "I-765 o que acontece depois de protocolar"
-status: draft
+status: approved
 compliance_check: PASS_WITH_FLAGS (2026-09-13 — automatic-extension claim now sourced in content/leis/formularios/i-765.md; added urgent Sept 15, 2026 mandatory-edition alert)
-reviewed_by: pending
-byline: Equipe Immigrei
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://www.uscis.gov/i-765
   - content/leis/formularios/i-765.md
@@ -89,7 +89,7 @@ atualizada.
 
 ---
 
-O Immigrei explica cada etapa do seu pedido de autorização de trabalho
+O immigrei explica cada etapa do seu pedido de autorização de trabalho
 dentro da sua jornada — em português, sem enrolação.
 [Acompanhe sua jornada →](https://immigrei.app)
 
