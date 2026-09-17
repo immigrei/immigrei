@@ -239,8 +239,11 @@ Siga estas regras rigorosamente:
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 2048,
+      // claude-3-5-sonnet-20241022 was retired Oct 28, 2025; Sonnet 5 is its
+      // drop-in replacement. It thinks by default, and thinking tokens count
+      // against max_tokens — hence the headroom over the ~1500-char draft.
+      model: "claude-sonnet-5",
+      max_tokens: 8000,
       system: systemPrompt,
       messages: [
         {
@@ -257,11 +260,20 @@ Siga estas regras rigorosamente:
   }
 
   interface AnthropicResponse {
-    content?: Array<{ text?: string }>;
+    content?: Array<{ type?: string; text?: string }>;
+    stop_reason?: string;
   }
 
   const data = (await response.json()) as AnthropicResponse;
-  const content = data.content?.[0]?.text ?? "";
+  if (data.stop_reason === "refusal") {
+    throw new Error("Anthropic API declined the request (stop_reason: refusal)");
+  }
+  // content can open with a thinking block, so join the text blocks rather
+  // than assuming content[0] is the draft.
+  const content = (data.content ?? [])
+    .filter((block) => block.type === "text")
+    .map((block) => block.text ?? "")
+    .join("");
 
   if (!content) {
     throw new Error("Anthropic API returned empty response");

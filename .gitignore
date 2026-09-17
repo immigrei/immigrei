@@ -56,5 +56,31 @@ public/demo.html
 
 .reels-preview/
 
-# Social media assets (Stories, carousels) — local only, not versioned
-immigrei-midias/
+# Marketing/social media creative folders (content/marketing/creatives/,
+# immigrei-midias/) — text (.md scripts/copy, .txt narration) IS committed,
+# same as any other content. Art in any form — .svg, .png, .mp4, .mov, audio
+# — is NEVER committed; final exports live only on the founders' local
+# machines (Desktop/immigrei-midias), organized by hand.
+content/marketing/creatives/**/*.svg
+# Exception: reusable background motifs (line-art, brand tokens, meant to be
+# shared across future Reels/carousels) — not a one-off export.
+!content/marketing/creatives/reel-template/motifs/*.svg
+content/marketing/creatives/**/*.png
+content/marketing/creatives/**/*.jpg
+content/marketing/creatives/**/*.jpeg
+content/marketing/creatives/**/*.mp4
+content/marketing/creatives/**/*.mov
+content/marketing/creatives/**/*.aiff
+content/marketing/creatives/**/*.mp3
+content/marketing/creatives/**/*.wav
+content/marketing/creatives/**/*.ttf
+content/marketing/creatives/**/*.otf
+immigrei-midias/**/*.svg
+immigrei-midias/**/*.png
+immigrei-midias/**/*.jpg
+immigrei-midias/**/*.jpeg
+immigrei-midias/**/*.mp4
+immigrei-midias/**/*.mov
+immigrei-midias/**/*.aiff
+immigrei-midias/**/*.mp3
+immigrei-midias/**/*.wav

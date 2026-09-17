@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { VISTO_PAGES } from "@/lib/vistoPages";
 import guias from "@/app/documentos/guias/data";
+import { getExplainerPages, getExplainersBySection } from "@/lib/contentPages";
 
 // Pre-launch sitemap: the public pages behind the immigrei.app gate, plus
 // catalog-driven routes generated from their source of truth (never
@@ -18,6 +19,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
     priority: 0.6,
   }));
+
+  // Reviewed explainers only (lib/contentPages.ts gates on César's approval),
+  // plus each section hub once it has at least one page.
+  const explainers = getExplainerPages();
+  const explainerEntries: MetadataRoute.Sitemap = explainers.map((p) => ({
+    url: p.url,
+    lastModified: p.verificadoEm,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+  const hubEntries: MetadataRoute.Sitemap = (["/status", "/entenda"] as const)
+    .filter((section) => getExplainersBySection(section).length > 0)
+    .map((section) => ({
+      url: `https://immigrei.app${section}`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
 
   return [
     {
@@ -37,6 +55,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    ...hubEntries,
+    ...explainerEntries,
     ...vistoEntries,
     ...guiaEntries,
   ];

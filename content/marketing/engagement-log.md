@@ -13,4 +13,6 @@ One row per post/comment a founder made. Agents draft; humans post. Keep the
 
 | Date | Channel | Group/Thread | Asset | Posted by | Response |
 |---|---|---|---|---|---|
-| | | | | | |
+| 2026-09-14 (planejado, meio-dia) | Instagram | Feed/Reels | Reel A — alerta I-539/I-765 (`urgentes/2026-09-14-alerta-i539-i765/reel.md`) | Felipe | _pendente_ |
+| 2026-09-14 (planejado, noite) | Instagram | Feed/Reels | Reel B — alerta I-539/I-765 (`reel_B_legenda.txt`) | Felipe | _pendente_ |
+| 2026-09-14 (planejado, noite) | Instagram | Feed/Carrossel | Carrossel — alerta I-539/I-765 (`carousel.md`) | Felipe | _pendente_ |

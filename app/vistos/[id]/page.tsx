@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import VistoCatalogDetails from "@/app/components/VistoCatalogDetails";
 import CofreLink from "@/app/components/CofreLink";
+import { FontesOficiaisSection } from "@/app/components/FontesOficiais";
 import { todosVistos } from "@/lib/vistosCatalog";
 import { getVistoPage, VISTO_PAGES, type VistoPrazo } from "@/lib/vistoPages";
 import ConfirmBar, { VoltarButton } from "./ConfirmBar";
@@ -69,39 +70,11 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Extracted (rather than inlined below) so it can be unit-rendered without
-// pulling in the client-only siblings (ConfirmBar/VoltarButton use
-// next/navigation's useRouter, which needs a live App Router context).
-export function FontesOficiaisSection({
-  fontesOficiais,
-  verificadoEm,
-}: {
-  fontesOficiais: { label: string; url: string }[];
-  verificadoEm: string;
-}) {
-  return (
-    <section className="mb-6">
-      <SectionLabel>Fontes oficiais</SectionLabel>
-      <ul className="space-y-1.5">
-        {fontesOficiais.map((f) => (
-          <li key={f.url}>
-            <a
-              href={f.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-pine underline underline-offset-2"
-            >
-              {f.label} ↗
-            </a>
-          </li>
-        ))}
-      </ul>
-      <p className="text-[10px] text-ink-faint mt-2">
-        Conteúdo verificado contra as fontes oficiais em {verificadoEm}.
-      </p>
-    </section>
-  );
-}
+// FontesOficiaisSection lives in app/components/FontesOficiais.tsx (shared
+// with the explainer pages, and unit-renderable without the client-only
+// ConfirmBar/VoltarButton siblings). Re-exported so imports of it from this
+// module keep working.
+export { FontesOficiaisSection };
 
 export default async function VistoPage({
   params,

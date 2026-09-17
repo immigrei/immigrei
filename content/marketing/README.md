@@ -10,7 +10,7 @@ Agent-run, human-gated marketing system. Source strategy:
 | Content | `.claude/skills/content-agent` | topic → unpublished draft in `drafts/` |
 | Compliance/Fact-Check | `.claude/agents/compliance-fact-check.md` | draft → verdict + flags (read-only) |
 | SEO/GEO | `.claude/skills/seo-geo-agent` | approved draft → route/schema/sitemap/IndexNow |
-| Distribution-Assist | `.claude/skills/distribution-assist` | published post → Reel/carousel/comment drafts |
+| Distribution-Assist | `.claude/skills/distribution-assist` | published post → Reel/carousel/comment drafts (Reel visual/motion spec: `creatives/reel-template/`) |
 | Lifecycle-Email | `.claude/skills/lifecycle-email` | flow name → copy + segment SQL + Resend spec |
 | Paid-Experiment | `.claude/skills/paid-experiment` | budget + hypothesis → ad specs + weekly readout |
 

@@ -3,15 +3,15 @@ title: "\"Case Was Received\" — o que significa esse status do USCIS (em portu
 slug: case-was-received
 type: status
 query_target: "Case Was Received"
-status: draft
-compliance_check: PASS_WITH_FLAGS
-reviewed_by: pending
-byline: Equipe Immigrei
+status: approved
+compliance_check: "PASS (2026-09-16 — citação do I-797C conferida verbatim na página oficial; estatística de backlog sem fonte verificável trocada pelo relatório trimestral Net Backlog and Frontlog)"
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions
   - https://egov.uscis.gov/processing-times/
-verificado_em: pendente
+verificado_em: 2026-09-16
 ---
 
 **"Case Was Received"** significa que o USCIS recebeu sua petição, abriu o
@@ -29,19 +29,20 @@ protocolou de fora dos EUA. Por isso este guia mantém o texto original —
 ## O que acontece depois de "Case Was Received"?
 
 O caso entra na fila do centro de processamento indicado pelo prefixo do seu
-número de recibo (veja o [decodificador de prefixos](receipt-number-decoder.md)).
-Segundo o USCIS, o I-797C é o documento que comunica, entre outras coisas, o
-recebimento de uma petição — *"receipt or rejection of applications or
-petitions"* ([uscis.gov, Form I-797: Types and
+número de recibo (veja o [decodificador de prefixos](/entenda/receipt-number-decoder)).
+Segundo o USCIS, o I-797C é o documento usado para comunicar, entre outras
+coisas, o recebimento de uma petição: *"Issued to communicate receipt or
+rejection of an applications or petitions; transfer of files; fingerprint
+biometric, interview and re-scheduled appointments; additional actions, and
+re-opening of cases"* ([uscis.gov, Form I-797: Types and
 Functions](https://www.uscis.gov/forms/filing-guidance/form-i-797-types-and-functions)).
-<!-- VERIFY: confirmar citação verbatim na página atual -->
 
-É comum o status **não mudar por meses** — isso não indica problema. O USCIS
-processa milhões de casos por ano e divulga o tempo médio por formulário e por
-centro em [egov.uscis.gov/processing-times](https://egov.uscis.gov/processing-times/).
-O acúmulo de casos pendentes no USCIS ultrapassou 11 milhões em 2025, o maior
-da história da agência ([dados trimestrais do
-USCIS](https://www.uscis.gov/tools/reports-and-studies)). <!-- VERIFY: número e período exatos no relatório trimestral mais recente -->
+É comum o status **não mudar por meses** — isso não indica problema. O tempo
+médio por formulário e por centro fica no
+[Case Processing Times](https://egov.uscis.gov/processing-times/), e a cada
+trimestre o próprio USCIS publica quantos casos estão parados na fila, no
+relatório *Net Backlog and Frontlog* ([Immigration and Citizenship Data,
+USCIS](https://www.uscis.gov/tools/reports-and-studies/immigration-and-citizenship-data)).
 
 ## Quanto tempo até o próximo status?
 
@@ -80,17 +81,10 @@ tipo de decisão que merece a avaliação de um profissional licenciado.
 
 ---
 
-O Immigrei acompanha seu caso no USCIS dia e noite e avisa em português quando
+O immigrei acompanha seu caso no USCIS dia e noite e avisa em português quando
 o status mudar — com a explicação do que muda para você.
-[Acompanhe sua jornada →](https://immigrei.com)
+[Acompanhe sua jornada →](https://immigrei.app)
 
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*
 
-<!-- COMPLIANCE (inline pass, 2026-07-28 — full subagent run pending):
-FLAGS:
-- [FACT] "ultrapassou 11 milhões em 2025" — verify exact figure/period in latest USCIS quarterly report before publish
-- [FACT] I-797 quote — confirm verbatim wording on current uscis.gov page
-VERIFIED CLAIMS: consistent with lib/uscis-status-pt.ts ("case was received") and content/leis conventions
-UPL: none found — no personalized directives
--->

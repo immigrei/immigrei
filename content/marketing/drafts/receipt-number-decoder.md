@@ -3,15 +3,14 @@ title: "Número de recibo do USCIS: o que significam EAC, WAC, LIN, SRC, IOE e M
 slug: receipt-number-decoder
 type: decoder
 query_target: "receipt number EAC WAC LIN SRC IOE significado"
-status: draft
-compliance_check: PASS_WITH_FLAGS
-reviewed_by: pending
-byline: Equipe Immigrei
+status: approved
+compliance_check: "PASS (2026-09-16 — definição do glossário citada verbatim; mapa prefixo→centro e estrutura dos dígitos reescritos como uso corrente, sem fonte oficial; YSC removido; URL de service centers estava 404)"
+reviewed_by: "César — 2026-09-16"
+byline: Equipe immigrei
 sources:
   - https://egov.uscis.gov/casestatus/landing.do
   - https://www.uscis.gov/tools/glossary
-  - https://www.uscis.gov/about-us/find-a-uscis-office/service-centers
-verificado_em: pendente
+verificado_em: 2026-09-16
 ---
 
 O **número de recibo** (*receipt number*) do USCIS tem 13 caracteres — **3
@@ -22,7 +21,19 @@ diferentes: cada centro tem a sua fila.
 
 ## O que significa cada prefixo?
 
-| Prefixo | Origem | O que indica |
+O glossário oficial do USCIS define o número e lista as siglas que ele usa:
+*"The receipt number is a unique 13-character identifier USCIS provides for
+each application or petition it receives. We use it to identify and track our
+cases. The receipt number consists of 3 letters, such as EAC, WAC, LIN, SRC,
+NBC, MSC or IOE, with 10 numbers"*
+([uscis.gov/tools/glossary](https://www.uscis.gov/tools/glossary)).
+
+O USCIS lista as siglas, mas não publica uma tabela oficial ligando cada uma a
+um centro. A correspondência abaixo é a de uso corrente — serve para entender
+por que dois casos iguais andam em ritmos diferentes, e não como documento
+oficial:
+
+| Prefixo | Origem da sigla | Centro normalmente associado |
 |---|---|---|
 | **IOE** | Sistema eletrônico do USCIS (ELIS) | Caso protocolado ou processado digitalmente — o prefixo mais comum hoje |
 | **EAC** | *Eastern Adjudication Center* | Vermont Service Center |
@@ -31,26 +42,25 @@ diferentes: cada centro tem a sua fila.
 | **SRC** | *Southern Regional Center* | Texas Service Center |
 | **MSC** | *Missouri Service Center* | National Benefits Center (NBC) |
 | **NBC** | *National Benefits Center* | Casos do NBC (frequente em ajuste de status) |
-| **YSC** | Potomac | Potomac Service Center |
 
-<!-- VERIFY: confirmar lista completa e nomes atuais dos centros na página oficial de service centers -->
-
-Os nomes vêm da época em que os centros eram "adjudication centers" regionais —
-as siglas ficaram, mesmo depois de os centros mudarem de nome. O USCIS define o
-número de recibo no seu glossário oficial como o identificador único de cada
-caso ([uscis.gov/tools/glossary](https://www.uscis.gov/tools/glossary)).
-<!-- VERIFY: citar definição verbatim do glossário -->
+As siglas vêm da época em que os centros eram "adjudication centers" regionais
+— elas ficaram, mesmo depois de os centros mudarem de nome.
 
 ## Como ler os números depois do prefixo?
 
-O formato geral é `XXX` + `AA` + `BBB` + `CCCCC`:
+O que é oficial: **3 letras + 10 números**, num identificador único do seu caso
+(glossário do USCIS, citado acima).
+
+O que cada bloco de números significa, porém, o USCIS não documenta
+publicamente. Na prática, o formato observado é `XXX` + `AA` + `BBB` + `CCCCC`:
 
 - **2 primeiros dígitos** — ano fiscal em que o USCIS recebeu o caso (o ano
   fiscal americano começa em outubro).
 - **3 dígitos seguintes** — dia útil de processamento dentro daquele ano.
-- **5 dígitos finais** — sequência única do seu caso naquele dia.
+- **5 dígitos finais** — sequência do caso naquele dia.
 
-<!-- VERIFY: estrutura amplamente documentada, mas confirmar em fonte oficial antes de publicar; se não houver fonte oficial, reformular como "formato observado" -->
+Trate isso como leitura aproximada, não como regra oficial — para qualquer
+consulta, o que vale é o número completo.
 
 ## Por que o prefixo importa?
 
@@ -79,21 +89,14 @@ preservado.
 
 **Onde acompanho o status com esse número?**
 No site oficial: [egov.uscis.gov/casestatus](https://egov.uscis.gov/casestatus/landing.do) —
-ou no Immigrei, que acompanha por você e explica cada mudança em português.
+ou no immigrei, que acompanha por você e explica cada mudança em português.
 
 ---
 
-Cole seu número de recibo no Immigrei e receba cada mudança de status
+Cole seu número de recibo no immigrei e receba cada mudança de status
 explicada em português, na hora.
-[Acompanhe sua jornada →](https://immigrei.com)
+[Acompanhe sua jornada →](https://immigrei.app)
 
 *Este conteúdo é informativo e não constitui aconselhamento jurídico; consulte
 um advogado de imigração licenciado para o seu caso.*
 
-<!-- COMPLIANCE (inline pass, 2026-07-28 — full subagent run pending):
-FLAGS:
-- [FACT] prefix table + digit structure — widely documented but needs confirmation against official USCIS pages; if no official source, reframe digit structure as observed format
-- [FACT] glossary quote — pull verbatim definition
-VERIFIED CLAIMS: transfer behavior consistent with lib/uscis-status-pt.ts ("case was transferred...")
-UPL: none — purely informational decoder
--->

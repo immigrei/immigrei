@@ -6,6 +6,12 @@
  * USCIS PDF (field names extracted from the real edition 08/21/25 asset at
  * public/forms/i-765.pdf — never guessed).
  *
+ * USCIS is replacing this with a 09/15/26 edition (no grace period — the
+ * 08/21/25 edition is rejected if submitted on/after that date). Verified the
+ * two editions field-for-field: all 180 AcroForm field names are byte-identical
+ * (public/forms/i-765-09-15-26.pdf), so the mapping below needs no changes —
+ * only the edition/asset swap below the effective date.
+ *
  * Scope (MVP): standard OPT for an F-1 student — post-completion (c)(3)(B) and
  * pre-completion (c)(3)(A). STEM (c)(3)(C) and other categories are additive
  * later. The engine is ministerial: it transcribes and translates what the
@@ -14,6 +20,9 @@
  */
 
 import type { FormSpec } from "./types";
+import { isOnOrAfter } from "./editionSwitch";
+
+const usesNewEdition = () => isOnOrAfter("2026-09-15");
 
 // AcroForm field-name prefix on every I-765 field.
 const F = "form1[0].";
@@ -36,9 +45,16 @@ export const I765: FormSpec = {
   namePt: "Autorização de Trabalho (OPT)",
   agency: "USCIS",
   officialUrl: "https://www.uscis.gov/i-765",
-  edition: "08/21/25",
+  // USCIS rejects the 08/21/25 edition starting 09/15/26 (no grace period).
+  // Getters (not baked-in values) so the switch takes effect without a
+  // same-day redeploy, even on a long-lived serverless instance.
+  get edition() {
+    return usesNewEdition() ? "09/15/26" : "08/21/25";
+  },
   exportKind: "pdf",
-  pdfAssetPath: "forms/i-765.pdf",
+  get pdfAssetPath() {
+    return usesNewEdition() ? "forms/i-765-09-15-26.pdf" : "forms/i-765.pdf";
+  },
   attachTo: { vistoId: "f1-opt", documentoId: "i765" },
   disclaimerPt:
     "Este formulário foi preenchido por você com as informações que você forneceu. " +

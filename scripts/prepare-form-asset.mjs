@@ -16,11 +16,26 @@
  * Usage:
  *   node scripts/prepare-form-asset.mjs i-765
  *
- * Requires network access and the `mupdf` dev dependency.
+ *   # A dated "no grace period" edition (USCIS publishes these ahead of the
+ *   # effective date, often NOT yet at the form's canonical URL — see the
+ *   # newsroom alert linked in content/leis/formularios/<form>.md for where
+ *   # to actually get it). Writes to an explicit path instead of overwriting
+ *   # the canonical asset, matching the get pdfAssetPath() pattern in
+ *   # lib/forms/<form>.ts:
+ *   node scripts/prepare-form-asset.mjs i-539 --out forms/i-539-09-15-26.pdf
+ *
+ *   # Decrypt a PDF already downloaded by hand (e.g. from a newsroom alert
+ *   # link) instead of fetching the canonical URL — this is the step that
+ *   # was skipped once already: a dated edition got committed straight from
+ *   # USCIS, still AES-encrypted, and pdf-lib silently failed to open it in
+ *   # production (see lib/forms/i-539.ts's file header for the incident):
+ *   node scripts/prepare-form-asset.mjs i-539 --in /tmp/i-539-new.pdf --out forms/i-539-09-15-26.pdf
+ *
+ * Requires the `mupdf` dev dependency, and network access unless --in is given.
  */
 
 import * as mupdf from "mupdf";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 // Official sources per form id.
@@ -93,25 +108,51 @@ async function editionFromPage(pageUrl) {
   }
 }
 
+function parseArgs(argv) {
+  const formId = argv[0];
+  let inPath, outPath;
+  for (let i = 1; i < argv.length; i++) {
+    if (argv[i] === "--in") inPath = argv[++i];
+    else if (argv[i] === "--out") outPath = argv[++i];
+  }
+  return { formId, inPath, outPath };
+}
+
 async function main() {
-  const formId = process.argv[2];
+  const { formId, inPath, outPath } = parseArgs(process.argv.slice(2));
   const src = SOURCES[formId];
   if (!src) {
     console.error(`Unknown form "${formId}". Known: ${Object.keys(SOURCES).join(", ")}`);
     process.exit(1);
   }
 
-  console.log(`Downloading ${src.pdf}`);
-  const bytes = new Uint8Array(await fetch(src.pdf).then((r) => r.arrayBuffer()));
+  let bytes;
+  if (inPath) {
+    console.log(`Reading ${inPath}`);
+    bytes = new Uint8Array(readFileSync(inPath));
+  } else {
+    console.log(`Downloading ${src.pdf}`);
+    bytes = new Uint8Array(await fetch(src.pdf).then((r) => r.arrayBuffer()));
+  }
 
   const doc = mupdf.Document.openDocument(bytes, "application/pdf");
   if (doc.needsPassword()) doc.authenticatePassword(""); // empty user password
 
   // encrypt=none strips the owner lock; the visible form is unchanged.
   const clean = doc.saveToBuffer("encrypt=none").asUint8Array();
-  const outPath = path.join(process.cwd(), src.out);
-  writeFileSync(outPath, clean);
-  console.log(`Wrote ${src.out} (${clean.length} bytes)`);
+  const dest = outPath ?? src.out;
+  const destPath = path.join(process.cwd(), dest);
+  writeFileSync(destPath, clean);
+  console.log(`Wrote ${dest} (${clean.length} bytes)`);
+
+  // Skip the live-page edition check when reading a local file for a dated
+  // "no grace period" edition — the canonical page usually still lists the
+  // OLD edition until the effective date, so the check would just be noise;
+  // verify against the printed footer on the PDF's own first page instead.
+  if (inPath) {
+    console.log("Read from a local file — verify the edition against the PDF's own page-1 footer, not uscis.gov.");
+    return;
+  }
 
   const edition = await editionFromPage(src.page);
   console.log(
