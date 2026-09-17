@@ -480,6 +480,32 @@ export function getStrategy(profile: Profile): Strategy {
     };
   }
 
+  // ── EB-5 — Green Card por investimento ──────────────────────────────────
+  // Perfil salvo com visa_type "eb5" quando a pessoa confirma esse caminho
+  // em /vistos/eb5 (ConfirmBar salva visa_type = vistoId). Sem este branch,
+  // caía no fallback genérico — perdendo a jornada real e apontando o kit
+  // errado (kitId "f1") para quem já escolheu investidor.
+  if (visa_type === "eb5") {
+    return {
+      titulo:    `Jornada de ${nome}`,
+      subtitulo: "EB-5 · Green Card por investimento",
+      situacao:  `O EB-5 dá residência permanente direta a quem investe capital próprio em um negócio americano que crie empregos — sem patrocinador, sem oferta de emprego. É autopetição: você mesmo protocola.`,
+      etapas: [
+        { num: "1", estado: "agora",   titulo: "Escolher o projeto ou estruturar o negócio próprio", desc: "Regional Center (I-526E) ou investimento direto no próprio negócio (I-526)." },
+        { num: "2", estado: "proximo", titulo: "Documentar a origem do capital",                     desc: "A parte que mais atrasa o caso — herança, venda de bens, poupança: rastreie tudo desde já." },
+        { num: "3", estado: "proximo", titulo: "Protocolar o I-526 ou I-526E",                        desc: "Com o plano de negócio e a prova de criação de pelo menos 10 empregos americanos.", linkExterno: { label: "Programa EB-5 em uscis.gov", url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/eb-5-immigrant-investor-program" } },
+        { num: "4", estado: "futuro",  titulo: "Green Card condicional (2 anos)",                     desc: "Via ajuste de status (I-485), se já nos EUA em status válido, ou processo consular (DS-260) pelo NVC." },
+        { num: "✓", estado: "futuro",  titulo: "I-829 — remoção das condições",                       desc: "Protocolado nos 90 dias antes do vencimento condicional, prova que o investimento e os empregos se concretizaram. Aprovado, vira Green Card permanente." },
+      ],
+      guardrails: [
+        { tipo: "proibido", texto: "Origem do capital não comprovada mata o caso — o USCIS exige rastrear de onde veio cada parte do valor investido (8 CFR §204.6(j))." },
+        { tipo: "atencao",  texto: "Menos de 10 empregos criados reprova o I-829 — o Green Card condicional só vira permanente se o investimento realmente gerou (ou preservou) os empregos prometidos." },
+      ],
+      kitId:    "eb5",
+      kitLabel: "Kit EB-5 — investidor",
+    };
+  }
+
   // ── B-1/B-2 — dentro dos EUA (I-94, extensão, mudança de status) ──────
   if ((visa_type === "b1" || visa_type === "b1b2") && location === "eua") {
     const dias = i94_expiry_date ? daysUntilI94Expiry(i94_expiry_date) : null;

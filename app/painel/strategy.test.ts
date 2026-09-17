@@ -184,6 +184,13 @@ describe("getStrategy — visa_types sem branch dedicado caíam no fallback gen�
     expect(s.kitId).toBe("asylee");
   });
 
+  it("eb5 → jornada de investidor, kit eb5 (não o fallback genérico com kitId f1)", () => {
+    const s = getStrategy(profile({ visa_type: "eb5" }));
+    expect(s.situacao).not.toContain("Complete seu perfil");
+    expect(s.kitId).toBe("eb5");
+    expect(JSON.stringify(s.etapas)).toContain("I-829");
+  });
+
   it("outro → jornada de situação em definição, não o fallback genérico", () => {
     const s = getStrategy(profile({ visa_type: "outro" }));
     expect(s.situacao).not.toContain("Complete seu perfil");
