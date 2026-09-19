@@ -34,6 +34,18 @@ export default function Footer() {
             </Link>
           </nav>
 
+          <nav aria-label="Entenda seu caso" className="flex flex-col gap-2 text-sm">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-ink-faint mb-1">
+              Entenda seu caso
+            </span>
+            <Link href="/status" className="text-ink-soft hover:text-pine transition-colors">
+              Status do caso
+            </Link>
+            <Link href="/entenda" className="text-ink-soft hover:text-pine transition-colors">
+              Guias por formulário
+            </Link>
+          </nav>
+
           <nav aria-label="Empresa" className="flex flex-col gap-2 text-sm">
             <span className="text-[11px] font-bold uppercase tracking-widest text-ink-faint mb-1">
               Empresa
