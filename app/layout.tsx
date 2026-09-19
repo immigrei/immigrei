@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import CookieConsent from "./components/CookieConsent";
+import { SOCIAL_LINKS } from "@/lib/socialLinks";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -40,10 +41,7 @@ const siteJsonLd = {
       logo: "https://immigrei.app/apple-icon.png",
       description:
         "Companheiro da jornada migratória de brasileiros nos EUA, em português. Construído por imigrantes, para imigrantes.",
-      sameAs: [
-        "https://www.instagram.com/immigrei.app/",
-        "https://www.facebook.com/1222392010966088",
-      ],
+      sameAs: SOCIAL_LINKS.map((link) => link.url),
     },
     {
       "@type": "WebSite",

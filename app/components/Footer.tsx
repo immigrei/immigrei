@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "./Logo";
+import { SOCIAL_LINKS } from "@/lib/socialLinks";
 
 // Site-wide footer — the one place every legal/compliance link lives so
 // visitors (including a USCIS reviewer checking our public policies) can
@@ -56,6 +57,17 @@ export default function Footer() {
             <a href="mailto:ola@immigrei.com" className="text-ink-soft hover:text-pine transition-colors">
               ola@immigrei.com
             </a>
+            {SOCIAL_LINKS.map((link) => (
+              <a
+                key={link.name}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink-soft hover:text-pine transition-colors"
+              >
+                {link.name}
+              </a>
+            ))}
           </nav>
         </div>
 
