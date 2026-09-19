@@ -123,8 +123,27 @@ async function fillAndReload(answers: Answers) {
   return doc.getForm();
 }
 
+// USCIS rejects the 01/20/25 edition starting 09/18/26 with no grace period
+// (lib/forms/editionSwitch.ts). Real wall-clock time is now past that date,
+// so this block pins the clock before the cutoff — without it these tests
+// silently switch to the new PDF and fail on the old edition's field names
+// (same pin the I-539 suite uses; see the new-edition block below).
+//
 // The I-485 is a 24-page PDF — each fill/save round-trip takes seconds.
 describe("I-485 fill", { timeout: 30_000 }, () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-09-01T12:00:00-04:00"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("usa a edição e o asset antigos", () => {
+    expect(I485.edition).toBe("01/20/25");
+    expect(I485.pdfAssetPath).toBe("forms/i-485.pdf");
+  });
+
   it("replicates the A-Number into every page header (24 pages)", async () => {
     const form = await fillAndReload(ANSWERS);
     expect(form.getTextField("form1[0].#subform[0].AlienNumber[0]").getText()).toBe("123456789");
