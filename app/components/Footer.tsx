@@ -54,7 +54,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   aria-label={`${link.name} da immigrei`}
                   title={`${link.name} da immigrei`}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-pine-tint text-ink-soft transition-colors hover:border-pine hover:bg-pine-tint hover:text-pine focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-pine-tint text-pine transition-colors hover:bg-pine hover:text-cream-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine"
                 >
                   {SOCIAL_ICONS[link.name]}
                 </a>
